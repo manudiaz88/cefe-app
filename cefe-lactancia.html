@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Cefe">
+<meta name="theme-color" content="#0f1923">
+<title>Cefe Lactancia</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{min-height:100vh;background:linear-gradient(135deg,#0f1923 0%,#1a2d3d 50%,#0f2030 100%);font-family:Georgia,'Times New Roman',serif;color:#e8dcc8;display:flex;flex-direction:column;align-items:center;padding-bottom:40px;}
+button{-webkit-appearance:none;}
+#app{width:100%;max-width:480px;display:flex;flex-direction:column;min-height:100vh;}
+#header{padding:20px 20px 12px;border-bottom:1px solid rgba(210,175,120,0.2);display:flex;align-items:center;justify-content:space-between;}
+.title-label{font-size:9px;letter-spacing:4px;color:#a89070;text-transform:uppercase;margin-bottom:3px;}
+.title-main{font-size:22px;font-weight:bold;color:#f0d9a0;}
+.header-right{display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:flex-end;}
+.tab-btn{background:rgba(255,255,255,0.06);border:1px solid rgba(210,175,120,0.2);border-radius:10px;padding:6px 10px;color:#a89070;font-size:11px;cursor:pointer;font-family:Georgia,serif;}
+.tab-btn.active{background:rgba(212,168,67,0.15);border-color:rgba(212,168,67,0.4);color:#f0d9a0;}
+.moon{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#d4a843,#8b6914);display:flex;align-items:center;justify-content:center;font-size:16px;}
+#body{padding:18px 18px;flex:1;}
+.card{background:rgba(255,255,255,0.04);border:1px solid rgba(210,175,120,0.15);border-radius:16px;padding:16px;margin-bottom:18px;}
+.section-label{font-size:9px;letter-spacing:3px;color:#a89070;text-transform:uppercase;margin-bottom:10px;}
+.stat-row{display:flex;}
+.stat-box{text-align:center;flex:1;}
+.stat-box .val{font-size:22px;font-weight:bold;color:#f0d9a0;}
+.stat-box .lbl{font-size:9px;color:#a89070;letter-spacing:1px;text-transform:uppercase;}
+.weight-chip{display:inline-block;background:rgba(212,168,67,0.15);border:1px solid rgba(212,168,67,0.3);border-radius:20px;padding:4px 12px;font-size:11px;color:#d4a843;margin-top:8px;cursor:pointer;}
+.action-btn{background:rgba(255,255,255,0.04);border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;width:100%;text-align:left;margin-bottom:8px;border:1px solid rgba(212,168,67,0.2);}
+.action-btn.blue{border-color:rgba(122,184,212,0.2);}
+.action-btn.teal{border-color:rgba(100,200,180,0.2);}
+.action-btn.purple{border-color:rgba(180,140,220,0.2);}
+.action-btn.rose{border-color:rgba(220,140,160,0.2);}
+.action-icon{width:42px;height:42px;border-radius:11px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:19px;background:linear-gradient(135deg,rgba(212,168,67,.2),rgba(212,168,67,.05));border:1px solid rgba(212,168,67,.3);}
+.action-icon.blue{background:linear-gradient(135deg,rgba(122,184,212,.2),rgba(122,184,212,.05));border-color:rgba(122,184,212,.3);}
+.action-icon.teal{background:linear-gradient(135deg,rgba(100,200,180,.2),rgba(100,200,180,.05));border-color:rgba(100,200,180,.3);}
+.action-icon.purple{background:linear-gradient(135deg,rgba(180,140,220,.2),rgba(180,140,220,.05));border-color:rgba(180,140,220,.3);}
+.action-icon.rose{background:linear-gradient(135deg,rgba(220,140,160,.2),rgba(220,140,160,.05));border-color:rgba(220,140,160,.3);}
+.action-label{font-size:14px;font-weight:bold;color:#f0d9a0;margin-bottom:2px;}
+.action-sub{font-size:11px;color:#a89070;}
+.h-row{border-radius:12px;padding:10px 12px;display:flex;justify-content:space-between;align-items:center;margin-bottom:7px;}
+.h-row.toma{background:rgba(212,168,67,0.05);border:1px solid rgba(212,168,67,0.12);}
+.h-row.panal{background:rgba(122,184,212,0.05);border:1px solid rgba(122,184,212,0.12);}
+.h-row.peso{background:rgba(100,200,180,0.05);border:1px solid rgba(100,200,180,0.12);}
+.h-row.visita{background:rgba(180,140,220,0.05);border:1px solid rgba(180,140,220,0.12);}
+.h-time{font-size:12px;color:#d4c090;}
+.h-sub{font-size:11px;color:#a89070;margin-top:2px;}
+.h-mins{font-size:16px;font-weight:bold;color:#d4a843;}
+.h-right{display:flex;align-items:center;gap:7px;}
+.del-btn{background:rgba(224,112,112,0.1);border:1px solid rgba(224,112,112,0.2);border-radius:7px;width:24px;height:24px;color:#e07070;cursor:pointer;font-size:10px;display:flex;align-items:center;justify-content:center;padding:0;}
+.screen-title{font-size:17px;font-weight:bold;color:#f0d9a0;margin-bottom:4px;}
+.screen-sub{font-size:12px;color:#a89070;margin-bottom:18px;}
+.lados-box{background:rgba(212,168,67,0.08);border:1px solid rgba(212,168,67,0.2);border-radius:12px;padding:12px;margin-bottom:14px;}
+.lado-item{font-size:13px;color:#d4c090;margin-bottom:3px;}
+.timer-box{background:rgba(212,168,67,0.12);border:1px solid rgba(212,168,67,0.4);border-radius:14px;padding:18px;text-align:center;margin-bottom:14px;}
+.timer-side{font-size:12px;color:#a89070;margin-bottom:6px;}
+.timer-display{font-size:38px;font-weight:bold;color:#f0d9a0;font-family:monospace;}
+.side-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:14px;}
+.side-btn{background:rgba(255,255,255,0.05);border:1px solid rgba(210,175,120,0.25);border-radius:11px;padding:11px 6px;color:#e8dcc8;font-size:12px;cursor:pointer;font-family:Georgia,serif;}
+.ext-box{background:rgba(255,255,255,0.03);border:1px solid rgba(210,175,120,0.1);border-radius:11px;padding:12px;margin-bottom:12px;}
+.ml-row{display:flex;gap:14px;}
+.ml-col{flex:1;}
+.ml-label{font-size:10px;color:#a89070;margin-bottom:5px;}
+.ml-controls{display:flex;align-items:center;gap:5px;}
+.ml-btn{background:rgba(255,255,255,0.08);border:1px solid rgba(210,175,120,0.2);border-radius:7px;width:30px;height:30px;color:#e8dcc8;cursor:pointer;font-size:17px;font-family:Georgia,serif;display:flex;align-items:center;justify-content:center;}
+.ml-val{font-size:14px;color:#f0d9a0;min-width:32px;text-align:center;}
+.notes-box{background:rgba(255,255,255,0.03);border:1px solid rgba(210,175,120,0.1);border-radius:11px;padding:12px;margin-bottom:12px;}
+.notes-input{width:100%;background:none;border:none;color:#e8dcc8;font-family:Georgia,serif;font-size:12px;resize:none;outline:none;min-height:46px;line-height:1.5;}
+.notes-input::placeholder{color:#a89070;}
+.form-field{margin-bottom:12px;}
+.form-label{font-size:10px;letter-spacing:2px;color:#a89070;text-transform:uppercase;margin-bottom:6px;display:block;}
+.form-input{width:100%;background:rgba(255,255,255,0.04);border:1px solid rgba(210,175,120,0.2);border-radius:10px;padding:10px 12px;color:#e8dcc8;font-family:Georgia,serif;font-size:13px;outline:none;}
+.form-input::placeholder{color:#a89070;}
+.form-select{width:100%;background:rgba(20,30,45,0.9);border:1px solid rgba(210,175,120,0.2);border-radius:10px;padding:10px 12px;color:#e8dcc8;font-family:Georgia,serif;font-size:13px;outline:none;-webkit-appearance:none;}
+.form-row{display:flex;gap:10px;}
+.form-row .form-field{flex:1;}
+.alarm-banner{background:rgba(212,168,67,0.12);border:1px solid rgba(212,168,67,0.35);border-radius:13px;padding:12px 14px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;}
+.alarm-text{font-size:12px;color:#d4c090;}
+.alarm-dismiss{background:rgba(212,168,67,0.2);border:1px solid rgba(212,168,67,0.3);border-radius:9px;padding:5px 12px;color:#f0d9a0;font-size:11px;cursor:pointer;font-family:Georgia,serif;}
+.panal-btn{border-radius:13px;padding:14px 18px;color:#e8dcc8;font-size:15px;cursor:pointer;font-family:Georgia,serif;text-align:left;display:flex;align-items:center;gap:11px;margin-bottom:8px;width:100%;}
+.panal-btn.pis{background:rgba(255,255,255,0.04);border:1px solid rgba(210,175,120,0.2);}
+.panal-btn.caca{background:rgba(122,184,212,0.1);border:1px solid rgba(122,184,212,0.3);}
+.panal-btn.mixto{background:rgba(150,200,130,0.1);border:1px solid rgba(150,200,130,0.3);}
+.peso-input-wrap{background:rgba(100,200,180,0.06);border:1px solid rgba(100,200,180,0.2);border-radius:14px;padding:24px 18px;text-align:center;margin-bottom:16px;}
+.peso-display{font-size:48px;font-weight:bold;color:#f0d9a0;font-family:monospace;margin-bottom:3px;}
+.peso-unit{font-size:14px;color:#a89070;}
+.peso-controls{display:flex;justify-content:center;gap:8px;margin-top:16px;flex-wrap:wrap;}
+.peso-btn{background:rgba(255,255,255,0.08);border:1px solid rgba(210,175,120,0.2);border-radius:10px;padding:9px 13px;color:#e8dcc8;cursor:pointer;font-size:13px;font-family:Georgia,serif;min-width:50px;}
+.peso-btn.big{background:rgba(100,200,180,0.12);border-color:rgba(100,200,180,0.3);font-size:16px;padding:10px 16px;}
+.msg-box{background:rgba(37,211,102,0.06);border:1px solid rgba(37,211,102,0.25);border-radius:14px;padding:16px;margin-bottom:14px;font-size:13px;line-height:1.75;color:#d4e8d0;white-space:pre-wrap;}
+.p-btn{border:none;border-radius:12px;padding:13px 20px;font-size:13px;font-weight:bold;cursor:pointer;width:100%;font-family:Georgia,serif;display:block;}
+.p-btn.gold{background:#d4a843;color:#0f1923;}
+.p-btn.green{background:#25d366;color:#fff;}
+.p-btn.green.done{background:#2a7a4a;}
+.p-btn.grey{background:#a89070;color:#0f1923;}
+.p-btn.teal{background:rgba(100,200,180,0.8);color:#0f1923;}
+.p-btn.purple{background:rgba(180,140,220,0.8);color:#0f1923;}
+.p-btn.blue2{background:rgba(100,150,220,0.8);color:#fff;}
+.g-btn{background:transparent;border-radius:12px;padding:11px 20px;font-size:12px;cursor:pointer;width:100%;font-family:Georgia,serif;display:block;margin-top:8px;}
+.g-btn.white{color:#e8dcc8;border:1px solid rgba(232,220,200,0.25);}
+.g-btn.red{color:#e07070;border:1px solid rgba(224,112,112,0.25);}
+.back-btn{background:none;border:none;color:#a89070;cursor:pointer;font-size:12px;padding:0 0 12px 0;display:block;font-family:Georgia,serif;}
+.err-txt{color:#e07070;font-size:12px;margin-bottom:9px;}
+.muted{font-size:12px;color:#a89070;margin-bottom:9px;}
+.filter-row{display:flex;gap:7px;flex-wrap:wrap;margin-top:7px;}
+.filter-btn{background:rgba(255,255,255,0.05);border:1px solid rgba(212,168,67,0.15);border-radius:9px;padding:4px 10px;color:#e8dcc8;font-size:11px;cursor:pointer;font-family:Georgia,serif;}
+.filter-btn.active{background:rgba(212,168,67,0.2);border-color:rgba(212,168,67,0.5);}
+.stat-mini{display:flex;background:rgba(255,255,255,0.03);border:1px solid rgba(210,175,120,0.1);border-radius:11px;padding:10px 0;margin-bottom:14px;}
+#install-banner{background:rgba(212,168,67,0.1);border:1px solid rgba(212,168,67,0.3);border-radius:13px;padding:12px 14px;margin-bottom:16px;font-size:12px;color:#d4c090;line-height:1.6;}
+#install-banner strong{color:#f0d9a0;}
+.close-banner{float:right;background:none;border:none;color:#a89070;cursor:pointer;font-size:15px;padding:0;margin-left:7px;}
+.peso-diff{font-size:11px;margin-top:2px;}
+.peso-diff.up{color:#64c8b4;}
+.peso-diff.down{color:#e07070;}
+.radio-group{display:flex;gap:8px;margin-bottom:12px;}
+.radio-btn{flex:1;background:rgba(255,255,255,0.04);border:1px solid rgba(210,175,120,0.2);border-radius:10px;padding:10px;text-align:center;cursor:pointer;font-size:12px;color:#a89070;font-family:Georgia,serif;}
+.radio-btn.sel{background:rgba(212,168,67,0.15);border-color:rgba(212,168,67,0.5);color:#f0d9a0;}
+.medico-card{background:rgba(180,140,220,0.05);border:1px solid rgba(180,140,220,0.15);border-radius:13px;padding:14px;margin-bottom:10px;}
+.medico-name{font-size:14px;font-weight:bold;color:#f0d9a0;margin-bottom:3px;}
+.medico-spec{font-size:11px;color:#b48cdc;margin-bottom:6px;}
+.medico-detail{font-size:11px;color:#a89070;line-height:1.6;}
+.medico-actions{display:flex;gap:7px;margin-top:10px;}
+.medico-act-btn{flex:1;background:rgba(255,255,255,0.05);border:1px solid rgba(210,175,120,0.2);border-radius:9px;padding:7px;text-align:center;cursor:pointer;font-size:11px;color:#d4c090;font-family:Georgia,serif;}
+.summary-card{background:rgba(37,211,102,0.04);border:1px solid rgba(37,211,102,0.2);border-radius:13px;padding:14px;margin-bottom:12px;}
+.summary-title{font-size:11px;letter-spacing:2px;color:#64c8b4;text-transform:uppercase;margin-bottom:8px;}
+.summary-line{font-size:13px;color:#d4e8d0;margin-bottom:4px;line-height:1.5;}
+.export-btn{background:rgba(100,150,220,0.1);border:1px solid rgba(100,150,220,0.3);border-radius:13px;padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;width:100%;text-align:left;margin-bottom:10px;}
+.export-icon{width:40px;height:40px;border-radius:10px;background:rgba(100,150,220,0.15);border:1px solid rgba(100,150,220,0.3);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.toggle-row{display:flex;gap:8px;margin-bottom:16px;}
+.toggle-btn{flex:1;background:rgba(255,255,255,0.04);border:1px solid rgba(210,175,120,0.15);border-radius:10px;padding:9px;text-align:center;cursor:pointer;font-size:11px;color:#a89070;font-family:Georgia,serif;}
+.toggle-btn.on{background:rgba(212,168,67,0.15);border-color:rgba(212,168,67,0.4);color:#f0d9a0;}
+.manual-time-row{display:flex;gap:8px;margin-bottom:12px;}
+.manual-time-row .form-field{flex:1;}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="header">
+    <div>
+      <div class="title-label">Registro Lactancia</div>
+      <div class="title-main">Ceferino</div>
+    </div>
+    <div class="header-right">
+      <button class="tab-btn" id="tab-hist" onclick="navTo('history')">Historial</button>
+      <button class="tab-btn" id="tab-peso" onclick="navTo('peso')">Peso</button>
+      <button class="tab-btn" id="tab-medicos" onclick="navTo('medicos')">Medicos</button>
+      <button class="tab-btn" id="tab-resumen" onclick="navTo('resumen')">Resumen</button>
+      <div class="moon">🌙</div>
+    </div>
+  </div>
+  <div id="body"></div>
+</div>
+<script>
+var SIDES=["Izquierdo","Derecho","Derecho invertido","Izquierdo invertido","Acostado Izquierda","Acostado Derecha"];
+var S={
+  step:'home',
+  history:[],pesoHistory:[],medicos:[],visitas:[],
+  tomaStart:null,lados:[],currentSide:null,sideStart:null,
+  extraction:{left:0,right:0},panalTime:null,tomaNote:'',
+  historyFilter:null,timerInterval:null,elapsed:0,
+  alarmTimer:null,alarmFired:false,alarmNextTime:null,
+  pesoGrams:0,
+  _summaryMsg:'',_summaryType:'',
+  manualMode:false,
+  manualDate:'',manualTimeStart:'',manualTimeEnd:'',
+  manualLados:[],manualCurrentSide:null,manualCurrentMins:'',
+  visitaModalMedico:'',visitaFecha:'',visitaHora:'',visitaModalidad:'presencial',visitaDesc:'',
+  medicoForm:{especialidad:'',nombre:'',apellido:'',direccion:'',telefono:'',email:''},
+  editMedicoIdx:-1,
+};
+
+function loadData(){
+  try{
+    S.history=JSON.parse(localStorage.getItem('cefe_history')||'[]').map(function(e){
+      if(e.type==='toma'){e.start=new Date(e.start);e.end=new Date(e.end);e.nextToma=new Date(e.nextToma);}
+      else if(e.type==='panal'){e.time=new Date(e.time);}
+      return e;
+    });
+    S.pesoHistory=JSON.parse(localStorage.getItem('cefe_pesos')||'[]').map(function(e){e.time=new Date(e.time);return e;});
+    S.medicos=JSON.parse(localStorage.getItem('cefe_medicos')||'[]');
+    S.visitas=JSON.parse(localStorage.getItem('cefe_visitas')||'[]').map(function(e){e.datetime=new Date(e.datetime);return e;});
+  }catch(err){S.history=[];S.pesoHistory=[];S.medicos=[];S.visitas=[];}
+}
+function saveData(){
+  localStorage.setItem('cefe_history',JSON.stringify(S.history));
+  localStorage.setItem('cefe_pesos',JSON.stringify(S.pesoHistory));
+  localStorage.setItem('cefe_medicos',JSON.stringify(S.medicos));
+  localStorage.setItem('cefe_visitas',JSON.stringify(S.visitas));
+}
+loadData();
+
+function fTime(d){return new Date(d).toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'});}
+function fDate(d){return new Date(d).toLocaleDateString('es-AR',{weekday:'short',day:'2-digit',month:'2-digit'});}
+function fDateFull(d){return new Date(d).toLocaleDateString('es-AR',{weekday:'long',day:'2-digit',month:'long',year:'numeric'});}
+function fDT(d){return new Date(d).toLocaleString('es-AR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});}
+function addMins(d,m){return new Date(new Date(d).getTime()+m*60000);}
+function sameDay(a,b){var da=new Date(a),db=new Date(b);return da.getFullYear()===db.getFullYear()&&da.getMonth()===db.getMonth()&&da.getDate()===db.getDate();}
+function gramsToKg(g){return (g/1000).toFixed(3);}
+function getDayKey(h){var d=new Date(h.type==='toma'?h.start:h.time);return d.getFullYear()+'-'+d.getMonth()+'-'+d.getDate();}
+
+// ── MESSAGES ──
+function generateMsg(entry,hist){
+  if(entry.type==='toma'){
+    var lstr=entry.lados.map(function(l){return l.side+' '+l.mins+'min';}).join(' + ');
+    var hasExt=entry.extraction.left>0||entry.extraction.right>0;
+    var tomasHoy=hist.filter(function(h){return h.type==='toma'&&sameDay(h.start,entry.start);});
+    var num=tomasHoy.length+1;
+    var obs=entry.totalMins<10?'Toma corta, observar si Cefe queda satisfecho.':entry.totalMins>=20?'Buena duracion de toma.':'Toma normal, seguir observando.';
+    var lines=['*Lactancia - Ultima Sesion*','Toma #'+num+' del dia','Inicio: '+fTime(entry.start)+' | Fin: '+fTime(entry.end),'Duracion: '+entry.totalMins+' min','Lados: '+lstr];
+    if(hasExt) lines.push('Extraccion: izq '+entry.extraction.left+'ml / der '+entry.extraction.right+'ml');
+    lines.push('Proxima toma estimada: ~'+fTime(entry.nextToma));
+    lines.push(obs);
+    if(entry.note&&entry.note.trim()) lines.push('Nota: '+entry.note.trim());
+    return lines.join('\n');
+  } else if(entry.type==='panal'){
+    var panalesHoy=hist.filter(function(h){return h.type==='panal'&&sameDay(h.time,entry.time);});
+    var pnum=panalesHoy.length+1;
+    var nota=entry.panal==='Caca'?'Caca registrada - buena senal de ingesta.':entry.panal==='Mixto'?'Panal mixto - todo en orden.':'Panal #'+pnum+' del dia.';
+    var plines=['*Registro de Panal - Cefe*',fDT(entry.time),'Tipo: '+entry.panal,nota];
+    if(entry.note&&entry.note.trim()) plines.push('Nota: '+entry.note.trim());
+    return plines.join('\n');
+  }
+  return '';
+}
+
+function generateVisitaMsg(v,medico){
+  var lines=['*Visita Medica - Cefe*'];
+  lines.push('Medico: Dr/a. '+medico.nombre+' '+medico.apellido+' ('+medico.especialidad+')');
+  lines.push('Fecha: '+fDateFull(v.datetime));
+  lines.push('Hora: '+fTime(v.datetime));
+  lines.push('Modalidad: '+v.modalidad.charAt(0).toUpperCase()+v.modalidad.slice(1));
+  if(v.modalidad==='presencial'&&medico.direccion) lines.push('Direccion: '+medico.direccion);
+  if(v.desc&&v.desc.trim()) lines.push('Observacion: '+v.desc.trim());
+  lines.push('');
+  // Google Calendar link
+  var gcTitle=encodeURIComponent('Visita '+medico.especialidad+' - Cefe');
+  var dt=new Date(v.datetime);
+  var pad=function(n){return String(n).padStart(2,'0');};
+  var dtStr=dt.getFullYear()+pad(dt.getMonth()+1)+pad(dt.getDate())+'T'+pad(dt.getHours())+pad(dt.getMinutes())+'00';
+  var dtEnd=new Date(dt.getTime()+60*60000);
+  var dtEndStr=dtEnd.getFullYear()+pad(dtEnd.getMonth()+1)+pad(dtEnd.getDate())+'T'+pad(dtEnd.getHours())+pad(dtEnd.getMinutes())+'00';
+  var gcDetails=encodeURIComponent(v.desc||'');
+  var gcLocation=encodeURIComponent(v.modalidad==='presencial'?medico.direccion:'Virtual');
+  var gcLink='https://calendar.google.com/calendar/render?action=TEMPLATE&text='+gcTitle+'&dates='+dtStr+'/'+dtEndStr+'&details='+gcDetails+'&location='+gcLocation;
+  lines.push('Agendar en Google Calendar: '+gcLink);
+  if(medico.telefono){
+    var waPhone=medico.telefono.replace(/\D/g,'');
+    lines.push('WhatsApp del medico: https://wa.me/'+waPhone);
+  }
+  return lines.join('\n');
+}
+
+// ── TIMER ──
+function startTimer(){
+  stopTimer();S.elapsed=0;
+  S.timerInterval=setInterval(function(){
+    S.elapsed=Math.floor((Date.now()-S.sideStart)/1000);
+    var el=document.getElementById('timer-display');
+    if(el) el.textContent=Math.floor(S.elapsed/60)+':'+String(S.elapsed%60).padStart(2,'0');
+  },1000);
+}
+function stopTimer(){if(S.timerInterval){clearInterval(S.timerInterval);S.timerInterval=null;}S.elapsed=0;}
+
+// ── ALARM ──
+function scheduleAlarm(nextToma){
+  if(S.alarmTimer) clearTimeout(S.alarmTimer);
+  S.alarmFired=false;S.alarmNextTime=new Date(nextToma);
+  var ms=new Date(nextToma).getTime()-Date.now();
+  if(ms>0&&ms<4*3600000){
+    S.alarmTimer=setTimeout(function(){S.alarmFired=true;if(S.step==='home')render();},ms);
+  }
+}
+
+// ── NAV ──
+function navTo(dest){if(S.step===dest){setStep('home');}else{S.historyFilter=null;setStep(dest);}}
+
+// ── TOMA ──
+function startToma(manual){
+  S.manualMode=!!manual;
+  S.tomaStart=new Date();S.lados=[];S.currentSide=null;S.sideStart=null;
+  S.extraction={left:0,right:0};S.tomaNote='';
+  S.manualDate=todayStr();S.manualTimeStart='';S.manualTimeEnd='';
+  S.manualLados=[];S.manualCurrentSide='';S.manualCurrentMins='';
+  setStep('toma');
+}
+function todayStr(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+
+function startSide(side){
+  if(S.currentSide&&S.sideStart){var m=Math.max(1,Math.round((Date.now()-S.sideStart)/60000));S.lados.push({side:S.currentSide,mins:m});}
+  S.currentSide=side;S.sideStart=Date.now();startTimer();render();
+}
+function finishSide(){
+  if(!S.currentSide||!S.sideStart) return;
+  var m=Math.max(1,Math.round((Date.now()-S.sideStart)/60000));
+  S.lados.push({side:S.currentSide,mins:m});S.currentSide=null;S.sideStart=null;stopTimer();render();
+}
+
+function addManualLado(){
+  var side=document.getElementById('manual-side-sel').value;
+  var mins=parseInt(document.getElementById('manual-mins-input').value)||0;
+  if(!side||mins<=0){alert('Selecciona lado y minutos.');return;}
+  S.manualLados.push({side:side,mins:mins});
+  document.getElementById('manual-mins-input').value='';
+  render();
+}
+function removeManualLado(i){S.manualLados.splice(i,1);render();}
+
+function finishToma(){
+  var finalLados,startTime,endTime,note,extrL,extrR;
+  if(S.manualMode){
+    var dateVal=document.getElementById('manual-date-inp').value;
+    var timeStartVal=document.getElementById('manual-start-inp').value;
+    var timeEndVal=document.getElementById('manual-end-inp').value;
+    if(!dateVal||!timeStartVal){alert('Ingresa fecha y hora de inicio.');return;}
+    startTime=new Date(dateVal+'T'+timeStartVal);
+    endTime=timeEndVal?new Date(dateVal+'T'+timeEndVal):new Date(startTime.getTime()+S.manualLados.reduce(function(a,b){return a+b.mins;},0)*60000);
+    finalLados=S.manualLados.slice();
+    note=document.getElementById('toma-note-input')?document.getElementById('toma-note-input').value:'';
+    extrL=S.extraction.left;extrR=S.extraction.right;
+  } else {
+    var fl=S.lados.slice();
+    if(S.currentSide&&S.sideStart) fl.push({side:S.currentSide,mins:Math.max(1,Math.round((Date.now()-S.sideStart)/60000))});
+    if(fl.length===0){alert('Registra al menos un lado.');return;}
+    stopTimer();
+    startTime=S.tomaStart;endTime=new Date();finalLados=fl;
+    note=document.getElementById('toma-note-input')?document.getElementById('toma-note-input').value:'';
+    extrL=S.extraction.left;extrR=S.extraction.right;
+  }
+  if(finalLados.length===0){alert('Agrega al menos un lado.');return;}
+  var total=finalLados.reduce(function(a,b){return a+b.mins;},0);
+  var nextToma=addMins(startTime,180);
+  var entry={type:'toma',start:startTime,end:endTime,lados:finalLados,totalMins:total,extraction:{left:extrL,right:extrR},nextToma:nextToma,note:note};
+  var msg=generateMsg(entry,S.history);
+  S.history.unshift(entry);saveData();
+  scheduleAlarm(nextToma);
+  S._summaryMsg=msg;S._summaryType='toma';setStep('summary');
+}
+
+// ── PANAL ──
+function startPanal(){S.panalTime=new Date();setStep('panal');}
+function finishPanal(type){
+  var note=document.getElementById('panal-note-input');
+  var entry={type:'panal',panal:type,time:S.panalTime||new Date(),note:note?note.value:''};
+  var msg=generateMsg(entry,S.history);
+  S.history.unshift(entry);saveData();
+  S._summaryMsg=msg;S._summaryType='panal';setStep('summary');
+}
+
+// ── PESO ──
+function startPeso(){S.pesoGrams=0;setStep('pesoEntry');}
+function adjustPeso(d){S.pesoGrams=Math.max(0,S.pesoGrams+d);render();}
+function savePeso(){
+  if(S.pesoGrams===0){alert('Ingresa un peso.');return;}
+  var note=document.getElementById('peso-note-input');
+  S.pesoHistory.unshift({time:new Date(),grams:S.pesoGrams,note:note?note.value:''});
+  saveData();setStep('peso');
+}
+
+// ── MEDICOS ──
+function startAddMedico(){
+  S.medicoForm={especialidad:'',nombre:'',apellido:'',direccion:'',telefono:'',email:''};
+  S.editMedicoIdx=-1;setStep('medicoForm');
+}
+function editMedico(i){
+  S.medicoForm=Object.assign({},S.medicos[i]);
+  S.editMedicoIdx=i;setStep('medicoForm');
+}
+function saveMedico(){
+  var f={
+    especialidad:val('mf-esp'),nombre:val('mf-nom'),apellido:val('mf-ape'),
+    direccion:val('mf-dir'),telefono:val('mf-tel'),email:val('mf-email')
+  };
+  if(!f.nombre||!f.apellido){alert('Nombre y apellido son obligatorios.');return;}
+  if(S.editMedicoIdx>=0) S.medicos[S.editMedicoIdx]=f;
+  else S.medicos.push(f);
+  saveData();setStep('medicos');
+}
+function deleteMedico(i){if(confirm('Eliminar medico?')){S.medicos.splice(i,1);saveData();render();}}
+function val(id){var el=document.getElementById(id);return el?el.value.trim():'';}
+
+// ── VISITAS ──
+function startAddVisita(){
+  S.visitaModalMedico='';S.visitaFecha=todayStr();S.visitaHora='';S.visitaModalidad='presencial';S.visitaDesc='';
+  setStep('visitaForm');
+}
+function saveVisita(){
+  var mIdx=parseInt(val('v-medico-sel'));
+  if(isNaN(mIdx)||mIdx<0){alert('Selecciona un medico.');return;}
+  var fecha=val('v-fecha');var hora=val('v-hora');
+  if(!fecha||!hora){alert('Fecha y hora son obligatorias.');return;}
+  var dt=new Date(fecha+'T'+hora);
+  var modalidad=document.querySelector('.radio-btn.sel')?document.querySelector('.radio-btn.sel').dataset.val:'presencial';
+  var v={medicoIdx:mIdx,datetime:dt,modalidad:modalidad,desc:val('v-desc')};
+  var medico=S.medicos[mIdx];
+  var msg=generateVisitaMsg(v,medico);
+  S.visitas.unshift(v);saveData();
+  S._summaryMsg=msg;S._summaryType='visita';setStep('summary');
+}
+function deleteVisita(i){S.visitas.splice(i,1);saveData();render();}
+
+// ── EXPORT ──
+function exportToCSV(){
+  var rows=[['Tipo','Fecha','Hora Inicio','Hora Fin','Duracion (min)','Lados','Ext Izq ml','Ext Der ml','Panal','Nota']];
+  S.history.forEach(function(h){
+    if(h.type==='toma'){
+      rows.push(['Toma',fDate(h.start),fTime(h.start),fTime(h.end),h.totalMins,h.lados.map(function(l){return l.side+' '+l.mins+'m';}).join(' + '),h.extraction.left,h.extraction.right,'',h.note||'']);
+    } else {
+      rows.push(['Panal',fDate(h.time),fTime(h.time),'','','','','',h.panal,h.note||'']);
+    }
+  });
+  S.pesoHistory.forEach(function(p){
+    rows.push(['Peso',fDate(p.time),fTime(p.time),'','','','','','',gramsToKg(p.grams)+' kg'+(p.note?' - '+p.note:'')]);
+  });
+  var csv=rows.map(function(r){return r.map(function(c){return '"'+String(c).replace(/"/g,'""')+'"';}).join(',');}).join('\n');
+  var blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');a.href=url;a.download='cefe-registro.csv';
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+function exportAndEmail(){
+  exportToCSV();
+  setTimeout(function(){
+    var sub=encodeURIComponent('Registro Ceferino - '+fDate(new Date()));
+    var body=encodeURIComponent('Adjunto el CSV con el registro de lactancia, panales y peso de Cefe.\n\nExportado el '+fDateFull(new Date()));
+    window.location.href='mailto:?subject='+sub+'&body='+body;
+  },800);
+}
+
+// ── RESUMEN ANALYSIS ──
+function buildResumen(days){
+  var now=new Date();
+  var cutoff=new Date(now.getTime()-days*24*3600000);
+  var tomas=S.history.filter(function(h){return h.type==='toma'&&new Date(h.start)>=cutoff;});
+  var panales=S.history.filter(function(h){return h.type==='panal'&&new Date(h.time)>=cutoff;});
+  if(tomas.length===0&&panales.length===0&&S.pesoHistory.length===0) return '<div style="color:#a89070;font-size:13px">Sin datos suficientes todavia.</div>';
+
+  var totalTomas=tomas.length;
+  var totalMins=tomas.reduce(function(a,b){return a+b.totalMins;},0);
+  var avgMins=totalTomas>0?Math.round(totalMins/totalTomas):0;
+  var caca=panales.filter(function(p){return p.panal==='Caca';}).length;
+  var mixto=panales.filter(function(p){return p.panal==='Mixto';}).length;
+  var pis=panales.filter(function(p){return p.panal==='Pis';}).length;
+  var totalExt=tomas.reduce(function(a,b){return a+(b.extraction.left||0)+(b.extraction.right||0);},0);
+
+  // Peso analysis
+  var pesoHTML='';
+  if(S.pesoHistory.length>=2){
+    var ultimo=S.pesoHistory[0];var anterior=S.pesoHistory[1];
+    var diff=ultimo.grams-anterior.grams;
+    var trend=diff>=0?'subio':'bajo';
+    var color=diff>=0?'#64c8b4':'#e07070';
+    pesoHTML='<div class="summary-line">Ultimo peso: <strong style="color:#f0d9a0">'+gramsToKg(ultimo.grams)+' kg</strong> ('+fDate(ultimo.time)+')</div>'+
+      '<div class="summary-line">Vs anterior: <strong style="color:'+color+'">'+(diff>=0?'+':'')+diff+'g — '+trend+'</strong></div>'+
+      '<div class="summary-line" style="font-size:11px;color:#a89070">Objetivo: recuperar peso de nacimiento (3.365 kg = 3365 g)</div>';
+    var faltaParaNacimiento=3365-ultimo.grams;
+    if(faltaParaNacimiento>0){
+      pesoHTML+='<div class="summary-line" style="color:#e07070">Faltan <strong>'+faltaParaNacimiento+'g</strong> para recuperar peso de nacimiento.</div>';
+    } else {
+      pesoHTML+='<div class="summary-line" style="color:#64c8b4">Supero el peso de nacimiento en <strong>'+(Math.abs(faltaParaNacimiento))+'g</strong>.</div>';
+    }
+  } else if(S.pesoHistory.length===1){
+    pesoHTML='<div class="summary-line">Peso registrado: <strong style="color:#f0d9a0">'+gramsToKg(S.pesoHistory[0].grams)+' kg</strong></div>';
+  }
+
+  // Intervals between tomas
+  var intervalMsg='';
+  if(tomas.length>=2){
+    var sorted=tomas.slice().sort(function(a,b){return new Date(a.start)-new Date(b.start);});
+    var intervals=[];
+    for(var i=1;i<sorted.length;i++){
+      intervals.push(Math.round((new Date(sorted[i].start)-new Date(sorted[i-1].start))/60000));
+    }
+    var avgInterval=Math.round(intervals.reduce(function(a,b){return a+b;},0)/intervals.length);
+    intervalMsg='<div class="summary-line">Intervalo promedio entre tomas: <strong style="color:#f0d9a0">'+avgInterval+' min ('+Math.round(avgInterval/60*10)/10+'h)</strong></div>';
+  }
+
+  return '<div class="summary-card"><div class="summary-title">Lactancia (ultimos '+days+' dias)</div>'+
+    '<div class="summary-line">Tomas registradas: <strong style="color:#f0d9a0">'+totalTomas+'</strong></div>'+
+    '<div class="summary-line">Duracion promedio: <strong style="color:#f0d9a0">'+avgMins+' min</strong></div>'+
+    '<div class="summary-line">Tiempo total al pecho: <strong style="color:#f0d9a0">'+totalMins+' min</strong></div>'+
+    intervalMsg+
+    (totalExt>0?'<div class="summary-line">Total extraido: <strong style="color:#f0d9a0">'+totalExt+'ml</strong></div>':'')+
+    '</div>'+
+    '<div class="summary-card"><div class="summary-title">Panales (ultimos '+days+' dias)</div>'+
+    '<div class="summary-line">Total panales: <strong style="color:#f0d9a0">'+panales.length+'</strong></div>'+
+    '<div class="summary-line">Pis: <strong>'+pis+'</strong> | Caca: <strong style="color:#64c8b4">'+caca+'</strong> | Mixto: <strong>'+mixto+'</strong></div>'+
+    (panales.length>0&&caca+mixto>=panales.length*0.3?'<div class="summary-line" style="color:#64c8b4;font-size:11px">Buena proporcion de cacas — senal positiva de ingesta.</div>':'<div class="summary-line" style="color:#e09070;font-size:11px">Pocas cacas registradas — observar ingesta.</div>')+
+    '</div>'+
+    (pesoHTML?'<div class="summary-card"><div class="summary-title">Evolucion de Peso</div>'+pesoHTML+'</div>':'');
+}
+
+// ── COPY ──
+function copyText(text){
+  navigator.clipboard.writeText(text).catch(function(){var ta=document.createElement('textarea');ta.value=text;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);});
+  var btn=document.getElementById('copy-btn');
+  if(btn){btn.textContent='Copiado!';btn.classList.add('done');setTimeout(function(){btn.textContent='Copiar mensaje';btn.classList.remove('done');},2000);}
+}
+function copyHistory(){
+  var items=getFiltered();
+  var text=items.map(function(h){
+    if(h.type==='toma'){var lstr=h.lados.map(function(l){return l.side+' '+l.mins+'min';}).join(' + ');return 'Toma '+fDT(h.start)+' | '+lstr+' ('+h.totalMins+'min)'+(h.note?' | '+h.note:'');}
+    return 'Panal '+fDT(h.time)+' | '+h.panal+(h.note?' | '+h.note:'');
+  }).join('\n');
+  navigator.clipboard.writeText(text).catch(function(){var ta=document.createElement('textarea');ta.value=text;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);});
+  var btn=document.getElementById('copy-hist-btn');
+  if(btn){var o=btn.textContent;btn.textContent='Copiado!';setTimeout(function(){btn.textContent=o;},2000);}
+}
+
+function getFiltered(){return S.historyFilter?S.history.filter(function(h){return getDayKey(h)===S.historyFilter;}):S.history;}
+
+function setStep(step){S.step=step;render();}
+
+function setRadio(val){
+  document.querySelectorAll('.radio-btn').forEach(function(b){b.classList.toggle('sel',b.dataset.val===val);});
+}
+
+// ── RENDER ──
+function render(){
+  ['hist','peso','medicos','resumen'].forEach(function(t){
+    var el=document.getElementById('tab-'+t);
+    if(el) el.classList.toggle('active',S.step===t||S.step===t+'Entry'||S.step===t+'Form'||(t==='medicos'&&(S.step==='medicoForm'||S.step==='visitaForm')));
+  });
+
+  var body=document.getElementById('body');
+  var tomas=S.history.filter(function(h){return h.type==='toma';});
+  var panales=S.history.filter(function(h){return h.type==='panal';});
+  var lastToma=tomas[0];
+
+  if(S.step==='home'){
+    var alarmHTML=S.alarmFired&&S.alarmNextTime?'<div class="alarm-banner"><div class="alarm-text">Hora de la proxima toma de Cefe!</div><button class="alarm-dismiss" onclick="S.alarmFired=false;render()">OK</button></div>':'';
+    var bannerHTML=!localStorage.getItem('cefe_banner_closed')?'<div id="install-banner"><button class="close-banner" onclick="localStorage.setItem(\'cefe_banner_closed\',\'1\');this.parentElement.remove()">x</button><strong>Instalar como app:</strong> Safari - Compartir - Agregar a pantalla de inicio</div>':'';
+    var statsHTML='';
+    if(S.history.length>0){
+      var minsAgo=lastToma?Math.round((Date.now()-new Date(lastToma.start))/60000):0;
+      var nextLine=lastToma?'<div style="margin-top:8px;font-size:12px;color:#c4b090">Ultima toma: hace '+minsAgo+' min | Proxima: <strong style="color:#f0d9a0">'+fTime(lastToma.nextToma)+'</strong></div>':'';
+      var lp=S.pesoHistory[0];
+      var pesoChip=lp?'<div class="weight-chip" onclick="navTo(\'peso\')">'+gramsToKg(lp.grams)+' kg | '+fDate(lp.time)+'</div>':'';
+      statsHTML='<div class="card"><div class="section-label">Resumen sesion</div><div class="stat-row"><div class="stat-box"><div class="val">'+tomas.length+'</div><div class="lbl">Tomas</div></div><div class="stat-box"><div class="val">'+panales.length+'</div><div class="lbl">Panales</div></div><div class="stat-box"><div class="val">'+panales.filter(function(p){return p.panal!=='Pis';}).length+'</div><div class="lbl">Caca/Mix</div></div></div>'+nextLine+pesoChip+'</div>';
+    }
+    var histHTML='';
+    if(S.history.length>0){
+      var rows=S.history.slice(0,4).map(function(h,i){return renderRow(h,i);}).join('');
+      var more=S.history.length>4?'<button onclick="navTo(\'history\')" style="margin-top:8px;background:none;border:none;color:#a89070;font-size:12px;cursor:pointer;font-family:Georgia,serif">Ver todos ('+S.history.length+') -></button>':'';
+      histHTML='<div style="margin-top:20px"><div class="section-label">Ultimos registros</div>'+rows+more+'</div>';
+    }
+    body.innerHTML=alarmHTML+bannerHTML+statsHTML+
+      '<button class="action-btn" onclick="startToma(false)"><div class="action-icon">🍼</div><div><div class="action-label">Registrar Toma</div><div class="action-sub">Iniciar sesion ahora</div></div></button>'+
+      '<button class="action-btn" onclick="startToma(true)" style="border-color:rgba(212,168,67,0.1)"><div class="action-icon" style="font-size:15px">📝</div><div><div class="action-label">Toma Manual</div><div class="action-sub">Ingresar horario y datos a mano</div></div></button>'+
+      '<button class="action-btn blue" onclick="startPanal()"><div class="action-icon blue">🧷</div><div><div class="action-label">Registrar Panal</div><div class="action-sub">Pis, caca o mixto</div></div></button>'+
+      '<button class="action-btn teal" onclick="startPeso()"><div class="action-icon teal">⚖️</div><div><div class="action-label">Registrar Peso</div><div class="action-sub">Seguimiento de curva</div></div></button>'+
+      histHTML;
+  }
+
+  else if(S.step==='toma'){
+    if(S.manualMode){
+      // Manual entry form
+      var ladosListHTML=S.manualLados.map(function(l,i){return '<div class="lado-item">✓ '+l.side+' — '+l.mins+' min <button onclick="removeManualLado('+i+')" style="background:none;border:none;color:#e07070;cursor:pointer;font-size:11px;margin-left:6px">x</button></div>';}).join('');
+      var sideOptions=SIDES.map(function(s){return '<option value="'+s+'">'+s+'</option>';}).join('');
+      body.innerHTML=
+        '<button class="back-btn" onclick="setStep(\'home\')">← Volver</button>'+
+        '<div class="screen-title">Toma Manual</div>'+
+        '<div class="screen-sub">Ingresa los datos a mano</div>'+
+        '<div class="form-row">'+
+          '<div class="form-field"><label class="form-label">Fecha</label><input type="date" class="form-input" id="manual-date-inp" value="'+S.manualDate+'"></div>'+
+          '<div class="form-field"><label class="form-label">Hora inicio</label><input type="time" class="form-input" id="manual-start-inp"></div>'+
+          '<div class="form-field"><label class="form-label">Hora fin</label><input type="time" class="form-input" id="manual-end-inp"></div>'+
+        '</div>'+
+        '<div class="section-label" style="margin-top:4px">Lados</div>'+
+        (ladosListHTML?'<div class="lados-box">'+ladosListHTML+'</div>':'')+
+        '<div style="display:flex;gap:8px;margin-bottom:12px;align-items:flex-end">'+
+          '<div class="form-field" style="flex:2"><label class="form-label">Lado</label><select class="form-select" id="manual-side-sel">'+sideOptions+'</select></div>'+
+          '<div class="form-field" style="flex:1"><label class="form-label">Minutos</label><input type="number" class="form-input" id="manual-mins-input" placeholder="10" min="1" max="60"></div>'+
+          '<button class="p-btn gold" style="flex:1;padding:10px 8px;font-size:12px;margin-bottom:0;width:auto" onclick="addManualLado()">+ Agregar</button>'+
+        '</div>'+
+        '<div class="ext-box"><div class="section-label">Extraccion sacaleches (ml)</div><div class="ml-row">'+
+          '<div class="ml-col"><div class="ml-label">Izquierdo</div><div class="ml-controls"><button class="ml-btn" onclick="S.extraction.left=Math.max(0,S.extraction.left-5);render()">-</button><div class="ml-val">'+S.extraction.left+'</div><button class="ml-btn" onclick="S.extraction.left+=5;render()">+</button></div></div>'+
+          '<div class="ml-col"><div class="ml-label">Derecho</div><div class="ml-controls"><button class="ml-btn" onclick="S.extraction.right=Math.max(0,S.extraction.right-5);render()">-</button><div class="ml-val">'+S.extraction.right+'</div><button class="ml-btn" onclick="S.extraction.right+=5;render()">+</button></div></div>'+
+        '</div></div>'+
+        '<div class="notes-box"><div class="section-label">Notas</div><textarea class="notes-input" id="toma-note-input" placeholder="Observaciones..."></textarea></div>'+
+        (S.manualLados.length>0?'<button class="p-btn gold" onclick="finishToma()">Guardar toma</button>':'')+
+        '<button class="g-btn red" onclick="setStep(\'home\')">Cancelar</button>';
+    } else {
+      // Live timer entry
+      var ladosHTML=S.lados.length>0?'<div class="lados-box">'+S.lados.map(function(l){return '<div class="lado-item">✓ '+l.side+' — '+l.mins+' min</div>';}).join('')+'</div>':'';
+      var timerHTML=S.currentSide?'<div class="timer-box"><div class="timer-side">'+S.currentSide+'</div><div class="timer-display" id="timer-display">0:00</div><button class="p-btn gold" style="margin-top:12px;width:auto;padding:10px 22px" onclick="finishSide()">Terminar este lado</button></div>':'';
+      var sideGrid=!S.currentSide?'<div class="muted">'+(S.lados.length===0?'Por que lado empieza?':'Continua en otro lado?')+'</div><div class="side-grid">'+SIDES.map(function(s){return '<button class="side-btn" onclick="startSide(\''+s.replace(/'/g,"\\'")+'\')" >'+s+'</button>';}).join('')+'</div>':'';
+      var finBtn=S.lados.length>0&&!S.currentSide?'<button class="p-btn gold" onclick="finishToma()">Finalizar y generar mensaje</button>':'';
+      body.innerHTML=
+        '<button class="back-btn" onclick="discardCurrent()">← Descartar y volver</button>'+
+        '<div class="screen-title">Nueva Toma</div><div class="screen-sub">Inicio: '+fTime(S.tomaStart)+'</div>'+
+        ladosHTML+timerHTML+sideGrid+
+        '<div class="ext-box"><div class="section-label">Extraccion (ml)</div><div class="ml-row">'+
+          '<div class="ml-col"><div class="ml-label">Izquierdo</div><div class="ml-controls"><button class="ml-btn" onclick="S.extraction.left=Math.max(0,S.extraction.left-5);render()">-</button><div class="ml-val">'+S.extraction.left+'</div><button class="ml-btn" onclick="S.extraction.left+=5;render()">+</button></div></div>'+
+          '<div class="ml-col"><div class="ml-label">Derecho</div><div class="ml-controls"><button class="ml-btn" onclick="S.extraction.right=Math.max(0,S.extraction.right-5);render()">-</button><div class="ml-val">'+S.extraction.right+'</div><button class="ml-btn" onclick="S.extraction.right+=5;render()">+</button></div></div>'+
+        '</div></div>'+
+        '<div class="notes-box"><div class="section-label">Notas</div><textarea class="notes-input" id="toma-note-input" placeholder="Ej: Cefe se prendo bien..."></textarea></div>'+
+        finBtn+'<button class="g-btn red" onclick="discardCurrent()">Descartar</button>';
+      if(S.currentSide&&S.sideStart){var el=document.getElementById('timer-display');if(el)el.textContent=Math.floor(S.elapsed/60)+':'+String(S.elapsed%60).padStart(2,'0');}
+    }
+  }
+
+  else if(S.step==='panal'){
+    body.innerHTML=
+      '<button class="back-btn" onclick="discardCurrent()">← Descartar y volver</button>'+
+      '<div class="screen-title">Cambio de Panal</div><div class="screen-sub">'+fDT(S.panalTime)+'</div>'+
+      '<button class="panal-btn pis" onclick="finishPanal(\'Pis\')"><span style="font-size:20px">💛</span><span>Pis</span></button>'+
+      '<button class="panal-btn caca" onclick="finishPanal(\'Caca\')"><span style="font-size:20px">💩</span><span>Caca</span></button>'+
+      '<button class="panal-btn mixto" onclick="finishPanal(\'Mixto\')"><span style="font-size:20px">🔀</span><span>Mixto</span></button>'+
+      '<div class="notes-box" style="margin-top:12px"><div class="section-label">Nota</div><textarea class="notes-input" id="panal-note-input" placeholder="Opcional..."></textarea></div>'+
+      '<button class="g-btn red" onclick="discardCurrent()">Descartar</button>';
+  }
+
+  else if(S.step==='pesoEntry'){
+    body.innerHTML=
+      '<button class="back-btn" onclick="setStep(\'peso\')">← Volver</button>'+
+      '<div class="screen-title">Registrar Peso</div><div class="screen-sub">'+fDT(new Date())+'</div>'+
+      '<div class="peso-input-wrap">'+
+        '<div class="peso-display">'+gramsToKg(S.pesoGrams)+'</div><div class="peso-unit">kg</div>'+
+        '<div class="peso-controls">'+
+          '<button class="peso-btn" onclick="adjustPeso(-100)">-100g</button>'+
+          '<button class="peso-btn" onclick="adjustPeso(-10)">-10g</button>'+
+          '<button class="peso-btn big" onclick="adjustPeso(-1)">-1g</button>'+
+          '<button class="peso-btn big" onclick="adjustPeso(1)">+1g</button>'+
+          '<button class="peso-btn" onclick="adjustPeso(10)">+10g</button>'+
+          '<button class="peso-btn" onclick="adjustPeso(100)">+100g</button>'+
+        '</div>'+
+      '</div>'+
+      '<div class="notes-box"><div class="section-label">Nota</div><textarea class="notes-input" id="peso-note-input" placeholder="Ej: Pesado en consultorio..."></textarea></div>'+
+      '<button class="p-btn teal" onclick="savePeso()">Guardar peso</button>'+
+      '<button class="g-btn red" onclick="setStep(\'peso\')">Cancelar</button>';
+  }
+
+  else if(S.step==='peso'){
+    var pesoRows=S.pesoHistory.length===0?'<div style="color:#a89070;font-size:13px;margin-top:8px">Sin registros todavia.</div>':
+      S.pesoHistory.map(function(p,i){
+        var prev=S.pesoHistory[i+1];
+        var diffHTML='';
+        if(prev){var d=p.grams-prev.grams;diffHTML='<div class="peso-diff '+(d>=0?'up':'down')+'">'+(d>=0?'+':'')+d+'g vs anterior</div>';}
+        return '<div class="h-row peso"><div><div class="h-time">'+fDT(p.time)+'</div>'+(p.note?'<div class="h-sub">'+p.note+'</div>':'')+diffHTML+'</div><div class="h-right"><div style="font-size:16px;font-weight:bold;color:#64c8b4">'+gramsToKg(p.grams)+'kg</div><button class="del-btn" onclick="deletePeso('+i+')">x</button></div></div>';
+      }).join('');
+    body.innerHTML=
+      '<div class="screen-title">Curva de Peso</div>'+
+      '<div style="font-size:11px;color:#a89070;margin-bottom:16px">Peso nacimiento: <strong style="color:#f0d9a0">3.365 kg</strong></div>'+
+      '<button class="action-btn teal" onclick="startPeso()"><div class="action-icon teal">+</div><div><div class="action-label">Registrar nuevo peso</div></div></button>'+
+      (S.pesoHistory.length>0?'<button class="p-btn grey" id="copy-peso-btn" onclick="copyPesoHistory()" style="margin-bottom:14px;margin-top:2px">Copiar historial de peso</button>':'')+
+      '<div>'+pesoRows+'</div>';
+  }
+
+  else if(S.step==='medicos'){
+    var medicoCards=S.medicos.length===0?'<div style="color:#a89070;font-size:13px;margin-top:8px">Sin medicos registrados.</div>':
+      S.medicos.map(function(m,i){
+        return '<div class="medico-card"><div class="medico-name">Dr/a. '+m.nombre+' '+m.apellido+'</div><div class="medico-spec">'+m.especialidad+'</div><div class="medico-detail">'+(m.telefono?'Tel: '+m.telefono+'<br>':'')+( m.email?'Email: '+m.email+'<br>':'')+(m.direccion?'Dir: '+m.direccion:'')+'</div><div class="medico-actions"><button class="medico-act-btn" onclick="editMedico('+i+')">Editar</button><button class="medico-act-btn" onclick="deleteMedico('+i+')">Eliminar</button></div></div>';
+      }).join('');
+    var visitaCards=S.visitas.length===0?'':'<div style="margin-top:20px"><div class="section-label">Proximas visitas</div>'+S.visitas.slice(0,5).map(function(v,i){var m=S.medicos[v.medicoIdx]||{};return '<div class="h-row visita"><div><div class="h-time">'+fDate(v.datetime)+' '+fTime(v.datetime)+'</div><div class="h-sub">Dr/a. '+m.nombre+' '+m.apellido+' | '+v.modalidad+'</div></div><div class="h-right"><button class="del-btn" onclick="deleteVisita('+i+')">x</button></div></div>';}).join('')+'</div>';
+    body.innerHTML=
+      '<div class="screen-title">Medicos de Cefe</div>'+
+      '<button class="action-btn purple" onclick="startAddMedico()"><div class="action-icon purple">+</div><div><div class="action-label">Agregar medico</div><div class="action-sub">Registrar nuevo profesional</div></div></button>'+
+      (S.medicos.length>0?'<button class="action-btn rose" onclick="startAddVisita()"><div class="action-icon rose">📅</div><div><div class="action-label">Agendar visita</div><div class="action-sub">Programar consulta medica</div></div></button>':'')+
+      '<div style="margin-top:16px"><div class="section-label">Profesionales</div>'+medicoCards+'</div>'+
+      visitaCards;
+  }
+
+  else if(S.step==='medicoForm'){
+    var mf=S.medicoForm;
+    body.innerHTML=
+      '<button class="back-btn" onclick="setStep(\'medicos\')">← Volver</button>'+
+      '<div class="screen-title">'+(S.editMedicoIdx>=0?'Editar Medico':'Agregar Medico')+'</div>'+
+      '<div class="form-field"><label class="form-label">Especialidad</label><input class="form-input" id="mf-esp" value="'+esc(mf.especialidad)+'" placeholder="Pediatra, Neonatólogo..."></div>'+
+      '<div class="form-row">'+
+        '<div class="form-field"><label class="form-label">Nombre</label><input class="form-input" id="mf-nom" value="'+esc(mf.nombre)+'" placeholder="Juan"></div>'+
+        '<div class="form-field"><label class="form-label">Apellido</label><input class="form-input" id="mf-ape" value="'+esc(mf.apellido)+'" placeholder="Garcia"></div>'+
+      '</div>'+
+      '<div class="form-field"><label class="form-label">Direccion consultorio</label><input class="form-input" id="mf-dir" value="'+esc(mf.direccion)+'" placeholder="Av. Corrientes 1234, CABA"></div>'+
+      '<div class="form-row">'+
+        '<div class="form-field"><label class="form-label">Telefono (con codigo pais)</label><input class="form-input" id="mf-tel" value="'+esc(mf.telefono)+'" placeholder="5491112345678"></div>'+
+        '<div class="form-field"><label class="form-label">Email</label><input class="form-input" id="mf-email" value="'+esc(mf.email)+'" placeholder="doctor@mail.com"></div>'+
+      '</div>'+
+      '<button class="p-btn purple" onclick="saveMedico()">Guardar medico</button>'+
+      '<button class="g-btn red" onclick="setStep(\'medicos\')">Cancelar</button>';
+  }
+
+  else if(S.step==='visitaForm'){
+    var medicoOptions=S.medicos.map(function(m,i){return '<option value="'+i+'">Dr/a. '+m.nombre+' '+m.apellido+' ('+m.especialidad+')</option>';}).join('');
+    body.innerHTML=
+      '<button class="back-btn" onclick="setStep(\'medicos\')">← Volver</button>'+
+      '<div class="screen-title">Agendar Visita Medica</div>'+
+      '<div class="form-field"><label class="form-label">Medico</label><select class="form-select" id="v-medico-sel">'+medicoOptions+'</select></div>'+
+      '<div class="form-row">'+
+        '<div class="form-field"><label class="form-label">Fecha</label><input type="date" class="form-input" id="v-fecha" value="'+S.visitaFecha+'"></div>'+
+        '<div class="form-field"><label class="form-label">Hora</label><input type="time" class="form-input" id="v-hora" value="'+S.visitaHora+'"></div>'+
+      '</div>'+
+      '<div class="form-field"><label class="form-label">Modalidad</label>'+
+        '<div class="radio-group">'+
+          '<button class="radio-btn '+(S.visitaModalidad==='presencial'?'sel':'')+'" data-val="presencial" onclick="S.visitaModalidad=\'presencial\';setRadio(\'presencial\')">Presencial</button>'+
+          '<button class="radio-btn '+(S.visitaModalidad==='virtual'?'sel':'')+'" data-val="virtual" onclick="S.visitaModalidad=\'virtual\';setRadio(\'virtual\')">Virtual</button>'+
+        '</div>'+
+      '</div>'+
+      '<div class="form-field"><label class="form-label">Descripcion / Motivo</label><textarea class="notes-input form-input" id="v-desc" placeholder="Control de peso, consulta por..." style="min-height:52px"></textarea></div>'+
+      '<button class="p-btn rose" onclick="saveVisita()" style="background:rgba(220,140,160,0.8);color:#0f1923">Guardar y generar mensaje</button>'+
+      '<button class="g-btn red" onclick="setStep(\'medicos\')">Cancelar</button>';
+  }
+
+  else if(S.step==='summary'){
+    var typeLabel=S.step;
+    body.innerHTML=
+      '<div class="screen-title">Mensaje listo</div>'+
+      '<div style="font-size:11px;color:#a89070;margin-bottom:14px">Copia el texto y pegalo en WhatsApp</div>'+
+      '<div class="msg-box">'+S._summaryMsg+'</div>'+
+      '<button class="p-btn green" id="copy-btn" onclick="copyText(\''+escMsg(S._summaryMsg)+'\')">Copiar mensaje</button>'+
+      '<button class="g-btn white" onclick="setStep(\'home\')">Volver al inicio</button>'+
+      (S._summaryType==='toma'||S._summaryType==='panal'?'<button class="g-btn red" onclick="S.history.shift();saveData();setStep(\'home\')">Borrar este registro</button>':'');
+  }
+
+  else if(S.step==='history'){
+    var filtered=getFiltered();
+    var ft=filtered.filter(function(h){return h.type==='toma';});
+    var fp=filtered.filter(function(h){return h.type==='panal';});
+    var totalMin=ft.reduce(function(a,b){return a+b.totalMins;},0);
+    var dayKeys=[...new Set(S.history.map(getDayKey))];
+    var filterBtns='<button class="filter-btn'+(S.historyFilter?'':' active')+'" onclick="setFilter(null)">Todos</button>'+
+      dayKeys.map(function(key){
+        var sample=S.history.find(function(h){return getDayKey(h)===key;});
+        return '<button class="filter-btn'+(S.historyFilter===key?' active':'')+'" onclick="setFilter(\''+key+'\')">'+fDate(sample.type==='toma'?sample.start:sample.time)+'</button>';
+      }).join('');
+    var rows=filtered.map(function(h){return renderRow(h,S.history.indexOf(h));}).join('');
+    body.innerHTML=
+      '<div class="screen-title">Historial</div>'+
+      (S.history.length===0?'<div style="color:#a89070;font-size:13px">Sin registros.</div>':
+        '<div style="margin-bottom:14px"><div class="section-label">Filtrar por dia</div><div class="filter-row">'+filterBtns+'</div></div>'+
+        '<div class="stat-mini"><div class="stat-box"><div class="val">'+ft.length+'</div><div class="lbl">Tomas</div></div><div class="stat-box"><div class="val">'+totalMin+'</div><div class="lbl">Min</div></div><div class="stat-box"><div class="val">'+fp.length+'</div><div class="lbl">Panales</div></div></div>'+
+        '<button class="p-btn grey" id="copy-hist-btn" onclick="copyHistory()" style="margin-bottom:14px">Copiar historial</button>'+
+        '<div>'+rows+'</div>')+
+      '<div style="margin-top:20px"><div class="section-label">Exportar</div>'+
+      '<div class="export-btn" onclick="exportToCSV()"><div class="export-icon">📊</div><div><div class="action-label">Exportar a CSV (Excel)</div><div class="action-sub">Descarga archivo para abrir en Excel</div></div></div>'+
+      '<div class="export-btn" onclick="exportAndEmail()"><div class="export-icon">📧</div><div><div class="action-label">Exportar + Enviar por email</div><div class="action-sub">Descarga CSV y abre tu correo</div></div></div></div>';
+  }
+
+  else if(S.step==='resumen'){
+    var periodBtns=['1','3','7','14'].map(function(d){return '<button class="filter-btn'+(S._resumenDays===parseInt(d)?' active':'')+'" onclick="S._resumenDays='+d+';render()">'+d+(d==='1'?' dia':' dias')+'</button>';}).join('');
+    if(!S._resumenDays) S._resumenDays=1;
+    body.innerHTML=
+      '<div class="screen-title">Resumen de Evolucion</div>'+
+      '<div style="margin-bottom:16px"><div class="section-label">Periodo</div><div class="filter-row">'+periodBtns+'</div></div>'+
+      buildResumen(S._resumenDays);
+  }
+}
+
+function renderRow(h,i){
+  if(h.type==='toma'){
+    var ltxt=h.lados.map(function(l){return l.side.split(' ')[0]+' '+l.mins+'m';}).join(' · ');
+    return '<div class="h-row toma"><div><div class="h-time">🍼 '+fTime(h.start)+'</div><div class="h-sub">'+ltxt+(h.note?' | '+h.note.substring(0,25):'')+'</div></div><div class="h-right"><div class="h-mins">'+h.totalMins+'m</div><button class="del-btn" onclick="deleteItem('+i+')">x</button></div></div>';
+  }
+  var emo=h.panal==='Pis'?'💛':h.panal==='Caca'?'💩':'🔀';
+  return '<div class="h-row panal"><div><div class="h-time" style="color:#c0d4e4">🧷 '+fTime(h.time)+' — '+h.panal+'</div>'+(h.note?'<div class="h-sub">'+h.note.substring(0,30)+'</div>':'')+'</div><div class="h-right"><span style="font-size:16px">'+emo+'</span><button class="del-btn" onclick="deleteItem('+i+')">x</button></div></div>';
+}
+
+function deleteItem(i){S.history.splice(i,1);saveData();render();}
+function deletePeso(i){S.pesoHistory.splice(i,1);saveData();render();}
+function discardCurrent(){stopTimer();S.currentSide=null;S.sideStart=null;setStep('home');}
+function copyPesoHistory(){
+  var text='Registro peso Cefe\n'+S.pesoHistory.map(function(p){return fDT(p.time)+': '+gramsToKg(p.grams)+' kg'+(p.note?' ('+p.note+')':'');}).join('\n');
+  navigator.clipboard.writeText(text).catch(function(){var ta=document.createElement('textarea');ta.value=text;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);});
+}
+function escMsg(m){return m.replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/\n/g,'\\n');}
+function esc(s){return (s||'').replace(/"/g,'&quot;').replace(/</g,'&lt;');}
+
+render();
+</script>
+</body>
+</html>
