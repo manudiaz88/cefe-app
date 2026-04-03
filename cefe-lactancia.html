@@ -142,7 +142,7 @@ button{-webkit-appearance:none;}
       <div class="title-label">Registro Lactancia</div>
       <div class="title-main">Ceferino</div>
     </div>
-    <div class="header-right">
+    <div id="sync-status" style="font-size:10px;color:#64c8b4;letter-spacing:1px;margin-right:4px">● Conectando...</div><div class="header-right">
       <button class="tab-btn" id="tab-hist" onclick="navTo('history')">Historial</button>
       <button class="tab-btn" id="tab-peso" onclick="navTo('peso')">Peso</button>
       <button class="tab-btn" id="tab-medicos" onclick="navTo('medicos')">Medicos</button>
@@ -188,6 +188,14 @@ function saveData(){
   localStorage.setItem('cefe_pesos',JSON.stringify(S.pesoHistory));
   localStorage.setItem('cefe_medicos',JSON.stringify(S.medicos));
   localStorage.setItem('cefe_visitas',JSON.stringify(S.visitas));
+  if (typeof window.firebaseSave === 'function') {
+    window.firebaseSave({
+      history: S.history,
+      pesoHistory: S.pesoHistory,
+      medicos: S.medicos,
+      visitas: S.visitas
+    });
+  }
 }
 loadData();
 
@@ -769,5 +777,71 @@ function esc(s){return (s||'').replace(/"/g,'&quot;').replace(/</g,'&lt;');}
 
 render();
 </script>
+
+  <!-- Firebase -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getDatabase, ref, set, onValue, push, remove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyC5iVBZbLlD0a7yVRx4eDg6pOjRKNO28kA",
+      authDomain: "cefe-app.firebaseapp.com",
+      databaseURL: "https://cefe-app-default-rtdb.firebaseio.com",
+      projectId: "cefe-app",
+      storageBucket: "cefe-app.firebasestorage.app",
+      messagingSenderId: "40391677831",
+      appId: "1:40391677831:web:3640958b4450f2cd5ae522"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    // Sync status indicator
+    function setSyncStatus(status) {
+      var el = document.getElementById('sync-status');
+      if (!el) return;
+      if (status === 'ok') { el.textContent = '● Sincronizado'; el.style.color = '#64c8b4'; }
+      else if (status === 'saving') { el.textContent = '● Guardando...'; el.style.color = '#d4a843'; }
+      else { el.textContent = '● Sin conexion'; el.style.color = '#e07070'; }
+    }
+
+    // Save to Firebase (replaces localStorage saveData)
+    window.firebaseSave = function(data) {
+      setSyncStatus('saving');
+      set(ref(db, 'cefe'), data)
+        .then(function() { setSyncStatus('ok'); })
+        .catch(function(err) { console.error(err); setSyncStatus('error'); });
+    };
+
+    // Listen for real-time changes from Firebase
+    onValue(ref(db, 'cefe'), function(snapshot) {
+      var data = snapshot.val();
+      if (!data) return;
+
+      // Parse dates back
+      if (data.history) {
+        S.history = data.history.map(function(e) {
+          if (!e) return null;
+          if (e.type === 'toma') { e.start = new Date(e.start); e.end = new Date(e.end); e.nextToma = new Date(e.nextToma); }
+          else if (e.type === 'panal') { e.time = new Date(e.time); }
+          return e;
+        }).filter(Boolean);
+      }
+      if (data.pesoHistory) {
+        S.pesoHistory = data.pesoHistory.map(function(e) { if(e) e.time = new Date(e.time); return e; }).filter(Boolean);
+      }
+      if (data.medicos) S.medicos = data.medicos.filter(Boolean);
+      if (data.visitas) {
+        S.visitas = data.visitas.map(function(e) { if(e) e.datetime = new Date(e.datetime); return e; }).filter(Boolean);
+      }
+
+      setSyncStatus('ok');
+      if (typeof render === 'function') render();
+    }, function(error) {
+      console.error(error);
+      setSyncStatus('error');
+    });
+  </script>
+
 </body>
 </html>
