@@ -143,10 +143,10 @@ button{-webkit-appearance:none;}
       <div class="title-main">Ceferino</div>
     </div>
     <div id="sync-status" style="font-size:10px;color:#64c8b4;letter-spacing:1px;margin-right:4px">● Conectando...</div><div class="header-right">
-      <button class="tab-btn" id="tab-hist" onclick="navTo('history')">Historial</button>
+      <button class="tab-btn" id="tab-perfil" onclick="navTo('perfil')">Perfil</button><button class="tab-btn" id="tab-hist" onclick="navTo('history')">Historial</button>
       <button class="tab-btn" id="tab-peso" onclick="navTo('peso')">Peso</button>
       <button class="tab-btn" id="tab-medicos" onclick="navTo('medicos')">Medicos</button>
-      <button class="tab-btn" id="tab-resumen" onclick="navTo('resumen')">Resumen</button>
+      <button class="tab-btn" id="tab-resumen" onclick="navTo('resumen')">Dashboard</button>
       <div class="moon">🌙</div>
     </div>
   </div>
@@ -163,6 +163,22 @@ var S={
   alarmTimer:null,alarmFired:false,alarmNextTime:null,
   pesoGrams:0,
   _summaryMsg:'',_summaryType:'',
+  _pendingEntry:null,
+  eficiencia:0,
+  panalManualDate:'',panalManualTime:'',
+  bebe:{
+    nombre:'Ceferino',apellido:'Diaz Palacios',apodo:'Cefe',
+    fechaNacimiento:'2026-03-29',horaNavimiento:'05:20',
+    pesoNacimiento:3365,talla:49,cc:32,
+    sexo:'M',sangre:'A+',
+    apgar:'9/10',edadGestacional:40,tipoParto:'Cesarea',
+    dni:'71.013.834',
+    vacunaBCG:false,vacunaHepB:'29/03/2026',
+    diagnosticoEgreso:'RNT PAEG',
+    pesoAlta:2980,fechaAlta:'2026-04-01',
+    notas:'Coombs directa negativa. Pesquisa neonatal FEI realizada 30/03. Reflejo rojo ambos ojos presente.'
+  },
+  padres:[],_editPadre:null,_editPadreIdx:-1,_pesoChartVisible:false,
   manualMode:false,
   manualDate:'',manualTimeStart:'',manualTimeEnd:'',
   manualLados:[],manualCurrentSide:null,manualCurrentMins:'',
@@ -181,6 +197,12 @@ function loadData(){
     S.pesoHistory=JSON.parse(localStorage.getItem('cefe_pesos')||'[]').map(function(e){e.time=new Date(e.time);return e;});
     S.medicos=JSON.parse(localStorage.getItem('cefe_medicos')||'[]');
     S.visitas=JSON.parse(localStorage.getItem('cefe_visitas')||'[]').map(function(e){e.datetime=new Date(e.datetime);return e;});
+    var sb=localStorage.getItem('cefe_bebe'); if(sb) S.bebe=JSON.parse(sb);
+    var sp=localStorage.getItem('cefe_padres'); if(sp) S.padres=JSON.parse(sp);
+    // Seed peso alta from epicrisis if no peso history yet
+    if(S.pesoHistory.length===0&&S.bebe.pesoAlta&&S.bebe.fechaAlta){
+      S.pesoHistory=[{time:new Date(S.bebe.fechaAlta+'T12:00:00'),grams:S.bebe.pesoAlta,note:'Peso al alta sanatorio (epicrisis)'}];
+    }
   }catch(err){S.history=[];S.pesoHistory=[];S.medicos=[];S.visitas=[];}
 }
 function saveData(){
@@ -188,8 +210,12 @@ function saveData(){
   localStorage.setItem('cefe_pesos',JSON.stringify(S.pesoHistory));
   localStorage.setItem('cefe_medicos',JSON.stringify(S.medicos));
   localStorage.setItem('cefe_visitas',JSON.stringify(S.visitas));
+  localStorage.setItem('cefe_bebe',JSON.stringify(S.bebe));
+  localStorage.setItem('cefe_padres',JSON.stringify(S.padres));
   if (typeof window.firebaseSave === 'function') {
     window.firebaseSave({
+      bebe: S.bebe,
+      padres: S.padres,
       history: S.history,
       pesoHistory: S.pesoHistory,
       medicos: S.medicos,
@@ -202,7 +228,7 @@ loadData();
 function fTime(d){return new Date(d).toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'});}
 function fDate(d){return new Date(d).toLocaleDateString('es-AR',{weekday:'short',day:'2-digit',month:'2-digit'});}
 function fDateFull(d){return new Date(d).toLocaleDateString('es-AR',{weekday:'long',day:'2-digit',month:'long',year:'numeric'});}
-function fDT(d){return new Date(d).toLocaleString('es-AR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});}
+function fDT(d){var dt=new Date(d);if(isNaN(dt.getTime()))return 'Fecha desconocida';return dt.toLocaleString('es-AR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});}
 function addMins(d,m){return new Date(new Date(d).getTime()+m*60000);}
 function sameDay(a,b){var da=new Date(a),db=new Date(b);return da.getFullYear()===db.getFullYear()&&da.getMonth()===db.getMonth()&&da.getDate()===db.getDate();}
 function gramsToKg(g){return (g/1000).toFixed(3);}
@@ -211,22 +237,29 @@ function getDayKey(h){var d=new Date(h.type==='toma'?h.start:h.time);return d.ge
 // ── MESSAGES ──
 function generateMsg(entry,hist){
   if(entry.type==='toma'){
-    var lstr=entry.lados.map(function(l){return l.side+' '+l.mins+'min';}).join(' + ');
+    // Lados: group by side and sum, then show as percentages
+    var sideMap={};
+    entry.lados.forEach(function(l){sideMap[l.side]=(sideMap[l.side]||0)+l.mins;});
+    var total=entry.totalMins||1;
+    var ladosPct=Object.keys(sideMap).map(function(s){
+      var pct=Math.round(sideMap[s]/total*100);
+      return s+' '+pct+'%';
+    }).join(' | ');
     var hasExt=entry.extraction.left>0||entry.extraction.right>0;
-    var tomasHoy=hist.filter(function(h){return h.type==='toma'&&sameDay(h.start,entry.start);});
-    var num=tomasHoy.length+1;
-    var obs=entry.totalMins<10?'Toma corta, observar si Cefe queda satisfecho.':entry.totalMins>=20?'Buena duracion de toma.':'Toma normal, seguir observando.';
-    var lines=['*Lactancia - Ultima Sesion*','Toma #'+num+' del dia','Inicio: '+fTime(entry.start)+' | Fin: '+fTime(entry.end),'Duracion: '+entry.totalMins+' min','Lados: '+lstr];
+    var effLine=entry.eficiencia?'Eficiencia percibida: '+entry.eficiencia+'/5':'';
+    var lines=['*Lactancia - Ultima Sesion*',
+      'Inicio: '+fTime(entry.start)+' | Fin: '+fTime(entry.end),
+      'Duracion: '+entry.totalMins+' min',
+      'Lados: '+ladosPct];
     if(hasExt) lines.push('Extraccion: izq '+entry.extraction.left+'ml / der '+entry.extraction.right+'ml');
     lines.push('Proxima toma estimada: ~'+fTime(entry.nextToma));
-    lines.push(obs);
+    if(effLine) lines.push(effLine);
     if(entry.note&&entry.note.trim()) lines.push('Nota: '+entry.note.trim());
     return lines.join('\n');
   } else if(entry.type==='panal'){
     var panalesHoy=hist.filter(function(h){return h.type==='panal'&&sameDay(h.time,entry.time);});
     var pnum=panalesHoy.length+1;
-    var nota=entry.panal==='Caca'?'Caca registrada - buena senal de ingesta.':entry.panal==='Mixto'?'Panal mixto - todo en orden.':'Panal #'+pnum+' del dia.';
-    var plines=['*Registro de Panal - Cefe*',fDT(entry.time),'Tipo: '+entry.panal,nota];
+    var plines=['*Registro de Panal - Cefe*',fDT(entry.time)+' (#'+pnum+' del dia)','Tipo: '+entry.panal];
     if(entry.note&&entry.note.trim()) plines.push('Nota: '+entry.note.trim());
     return plines.join('\n');
   }
@@ -267,6 +300,8 @@ function startTimer(){
     S.elapsed=Math.floor((Date.now()-S.sideStart)/1000);
     var el=document.getElementById('timer-display');
     if(el) el.textContent=Math.floor(S.elapsed/60)+':'+String(S.elapsed%60).padStart(2,'0');
+    // Update bg timer on home screen too
+    if(S.step==='home') render();
   },1000);
 }
 function stopTimer(){if(S.timerInterval){clearInterval(S.timerInterval);S.timerInterval=null;}S.elapsed=0;}
@@ -278,6 +313,29 @@ function scheduleAlarm(nextToma){
   var ms=new Date(nextToma).getTime()-Date.now();
   if(ms>0&&ms<4*3600000){
     S.alarmTimer=setTimeout(function(){S.alarmFired=true;if(S.step==='home')render();},ms);
+  }
+  // Try Web Notifications (works in Chrome/Safari iOS 16.4+ as PWA)
+  S._nextTomaTime=new Date(nextToma);
+  if('Notification' in window && Notification.permission==='granted'){
+    var msNotif=new Date(nextToma).getTime()-Date.now();
+    if(msNotif>0){
+      if(S._notifTimer) clearTimeout(S._notifTimer);
+      S._notifTimer=setTimeout(function(){
+        new Notification('Cefe necesita comer', {
+          body:'Proxima toma programada para las '+fTime(nextToma),
+          icon:'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">🍼</text></svg>'
+        });
+      }, msNotif);
+    }
+  }
+}
+
+function requestNotifPermission(){
+  if('Notification' in window && Notification.permission==='default'){
+    Notification.requestPermission().then(function(p){
+      if(p==='granted') alert('Notificaciones activadas! Recibirás alertas cuando sea hora de la próxima toma.');
+      render();
+    });
   }
 }
 
@@ -301,7 +359,9 @@ function startSide(side){
 }
 function finishSide(){
   if(!S.currentSide||!S.sideStart) return;
-  var m=Math.max(1,Math.round((Date.now()-S.sideStart)/60000));
+  var secs=(Date.now()-S.sideStart)/1000;
+  var m=Math.floor(secs/60); // floor: 1:59 = 1 min, <60s = 0 (discard)
+  if(m<1){S.currentSide=null;S.sideStart=null;stopTimer();render();return;} // discard <1min
   S.lados.push({side:S.currentSide,mins:m});S.currentSide=null;S.sideStart=null;stopTimer();render();
 }
 
@@ -340,25 +400,32 @@ function finishToma(){
   var total=finalLados.reduce(function(a,b){return a+b.mins;},0);
   var nextToma=addMins(startTime,180);
   var entry={type:'toma',start:startTime,end:endTime,lados:finalLados,totalMins:total,extraction:{left:extrL,right:extrR},nextToma:nextToma,note:note};
-  var msg=generateMsg(entry,S.history);
-  S.history.unshift(entry);saveData();
-  scheduleAlarm(nextToma);
-  S._summaryMsg=msg;S._summaryType='toma';setStep('summary');
+  S._pendingEntry=entry;
+  S.eficiencia=0;
+  setStep('tomaPreview');
 }
 
 // ── PANAL ──
-function startPanal(){S.panalTime=new Date();setStep('panal');}
+function startPanal(){S.panalTime=new Date();S.panalManualDate='';S.panalManualTime='';setStep('panal');}
 function finishPanal(type){
   var note=document.getElementById('panal-note-input');
-  var entry={type:'panal',panal:type,time:S.panalTime||new Date(),note:note?note.value:''};
-  var msg=generateMsg(entry,S.history);
-  S.history.unshift(entry);saveData();
-  S._summaryMsg=msg;S._summaryType='panal';setStep('summary');
+  var manualDateVal=document.getElementById('panal-date-inp')?document.getElementById('panal-date-inp').value:'';
+  var manualTimeVal=document.getElementById('panal-time-inp')?document.getElementById('panal-time-inp').value:'';
+  var ptime=S.panalTime||new Date();
+  if(manualDateVal&&manualTimeVal) ptime=new Date(manualDateVal+'T'+manualTimeVal);
+  else if(manualDateVal&&!manualTimeVal) ptime=new Date(manualDateVal+'T'+String(new Date().getHours()).padStart(2,'0')+':'+String(new Date().getMinutes()).padStart(2,'0'));
+  var entry={type:'panal',panal:type,time:ptime,note:note?note.value:''};
+  S._pendingEntry=entry;
+  setStep('panalPreview');
 }
 
 // ── PESO ──
 function startPeso(){S.pesoGrams=0;setStep('pesoEntry');}
-function adjustPeso(d){S.pesoGrams=Math.max(0,S.pesoGrams+d);render();}
+function adjustPeso(d){
+  S.pesoGrams=Math.max(0,S.pesoGrams+d);
+  var disp=document.getElementById('peso-disp');if(disp)disp.textContent=gramsToKg(S.pesoGrams);
+  var inp=document.getElementById('peso-manual-input');if(inp)inp.value=(S.pesoGrams/1000).toFixed(3);
+}
 function savePeso(){
   if(S.pesoGrams===0){alert('Ingresa un peso.');return;}
   var note=document.getElementById('peso-note-input');
@@ -527,7 +594,7 @@ function setRadio(val){
 
 // ── RENDER ──
 function render(){
-  ['hist','peso','medicos','resumen'].forEach(function(t){
+  ['perfil','hist','peso','medicos','resumen'].forEach(function(t){
     var el=document.getElementById('tab-'+t);
     if(el) el.classList.toggle('active',S.step===t||S.step===t+'Entry'||S.step===t+'Form'||(t==='medicos'&&(S.step==='medicoForm'||S.step==='visitaForm')));
   });
@@ -538,6 +605,16 @@ function render(){
   var lastToma=tomas[0];
 
   if(S.step==='home'){
+    var bgTimerHTML='';
+    if(S.currentSide&&S.sideStart){
+      var bgSecs=Math.floor((Date.now()-S.sideStart)/1000);
+      var bgMins=Math.floor(bgSecs/60);var bgS=bgSecs%60;
+      bgTimerHTML='<div style="background:rgba(212,168,67,0.12);border:1px solid rgba(212,168,67,0.4);border-radius:13px;padding:12px 16px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between">'+
+        '<div><div style="font-size:11px;color:#a89070">Sesion en curso — '+S.currentSide+'</div>'+
+        '<div style="font-size:22px;font-weight:bold;color:#f0d9a0;font-family:monospace">'+bgMins+':'+String(bgS).padStart(2,'0')+'</div></div>'+
+        '<button onclick="setStep(\'toma\')" style="background:rgba(212,168,67,0.3);border:1px solid rgba(212,168,67,0.5);border-radius:10px;padding:8px 14px;color:#f0d9a0;font-size:12px;cursor:pointer;font-family:Georgia,serif">Volver a toma</button>'+
+      '</div>';
+    }
     var alarmHTML=S.alarmFired&&S.alarmNextTime?'<div class="alarm-banner"><div class="alarm-text">Hora de la proxima toma de Cefe!</div><button class="alarm-dismiss" onclick="S.alarmFired=false;render()">OK</button></div>':'';
     var bannerHTML=!localStorage.getItem('cefe_banner_closed')?'<div id="install-banner"><button class="close-banner" onclick="localStorage.setItem(\'cefe_banner_closed\',\'1\');this.parentElement.remove()">x</button><strong>Instalar como app:</strong> Safari - Compartir - Agregar a pantalla de inicio</div>':'';
     var statsHTML='';
@@ -554,7 +631,7 @@ function render(){
       var more=S.history.length>4?'<button onclick="navTo(\'history\')" style="margin-top:8px;background:none;border:none;color:#a89070;font-size:12px;cursor:pointer;font-family:Georgia,serif">Ver todos ('+S.history.length+') -></button>':'';
       histHTML='<div style="margin-top:20px"><div class="section-label">Ultimos registros</div>'+rows+more+'</div>';
     }
-    body.innerHTML=alarmHTML+bannerHTML+statsHTML+
+    body.innerHTML=bgTimerHTML+alarmHTML+bannerHTML+statsHTML+
       '<button class="action-btn" onclick="startToma(false)"><div class="action-icon">🍼</div><div><div class="action-label">Registrar Toma</div><div class="action-sub">Iniciar sesion ahora</div></div></button>'+
       '<button class="action-btn" onclick="startToma(true)" style="border-color:rgba(212,168,67,0.1)"><div class="action-icon" style="font-size:15px">📝</div><div><div class="action-label">Toma Manual</div><div class="action-sub">Ingresar horario y datos a mano</div></div></button>'+
       '<button class="action-btn blue" onclick="startPanal()"><div class="action-icon blue">🧷</div><div><div class="action-label">Registrar Panal</div><div class="action-sub">Pis, caca o mixto</div></div></button>'+
@@ -593,9 +670,9 @@ function render(){
     } else {
       // Live timer entry
       var ladosHTML=S.lados.length>0?'<div class="lados-box">'+S.lados.map(function(l){return '<div class="lado-item">✓ '+l.side+' — '+l.mins+' min</div>';}).join('')+'</div>':'';
-      var timerHTML=S.currentSide?'<div class="timer-box"><div class="timer-side">'+S.currentSide+'</div><div class="timer-display" id="timer-display">0:00</div><button class="p-btn gold" style="margin-top:12px;width:auto;padding:10px 22px" onclick="finishSide()">Terminar este lado</button></div>':'';
+      var timerHTML=S.currentSide?'<div class="timer-box"><div class="timer-side">'+S.currentSide+'</div><div class="timer-display" id="timer-display">0:00</div><button class="p-btn gold" style="margin-top:12px;width:auto;padding:10px 22px" onclick="if(confirm('Cerrar este lado?'))finishSide()">Terminar este lado</button></div>':'';
       var sideGrid=!S.currentSide?'<div class="muted">'+(S.lados.length===0?'Por que lado empieza?':'Continua en otro lado?')+'</div><div class="side-grid">'+SIDES.map(function(s){return '<button class="side-btn" onclick="startSide(\''+s.replace(/'/g,"\\'")+'\')" >'+s+'</button>';}).join('')+'</div>':'';
-      var finBtn=S.lados.length>0&&!S.currentSide?'<button class="p-btn gold" onclick="finishToma()">Finalizar y generar mensaje</button>':'';
+      var finBtn=S.lados.length>0&&!S.currentSide?'<button class="p-btn gold" onclick="if(confirm('Finalizar sesion?'))finishToma()">Finalizar y generar mensaje</button>':'';
       body.innerHTML=
         '<button class="back-btn" onclick="discardCurrent()">← Descartar y volver</button>'+
         '<div class="screen-title">Nueva Toma</div><div class="screen-sub">Inicio: '+fTime(S.tomaStart)+'</div>'+
@@ -611,9 +688,15 @@ function render(){
   }
 
   else if(S.step==='panal'){
+    var nowStr=todayStr();
+    var nowTimeStr=String(new Date().getHours()).padStart(2,'0')+':'+String(new Date().getMinutes()).padStart(2,'0');
     body.innerHTML=
       '<button class="back-btn" onclick="discardCurrent()">← Descartar y volver</button>'+
-      '<div class="screen-title">Cambio de Panal</div><div class="screen-sub">'+fDT(S.panalTime)+'</div>'+
+      '<div class="screen-title">Cambio de Panal</div>'+
+      '<div style="display:flex;gap:8px;margin-bottom:14px">'+
+        '<div class="form-field" style="flex:1"><label class="form-label">Fecha (opcional)</label><input type="date" class="form-input" id="panal-date-inp" placeholder="'+nowStr+'"></div>'+
+        '<div class="form-field" style="flex:1"><label class="form-label">Hora (opcional)</label><input type="time" class="form-input" id="panal-time-inp" placeholder="'+nowTimeStr+'"></div>'+
+      '</div>'+
       '<button class="panal-btn pis" onclick="finishPanal(\'Pis\')"><span style="font-size:20px">💛</span><span>Pis</span></button>'+
       '<button class="panal-btn caca" onclick="finishPanal(\'Caca\')"><span style="font-size:20px">💩</span><span>Caca</span></button>'+
       '<button class="panal-btn mixto" onclick="finishPanal(\'Mixto\')"><span style="font-size:20px">🔀</span><span>Mixto</span></button>'+
@@ -626,7 +709,11 @@ function render(){
       '<button class="back-btn" onclick="setStep(\'peso\')">← Volver</button>'+
       '<div class="screen-title">Registrar Peso</div><div class="screen-sub">'+fDT(new Date())+'</div>'+
       '<div class="peso-input-wrap">'+
-        '<div class="peso-display">'+gramsToKg(S.pesoGrams)+'</div><div class="peso-unit">kg</div>'+
+        '<div class="peso-display" id="peso-disp">'+gramsToKg(S.pesoGrams)+'</div><div class="peso-unit">kg</div>'+
+        '<div style="margin:12px 0 6px"><div class="section-label">Ingresar manualmente (kg)</div>'+
+        '<input type="number" id="peso-manual-input" class="form-input" placeholder="Ej: 3.450" step="0.001" min="0" max="20" '+
+        'oninput="var v=parseFloat(this.value);if(!isNaN(v)&&v>0){S.pesoGrams=Math.round(v*1000);var d=document.getElementById(\'peso-disp\');if(d)d.textContent=gramsToKg(S.pesoGrams);}">'+
+        '</div>'+
         '<div class="peso-controls">'+
           '<button class="peso-btn" onclick="adjustPeso(-100)">-100g</button>'+
           '<button class="peso-btn" onclick="adjustPeso(-10)">-10g</button>'+
@@ -642,21 +729,45 @@ function render(){
   }
 
   else if(S.step==='peso'){
+    var pesoNac=S.bebe&&S.bebe.pesoNacimiento?S.bebe.pesoNacimiento:3365;
+    var lastP2=S.pesoHistory[0];
+    var ageW=getAgeInWeeks();
+    var pctLabel=lastP2?calcPercentile(lastP2.grams,ageW):'—';
+    var pctColor=pctLabel==='<P3'?'#e07070':pctLabel==='>P97'?'#d4a843':'#64c8b4';
+    var gc3=getGastricCapacity();
     var pesoRows=S.pesoHistory.length===0?'<div style="color:#a89070;font-size:13px;margin-top:8px">Sin registros todavia.</div>':
       S.pesoHistory.map(function(p,i){
-        var prev=S.pesoHistory[i+1];
-        var diffHTML='';
-        if(prev){var d=p.grams-prev.grams;diffHTML='<div class="peso-diff '+(d>=0?'up':'down')+'">'+(d>=0?'+':'')+d+'g vs anterior</div>';}
-        return '<div class="h-row peso"><div><div class="h-time">'+fDT(p.time)+'</div>'+(p.note?'<div class="h-sub">'+p.note+'</div>':'')+diffHTML+'</div><div class="h-right"><div style="font-size:16px;font-weight:bold;color:#64c8b4">'+gramsToKg(p.grams)+'kg</div><button class="del-btn" onclick="deletePeso('+i+')">x</button></div></div>';
+        var prev=S.pesoHistory[i+1];var diffHTML='';
+        if(prev){var df=p.grams-prev.grams;diffHTML='<div class="peso-diff '+(df>=0?'up':'down')+'">'+(df>=0?'+':'')+df+'g vs anterior</div>';}
+        var wk2=Math.floor((new Date(p.time)-new Date(S.bebe.fechaNacimiento||Date.now()))/(86400000*7));
+        var pct2=calcPercentile(p.grams,wk2);
+        return '<div class="h-row peso"><div><div class="h-time">'+fDT(p.time)+'</div>'+(p.note?'<div class="h-sub">'+p.note+'</div>':'')+diffHTML+'<div style="font-size:10px;color:#64c8b4">Percentil: '+pct2+'</div></div><div class="h-right"><div style="font-size:16px;font-weight:bold;color:#64c8b4">'+gramsToKg(p.grams)+'kg</div><button class="del-btn" onclick="deletePeso('+i+')">x</button></div></div>';
       }).join('');
     body.innerHTML=
       '<div class="screen-title">Curva de Peso</div>'+
-      '<div style="font-size:11px;color:#a89070;margin-bottom:16px">Peso nacimiento: <strong style="color:#f0d9a0">3.365 kg</strong></div>'+
+      '<div style="display:flex;gap:8px;margin-bottom:12px">'+
+        '<div style="flex:1;background:rgba(100,200,180,0.08);border:1px solid rgba(100,200,180,0.2);border-radius:11px;padding:10px;text-align:center">'+
+          '<div style="font-size:9px;color:#a89070;text-transform:uppercase;letter-spacing:1px;margin-bottom:3px">Nac.</div>'+
+          '<div style="font-size:16px;font-weight:bold;color:#f0d9a0">'+gramsToKg(pesoNac)+'kg</div>'+
+        '</div>'+
+        (lastP2?'<div style="flex:1;background:rgba(100,200,180,0.08);border:1px solid rgba(100,200,180,0.2);border-radius:11px;padding:10px;text-align:center">'+
+          '<div style="font-size:9px;color:#a89070;text-transform:uppercase;letter-spacing:1px;margin-bottom:3px">Actual</div>'+
+          '<div style="font-size:16px;font-weight:bold;color:#f0d9a0">'+gramsToKg(lastP2.grams)+'kg</div>'+
+          '<div style="font-size:10px;color:'+pctColor+'">'+pctLabel+'</div>'+
+        '</div>':'')+
+        '<div style="flex:1;background:rgba(212,168,67,0.08);border:1px solid rgba(212,168,67,0.15);border-radius:11px;padding:10px;text-align:center">'+
+          '<div style="font-size:9px;color:#a89070;text-transform:uppercase;letter-spacing:1px;margin-bottom:3px">Cap. gastrica</div>'+
+          '<div style="font-size:13px;font-weight:bold;color:#d4a843">'+gc3.min+'-'+gc3.max+'ml</div>'+
+          '<div style="font-size:9px;color:#a89070">Dia '+gc3.days+'</div>'+
+        '</div>'+
+      '</div>'+
+      '<canvas id="peso-chart" width="420" height="200" style="width:100%;border-radius:12px;background:rgba(255,255,255,0.02);border:1px solid rgba(210,175,120,0.1);margin-bottom:12px;display:block"></canvas>'+
+      '<div style="font-size:9px;color:#a89070;margin-bottom:12px;text-align:center">Curvas OMS 2006 — P3 (rojo) / P50 (verde) / P97 (banda). Linea dorada = Cefe.</div>'+
       '<button class="action-btn teal" onclick="startPeso()"><div class="action-icon teal">+</div><div><div class="action-label">Registrar nuevo peso</div></div></button>'+
-      (S.pesoHistory.length>0?'<button class="p-btn grey" id="copy-peso-btn" onclick="copyPesoHistory()" style="margin-bottom:14px;margin-top:2px">Copiar historial de peso</button>':'')+
+      (S.pesoHistory.length>0?'<button class="p-btn grey" id="copy-peso-btn" onclick="copyPesoHistory()" style="margin-bottom:12px;margin-top:4px">Copiar historial</button>':'')+
       '<div>'+pesoRows+'</div>';
+    setTimeout(drawPesoChart,50);
   }
-
   else if(S.step==='medicos'){
     var medicoCards=S.medicos.length===0?'<div style="color:#a89070;font-size:13px;margin-top:8px">Sin medicos registrados.</div>':
       S.medicos.map(function(m,i){
@@ -711,15 +822,168 @@ function render(){
       '<button class="g-btn red" onclick="setStep(\'medicos\')">Cancelar</button>';
   }
 
+  else if(S.step==='tomaPreview'){
+    var e=S._pendingEntry;
+    if(!e){setStep('home');return;}
+    var gcTP=getGastricCapacity();
+    // Lados grouped %
+    var sm={};e.lados.forEach(function(l){sm[l.side]=(sm[l.side]||0)+l.mins;});
+    var tot=e.totalMins||1;
+    var ladosPctPrev=Object.keys(sm).map(function(s){return s+' '+Math.round(sm[s]/tot*100)+'%';}).join(' | ');
+    var extPrev=(e.extraction.left>0||e.extraction.right>0)?'Extraccion: izq '+e.extraction.left+'ml / der '+e.extraction.right+'ml':'Sin extraccion';
+    var stars=[1,2,3,4,5].map(function(n){
+      return '<button onclick="S.eficiencia='+n+';render()" style="font-size:22px;background:none;border:none;cursor:pointer;padding:2px">'+(S.eficiencia>=n?'★':'☆')+'</button>';
+    }).join('');
+    body.innerHTML=
+      '<div class="screen-title">Confirmar Toma</div>'+
+      '<div style="font-size:11px;color:#a89070;margin-bottom:14px">Revisa los datos antes de guardar</div>'+
+      '<div class="msg-box" style="margin-bottom:14px">'+
+        '<strong>Inicio:</strong> '+fTime(e.start)+' | <strong>Fin:</strong> '+fTime(e.end)+'\n'+
+        '<strong>Duracion:</strong> '+e.totalMins+' min\n'+
+        '<strong>Lados:</strong> '+ladosPctPrev+'\n'+
+        extPrev+
+        (e.note?'\n<strong>Nota:</strong> '+e.note:'')+
+      '</div>'+
+      '<div style="background:rgba(100,200,180,0.06);border:1px solid rgba(100,200,180,0.15);border-radius:10px;padding:10px;margin-bottom:10px">'+
+        '<div style="font-size:9px;color:#a89070;text-transform:uppercase;letter-spacing:1px;margin-bottom:3px">Cap. gastrica estimada</div>'+
+        '<div style="font-size:14px;font-weight:bold;color:#f0d9a0">'+(typeof gcTP!=='undefined'?gcTP.min+' - '+gcTP.max:gc2min+'-'+gc2max)+' ml / toma</div>'+
+      '</div>'+
+      '<div style="background:rgba(212,168,67,0.08);border:1px solid rgba(212,168,67,0.2);border-radius:12px;padding:14px;margin-bottom:14px">'+
+        '<div class="section-label">Eficiencia percibida (obligatorio)</div>'+
+        '<div style="display:flex;align-items:center;gap:8px">'+stars+
+        '<span style="font-size:12px;color:#a89070;margin-left:4px">'+(S.eficiencia?S.eficiencia+'/5 - '+['','Muy baja','Baja','Normal','Buena','Excelente'][S.eficiencia]:'Selecciona')+'</span>'+
+        '</div>'+
+      '</div>'+
+      (S.eficiencia>0?'<button class="p-btn gold" onclick="confirmEntry()">Guardar y generar mensaje</button>':'<div style="font-size:12px;color:#a89070;text-align:center;padding:10px">Selecciona la eficiencia para continuar</div>')+
+      '<button class="g-btn red" onclick="discardPending()">Descartar</button>';
+  }
+
+  else if(S.step==='panalPreview'){
+    var e=S._pendingEntry;
+    if(!e){setStep('home');return;}
+    var emo=e.panal==='Pis'?'💛':e.panal==='Caca'?'💩':'🔀';
+    body.innerHTML=
+      '<div class="screen-title">Confirmar Panal</div>'+
+      '<div style="font-size:11px;color:#a89070;margin-bottom:14px">Revisa los datos antes de guardar</div>'+
+      '<div class="msg-box" style="margin-bottom:14px">'+
+        emo+' <strong>'+e.panal+'</strong>\n'+
+        '<strong>Fecha/Hora:</strong> '+fDT(e.time)+
+        (e.note?'\n<strong>Nota:</strong> '+e.note:'')+
+      '</div>'+
+      '<button class="p-btn gold" onclick="confirmEntry()">Guardar y generar mensaje</button>'+
+      '<button class="g-btn red" onclick="discardPending()">Descartar</button>';
+  }
+
   else if(S.step==='summary'){
-    var typeLabel=S.step;
     body.innerHTML=
       '<div class="screen-title">Mensaje listo</div>'+
-      '<div style="font-size:11px;color:#a89070;margin-bottom:14px">Copia el texto y pegalo en WhatsApp</div>'+
+      '<div style="font-size:11px;color:#a89070;margin-bottom:14px">Copia o comparti el texto</div>'+
       '<div class="msg-box">'+S._summaryMsg+'</div>'+
-      '<button class="p-btn green" id="copy-btn" onclick="copyText(\''+escMsg(S._summaryMsg)+'\')">Copiar mensaje</button>'+
-      '<button class="g-btn white" onclick="setStep(\'home\')">Volver al inicio</button>'+
-      (S._summaryType==='toma'||S._summaryType==='panal'?'<button class="g-btn red" onclick="S.history.shift();saveData();setStep(\'home\')">Borrar este registro</button>':'');
+      '<button class="p-btn green" id="copy-btn" onclick="copyText(''+escMsg(S._summaryMsg)+'')">Copiar</button>'+
+      '<button class="p-btn blue2" style="margin-top:8px" onclick="shareMsg(''+escMsg(S._summaryMsg)+'')">Compartir</button>'+
+      (S._summaryType==='toma'&&S._nextTomaTime?
+        '<div style="background:rgba(212,168,67,0.08);border:1px solid rgba(212,168,67,0.2);border-radius:11px;padding:10px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between">'+
+          '<div><div style="font-size:9px;color:#a89070;text-transform:uppercase;letter-spacing:1px">Proxima toma</div>'+
+          '<div style="font-size:14px;font-weight:bold;color:#f0d9a0">~'+fTime(S._nextTomaTime)+'</div></div>'+
+          ('Notification' in window&&Notification.permission==='granted'?
+            '<span style="font-size:11px;color:#64c8b4">Alerta programada</span>':
+            'Notification' in window?
+            '<button onclick="requestNotifPermission()" style="background:rgba(212,168,67,0.2);border:1px solid rgba(212,168,67,0.4);border-radius:8px;padding:5px 12px;color:#f0d9a0;font-size:11px;cursor:pointer;font-family:Georgia,serif">Activar alerta</button>':
+            '<span style="font-size:10px;color:#a89070">Instala como PWA para alertas</span>'):
+        '</div>':''):
+      '')+
+      '<button class="g-btn white" onclick="setStep('home')">Volver al inicio</button>'+
+      (S._summaryType==='toma'||S._summaryType==='panal'?'<button class="g-btn red" onclick="S.history.shift();saveData();setStep('home')">Borrar este registro</button>':'');
+  }
+  else if(S.step==='perfil'){
+    var b=S.bebe||{};var ageD=getAgeInDays();var gc4=getGastricCapacity();
+    var lp=S.pesoHistory[0];var pctN=lp?calcPercentile(lp.grams,getAgeInWeeks()):'—';
+    var pctC=pctN==='<P3'?'#e07070':pctN==='>P97'?'#d4a843':'#64c8b4';
+    var padreCards=S.padres.map(function(p,i){
+      return '<div style="background:rgba(180,140,220,0.05);border:1px solid rgba(180,140,220,0.15);border-radius:11px;padding:11px;margin-bottom:8px">'+
+        '<div style="font-size:13px;font-weight:bold;color:#f0d9a0">'+(p.apodo||p.nombre)+' '+p.apellido+'</div>'+
+        (p.celular?'<div style="font-size:11px;color:#a89070">Tel: '+p.celular+'</div>':'')+
+        (p.email?'<div style="font-size:11px;color:#a89070">'+p.email+'</div>':'')+
+        (p.obraSocial?'<div style="font-size:11px;color:#a89070">OS: '+p.obraSocial+(p.plan?' / '+p.plan:'')+(p.credencial?' / '+p.credencial:'')+'</div>':'')+
+        '<div style="display:flex;gap:7px;margin-top:8px">'+
+          '<button onclick="editPadre('+i+')" style="flex:1;background:rgba(255,255,255,0.05);border:1px solid rgba(210,175,120,0.2);border-radius:8px;padding:6px;color:#d4c090;font-size:11px;cursor:pointer;font-family:Georgia,serif">Editar</button>'+
+          '<button onclick="deletePadre('+i+')" style="flex:1;background:rgba(224,112,112,0.1);border:1px solid rgba(224,112,112,0.2);border-radius:8px;padding:6px;color:#e07070;font-size:11px;cursor:pointer;font-family:Georgia,serif">Eliminar</button>'+
+        '</div></div>';
+    }).join('');
+    body.innerHTML=
+      '<div class="screen-title">Perfil</div>'+
+      '<div class="card">'+
+        '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">'+
+          '<div>'+
+            '<div style="font-size:20px;font-weight:bold;color:#f0d9a0">'+(b.apodo||'Cefe')+'</div>'+
+            '<div style="font-size:11px;color:#a89070">'+(b.nombre||'')+' '+(b.apellido||'')+'</div>'+
+            '<div style="font-size:11px;color:#a89070">'+(b.sexo==='F'?'Nina':'Nino')+(b.sangre?' · '+b.sangre:'')+(b.dni?' · DNI '+b.dni:'')+'</div>'+
+            (b.fechaNacimiento?'<div style="font-size:11px;color:#a89070">Nac: '+b.fechaNacimiento+(b.horaNavimiento?' '+b.horaNavimiento+'hs':'')+' · '+getAgeLabel()+' de vida</div>':'')+
+          '</div>'+
+          '<button onclick="setStep('editBebe')" style="background:rgba(212,168,67,0.15);border:1px solid rgba(212,168,67,0.3);border-radius:9px;padding:6px 12px;color:#d4a843;font-size:11px;cursor:pointer;font-family:Georgia,serif">Editar</button>'+
+        '</div>'+
+        (b.talla||b.edadGestacional?'<div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap">'+
+          (b.talla?'<span style="background:rgba(255,255,255,0.05);border:1px solid rgba(210,175,120,0.15);border-radius:20px;padding:3px 10px;font-size:10px;color:#d4c090">'+b.talla+'cm al nacer</span>':'')+
+          (b.cc?'<span style="background:rgba(255,255,255,0.05);border:1px solid rgba(210,175,120,0.15);border-radius:20px;padding:3px 10px;font-size:10px;color:#d4c090">CC '+b.cc+'cm</span>':'')+
+          (b.edadGestacional?'<span style="background:rgba(255,255,255,0.05);border:1px solid rgba(210,175,120,0.15);border-radius:20px;padding:3px 10px;font-size:10px;color:#d4c090">'+b.edadGestacional+' sem gest.</span>':'')+
+          (b.tipoParto?'<span style="background:rgba(255,255,255,0.05);border:1px solid rgba(210,175,120,0.15);border-radius:20px;padding:3px 10px;font-size:10px;color:#d4c090">'+b.tipoParto+'</span>':'')+
+          (b.apgar?'<span style="background:rgba(255,255,255,0.05);border:1px solid rgba(210,175,120,0.15);border-radius:20px;padding:3px 10px;font-size:10px;color:#d4c090">Apgar '+b.apgar+'</span>':'')+
+        '</div>':''):'')+
+        '<div style="display:flex;gap:0">'+
+          '<div class="stat-box"><div class="val">'+ageD+'</div><div class="lbl">Dias</div></div>'+
+          '<div class="stat-box"><div class="val" style="color:#64c8b4">'+(lp?gramsToKg(lp.grams):'—')+'</div><div class="lbl">kg actual</div></div>'+
+          '<div class="stat-box"><div class="val" style="font-size:16px;color:'+pctC+'">'+pctN+'</div><div class="lbl">Percentil</div></div>'+
+        '</div>'+
+        '<div style="margin-top:12px;background:rgba(212,168,67,0.08);border:1px solid rgba(212,168,67,0.15);border-radius:9px;padding:10px">'+
+          '<div style="font-size:9px;color:#a89070;letter-spacing:2px;text-transform:uppercase;margin-bottom:3px">Cap. gastrica hoy (dia '+gc4.days+')</div>'+
+          '<div style="font-size:15px;font-weight:bold;color:#f0d9a0">'+gc4.min+' - '+gc4.max+' ml / toma</div>'+
+          '<div style="font-size:9px;color:#a89070">Ref. cientifica: Clinica Alemana / AEP — consultar con pediatra</div>'+
+        '</div>'+
+      '</div>'+
+      '<div class="section-label">Padres / Cuidadores</div>'+
+      padreCards+
+      '<button class="action-btn purple" onclick="S._editPadre=null;S._editPadreIdx=-1;setStep('editPadreForm')"><div class="action-icon purple">+</div><div><div class="action-label">Agregar cuidador</div><div class="action-sub">Padre, madre, abuelo...</div></div></button>';
+  }
+
+  else if(S.step==='editBebe'){
+    var b3=S.bebe||{};
+    body.innerHTML=
+      '<button class="back-btn" onclick="setStep('perfil')">← Volver</button>'+
+      '<div class="screen-title">Datos del bebe</div>'+
+      '<div class="form-row"><div class="form-field"><label class="form-label">Nombre</label><input class="form-input" id="b-nom" value="'+esc(b3.nombre||'')+'"></div>'+
+      '<div class="form-field"><label class="form-label">Apellido</label><input class="form-input" id="b-ape" value="'+esc(b3.apellido||'')+'"></div></div>'+
+      '<div class="form-field"><label class="form-label">Apodo (obligatorio)</label><input class="form-input" id="b-apodo" value="'+esc(b3.apodo||'')+'"></div>'+
+      '<div class="form-row"><div class="form-field"><label class="form-label">Fecha nacimiento</label><input type="date" class="form-input" id="b-fecha" value="'+(b3.fechaNacimiento||'')+'"></div>'+
+      '<div class="form-field"><label class="form-label">Sexo</label><select class="form-select" id="b-sexo"><option value="M"'+(b3.sexo!=='F'?' selected':'')+'>Nino</option><option value="F"'+(b3.sexo==='F'?' selected':'')+'>Nina</option></select></div></div>'+
+      '<div class="form-row"><div class="form-field"><label class="form-label">Peso nacimiento (g)</label><input type="number" class="form-input" id="b-pesonal" value="'+(b3.pesoNacimiento||3365)+'"></div>'+
+      '<div class="form-field"><label class="form-label">Talla (cm)</label><input type="number" class="form-input" id="b-talla" value="'+(b3.talla||'')+'"></div></div>'+
+      '<div class="form-row"><div class="form-field"><label class="form-label">Grupo sanguineo</label><input class="form-input" id="b-sangre" value="'+esc(b3.sangre||'')+'" placeholder="A+, O-, etc."></div>'+
+      '<div class="form-field"><label class="form-label">DNI</label><input class="form-input" id="b-dni" value="'+esc(b3.dni||'')+'"></div></div>'+
+      '<div class="form-row"><div class="form-field"><label class="form-label">Edad gestacional (sem)</label><input type="number" class="form-input" id="b-eg" value="'+(b3.edadGestacional||40)+'"></div>'+
+      '<div class="form-field"><label class="form-label">Tipo de parto</label><input class="form-input" id="b-parto" value="'+esc(b3.tipoParto||'')+'"></div></div>'+
+      '<div class="form-field"><label class="form-label">Apgar</label><input class="form-input" id="b-apgar" value="'+esc(b3.apgar||'')+'" placeholder="9/10"></div>'+
+      '<div class="form-field"><label class="form-label">Notas medicas</label><textarea class="notes-input form-input" id="b-notas" style="min-height:52px">'+esc(b3.notas||'')+'</textarea></div>'+
+      '<button class="p-btn gold" onclick="saveBebe()">Guardar</button>'+
+      '<button class="g-btn red" onclick="setStep('perfil')">Cancelar</button>';
+  }
+
+  else if(S.step==='editPadreForm'){
+    var ep=S._editPadre||{};
+    body.innerHTML=
+      '<button class="back-btn" onclick="setStep('perfil')">← Volver</button>'+
+      '<div class="screen-title">'+(S._editPadreIdx>=0?'Editar':'Agregar')+' cuidador</div>'+
+      '<div class="form-row"><div class="form-field"><label class="form-label">Nombre</label><input class="form-input" id="p-nom" value="'+esc(ep.nombre||'')+'"></div>'+
+      '<div class="form-field"><label class="form-label">Apellido</label><input class="form-input" id="p-ape" value="'+esc(ep.apellido||'')+'"></div></div>'+
+      '<div class="form-field"><label class="form-label">Apodo</label><input class="form-input" id="p-apodo" value="'+esc(ep.apodo||'')+'"></div>'+
+      '<div class="form-row"><div class="form-field"><label class="form-label">Celular</label><input class="form-input" id="p-cel" value="'+esc(ep.celular||'')+'" placeholder="+549..."></div>'+
+      '<div class="form-field"><label class="form-label">Email</label><input class="form-input" id="p-email" value="'+esc(ep.email||'')+'"></div></div>'+
+      '<div class="form-field"><label class="form-label">Domicilio</label><input class="form-input" id="p-dom" value="'+esc(ep.domicilio||'')+'"></div>'+
+      '<div class="form-row"><div class="form-field"><label class="form-label">DNI</label><input class="form-input" id="p-dni" value="'+esc(ep.dni||'')+'"></div>'+
+      '<div class="form-field"><label class="form-label">Obra social</label><input class="form-input" id="p-os" value="'+esc(ep.obraSocial||'')+'"></div></div>'+
+      '<div class="form-row"><div class="form-field"><label class="form-label">Plan</label><input class="form-input" id="p-plan" value="'+esc(ep.plan||'')+'"></div>'+
+      '<div class="form-field"><label class="form-label">N credencial</label><input class="form-input" id="p-cred" value="'+esc(ep.credencial||'')+'"></div></div>'+
+      '<button class="p-btn purple" onclick="savePadre()">Guardar</button>'+
+      '<button class="g-btn red" onclick="setStep('perfil')">Cancelar</button>';
   }
 
   else if(S.step==='history'){
@@ -747,14 +1011,163 @@ function render(){
   }
 
   else if(S.step==='resumen'){
-    var periodBtns=['1','3','7','14'].map(function(d){return '<button class="filter-btn'+(S._resumenDays===parseInt(d)?' active':'')+'" onclick="S._resumenDays='+d+';render()">'+d+(d==='1'?' dia':' dias')+'</button>';}).join('');
     if(!S._resumenDays) S._resumenDays=1;
+    var now2=new Date();
+    var cutoff=new Date(now2.getTime()-S._resumenDays*24*3600000);
+    var tHist=S.history.filter(function(h){return h.type==='toma'&&new Date(h.start)>=cutoff;});
+    var pHist=S.history.filter(function(h){return h.type==='panal'&&new Date(h.time)>=cutoff;});
+    var lastPD=S.pesoHistory[0];
+    var ageD2=getAgeInDays();
+    var gc5=getGastricCapacity();
+    
+    // ── CALCULATE KPIs ──
+    var nTomas=tHist.length;
+    var totalMin=tHist.reduce(function(a,b){return a+b.totalMins;},0);
+    var avgMin=nTomas?Math.round(totalMin/nTomas):0;
+    var totalExt=tHist.reduce(function(a,b){return a+(b.extraction.left||0)+(b.extraction.right||0);},0);
+    var avgEff=0;
+    var tomasConEff=tHist.filter(function(h){return h.eficiencia&&h.eficiencia>0;});
+    if(tomasConEff.length) avgEff=(tomasConEff.reduce(function(a,b){return a+b.eficiencia;},0)/tomasConEff.length).toFixed(1);
+    
+    // Intervals
+    var sortedT=tHist.slice().sort(function(a,b){return new Date(a.start)-new Date(b.start);});
+    var intervals=[];
+    for(var ti=1;ti<sortedT.length;ti++){
+      intervals.push(Math.round((new Date(sortedT[ti].start)-new Date(sortedT[ti-1].start))/60000));
+    }
+    var avgInterval=intervals.length?Math.round(intervals.reduce(function(a,b){return a+b;},0)/intervals.length):0;
+    var minInterval=intervals.length?Math.min.apply(null,intervals):0;
+    var maxInterval=intervals.length?Math.max.apply(null,intervals):0;
+    
+    // Panales
+    var nPanales=pHist.length;
+    var nCaca=pHist.filter(function(p){return p.panal==='Caca';}).length;
+    var nMixto=pHist.filter(function(p){return p.panal==='Mixto';}).length;
+    var nPis=pHist.filter(function(p){return p.panal==='Pis';}).length;
+    var cacaRatio=nPanales?Math.round((nCaca+nMixto)/nPanales*100):0;
+    
+    // Peso
+    var pesoActual=lastPD?lastPD.grams:0;
+    var pesoNac2=S.bebe&&S.bebe.pesoNacimiento?S.bebe.pesoNacimiento:3365;
+    var pesoAlta=S.bebe&&S.bebe.pesoAlta?S.bebe.pesoAlta:2980;
+    var diffDesdeNac=pesoActual-pesoNac2;
+    var diffDesdeAlta=pesoActual-pesoAlta;
+    var pctW=lastPD?calcPercentile(lastPD.grams,getAgeInWeeks()):'—';
+    
+    // ── RISK ASSESSMENT ──
+    var risks=[];
+    var positives=[];
+    
+    // Tomas per day target: 8-12
+    var tomasPorDia=S._resumenDays>0?Math.round(nTomas/S._resumenDays):nTomas;
+    if(tomasPorDia<6) risks.push({icon:'🔴',msg:'Pocas tomas: '+tomasPorDia+'/dia (ideal 8-12). Riesgo de baja produccion.'});
+    else if(tomasPorDia>=8) positives.push({icon:'✅',msg:'Frecuencia de tomas adecuada: '+tomasPorDia+'/dia.'});
+    else positives.push({icon:'🟡',msg:'Tomas: '+tomasPorDia+'/dia. Ideal es 8-12.'});
+    
+    // Duration
+    if(avgMin>0 && avgMin<7) risks.push({icon:'🔴',msg:'Duracion promedio baja ('+avgMin+'min). Posible toma ineficaz.'});
+    else if(avgMin>=15) positives.push({icon:'✅',msg:'Buena duracion de toma promedio: '+avgMin+'min.'});
+    else if(avgMin>0) positives.push({icon:'🟡',msg:'Duracion promedio: '+avgMin+'min (ideal >15min).'});
+    
+    // Interval
+    if(avgInterval>0&&avgInterval>240) risks.push({icon:'🔴',msg:'Intervalo entre tomas muy largo: '+avgInterval+'min. No superar 3hs en RN.'});
+    else if(avgInterval>0&&avgInterval<=180) positives.push({icon:'✅',msg:'Intervalo entre tomas correcto: ~'+avgInterval+'min.'});
+    
+    // Peso
+    if(pesoActual>0){
+      if(diffDesdeNac<-350) risks.push({icon:'🔴',msg:'Peso '+(Math.abs(diffDesdeNac))+'g bajo peso nacimiento. Consultar pediatra.'});
+      else if(diffDesdeNac>=0) positives.push({icon:'✅',msg:'Recupero peso nacimiento! +'+(diffDesdeNac)+'g sobre nacimiento.'});
+      else positives.push({icon:'🟡',msg:'Faltan '+(Math.abs(diffDesdeNac))+'g para recuperar peso nacimiento.'});
+    }
+    
+    // Panales
+    if(nPanales<4*S._resumenDays) risks.push({icon:'🟡',msg:'Pocos panales: '+nPanales+' en '+S._resumenDays+' dia/s (ideal 5-6/dia).'});
+    else positives.push({icon:'✅',msg:'Cantidad de panales adecuada: '+nPanales+' en '+S._resumenDays+' dia/s.'});
+    
+    if(nCaca+nMixto===0&&S._resumenDays<=2) risks.push({icon:'🟡',msg:'Sin caca registrada. Normal primeros dias, monitorear.'});
+    else if(nCaca+nMixto>0) positives.push({icon:'✅',msg:(nCaca+nMixto)+' deposicion/es registrada/s. Buena senal de ingesta.'});
+    
+    // Eficiencia
+    if(avgEff>0&&parseFloat(avgEff)<3) risks.push({icon:'🟡',msg:'Eficiencia percibida baja: '+avgEff+'/5. Revisar agarre.'});
+    else if(avgEff>0&&parseFloat(avgEff)>=4) positives.push({icon:'✅',msg:'Eficiencia percibida alta: '+avgEff+'/5.'});
+    
+    var allSignals=[...risks,...positives];
+    var riskCount=risks.length;
+    var riskLevel=riskCount===0?'OK':riskCount<=2?'Atencion':'Revisar';
+    var riskColor=riskCount===0?'#64c8b4':riskCount<=2?'#d4a843':'#e07070';
+    
+    var periodBtns=['1','3','7'].map(function(d){
+      return '<button class="filter-btn'+(S._resumenDays===parseInt(d)?' active':'')+'" onclick="S._resumenDays='+d+';render()">'+d+(d==='1'?' dia':' dias')+'</button>';
+    }).join('');
+    
+    // ── KPI GRID ──
+    function kpi(icon,label,val2,sub,color){
+      return '<div style="background:rgba(255,255,255,0.04);border:1px solid rgba(210,175,120,0.12);border-radius:13px;padding:12px;text-align:center">'+
+        '<div style="font-size:18px;margin-bottom:3px">'+icon+'</div>'+
+        '<div style="font-size:'+(val2.length>5?'16':'20')+'px;font-weight:bold;color:'+(color||'#f0d9a0')+'">'+val2+'</div>'+
+        '<div style="font-size:9px;color:#a89070;text-transform:uppercase;letter-spacing:1px;margin-top:2px">'+label+'</div>'+
+        (sub?'<div style="font-size:10px;color:#888;margin-top:2px">'+sub+'</div>':'')+
+      '</div>';
+    }
+    
+    var signalsHTML=allSignals.map(function(s){
+      return '<div style="display:flex;gap:8px;align-items:flex-start;padding:8px 0;border-bottom:1px solid rgba(210,175,120,0.08)">'+
+        '<span style="font-size:14px;flex-shrink:0">'+s.icon+'</span>'+
+        '<span style="font-size:12px;color:#d4c090;line-height:1.4">'+s.msg+'</span>'+
+      '</div>';
+    }).join('');
+    
     body.innerHTML=
-      '<div class="screen-title">Resumen de Evolucion</div>'+
-      '<div style="margin-bottom:16px"><div class="section-label">Periodo</div><div class="filter-row">'+periodBtns+'</div></div>'+
-      buildResumen(S._resumenDays);
+      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">'+
+        '<div class="screen-title" style="margin-bottom:0">Dashboard</div>'+
+        '<div style="background:'+riskColor+';color:#0f1923;border-radius:20px;padding:4px 14px;font-size:11px;font-weight:bold">'+riskLevel+'</div>'+
+      '</div>'+
+      '<div class="filter-row" style="margin-bottom:16px">'+periodBtns+'</div>'+
+      
+      // KPI Grid 3x2
+      '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px">'+
+        kpi('🍼','Tomas',String(nTomas),S._resumenDays>1?Math.round(nTomas/S._resumenDays)+'/dia':'')+
+        kpi('⏱','Prom. min',avgMin?avgMin+''':'—',avgMin?'meta >15min':'')+
+        kpi('⏰','Intervalo',avgInterval?avgInterval+''':'—',avgInterval?'meta <180min':'')+
+        kpi('🧷','Panales',String(nPanales),nPanales?Math.round(nPanales/S._resumenDays)+'/dia':'')+
+        kpi('💩','Caca/Mix',String(nCaca+nMixto),cacaRatio?cacaRatio+'%':'')+
+        kpi('⚖️','Peso act.',pesoActual?gramsToKg(pesoActual)+'kg':'—',pctW||'')+
+      '</div>'+
+      
+      // Peso progress bar
+      (pesoActual?'<div style="background:rgba(255,255,255,0.03);border:1px solid rgba(210,175,120,0.1);border-radius:12px;padding:12px;margin-bottom:14px">'+
+        '<div style="display:flex;justify-content:space-between;font-size:11px;color:#a89070;margin-bottom:8px">'+
+          '<span>Alta: '+gramsToKg(pesoAlta)+'kg</span>'+
+          '<span style="color:#f0d9a0;font-weight:bold">'+gramsToKg(pesoActual)+'kg</span>'+
+          '<span>Nac: '+gramsToKg(pesoNac2)+'kg</span>'+
+        '</div>'+
+        '<div style="background:rgba(255,255,255,0.08);border-radius:20px;height:8px;position:relative">'+
+          '<div style="background:linear-gradient(90deg,#e07070,'+(pesoActual>=pesoNac2?'#64c8b4':'#d4a843')+');height:100%;border-radius:20px;width:'+Math.min(100,Math.max(5,Math.round((pesoActual-pesoAlta)/(pesoNac2-pesoAlta)*100)))+'%;transition:width .3s"></div>'+
+        '</div>'+
+        '<div style="font-size:10px;color:'+(pesoActual>=pesoNac2?'#64c8b4':'#d4a843')+';" >'+
+          (diffDesdeAlta>=0?'+':'')+diffDesdeAlta+'g desde alta | '+(diffDesdeNac>=0?'+':'')+diffDesdeNac+'g vs nacimiento'+
+        '</div>'+
+      '</div>':'')+ 
+      
+      // Eficiencia + Extraccion
+      (avgEff||totalExt?'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">'+
+        (avgEff?kpi('⭐','Eficiencia',avgEff+'/5','percibida por padres'):'')+
+        (totalExt?kpi('🧪','Extraccion',totalExt+'ml','total periodo'):'<div></div>')+
+      '</div>':'')+ 
+      
+      // Gastric cap
+      '<div style="background:rgba(212,168,67,0.08);border:1px solid rgba(212,168,67,0.15);border-radius:11px;padding:10px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center">'+
+        '<div><div style="font-size:9px;color:#a89070;text-transform:uppercase;letter-spacing:1px">Cap. gastrica dia '+ageD2+'</div>'+
+        '<div style="font-size:15px;font-weight:bold;color:#f0d9a0">'+gc5.min+' - '+gc5.max+' ml / toma</div></div>'+
+        '<div style="font-size:22px">🍼</div>'+
+      '</div>'+
+      
+      // Signals
+      '<div style="background:rgba(255,255,255,0.03);border:1px solid rgba(210,175,120,0.1);border-radius:12px;padding:12px;margin-bottom:14px">'+
+        '<div style="font-size:9px;color:#a89070;text-transform:uppercase;letter-spacing:2px;margin-bottom:8px">Indicadores</div>'+
+        (signalsHTML||'<div style="color:#a89070;font-size:13px">Sin datos suficientes para el periodo.</div>')+
+      '</div>';
   }
-}
 
 function renderRow(h,i){
   if(h.type==='toma'){
@@ -762,11 +1175,38 @@ function renderRow(h,i){
     return '<div class="h-row toma"><div><div class="h-time">🍼 '+fTime(h.start)+'</div><div class="h-sub">'+ltxt+(h.note?' | '+h.note.substring(0,25):'')+'</div></div><div class="h-right"><div class="h-mins">'+h.totalMins+'m</div><button class="del-btn" onclick="deleteItem('+i+')">x</button></div></div>';
   }
   var emo=h.panal==='Pis'?'💛':h.panal==='Caca'?'💩':'🔀';
-  return '<div class="h-row panal"><div><div class="h-time" style="color:#c0d4e4">🧷 '+fTime(h.time)+' — '+h.panal+'</div>'+(h.note?'<div class="h-sub">'+h.note.substring(0,30)+'</div>':'')+'</div><div class="h-right"><span style="font-size:16px">'+emo+'</span><button class="del-btn" onclick="deleteItem('+i+')">x</button></div></div>';
+  var ptime=h.time?new Date(h.time):new Date();
+  return '<div class="h-row panal"><div><div class="h-time" style="color:#c0d4e4">🧷 '+fTime(ptime)+' — '+h.panal+'</div>'+(h.note?'<div class="h-sub">'+h.note.substring(0,30)+'</div>':'')+'</div><div class="h-right"><span style="font-size:16px">'+emo+'</span><button class="del-btn" onclick="deleteItem('+i+')">x</button></div></div>';
 }
 
 function deleteItem(i){S.history.splice(i,1);saveData();render();}
 function deletePeso(i){S.pesoHistory.splice(i,1);saveData();render();}
+function saveBebe(){
+  var prev=S.bebe||{};
+  S.bebe={nombre:val('b-nom'),apellido:val('b-ape'),apodo:val('b-apodo')||'Bebe',
+    fechaNacimiento:document.getElementById('b-fecha')?document.getElementById('b-fecha').value:'',
+    horaNavimiento:prev.horaNavimiento||'',
+    sexo:document.getElementById('b-sexo')?document.getElementById('b-sexo').value:'M',
+    pesoNacimiento:parseInt(document.getElementById('b-pesonal')?document.getElementById('b-pesonal').value:3365)||3365,
+    talla:parseInt(document.getElementById('b-talla')?document.getElementById('b-talla').value:0)||0,
+    sangre:val('b-sangre'),dni:val('b-dni'),
+    edadGestacional:parseInt(document.getElementById('b-eg')?document.getElementById('b-eg').value:40)||40,
+    tipoParto:val('b-parto'),apgar:val('b-apgar'),notas:val('b-notas'),
+    vacunaBCG:prev.vacunaBCG||false,vacunaHepB:prev.vacunaHepB||'',
+    diagnosticoEgreso:prev.diagnosticoEgreso||'',pesoAlta:prev.pesoAlta||0,fechaAlta:prev.fechaAlta||''
+  };
+  saveData();setStep('perfil');
+}
+function savePadre(){
+  var p={nombre:val('p-nom'),apellido:val('p-ape'),apodo:val('p-apodo'),celular:val('p-cel'),
+    email:val('p-email'),domicilio:val('p-dom'),dni:val('p-dni'),
+    obraSocial:val('p-os'),plan:val('p-plan'),credencial:val('p-cred')};
+  if(S._editPadreIdx>=0) S.padres[S._editPadreIdx]=p;else S.padres.push(p);
+  S._editPadre=null;S._editPadreIdx=-1;saveData();setStep('perfil');
+}
+function editPadre(i){S._editPadre=Object.assign({},S.padres[i]);S._editPadreIdx=i;setStep('editPadreForm');}
+function deletePadre(i){if(confirm('Eliminar cuidador?')){S.padres.splice(i,1);saveData();render();}}
+
 function discardCurrent(){stopTimer();S.currentSide=null;S.sideStart=null;setStep('home');}
 function copyPesoHistory(){
   var text='Registro peso Cefe\n'+S.pesoHistory.map(function(p){return fDT(p.time)+': '+gramsToKg(p.grams)+' kg'+(p.note?' ('+p.note+')':'');}).join('\n');
@@ -774,6 +1214,127 @@ function copyPesoHistory(){
 }
 function escMsg(m){return m.replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/\n/g,'\\n');}
 function esc(s){return (s||'').replace(/"/g,'&quot;').replace(/</g,'&lt;');}
+
+
+
+// ── AGE & GASTRIC CAPACITY HELPERS ──
+function getAgeInDays(){
+  if(!S.bebe||!S.bebe.fechaNacimiento) return 0;
+  return Math.floor((Date.now()-new Date(S.bebe.fechaNacimiento).getTime())/(1000*60*60*24));
+}
+function getAgeInWeeks(){ return Math.floor(getAgeInDays()/7); }
+
+function getGastricCapacity(){
+  var d=getAgeInDays();
+  var lastPeso=S.pesoHistory[0];
+  var pesoG=lastPeso?lastPeso.grams:(S.bebe&&S.bebe.pesoNacimiento?S.bebe.pesoNacimiento:3365);
+  var minML,maxML;
+  if(d<=1){minML=5;maxML=7;}
+  else if(d<=2){minML=10;maxML=15;}
+  else if(d<=3){minML=22;maxML=27;}
+  else if(d<=5){minML=30;maxML=45;}
+  else if(d<=10){minML=45;maxML=60;}
+  else if(d<=14){minML=60;maxML=80;}
+  else if(d<=21){minML=80;maxML=100;}
+  else{var aep=Math.round((pesoG-3)/100);minML=Math.max(80,aep-20);maxML=aep+20;}
+  return {min:minML,max:maxML,days:d,pesoG:pesoG};
+}
+
+// WHO percentile tables (boys/girls, weeks 0-13, P3/P15/P50/P85/P97 in grams)
+var WHO_B={0:[2500,2800,3300,3900,4300],1:[2700,3000,3500,4100,4600],2:[2900,3300,3800,4400,4900],3:[3200,3600,4200,4800,5400],4:[3500,3900,4500,5200,5800],5:[3700,4200,4800,5500,6100],6:[4000,4500,5100,5900,6500],7:[4200,4700,5400,6200,6900],8:[4500,5000,5700,6500,7200],9:[4700,5200,5900,6800,7500],10:[4900,5500,6200,7100,7800],11:[5100,5700,6400,7300,8100],12:[5300,5900,6600,7500,8300],13:[5500,6100,6800,7800,8600]};
+var WHO_G={0:[2300,2600,3200,3700,4200],1:[2500,2800,3300,3900,4400],2:[2700,3100,3600,4200,4700],3:[3000,3400,4000,4600,5100],4:[3300,3700,4300,5000,5500],5:[3500,4000,4600,5300,5900],6:[3700,4200,4900,5600,6200],7:[3900,4400,5100,5900,6500],8:[4100,4600,5400,6100,6800],9:[4300,4800,5600,6400,7100],10:[4500,5000,5800,6600,7300],11:[4700,5200,6000,6900,7600],12:[4900,5400,6200,7100,7800],13:[5100,5600,6400,7300,8000]};
+
+function getWHORow(weeks){
+  var tbl=(S.bebe&&S.bebe.sexo==='F')?WHO_G:WHO_B;
+  return tbl[Math.min(Math.max(Math.floor(weeks),0),13)];
+}
+function calcPercentile(g,weeks){
+  var p=getWHORow(weeks);if(!p) return '—';
+  if(g<=p[0]) return '<P3';
+  if(g<=p[1]) return 'P3-P15';
+  if(g<=p[2]) return 'P15-P50';
+  if(g<=p[3]) return 'P50-P85';
+  if(g<=p[4]) return 'P85-P97';
+  return '>P97';
+}
+
+function drawPesoChart(){
+  var canvas=document.getElementById('peso-chart');
+  if(!canvas||!canvas.getContext) return;
+  var ctx=canvas.getContext('2d');
+  var W=canvas.width,H=canvas.height;
+  var pl=46,pr=12,pt=16,pb=34;
+  var cW=W-pl-pr,cH=H-pt-pb;
+  ctx.clearRect(0,0,W,H);
+  var tbl=(S.bebe&&S.bebe.sexo==='F')?WHO_G:WHO_B;
+  var wks=[0,1,2,3,4,5,6,7,8,9,10,11,12,13];
+  var maxWks=Math.max(13,getAgeInWeeks()+1);
+  var allG=S.pesoHistory.map(function(p){return p.grams;});
+  var maxG=Math.max(tbl[13][4],(allG.length?Math.max.apply(null,allG):0))+200;
+  var minG=1800;
+  function xP(w){return pl+(w/maxWks)*cW;}
+  function yP(g){return pt+(1-(g-minG)/(maxG-minG))*cH;}
+  // grid
+  ctx.strokeStyle='rgba(210,175,120,0.08)';ctx.lineWidth=1;
+  for(var g=2000;g<=maxG;g+=500){ctx.beginPath();ctx.moveTo(pl,yP(g));ctx.lineTo(pl+cW,yP(g));ctx.stroke();ctx.fillStyle='rgba(168,144,112,0.6)';ctx.font='8px Georgia';ctx.textAlign='right';ctx.fillText((g/1000).toFixed(1),pl-3,yP(g)+3);}
+  for(var wi=0;wi<=maxWks;wi+=2){ctx.beginPath();ctx.moveTo(xP(wi),pt);ctx.lineTo(xP(wi),pt+cH);ctx.stroke();ctx.fillStyle='rgba(168,144,112,0.6)';ctx.font='8px Georgia';ctx.textAlign='center';ctx.fillText('S'+wi,xP(wi),pt+cH+12);}
+  // P3-P97 band
+  ctx.beginPath();wks.forEach(function(w,i){if(i===0)ctx.moveTo(xP(w),yP(tbl[w][0]));else ctx.lineTo(xP(w),yP(tbl[w][0]));});
+  wks.slice().reverse().forEach(function(w){ctx.lineTo(xP(w),yP(tbl[w][4]));});
+  ctx.closePath();ctx.fillStyle='rgba(100,200,180,0.07)';ctx.fill();
+  // P50
+  ctx.beginPath();ctx.strokeStyle='rgba(100,200,180,0.5)';ctx.lineWidth=1.5;ctx.setLineDash([4,3]);
+  wks.forEach(function(w,i){if(i===0)ctx.moveTo(xP(w),yP(tbl[w][2]));else ctx.lineTo(xP(w),yP(tbl[w][2]));});ctx.stroke();ctx.setLineDash([]);
+  // P3
+  ctx.beginPath();ctx.strokeStyle='rgba(224,112,112,0.35)';ctx.lineWidth=1;
+  wks.forEach(function(w,i){if(i===0)ctx.moveTo(xP(w),yP(tbl[w][0]));else ctx.lineTo(xP(w),yP(tbl[w][0]));});ctx.stroke();
+  // labels
+  ctx.fillStyle='rgba(100,200,180,0.6)';ctx.font='8px Georgia';ctx.textAlign='left';ctx.fillText('P50',pl+2,yP(tbl[13][2])-3);
+  ctx.fillStyle='rgba(224,112,112,0.5)';ctx.fillText('P3',pl+2,yP(tbl[13][0])-3);
+  // birth weight
+  var bw=S.bebe&&S.bebe.pesoNacimiento?S.bebe.pesoNacimiento:3365;
+  ctx.beginPath();ctx.strokeStyle='rgba(212,168,67,0.4)';ctx.lineWidth=1;ctx.setLineDash([3,3]);
+  ctx.moveTo(pl,yP(bw));ctx.lineTo(pl+cW,yP(bw));ctx.stroke();ctx.setLineDash([]);
+  // actual data
+  if(S.pesoHistory.length>0){
+    var sorted=S.pesoHistory.slice().reverse();
+    ctx.beginPath();ctx.strokeStyle='#f0d9a0';ctx.lineWidth=2;
+    sorted.forEach(function(p,i){
+      var dn=Math.floor((new Date(p.time)-new Date(S.bebe.fechaNacimiento||Date.now()))/(86400000));
+      var wn=dn/7;if(i===0)ctx.moveTo(xP(wn),yP(p.grams));else ctx.lineTo(xP(wn),yP(p.grams));
+    });ctx.stroke();
+    sorted.forEach(function(p){
+      var dn=Math.floor((new Date(p.time)-new Date(S.bebe.fechaNacimiento||Date.now()))/(86400000));
+      ctx.beginPath();ctx.arc(xP(dn/7),yP(p.grams),4,0,6.28);ctx.fillStyle='#f0d9a0';ctx.fill();
+    });
+  }
+  ctx.fillStyle='rgba(168,144,112,0.7)';ctx.font='9px Georgia';ctx.textAlign='center';ctx.fillText('Semanas de vida',pl+cW/2,H-2);
+}
+
+// ── CONFIRM PENDING ENTRY ──
+function confirmEntry(){
+  var entry=S._pendingEntry;
+  if(!entry) return;
+  if(entry.type==='toma') entry.eficiencia=S.eficiencia;
+  var msg=generateMsg(entry,S.history);
+  S.history.unshift(entry);saveData();
+  if(entry.type==='toma') scheduleAlarm(entry.nextToma);
+  S._summaryMsg=msg;S._summaryType=entry.type;
+  S._pendingEntry=null;
+  setStep('summary');
+}
+
+function discardPending(){S._pendingEntry=null;setStep('home');}
+
+// ── SHARE via native share or fallback ──
+function shareMsg(text){
+  if(navigator.share){
+    navigator.share({text:text}).catch(function(){});
+  } else {
+    copyText(text);
+    alert('Mensaje copiado. Pégalo donde quieras compartirlo.');
+  }
+}
 
 render();
 </script>
@@ -819,6 +1380,8 @@ render();
       if (!data) return;
 
       // Parse dates back
+      if (data.bebe) S.bebe = data.bebe;
+      if (data.padres) S.padres = data.padres;
       if (data.history) {
         S.history = data.history.map(function(e) {
           if (!e) return null;
