@@ -199,11 +199,12 @@ function loadData(){
     S.visitas=JSON.parse(localStorage.getItem('cefe_visitas')||'[]').map(function(e){e.datetime=new Date(e.datetime);return e;});
     var sb=localStorage.getItem('cefe_bebe'); if(sb) S.bebe=JSON.parse(sb);
     var sp=localStorage.getItem('cefe_padres'); if(sp) S.padres=JSON.parse(sp);
-    // Seed peso alta from epicrisis if no peso history yet
-    if(S.pesoHistory.length===0&&S.bebe.pesoAlta&&S.bebe.fechaAlta){
-      S.pesoHistory=[{time:new Date(S.bebe.fechaAlta+'T12:00:00'),grams:S.bebe.pesoAlta,note:'Peso al alta sanatorio (epicrisis)'}];
-    }
+
   }catch(err){S.history=[];S.pesoHistory=[];S.medicos=[];S.visitas=[];}
+  // Seed peso alta from epicrisis if no peso history recorded yet
+  if(S.pesoHistory.length===0&&S.bebe&&S.bebe.pesoAlta&&S.bebe.fechaAlta){
+    try{S.pesoHistory=[{time:new Date(S.bebe.fechaAlta+'T12:00'),grams:parseInt(S.bebe.pesoAlta)||2980,note:'Peso al alta sanatorio'}];}catch(e){}
+  }
 }
 function saveData(){
   localStorage.setItem('cefe_history',JSON.stringify(S.history));
@@ -881,17 +882,7 @@ function render(){
       '<div class="msg-box">'+S._summaryMsg+'</div>'+
       '<button class="p-btn green" id="copy-btn" onclick="copyText(''+escMsg(S._summaryMsg)+'')">Copiar</button>'+
       '<button class="p-btn blue2" style="margin-top:8px" onclick="shareMsg(''+escMsg(S._summaryMsg)+'')">Compartir</button>'+
-      (S._summaryType==='toma'&&S._nextTomaTime?
-        '<div style="background:rgba(212,168,67,0.08);border:1px solid rgba(212,168,67,0.2);border-radius:11px;padding:10px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between">'+
-          '<div><div style="font-size:9px;color:#a89070;text-transform:uppercase;letter-spacing:1px">Proxima toma</div>'+
-          '<div style="font-size:14px;font-weight:bold;color:#f0d9a0">~'+fTime(S._nextTomaTime)+'</div></div>'+
-          ('Notification' in window&&Notification.permission==='granted'?
-            '<span style="font-size:11px;color:#64c8b4">Alerta programada</span>':
-            'Notification' in window?
-            '<button onclick="requestNotifPermission()" style="background:rgba(212,168,67,0.2);border:1px solid rgba(212,168,67,0.4);border-radius:8px;padding:5px 12px;color:#f0d9a0;font-size:11px;cursor:pointer;font-family:Georgia,serif">Activar alerta</button>':
-            '<span style="font-size:10px;color:#a89070">Instala como PWA para alertas</span>'):
-        '</div>':''):
-      '')+
+      (S._summaryType==='toma'&&S._nextTomaTime?buildNextTomaBlock():'')+ 
       '<button class="g-btn white" onclick="setStep('home')">Volver al inicio</button>'+
       (S._summaryType==='toma'||S._summaryType==='panal'?'<button class="g-btn red" onclick="S.history.shift();saveData();setStep('home')">Borrar este registro</button>':'');
   }
@@ -1168,6 +1159,7 @@ function render(){
         (signalsHTML||'<div style="color:#a89070;font-size:13px">Sin datos suficientes para el periodo.</div>')+
       '</div>';
   }
+}
 
 function renderRow(h,i){
   if(h.type==='toma'){
@@ -1223,6 +1215,12 @@ function getAgeInDays(){
   return Math.floor((Date.now()-new Date(S.bebe.fechaNacimiento).getTime())/(1000*60*60*24));
 }
 function getAgeInWeeks(){ return Math.floor(getAgeInDays()/7); }
+function getAgeLabel(){
+  var d=getAgeInDays(),w=getAgeInWeeks();
+  if(d<14) return d+' dias';
+  if(w<8) return w+' semanas';
+  return Math.floor(d/30.4)+' meses';
+}
 
 function getGastricCapacity(){
   var d=getAgeInDays();
@@ -1334,6 +1332,21 @@ function shareMsg(text){
     copyText(text);
     alert('Mensaje copiado. Pégalo donde quieras compartirlo.');
   }
+}
+
+function buildNextTomaBlock(){
+  var ntStr=fTime(S._nextTomaTime);
+  var notifStr='';
+  try{
+    if(typeof Notification!=='undefined'){
+      if(Notification.permission==='granted') notifStr='<span style="font-size:11px;color:#64c8b4">Alerta programada</span>';
+      else notifStr='<button onclick="requestNotifPermission()" style="background:rgba(212,168,67,0.2);border:1px solid rgba(212,168,67,0.4);border-radius:8px;padding:5px 12px;color:#f0d9a0;font-size:11px;cursor:pointer;font-family:Georgia,serif">Activar alerta</button>';
+    }
+  }catch(e){}
+  return '<div style="background:rgba(212,168,67,0.08);border:1px solid rgba(212,168,67,0.2);border-radius:11px;padding:10px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between">'+
+    '<div><div style="font-size:9px;color:#a89070;text-transform:uppercase;letter-spacing:1px">Proxima toma</div>'+
+    '<div style="font-size:14px;font-weight:bold;color:#f0d9a0">~'+ntStr+'</div></div>'+
+    notifStr+'</div>';
 }
 
 render();
