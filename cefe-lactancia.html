@@ -7,20 +7,34 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Cefe">
 <meta name="theme-color" content="#0f1923">
-<title>Cefe Lactancia v2</title>
+<title>Cefe App v2.2</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-body{min-height:100vh;background:linear-gradient(135deg,#0f1923,#1a2d3d,#0f2030);font-family:Georgia,serif;color:#e8dcc8;display:flex;flex-direction:column;align-items:center;padding-bottom:40px}
+body{min-height:100vh;background:linear-gradient(135deg,#0f1923,#1a2d3d,#0f2030);font-family:Georgia,serif;color:#e8dcc8;display:flex;flex-direction:column;align-items:center;padding-bottom:40px;transition:background .3s}
+body.night{background:linear-gradient(135deg,#050a0f,#0a1520,#050f18)}
+body.night .card{background:rgba(0,0,0,.3)}
 button{font-family:Georgia,serif;-webkit-appearance:none}
 #app{width:100%;max-width:480px;display:flex;flex-direction:column;min-height:100vh}
-#hdr{padding:20px 18px 12px;border-bottom:1px solid rgba(210,175,120,.2);display:flex;align-items:center;justify-content:space-between}
+#hdr{padding:16px 18px 10px;border-bottom:1px solid rgba(210,175,120,.2);display:flex;align-items:center;justify-content:space-between}
 .hl{font-size:9px;letter-spacing:4px;color:#a89070;text-transform:uppercase;margin-bottom:3px}
-.hm{font-size:22px;font-weight:bold;color:#f0d9a0}
-.hr{display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
-.tb{background:rgba(255,255,255,.06);border:1px solid rgba(210,175,120,.2);border-radius:10px;padding:6px 10px;color:#a89070;font-size:11px;cursor:pointer}
+.hm{font-size:20px;font-weight:bold;color:#f0d9a0}
+.hr{display:flex;gap:5px;align-items:center}
+.tb{background:rgba(255,255,255,.06);border:1px solid rgba(210,175,120,.2);border-radius:10px;padding:5px 9px;color:#a89070;font-size:10px;cursor:pointer}
 .tb.on{background:rgba(212,168,67,.15);border-color:rgba(212,168,67,.4);color:#f0d9a0}
-.moon{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#d4a843,#8b6914);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
-#bd{padding:18px;flex:1}
+#bd{padding:18px 18px 100px 18px;flex:1;overflow-y:auto}
+#bnav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:rgba(10,18,28,.96);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:1px solid rgba(210,175,120,.15);display:flex;align-items:stretch;z-index:100;padding-bottom:env(safe-area-inset-bottom,0)}
+.bnav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 0 6px;background:none;border:none;cursor:pointer;color:#a89070;min-height:56px;position:relative}
+.bnav-btn.on{color:#f0d9a0}
+.bnav-btn.on::after{content:'';position:absolute;top:0;left:20%;right:20%;height:2px;background:linear-gradient(90deg,#d4a843,#f0d9a0);border-radius:0 0 3px 3px}
+.bnav-ic{font-size:20px;line-height:1;margin-bottom:3px;display:block}
+.bnav-lbl{font-size:9px;letter-spacing:.5px;text-transform:uppercase;font-family:Georgia,serif}
+.mas-menu{position:fixed;bottom:56px;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:rgba(10,18,28,.98);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-top:1px solid rgba(210,175,120,.15);padding:12px;z-index:99;display:none}
+.mas-menu.open{display:block}
+.mas-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.mas-item{background:rgba(255,255,255,.05);border:1px solid rgba(210,175,120,.12);border-radius:12px;padding:12px;display:flex;align-items:center;gap:10px;cursor:pointer;color:#e8dcc8;width:100%;text-align:left}
+.mas-item-ic{font-size:22px;flex-shrink:0}
+.mas-item-lbl{font-size:13px;font-weight:bold;color:#f0d9a0;display:block}
+.mas-item-sub{font-size:10px;color:#a89070;display:block;margin-top:1px}
 .card{background:rgba(255,255,255,.04);border:1px solid rgba(210,175,120,.15);border-radius:16px;padding:16px;margin-bottom:16px}
 .slbl{font-size:9px;letter-spacing:3px;color:#a89070;text-transform:uppercase;margin-bottom:10px}
 .srow{display:flex}.sbox{text-align:center;flex:1}
@@ -86,33 +100,42 @@ button{font-family:Georgia,serif;-webkit-appearance:none}
 .gcbox{background:rgba(212,168,67,.08);border:1px solid rgba(212,168,67,.15);border-radius:11px;padding:10px;margin-bottom:12px}
 .albox{background:rgba(212,168,67,.12);border:1px solid rgba(212,168,67,.4);border-radius:13px;padding:12px 14px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between}
 .ibanner{background:rgba(212,168,67,.1);border:1px solid rgba(212,168,67,.3);border-radius:13px;padding:12px 14px;margin-bottom:16px;font-size:12px;color:#d4c090;line-height:1.6}
-.ibanner strong{color:#f0d9a0}
 .rb{flex:1;border-radius:10px;padding:9px;font-size:12px;cursor:pointer;background:rgba(255,255,255,.05);border:1px solid rgba(210,175,120,.2);color:#a89070}
 .rb.on{background:rgba(212,168,67,.2);border-color:rgba(212,168,67,.5);color:#f0d9a0}
-.ntbox{background:rgba(212,168,67,.08);border:1px solid rgba(212,168,67,.2);border-radius:11px;padding:10px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between}
-
-body.night{background:linear-gradient(135deg,#050a0f,#0a1520,#050f18)}
-body.night #hdr{border-bottom-color:rgba(100,200,180,.15)}
-body.night .card{background:rgba(0,0,0,.3);border-color:rgba(100,200,180,.1)}
 .ntbox{background:rgba(212,168,67,.08);border:1px solid rgba(212,168,67,.2);border-radius:11px;padding:10px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between}
 </style>
 </head>
 <body>
 <div id="app">
   <div id="hdr">
-    <div><div class="hl">Registro · v2.0</div><div class="hm">Ceferino</div></div>
+    <div><div class="hl">Registro · v2.2</div><div class="hm" id="hdr-title">Ceferino</div></div>
     <div class="hr">
       <span id="sync-dot" style="font-size:9px;color:#d4a843" title="Conectando">●</span>
-      <button class="tb" data-tab="perfil">Perfil</button>
-      <button class="tb" data-tab="history">Historial</button>
-      <button class="tb" data-tab="peso">Peso</button>
-      <button class="tb" data-tab="medicos">Médicos</button>
-      <button class="tb" data-tab="dash">Dashboard</button>
-      <button class="tb" data-tab="extras">✨ Extras</button>
-      <div class="moon">🌙</div>
+      <button id="night-btn" class="tb" data-action="toggleNight">🌙</button>
     </div>
   </div>
   <div id="bd"></div>
+  <nav id="bnav">
+    <button class="bnav-btn" data-tab="home" id="bn-home"><span class="bnav-ic">🏠</span><span class="bnav-lbl">Inicio</span></button>
+    <button class="bnav-btn" data-tab="history" id="bn-history"><span class="bnav-ic">📋</span><span class="bnav-lbl">Historial</span></button>
+    <button class="bnav-btn" data-tab="peso" id="bn-peso"><span class="bnav-ic">⚖️</span><span class="bnav-lbl">Peso</span></button>
+    <button class="bnav-btn" data-tab="dash" id="bn-dash"><span class="bnav-ic">📊</span><span class="bnav-lbl">Dashboard</span></button>
+    <button class="bnav-btn" data-tab="mas" id="bn-mas"><span class="bnav-ic">☰</span><span class="bnav-lbl">Más</span></button>
+  </nav>
+  <div id="mas-menu" class="mas-menu">
+    <div class="mas-grid">
+      <button class="mas-item" data-action="goPerfil"><span class="mas-item-ic">👶</span><span><span class="mas-item-lbl">Perfil</span><span class="mas-item-sub">Datos de Cefe</span></span></button>
+      <button class="mas-item" data-action="goMedicos"><span class="mas-item-ic">🏥</span><span><span class="mas-item-lbl">Médicos</span><span class="mas-item-sub">Profesionales y visitas</span></span></button>
+      <button class="mas-item" data-action="goNotas"><span class="mas-item-ic">📝</span><span><span class="mas-item-lbl">Notas</span><span class="mas-item-sub">Observaciones del día</span></span></button>
+      <button class="mas-item" data-action="goSintomas"><span class="mas-item-ic">🩺</span><span><span class="mas-item-lbl">Síntomas</span><span class="mas-item-sub">Alertas y registros</span></span></button>
+      <button class="mas-item" data-action="goHitos"><span class="mas-item-ic">🌟</span><span><span class="mas-item-lbl">Hitos</span><span class="mas-item-sub">Desarrollo de Cefe</span></span></button>
+      <button class="mas-item" data-action="goCartas"><span class="mas-item-ic">💌</span><span><span class="mas-item-lbl">Cartas</span><span class="mas-item-sub">Memoria emocional</span></span></button>
+      <button class="mas-item" data-action="goActividades"><span class="mas-item-ic">🌟</span><span><span class="mas-item-lbl">Actividades</span><span class="mas-item-sub">Por semana de Cefe</span></span></button>
+      <button class="mas-item" data-action="goVacunas"><span class="mas-item-ic">💉</span><span><span class="mas-item-lbl">Vacunas</span><span class="mas-item-sub">Calendario nacional</span></span></button>
+      <button class="mas-item" data-action="goAstro"><span class="mas-item-ic">✨</span><span><span class="mas-item-lbl">Recreativo</span><span class="mas-item-sub">Astral y horóscopo</span></span></button>
+      <button class="mas-item" data-action="toggleNight"><span class="mas-item-ic" id="night-ic">🌙</span><span><span class="mas-item-lbl" id="night-lbl">Modo noche</span><span class="mas-item-sub">Tomas nocturnas</span></span></button>
+    </div>
+  </div>
 </div>
 <script>
 // ═══════════════════════════════════════════════════════════════
@@ -242,10 +265,16 @@ var E = {
 };
 
 // ─── UTILS ────────────────────────────────────────────────────
-function ft(d) { return new Date(d).toLocaleTimeString('es-AR', {hour:'2-digit', minute:'2-digit'}); }
-function fdt(d) { return new Date(d).toLocaleString('es-AR', {day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit'}); }
-function fd(d) { return new Date(d).toLocaleDateString('es-AR', {weekday:'short', day:'2-digit', month:'2-digit'}); }
-function fdl(d) { return new Date(d).toLocaleDateString('es-AR', {weekday:'long', day:'2-digit', month:'long', year:'numeric'}); }
+function safeDate(v){
+  if(!v)return null;
+  if(v instanceof Date)return isNaN(v.getTime())?null:v;
+  if(v&&typeof v==='object'&&v.seconds)return new Date(v.seconds*1000);
+  var d=new Date(v);return isNaN(d.getTime())?null:d;
+}
+function ft(d){var s=safeDate(d);if(!s)return '--:--';return s.toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'});}
+function fdt(d){var s=safeDate(d);if(!s)return '--/-- --:--';return s.toLocaleString('es-AR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});}
+function fd(d){var s=safeDate(d);if(!s)return '--/--';return s.toLocaleDateString('es-AR',{weekday:'short',day:'2-digit',month:'2-digit'});}
+function fdl(d){var s=safeDate(d);if(!s)return '----';return s.toLocaleDateString('es-AR',{weekday:'long',day:'2-digit',month:'long',year:'numeric'});}
 function fiso(d) { var dt=new Date(d); return dt.getFullYear()+'-'+p2(dt.getMonth()+1)+'-'+p2(dt.getDate()); }
 function gkg(g) { return (g / 1000).toFixed(3); }
 function p2(n) { return String(n).padStart(2, '0'); }
@@ -301,12 +330,24 @@ var D = {
   editCartaIdx: -1,
   // alarm
   alarmTimer: null, alarmFired: false, nextToma: null, notifTimer: null,
+  // alarm
+  alarmMaxInterval: 180,
+  // sleep
+  sleepStart: null, sleepLog: [],
+  // ml provistos
+  mlProvistos: 0,
   // timer
   timerInt: null, elapsed: 0,
   // summary
   msg: '', msgType: '',
   // night mode
-  nightMode: false
+  nightMode: false,
+  // astro tab
+  astroTab: 'horoscopo',
+  // hitos tab
+  hitoTab: 'vida',
+  // alarm state
+  alarmTimer: null, alarmFired: false, nextToma: null, notifTimer: null
 };
 
 // ─── STORAGE & MIGRATION ──────────────────────────────────────
@@ -316,9 +357,14 @@ function lss(k, v) { try { localStorage.setItem('cefe_' + k, JSON.stringify(v));
 function parseEntry(e) {
   if (!e) return null;
   try {
-    if (e.type === 'toma') { e.s = new Date(e.s); e.e = new Date(e.e); e.nt = new Date(e.nt); }
-    if (e.type === 'panal') e.t = new Date(e.t);
-  } catch(ex) {}
+    if (e.type === 'toma') {
+      var ts = safeDate(e.s); if (!ts) return null;
+      e.s = ts;
+      e.e = safeDate(e.e) || addM(ts, e.tot||0);
+      e.nt = safeDate(e.nt) || addM(ts, 180);
+    }
+    if (e.type === 'panal') { var tp = safeDate(e.t); if (!tp) return null; e.t = tp; }
+  } catch(ex) { return null; }
   return e;
 }
 
@@ -399,23 +445,127 @@ function gasC() {
 
 // ─── HITOS DEL DESARROLLO ─────────────────────────────────────
 var HITOS_DEF = [
-  {id:'h01', semanas:2,  label:'Sigue objeto con la vista (linea media)'},
-  {id:'h02', semanas:4,  label:'Responde a sonidos fuertes'},
-  {id:'h03', semanas:6,  label:'Primera sonrisa social'},
-  {id:'h04', semanas:8,  label:'Vocaliza (agu-agu)'},
-  {id:'h05', semanas:12, label:'Sostiene la cabeza 45\u00B0 boca abajo'},
-  {id:'h06', semanas:16, label:'Rie a carcajadas'},
-  {id:'h07', semanas:16, label:'Sigue con la vista 180\u00B0'},
-  {id:'h08', semanas:20, label:'Se lleva objetos a la boca'},
-  {id:'h09', semanas:20, label:'Sostiene la cabeza firme sentado con ayuda'},
-  {id:'h10', semanas:24, label:'Se da vuelta (panza \u2192 espalda)'},
-  {id:'h11', semanas:28, label:'Se sienta con apoyo'},
-  {id:'h12', semanas:32, label:'Pinza radial (toma objetos)'},
-  {id:'h13', semanas:36, label:'Dice "mama" / "papa" (inespec\u00EDfico)'},
-  {id:'h14', semanas:40, label:'Pinza fina (pulgar-\u00EDndice)'},
-  {id:'h15', semanas:44, label:'Se para con apoyo'},
-  {id:'h16', semanas:52, label:'Primeros pasos'}
+  // ── HITOS DE VIDA ─────────────────────────────────────────
+  // (momentos que los padres eligen recordar)
+  {id:'v01', cat:'vida',  semanas:0,  ic:'🏥', label:'Alta del sanatorio',              celebracion:true},
+  {id:'v02', cat:'vida',  semanas:0,  ic:'🏠', label:'Primera vez en casa',             celebracion:true},
+  {id:'v03', cat:'vida',  semanas:1,  ic:'🚶', label:'Primera salida a la calle',       celebracion:false},
+  {id:'v04', cat:'vida',  semanas:1,  ic:'🚿', label:'Primer baño de balde',       celebracion:true},
+  {id:'v05', cat:'vida',  semanas:2,  ic:'👶', label:'Cayó el cordón umbilical', celebracion:false},
+  {id:'v06', cat:'vida',  semanas:4,  ic:'👨‍👩‍👦', label:'Primera foto familiar', celebracion:false},
+  {id:'v07', cat:'vida',  semanas:8,  ic:'🎉', label:'Primer mes cumplido',             celebracion:true},
+  {id:'v08', cat:'vida',  semanas:13, ic:'🎉', label:'Tres meses',                      celebracion:true},
+  {id:'v09', cat:'vida',  semanas:26, ic:'🎉', label:'Seis meses',                      celebracion:true},
+  {id:'v10', cat:'vida',  semanas:39, ic:'🕯️', label:'Nueve meses',               celebracion:true},
+  {id:'v11', cat:'vida',  semanas:52, ic:'🎂', label:'Primer año',                 celebracion:true},
+  {id:'v12', cat:'vida',  semanas:52, ic:'👣', label:'Primer cumpleaños',          celebracion:true},
+  {id:'v13', cat:'vida',  semanas:78, ic:'🎉', label:'Año y medio',                celebracion:false},
+  {id:'v14', cat:'vida',  semanas:104,ic:'🎉', label:'Dos años',                   celebracion:true},
+  {id:'v15', cat:'vida',  semanas:130,ic:'🏫', label:'Comienza maternal / jardín', celebracion:true},
+  {id:'v16', cat:'vida',  semanas:156,ic:'🎓', label:'Primer día de preescolar',   celebracion:true},
+  {id:'v17', cat:'vida',  semanas:208,ic:'🎓', label:'Primer día de primaria',     celebracion:true},
+  {id:'v18', cat:'vida',  semanas:0,  ic:'🤝', label:'Primer mejor amigo',              celebracion:false},
+  {id:'v19', cat:'vida',  semanas:0,  ic:'🏊', label:'Primera actividad deportiva',    celebracion:false},
+  {id:'v20', cat:'vida',  semanas:0,  ic:'✈️', label:'Primer viaje en avión',      celebracion:false},
+  // ── HITOS DEL DESARROLLO ──────────────────────────────────
+  // (pautas AAP / SAP — marco orientativo, consultar pediatra)
+  {id:'h01', cat:'desarrollo', semanas:2,  ic:'👁️', label:'Sigue objeto con la vista'},
+  {id:'h02', cat:'desarrollo', semanas:4,  ic:'🔔',      label:'Responde a sonidos fuertes'},
+  {id:'h03', cat:'desarrollo', semanas:6,  ic:'😃',      label:'Primera sonrisa social',    celebracion:true},
+  {id:'h04', cat:'desarrollo', semanas:8,  ic:'🗣️',label:'Vocaliza (agu-agu)'},
+  {id:'h05', cat:'desarrollo', semanas:12, ic:'💪',      label:'Sostiene la cabeza 45°'},
+  {id:'h06', cat:'desarrollo', semanas:16, ic:'😂',      label:'Ríe a carcajadas',     celebracion:true},
+  {id:'h07', cat:'desarrollo', semanas:16, ic:'👀',      label:'Sigue con la vista 180°'},
+  {id:'h08', cat:'desarrollo', semanas:20, ic:'🤲',      label:'Se lleva objetos a la boca'},
+  {id:'h09', cat:'desarrollo', semanas:20, ic:'🧘',      label:'Sostiene cabeza sentado con ayuda'},
+  {id:'h10', cat:'desarrollo', semanas:24, ic:'🔄',      label:'Se da vuelta (panza → espalda)', celebracion:true},
+  {id:'h11', cat:'desarrollo', semanas:28, ic:'🧘',      label:'Se sienta con apoyo'},
+  {id:'h12', cat:'desarrollo', semanas:32, ic:'🤚',      label:'Pinza radial (toma objetos)'},
+  {id:'h13', cat:'desarrollo', semanas:36, ic:'🗣️',label:'Dice “mamá” / “papá”', celebracion:true},
+  {id:'h14', cat:'desarrollo', semanas:40, ic:'🤟',      label:'Pinza fina (pulgar-índice)'},
+  {id:'h15', cat:'desarrollo', semanas:40, ic:'🚶',      label:'Gateo'},                    
+  {id:'h16', cat:'desarrollo', semanas:44, ic:'🧗',      label:'Se para con apoyo'},
+  {id:'h17', cat:'desarrollo', semanas:48, ic:'🚶',      label:'Marcha con apoyo (crucero)'},
+  {id:'h18', cat:'desarrollo', semanas:52, ic:'🚶',      label:'Primeros pasos solos',      celebracion:true},
+  {id:'h19', cat:'desarrollo', semanas:65, ic:'🗣️',label:'Primeras palabras con significado'},
+  {id:'h20', cat:'desarrollo', semanas:78, ic:'🧩',      label:'Primeras combinaciones de 2 palabras'},
+  {id:'h21', cat:'desarrollo', semanas:104,ic:'🎨',      label:'Juego simbólico (juega a “hacerse”)'},
 ];
+
+var APP_VERSION = 2;
+var ML_FLOW = {1:2.0, 2:2.8, 3:3.5, 4:4.5, 5:5.5};
+function estimateML(lados,efi,mlProv){
+  if(!efi||!lados||lados.length===0)return mlProv||0;
+  var flow=ML_FLOW[efi]||3.5,tot=lados.reduce(function(a,b){return a+b.m;},0);
+  var first=Math.min(tot,5),rest=Math.max(0,tot-5);
+  return Math.round(first*flow*1.3+rest*flow)+(mlProv||0);
+}
+function estimateMLRange(lados,efi,mlProv){
+  if(!efi||!lados||lados.length===0)return{mn:mlProv||0,mx:mlProv||0,txt:(mlProv||0)+'ml'};
+  var flow=ML_FLOW[efi]||3.5,tot=lados.reduce(function(a,b){return a+b.m;},0);
+  var first=Math.min(tot,5),rest=Math.max(0,tot-5),mid=first*flow*1.3+rest*flow;
+  var mn=Math.round(mid*0.85)+(mlProv||0),mx=Math.round(mid*1.15)+(mlProv||0);
+  return{mn:mn,mx:mx,txt:mn+'-'+mx+'ml'};
+}
+function getDailyML(){
+  var now=new Date(),s=new Date(now.getFullYear(),now.getMonth(),now.getDate());
+  var t=D.hist.filter(function(h){var sd=safeDate(h.s);return h.type==='toma'&&sd&&sd>=s;});
+  var total=t.reduce(function(a,h){return a+estimateML(h.lados,h.efi,h.mlProvistos||0);},0);
+  var peso=D.pesos[0]?D.pesos[0].g:(D.bebe.pn||3365);
+  var objMin=Math.round(peso*0.150),objMax=Math.round(peso*0.200);
+  return{total:total,objMin:objMin,objMax:objMax,pct:Math.min(100,Math.round(total/objMin*100)),ntomas:t.length};
+}
+function getHydrationStatus(){
+  var now=new Date(),s=new Date(now.getFullYear(),now.getMonth(),now.getDate());
+  var p=D.hist.filter(function(h){var td=safeDate(h.t);return h.type==='panal'&&td&&td>=s;});
+  var wet=p.filter(function(x){return x.p==='Pis'||x.p==='Mixto';}).length;
+  var target=ageD()<=5?5:6;
+  if(wet>=target)return{status:'ok',label:'Hidratación OK',color:'#64c8b4',wet:wet,target:target};
+  if(wet>=target-2)return{status:'warn',label:'Hidratación baja',color:'#d4a843',wet:wet,target:target};
+  return{status:'alert',label:'Revisar ingesta',color:'#e07070',wet:wet,target:target};
+}
+function getSmartInterval(){
+  var t=D.hist.filter(function(h){return h.type==='toma'&&safeDate(h.s);}).slice(0,6);
+  if(t.length<2)return D.alarmMaxInterval||180;
+  var ivs=[];
+  for(var i=0;i<t.length-1;i++){
+    var sa=safeDate(t[i].s),sb=safeDate(t[i+1].s);
+    if(!sa||!sb)continue;
+    var d=Math.round((sa.getTime()-sb.getTime())/60000);
+    if(d>30&&d<360)ivs.push(d);
+  }
+  if(!ivs.length)return D.alarmMaxInterval||180;
+  var avg=Math.round(ivs.reduce(function(a,b){return a+b;},0)/ivs.length);
+  return Math.min(Math.max(avg,90),D.alarmMaxInterval||180);
+}
+function setAlarmInterval(mins){
+  D.alarmMaxInterval=parseInt(mins)||180;
+  lss('alarmMax',D.alarmMaxInterval);
+  var lt=D.hist.find(function(h){return h.type==='toma'&&safeDate(h.s);});
+  if(lt){var sd=safeDate(lt.s);if(sd)schedAlarm(addM(sd,D.alarmMaxInterval));}
+  render();
+}
+function toggleSleep(){
+  if(D.sleepStart){
+    var ss=safeDate(D.sleepStart)||new Date();
+    var dur=Math.round((Date.now()-ss.getTime())/60000);
+    if(dur>5)D.sleepLog.unshift({start:D.sleepStart,end:new Date().toISOString(),dur:dur});
+    D.sleepStart=null;
+  } else {D.sleepStart=new Date().toISOString();}
+  lss('sleepStart2',D.sleepStart||null);
+  lss('sleepLog2',D.sleepLog||[]);
+  saveData();render();
+}
+function markVacuna(id,done){
+  if(!D.bebe.vacunas)D.bebe.vacunas={};
+  if(done)D.bebe.vacunas[id]=new Date().toISOString();
+  else delete D.bebe.vacunas[id];
+  saveData();render();
+}
+function setAstroTab(k){D.astroTab=k;render();}
+function setHitoTab(k){D.hitoTab=k;render();}
+function toggleMasMenu(){var mm=document.getElementById('mas-menu');if(mm)mm.classList.toggle('open');}
+function closeMasMenu(){var mm=document.getElementById('mas-menu');if(mm)mm.classList.remove('open');}
 
 // ─── CARTA ASTRAL ─────────────────────────────────────────────
 function calcAstro() {
@@ -623,7 +773,7 @@ function savePeso(){
   if(fv){try{t=new Date(fv+'T'+(hv||'12:00'));}catch(e){}}
   D.pesos.unshift({t:t,g:D.pg,n:nEl?nEl.value:''});
   // Sort by date descending
-  D.pesos.sort(function(a,b){return new Date(b.t)-new Date(a.t);});
+  D.pesos.sort(function(a,b){var da=safeDate(a.t)||new Date(0),db=safeDate(b.t)||new Date(0);return db-da;});
   saveData();setStep('peso');
 }
 function adjustPeso(d){
@@ -864,7 +1014,12 @@ document.addEventListener('click',function(ev){
   }
 });
 
-function handleTab(tab){if(D.step===tab){setStep('home');return;}D.hFilter=null;setStep(tab);}
+function handleTab(tab){
+  if(tab==='home'){setStep('home');return;}
+  if(tab==='mas'){toggleMasMenu();return;}
+  var mm=document.getElementById('mas-menu');if(mm)mm.classList.remove('open');
+  D.hFilter=null;setStep(tab);
+}
 
 function handleAction(action,data){
   switch(action){
@@ -929,6 +1084,26 @@ function handleAction(action,data){
     case 'editCarta':D.editCartaIdx=parseInt(data.idx);setStep('editCarta');break;
     case 'delCarta':delCarta(parseInt(data.idx));break;
     case 'saveCarta':saveCarta();break;
+    case 'setAstroTab':setAstroTab(data.k);break;
+    case 'toggleVacuna':markVacuna(data.id,data.done!=='1');break;
+    case 'mlProvPlus':D.mlProvistos=Math.min(300,(D.mlProvistos||0)+5);var ep=document.getElementById('mlprov-val');if(ep)ep.textContent=D.mlProvistos+'ml';break;
+    case 'mlProvMinus':D.mlProvistos=Math.max(0,(D.mlProvistos||0)-5);var emp=document.getElementById('mlprov-val');if(emp)emp.textContent=D.mlProvistos+'ml';break;
+    case 'toggleSleep':toggleSleep();break;
+    case 'setHitoTab':setHitoTab(data.k);break;
+    case 'marcarHito':(function(){
+      var hd=HITOS_DEF.find(function(h){return h.id===data.id;});
+      if(!hd)return;
+      var existing=D.hitos.find(function(h){return h.id===data.id;});
+      if(existing)return;
+      var nota=hd.cat==='vida'?'':undefined;
+      D.hitos.push({id:data.id,fecha:new Date().toISOString(),nota:nota||''});
+      saveData();render();
+    })();break;
+    case 'desmarcarHito':(function(){
+      if(!confirm('Desmarcar este hito?'))return;
+      D.hitos=D.hitos.filter(function(h){return h.id!==data.id;});
+      saveData();render();
+    })();break;
     case 'toggleNight':toggleNightMode();break;
     case 'copyWeekly':copyText(genWeeklySummary());break;
     case 'shareWeekly':shareText(genWeeklySummary());break;
@@ -988,16 +1163,16 @@ function medCard(m,i){
 // ─── RENDER ───────────────────────────────────────────────────
 function render(){
   applyNightMode();
-  var TABS=['perfil','history','peso','medicos','dash','extras'];
-  TABS.forEach(function(t){
-    var el=document.querySelector('[data-tab="'+t+'"]');if(!el)return;
-    var on=D.step===t||(t==='peso'&&(D.step==='peso'||D.step==='pesoEntry'))||
-      (t==='medicos'&&(D.step==='medicos'||D.step==='editMed'||D.step==='visitaForm'))||
-      (t==='perfil'&&(D.step==='perfil'||D.step==='editBebe'||D.step==='editPadre'))||
-      (t==='dash'&&D.step==='dash')||
-      (t==='extras'&&['notas','editNota','sintomas','editSintoma','hitos','cartas','editCarta','astro'].indexOf(D.step)>=0);
-    el.className='tb'+(on?' on':'');
+  var MAS_STEPS=['perfil','editBebe','editPadre','medicos','editMed','visitaForm','extras','notas','editNota','sintomas','editSintoma','hitos','cartas','editCarta','astro','actividades','vacunas'];
+  var TAB_MAP={home:['home'],history:['history'],peso:['peso','pesoEntry'],dash:['dash'],mas:MAS_STEPS};
+  Object.keys(TAB_MAP).forEach(function(t){
+    var el=document.getElementById('bn-'+t);if(!el)return;
+    el.className='bnav-btn'+(TAB_MAP[t].indexOf(D.step)>=0?' on':'');
   });
+  var nb=document.getElementById('night-btn');if(nb)nb.style.color=D.nightMode?'#f0d9a0':'#a89070';
+  var htEl=document.getElementById('hdr-title');
+  if(htEl){var TITLES={home:'Ceferino',history:'Historial',peso:'Peso',pesoEntry:'Peso',dash:'Dashboard',perfil:'Perfil',editBebe:'Perfil',editPadre:'Perfil',medicos:'M\u00e9dicos',editMed:'M\u00e9dicos',visitaForm:'M\u00e9dicos',extras:'Extras',notas:'Notas',editNota:'Nueva Nota',sintomas:'S\u00edntomas',editSintoma:'S\u00edntoma',hitos:'Hitos',cartas:'Cartas',editCarta:'Carta',astro:'Recreativo',actividades:'Actividades',vacunas:'Vacunas',toma:'Toma',panal:'Pa\u00f1al',preview:'Confirmar',summary:'Mensaje'};
+  htEl.textContent=TITLES[D.step]||'Ceferino';}
 
   var bd=document.getElementById('bd');if(!bd)return;
   while(bd.firstChild)bd.removeChild(bd.firstChild);
@@ -1040,7 +1215,7 @@ function render(){
       sr.appendChild(E.sbox('Caca/Mix',panales.filter(function(p){return p.p!=='Pis';}).length));
       card.appendChild(sr);
       if(lastT){
-        var nxt=mkTxt('div',null,'Ultima toma: hace '+Math.round((Date.now()-new Date(lastT.s))/60000)+' min | Proxima: '+ft(lastT.nt),'margin-top:8px;font-size:12px;color:#c4b090');
+        var nxt=mkTxt('div',null,(function(){var sd=safeDate(lastT.s);var mins=sd?Math.round((Date.now()-sd.getTime())/60000):0;return 'Ultima toma: hace '+mins+' min | Proxima: '+ft(lastT.nt);})(),'margin-top:8px;font-size:12px;color:#c4b090');
         card.appendChild(nxt);
       }
       if(lastP){
@@ -1377,8 +1552,8 @@ function render(){
   // ── DASHBOARD ─────────────────────────────────────────────────
   else if(D.step==='dash'){
     var co=new Date(Date.now()-D.dashDays*86400000);
-    var th=D.hist.filter(function(h){return h.type==='toma'&&new Date(h.s)>=co;});
-    var ph=D.hist.filter(function(h){return h.type==='panal'&&new Date(h.t)>=co;});
+    var th=D.hist.filter(function(h){var sd=safeDate(h.s);return h.type==='toma'&&sd&&sd>=co;});
+    var ph=D.hist.filter(function(h){var td=safeDate(h.t);return h.type==='panal'&&td&&td>=co;});
     var nt2=th.length,totalM=th.reduce(function(a,b){return a+b.tot;},0),avgM=nt2?Math.round(totalM/nt2):0;
     var efis=th.filter(function(h){return h.efi>0;}),avgE=efis.length?(efis.reduce(function(a,b){return a+b.efi;},0)/efis.length).toFixed(1):'';
     var stT=th.slice().sort(function(a,b){return new Date(a.s)-new Date(b.s);}),ivs=[];
@@ -1458,14 +1633,7 @@ function render(){
 
   // ── EXTRAS MENU ───────────────────────────────────────────────
   else if(D.step==='extras'){
-    bd.appendChild(E.el('div',{cls:'st',txt:'Extras'}));
-    bd.appendChild(E.aBtn('\uD83D\uDCDD','Notas del dia','Observaciones libres diarias','','newNota'));
-    bd.appendChild(E.aBtn('\uD83C\uDFE5','Sintomas / Alertas','Fiebre, malestar, llanto','rs','newSintoma'));
-    bd.appendChild(E.aBtn('\uD83C\uDF1F','Hitos del desarrollo','Primeras veces de Cefe','tl',''));
-    document.querySelector('[data-action=""]') && (document.querySelector('[data-action=""]').dataset.action='goHitos');
-    bd.appendChild(E.aBtn('\uD83D\uDC8C','Cartas a Cefe','Memoria emocional','pu','goCartas'));
-    bd.appendChild(E.aBtn('\u2728','Modulo recreativo','Carta astral, numerologia...','','goAstro'));
-    document.querySelectorAll('[data-action=""]').forEach(function(el){if(!el.dataset.action)el.dataset.action='goExtras';});
+    setTimeout(function(){toggleMasMenu();setStep('home');},0);
   }
 
   // ── NOTAS ─────────────────────────────────────────────────────
@@ -1484,15 +1652,13 @@ function render(){
 
   // ── EDIT NOTA ─────────────────────────────────────────────────
   else if(D.step==='editNota'){
-    bd.appendChild(E.btn('bk','\u2190 Volver',''));
-    document.querySelector('.bk').dataset.action='goNotas';
+    bd.appendChild(E.btn('bk','\u2190 Volver','goNotas'));
     bd.appendChild(E.el('div',{cls:'st',txt:'Nueva nota'}));
     bd.appendChild(E.field('Fecha',E.input('fi','nota-fecha','date',null,todayStr())));
     var txa=E.textarea('ni fi','nota-texto','Observaciones del dia, como estuvo Cefe, novedades...');txa.style.minHeight='120px';
     bd.appendChild(E.field('Nota',txa));
     bd.appendChild(E.btn('pb go','Guardar nota','saveNota'));
-    bd.appendChild(E.btn('gb rd','Cancelar',''));
-    document.querySelectorAll('[data-action=""]').forEach(function(el){el.dataset.action='goNotas';});
+    bd.appendChild(E.btn('gb rd','Cancelar','goNotas'));
   }
 
   // ── SINTOMAS ──────────────────────────────────────────────────
@@ -1523,18 +1689,69 @@ function render(){
 
   // ── HITOS ─────────────────────────────────────────────────────
   else if(D.step==='hitos'){
-    bd.appendChild(E.el('div',{cls:'st',txt:'\uD83C\uDF1F Hitos del desarrollo'}));
-    bd.appendChild(mkTxt('div',null,'Basado en pautas de la AAP / SAP. Marca cuando Cefe lo logra.','font-size:11px;color:#a89070;margin-bottom:16px;line-height:1.5'));
-    HITOS_DEF.forEach(function(h){
-      var done=D.hitos.find(function(hi){return hi.id===h.id;});
-      var card=mkDiv('background:rgba(255,255,255,.03);border:1px solid rgba(210,175,120,'+(done?'0.4':'0.1')+');border-radius:12px;padding:12px;margin-bottom:8px;display:flex;align-items:center;gap:12px;cursor:pointer');
-      card.dataset.action='toggleHito';card.dataset.id=h.id;
-      var check=mkTxt('div',null,done?'\u2705':'\u25CB','font-size:22px;flex-shrink:0');
-      var info=E.div('');
-      info.appendChild(mkTxt('div',null,h.label,'font-size:13px;color:'+(done?'#64c8b4':'#d4c090')));
-      info.appendChild(mkTxt('div',null,'~Semana '+h.semanas+(done?' \u2014 Logrado: '+done.fecha:''),'font-size:10px;color:#a89070'));
-      card.appendChild(check);card.appendChild(info);bd.appendChild(card);
+    bd.appendChild(E.el('div',{cls:'st',txt:'🌟 Hitos de Cefe'}));
+    bd.appendChild(mkTxt('div',null,'Marca cada logro cuando sucede. Los hitos de desarrollo son orientativos — consultá al pediatra.','font-size:11px;color:#a89070;margin-bottom:20px;line-height:1.5'));
+
+    // Tabs: Vida / Desarrollo
+    var hitoTab = D.hitoTab||'vida';
+    var tabRow = mkDiv('display:flex;gap:6px;margin-bottom:16px');
+    var tb1 = E.btn('fb'+(hitoTab==='vida'?' on':''),'🏠 Hitos de vida','setHitoTab');tb1.dataset.k='vida';
+    var tb2 = E.btn('fb'+(hitoTab==='desarrollo'?' on':''),'🌱 Desarrollo','setHitoTab');tb2.dataset.k='desarrollo';
+    tabRow.appendChild(tb1);tabRow.appendChild(tb2);
+    bd.appendChild(tabRow);
+
+    var hitos_filtrados = HITOS_DEF.filter(function(h){return h.cat===hitoTab;});
+    var done_count = hitos_filtrados.filter(function(h){return D.hitos.find(function(hi){return hi.id===h.id;});}).length;
+
+    // Progress bar
+    var progWrap = mkDiv('background:rgba(255,255,255,.04);border:1px solid rgba(210,175,120,.12);border-radius:12px;padding:12px;margin-bottom:16px');
+    var progTop = mkDiv('display:flex;justify-content:space-between;align-items:center;margin-bottom:8px');
+    progTop.appendChild(mkTxt('span',null,done_count+' / '+hitos_filtrados.length+' logrados','font-size:13px;font-weight:bold;color:#f0d9a0'));
+    var pct = hitos_filtrados.length > 0 ? Math.round(done_count/hitos_filtrados.length*100) : 0;
+    progTop.appendChild(mkTxt('span',null,pct+'%','font-size:12px;color:#d4a843'));
+    progWrap.appendChild(progTop);
+    var progBar = mkDiv('background:rgba(255,255,255,.08);border-radius:20px;height:6px;overflow:hidden');
+    var progFill = mkDiv('background:linear-gradient(90deg,#d4a843,#f0d9a0);height:100%;border-radius:20px;transition:width .4s');
+    progFill.style.width = pct+'%';
+    progBar.appendChild(progFill);progWrap.appendChild(progBar);
+    bd.appendChild(progWrap);
+
+    hitos_filtrados.forEach(function(h){
+      var done = D.hitos.find(function(hi){return hi.id===h.id;});
+      var isCelebracion = h.celebracion;
+
+      var card = mkDiv('background:rgba(255,255,255,'+(done?'.06':'.03')+');border:1px solid rgba('+(done?'100,200,180,.3':isCelebracion?'212,168,67,.25':'210,175,120,.1')+');border-radius:14px;padding:13px 14px;margin-bottom:8px;display:flex;align-items:center;gap:12px;cursor:pointer');
+      card.dataset.action = done ? 'desmarcarHito' : 'marcarHito';
+      card.dataset.id = h.id;
+
+      // Icon
+      var icBox = mkDiv('font-size:22px;flex-shrink:0;width:36px;text-align:center');
+      icBox.textContent = done ? '✅' : (h.ic||'⭕');
+      card.appendChild(icBox);
+
+      // Content
+      var content = mkDiv('flex:1');content.style.flex='1';
+      var labelDiv = mkTxt('div',null,h.label,'font-size:13px;font-weight:bold;color:'+(done?'#64c8b4':isCelebracion?'#f0d9a0':'#e8dcc8'));
+      content.appendChild(labelDiv);
+
+      if(done && done.fecha){
+        content.appendChild(mkTxt('div',null,'✔ '+new Date(done.fecha).toLocaleDateString('es-AR',{day:'2-digit',month:'long',year:'numeric'})+(done.nota?' — '+done.nota:''),'font-size:10px;color:#64c8b4;margin-top:3px'));
+      } else {
+        var hint = h.semanas > 0 ? ('~semana '+h.semanas) : 'Cuando suceda';
+        content.appendChild(mkTxt('div',null,hint,'font-size:10px;color:#a89070;margin-top:2px'));
+      }
+      card.appendChild(content);
+
+      // Celebration badge
+      if(isCelebracion && !done){
+        var badge = mkTxt('span',null,'✨','font-size:16px;flex-shrink:0;opacity:.6');
+        card.appendChild(badge);
+      }
+
+      bd.appendChild(card);
     });
+
+    bd.appendChild(mkTxt('div',null,hitoTab==='desarrollo'?'📚 Fuentes: AAP, SAP. Marco orientativo, no diagnóstico.':'💙 Estos son los momentos que valen la pena guardar.','font-size:10px;color:#a89070;text-align:center;margin-top:8px;padding-bottom:8px;line-height:1.5'));
   }
 
   // ── CARTAS ────────────────────────────────────────────────────
@@ -1569,58 +1786,47 @@ function render(){
 
   // ── CARTA ASTRAL ──────────────────────────────────────────────
   else if(D.step==='astro'){
-    var astro=calcAstro();
-    bd.appendChild(E.el('div',{cls:'st',txt:'\u2728 Modulo Recreativo'}));
-
-    // Disclaimer
-    var disc=mkDiv('background:rgba(212,168,67,.08);border:1px solid rgba(212,168,67,.2);border-radius:12px;padding:12px;margin-bottom:16px');
-    disc.appendChild(mkTxt('div',null,'\u26A0\uFE0F Contenido recreativo','font-size:10px;color:#d4a843;font-weight:bold;margin-bottom:4px'));
-    disc.appendChild(mkTxt('div',null,'La astrolog\u00EDa y la numerolog\u00EDa son pseudociencias. Este m\u00F3dulo no tiene sustento cient\u00EDfico y existe \u00FAnicamente como espacio l\u00FAdico y creativo. No debe usarse como gu\u00EDa para decisiones sobre la salud, educaci\u00F3n o crianza de Cefe.','font-size:11px;color:#a89070;line-height:1.5'));
-    bd.appendChild(disc);
-
-    // Astro card
-    var ac=E.div('card');
-    ac.appendChild(mkTxt('div',null,'Carta Astral de '+D.bebe.apodo,'font-size:16px;font-weight:bold;color:#f0d9a0;margin-bottom:4px'));
-    ac.appendChild(mkTxt('div',null,D.bebe.fn+' \u00B7 '+D.bebe.hora+'hs \u00B7 San Isidro, Buenos Aires','font-size:10px;color:#a89070;margin-bottom:16px'));
-
-    var astRow=mkDiv('display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px');
-    var mkAstro=function(emoji,label,val){
-      var d=mkDiv('background:rgba(255,255,255,.04);border:1px solid rgba(210,175,120,.1);border-radius:10px;padding:10px;text-align:center');
-      d.appendChild(mkTxt('div',null,emoji,'font-size:20px;margin-bottom:3px'));
-      d.appendChild(mkTxt('div',null,val,'font-size:13px;font-weight:bold;color:#f0d9a0'));
-      d.appendChild(mkTxt('div',null,label,'font-size:9px;color:#a89070;text-transform:uppercase;letter-spacing:1px'));
-      return d;
-    };
-    astRow.appendChild(mkAstro('\u2600\uFE0F','Sol',astro.signo+' \u2665'));
-    astRow.appendChild(mkAstro('\uD83C\uDF19','Luna',astro.luna));
-    astRow.appendChild(mkAstro('\u2B50','Asc.',astro.ascendente));
-    ac.appendChild(astRow);
-
-    var mkSection=function(title,txt){
-      var s=mkDiv('margin-bottom:14px');
-      s.appendChild(mkTxt('div',null,title,'font-size:11px;font-weight:bold;color:#d4a843;margin-bottom:6px'));
-      s.appendChild(mkTxt('div',null,txt,'font-size:12px;color:#d4c090;line-height:1.6'));
-      return s;
-    };
-    ac.appendChild(mkSection('\u2600\uFE0F Sol en Aries \u2014 El Pionero',astro.descripcionSigno));
-    ac.appendChild(mkSection('\uD83C\uDF19 Luna en Tauro \u2014 Vida emocional',astro.descripcionLuna));
-    ac.appendChild(mkSection('\u2B50 Ascendente Capricornio',astro.descripcionAsc));
-    ac.appendChild(mkSection('\uD83D\uDCA1 La combinacion',astro.descripcionCombinada));
-    bd.appendChild(ac);
-
-    // Numerologia
-    var nc2=E.div('card');
-    nc2.appendChild(mkTxt('div',null,'Numerolog\u00EDa de Cefe','font-size:16px;font-weight:bold;color:#f0d9a0;margin-bottom:12px'));
-    var numBox=mkDiv('background:rgba(180,140,220,.1);border:1px solid rgba(180,140,220,.3);border-radius:12px;padding:16px;text-align:center;margin-bottom:14px');
-    numBox.appendChild(mkTxt('div',null,'N\u00FAmero de Vida','font-size:9px;color:#a89070;text-transform:uppercase;letter-spacing:2px;margin-bottom:6px'));
-    numBox.appendChild(mkTxt('div',null,String(astro.numerologia),'font-size:48px;font-weight:bold;color:#b48cdc'));
-    numBox.appendChild(mkTxt('div',null,'29/03/2026 \u2192 2+9+0+3+2+0+2+6 = 24 \u2192 2+4 = 6','font-size:10px;color:#a89070;margin-top:6px'));
-    nc2.appendChild(numBox);
-    nc2.appendChild(mkTxt('div',null,astro.descripcionNum,'font-size:12px;color:#d4c090;line-height:1.6'));
-    bd.appendChild(nc2);
+    bd.appendChild(E.el('div',{cls:'st',txt:'\u2728 M\u00f3dulo Recreativo'}));
+    renderModuloRecreativo(bd);
   }
-}
 
+
+  else if(D.step==='actividades'){
+    bd.appendChild(E.el('div',{cls:'st',txt:'🌟 Actividades de la semana'}));
+    var act=getActividades(),sw=ageW();
+    bd.appendChild(mkTxt('div',null,act.titulo,'font-size:14px;font-weight:bold;color:#f0d9a0;margin-bottom:4px'));
+    bd.appendChild(mkTxt('div',null,'Semana '+sw+' · Foco: '+act.foco,'font-size:11px;color:#a89070;margin-bottom:16px'));
+    act.actividades.forEach(function(a){
+      var c=E.div('card'),hd=mkDiv('display:flex;align-items:center;gap:10px;margin-bottom:8px');
+      hd.appendChild(mkTxt('span',null,a.ic,'font-size:24px;flex-shrink:0'));
+      var right=E.div('');right.style.flex='1';
+      right.appendChild(mkTxt('div',null,a.label,'font-size:14px;font-weight:bold;color:#f0d9a0;margin-bottom:3px'));
+      right.appendChild(mkTxt('div',null,a.desc,'font-size:12px;color:#d4c090;line-height:1.6'));
+      hd.appendChild(right);c.appendChild(hd);bd.appendChild(c);
+    });
+    bd.appendChild(mkTxt('div',null,'📚 AAP / SAP / Denver II / Brazelton','font-size:10px;color:#a89070;margin-top:8px;text-align:center'));
+  }
+
+  else if(D.step==='vacunas'){
+    bd.appendChild(E.el('div',{cls:'st',txt:'💉 Vacunas de Cefe'}));
+    bd.appendChild(mkTxt('div',null,'Calendario Nacional Argentina 2024. Tap para marcar como aplicada.','font-size:11px;color:#a89070;margin-bottom:16px;line-height:1.5'));
+    var mesActual=Math.floor(ageD()/30.4);
+    VACUNAS_ARG.forEach(function(v){
+      var st=getVacunaStatus(v),isDue=!v.dia&&v.mes<=mesActual;
+      var c=mkDiv('border-radius:12px;padding:11px 12px;margin-bottom:8px;display:flex;align-items:flex-start;gap:10px;cursor:pointer;background:rgba(255,255,255,.03);border:1px solid rgba('+(st.done?'100,200,180,.3':isDue?'220,140,160,.25':'210,175,120,.1')+')');
+      c.dataset.action='toggleVacuna';c.dataset.id=v.id;c.dataset.done=st.done?'1':'0';
+      c.appendChild(mkTxt('span',null,st.done?'✅':isDue?'⚠️':'🔘','font-size:20px;flex-shrink:0;margin-top:2px'));
+      var info=E.div('');info.style.flex='1';
+      info.appendChild(mkTxt('div',null,v.nombre,'font-size:13px;font-weight:bold;color:'+(st.done?'#64c8b4':isDue?'#e07070':'#f0d9a0')));
+      info.appendChild(mkTxt('div',null,(v.dia?'Al nacer':'A los '+v.mes+' mes'+(v.mes!==1?'es':''))+(st.fechaStr?' · '+st.fechaStr:'')+(st.done?' ✔ Aplicada':''),'font-size:10px;color:#a89070;margin-top:2px'));
+      info.appendChild(mkTxt('div',null,v.desc,'font-size:11px;color:#c4b090;margin-top:4px;line-height:1.4'));
+      c.appendChild(info);bd.appendChild(c);
+    });
+    bd.appendChild(mkTxt('div',null,'📋 Ministerio de Salud de la Nación Argentina (2024)','font-size:10px;color:#a89070;margin-top:8px;text-align:center'));
+  }
+
+
+}
 // ─── NAVIGATION HELPERS ───────────────────────────────────────
 // These are called from handleAction for steps not covered by main switch
 document.addEventListener('click', function(ev) {
@@ -1632,7 +1838,16 @@ document.addEventListener('click', function(ev) {
         case 'goSintomas': setStep('sintomas'); return;
         case 'goHitos': setStep('hitos'); return;
         case 'goCartas': setStep('cartas'); return;
-        case 'goAstro': setStep('astro'); return;
+        case 'goAstro': closeMasMenu(); setStep('astro'); return;
+        case 'goActividades': closeMasMenu(); setStep('actividades'); return;
+        case 'goVacunas': closeMasMenu(); setStep('vacunas'); return;
+        case 'goNotas': closeMasMenu(); setStep('notas'); return;
+        case 'goSintomas': closeMasMenu(); setStep('sintomas'); return;
+        case 'goHitos': closeMasMenu(); setStep('hitos'); return;
+        case 'goCartas': closeMasMenu(); setStep('cartas'); return;
+        case 'goPerfil': closeMasMenu(); setStep('perfil'); return;
+        case 'goMedicos': closeMasMenu(); setStep('medicos'); return;
+        case 'goExtras': closeMasMenu(); toggleMasMenu(); return;
         case 'goExtras': setStep('extras'); return;
       }
     }
@@ -1645,31 +1860,395 @@ loadData();
 applyNightMode();
 render();
 
+
+// ENTREGA B DATA
+// ═══════════════════════════════════════════════════════════════
+// ENTREGA B — DATA ESTÁTICA
+// Horóscopo diario, Actividades por semana, Vacunas Argentina
+// ═══════════════════════════════════════════════════════════════
+
+// ─── HORÓSCOPO DIARIO (offline, sin API) ──────────────────────
+// Aries con Luna en Tauro — textos rotantes según día del año
+// 4 textos por categoría, rotan semanalmente
+var HORO_ARIES = {
+  energia: [
+    'Cefe irradia una energía pionera hoy. Es un día ideal para intentar algo nuevo juntos: una postura diferente, un nuevo ritual de calma. Su espíritu Aries necesita estímulo, no solo rutina.',
+    'La energía marciana de Aries está activa. Cefe puede estar más inquieto o demandante de lo habitual — no es capricho, es su naturaleza de explorador buscando respuesta. Respondé con presencia.',
+    'Hoy Aries trae determinación. Si Cefe llora con insistencia, confía en que sabe lo que necesita. Su instinto es su guía más honesta en estas primeras semanas.',
+    'Día de impulso ariano. Cefe puede sorprenderlos con un nuevo logro pequeño — un giro de cabeza, un reflejo más marcado. Observen con atención: los pioneros siempre van un paso adelante.'
+  ],
+  luna: [
+    'La Luna en Tauro de Cefe pide hoy lo que siempre pide: contacto físico, calor y ritmo constante. Un rato de piel con piel hace más que cualquier otro estímulo.',
+    'Emocionalmente, Tauro busca seguridad sensorial. El sonido de tu voz, el olor de mamá, la temperatura correcta — hoy más que nunca esos detalles son su mundo entero.',
+    'La Luna taurina trae calma cuando el entorno es predecible. Si Cefe está irritable, revisá cambios en la rutina. La constancia es su idioma emocional.',
+    'Tauro lunar necesita tiempo para procesar. No apresures las tomas ni los cambios de pañal. El ritmo pausado hoy es un regalo para su sistema nervioso.'
+  ],
+  consejo: [
+    'El trío Aries-Tauro-Capricornio de Cefe sugiere hoy: menos estimulación visual, más contacto. Apagá una pantalla y encendé una conversación suave.',
+    'Cefe tiene la energía para liderar (Aries) pero necesita la base segura para hacerlo (Tauro). Hoy: sostené más, corregí menos.',
+    'Día para confiar en tu instinto como papá. Aries sabe sin pensar demasiado. Si algo te parece correcto, probablemente lo es.',
+    'El número 6 de Cefe habla de armonía familiar. Hoy es un buen día para que Manu y Sari se tomen un momento juntos, aunque sea de 10 minutos. La pareja que cuida bien a Cefe, primero se cuida a sí misma.'
+  ]
+};
+
+function getHoroscopo() {
+  var now = new Date();
+  var dayOfYear = Math.floor((now - new Date(now.getFullYear(), 0, 0)) / 86400000);
+  var weekOfYear = Math.floor(dayOfYear / 7);
+  var idx = weekOfYear % 4;
+
+  var meses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  var dias = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+
+  // Energía del día según día de la semana
+  var energiaDia = [
+    {ic:'\u2600\uFE0F', txt:'Día solar — energía alta, ideal para baños y paseos'},
+    {ic:'\uD83C\uDF19', txt:'Día lunar — privilegiá el descanso y el contacto'},
+    {ic:'\uD83D\uDD25', txt:'Día de fuego — estímulo y movimiento suave'},
+    {ic:'\uD83D\uDCA7', txt:'Día de agua — calma, hidratación, lactancia fluida'},
+    {ic:'\u26A1', txt:'Día de aire — conexión, voces, música suave'},
+    {ic:'\uD83C\uDF0D', txt:'Día de tierra — rutina y constancia como ancla'},
+    {ic:'\u2728', txt:'Día de síntesis — todo lo que funciona, repetilo'}
+  ];
+
+  return {
+    fecha: dias[now.getDay()] + ' ' + now.getDate() + ' de ' + meses[now.getMonth()],
+    energia: HORO_ARIES.energia[idx],
+    luna: HORO_ARIES.luna[idx],
+    consejo: HORO_ARIES.consejo[idx],
+    energiaDia: energiaDia[now.getDay()]
+  };
+}
+
+// ─── ACTIVIDADES POR SEMANA ────────────────────────────────────
+// Fuentes: AAP, SAP, Denver II, Brazelton
+var ACTIVIDADES = {
+  0: {
+    titulo: 'Semana 0-1 — Llegada al mundo',
+    foco: 'Adaptación y vínculo',
+    actividades: [
+      {ic:'\uD83E\uDD0D', label:'Piel con piel', desc:'30-60 min/día sobre el pecho de mamá o papá. Regula temperatura, respiración y cortisol.'},
+      {ic:'\uD83D\uDC41\uFE0F', label:'Contacto visual', desc:'A 20-30cm de distancia. El recién nacido enfoca mejor a esa distancia. Hablale despacio.'},
+      {ic:'\uD83C\uDFB5', label:'Voz y canciones', desc:'Tu voz ya la conoce del útero. Cantale o hablale suavemente, especialmente durante el baño.'},
+      {ic:'\uD83E\uDD4C', label:'Masaje suave post baño', desc:'Movimientos circulares en panza (sentido horario) para cólicos. Evitá zonas de cordón umbilical.'},
+      {ic:'\uD83D\uDCA4', label:'Dejar dormir', desc:'Dormir ES desarrollarse. No fuerces la vigilia. Los ciclos de sueño REM son cuando se forma el cerebro.'}
+    ]
+  },
+  1: {
+    titulo: 'Semana 1-2 — Primeros reflejos',
+    foco: 'Estimulación sensorial suave',
+    actividades: [
+      {ic:'\uD83D\uDC76', label:'Tiempo boca abajo supervisado', desc:'2-3 min cuando está despierto y alerta. Base del desarrollo motor futuro. Siempre con adulto presente.'},
+      {ic:'\uD83D\uDEFC', label:'Movimiento rítmico', desc:'Balancealo suavemente en brazos o en fular. El movimiento vestibular calma y organiza el sistema nervioso.'},
+      {ic:'\uD83C\uDFB6', label:'Música clásica suave', desc:'Mozart, Vivaldi o música tranquila. Volumen bajo (como conversación normal). No más de 20 min seguidos.'},
+      {ic:'\uD83D\uDC41\uFE0F', label:'Seguimiento visual', desc:'Mové un objeto rojo o negro y blanco lentamente a 25cm. Observá si intenta seguirlo con los ojos.'},
+      {ic:'\uD83E\uDD0F', label:'Masaje en manos y pies', desc:'Estimula terminaciones nerviosas. Aflojá los puños suavemente. Masajeá cada dedo por separado.'}
+    ]
+  },
+  2: {
+    titulo: 'Semana 2-3 — Despertar social',
+    foco: 'Interacción y reconocimiento',
+    actividades: [
+      {ic:'\uD83D\uDE03', label:'Provocar la primera sonrisa', desc:'Todavía es refleja, pero tu cara a 20cm haciendo expresiones exageradas puede lograrlo. Es normal si no aparece hasta la semana 6.'},
+      {ic:'\uD83D\uDDE3\uFE0F', label:'Narrar la rutina', desc:'"Ahora te cambiamos el pañal, ¿sentís el fresquito?" Asociar palabras a sensaciones es base del lenguaje.'},
+      {ic:'\uD83C\uDF1F', label:'Estimulación visual contrastes', desc:'Tarjetas o dibujos en blanco y negro. A esta edad el sistema visual responde mejor a alto contraste.'},
+      {ic:'\uD83D\uDEBF', label:'Baño como terapia', desc:'Agua a 36-37°C. Hablale durante todo el proceso. El agua es un ambiente familiar para Cefe.'},
+      {ic:'\uD83D\uDC89', label:'Tiempo al aire libre', desc:'10-15 min de luz natural (no sol directo) ayuda a regular el ritmo circadiano y sintetizar vitamina D.'}
+    ]
+  },
+  3: {
+    titulo: 'Semana 3-4 — Primer mes',
+    foco: 'Patrones y rutina',
+    actividades: [
+      {ic:'\uD83D\uDD54', label:'Instalar rutina día/noche', desc:'Luz natural durante el día, oscuridad y silencio de noche. El cerebro empieza a distinguir ciclos.'},
+      {ic:'\uD83E\uDD31', label:'Porteo funcional', desc:'Fular o mochila ergonómica. Libera las manos y mantiene a Cefe en posición ideal para su cadera.'},
+      {ic:'\uD83C\uDFB9', label:'Tiempo de piso boca abajo', desc:'Aumentar a 3-5 min si tolera. Poneté a su nivel y hablale. Es su primera "sala de musculación".'},
+      {ic:'\uD83D\uDE48', label:'Imitación facial', desc:'Sacá la lengua despacio. Algunos bebés de 3-4 semanas ya imitan. Si lo hace, es un hito precoz de conexión.'},
+      {ic:'\uD83D\uDCF5', label:'Reducir estimulación si llora', desc:'A veces el llanto del final del día es por exceso de input. Luces bajas, silencio y pecho es el mejor reset.'}
+    ]
+  },
+  4: {
+    titulo: 'Semana 4-6 — Cólicos y saltos',
+    foco: 'Manejo del malestar y estimulación progresiva',
+    actividades: [
+      {ic:'\uD83E\uDD86', label:'Posición "avioncito"', desc:'Boca abajo sobre tu antebrazo, cabeza en tu mano, piernas a cada lado del codo. Presión en panza alivia cólicos.'},
+      {ic:'\uD83D\uDD0A', label:'Ruido blanco', desc:'Aspiradora, secador de cabello grabado, o apps de white noise. Recuerda el ruido del útero (85dB). Calma rápido.'},
+      {ic:'\uD83D\uDC63', label:'Pedaleo de piernas', desc:'Boca arriba, mové sus piernas como en bicicleta suavemente. Ayuda a liberar gases y fortalece caderas.'},
+      {ic:'\uD83D\uDC4B', label:'Refuerzo de prensión', desc:'Pone tu dedo en su palma. Va a apretar. Es el reflejo de prensión Palmer — empezará a volverse voluntario.'},
+      {ic:'\uD83C\uDFE1', label:'Paseos cortos', desc:'El pediatra dando el OK, salir 15-20 min. El cambio de ambiente estimula nuevas conexiones sensoriales.'}
+    ]
+  },
+  6: {
+    titulo: 'Semana 6-8 — Primera sonrisa social',
+    foco: 'Comunicación y vínculo consciente',
+    actividades: [
+      {ic:'\uD83D\uDE04', label:'Provocar sonrisa social', desc:'Aparece entre semana 6-8. Requiere contacto visual sostenido y tu voz. Es un hito neurológico, no estético.'},
+      {ic:'\uD83D\uDC40', label:'Seguimiento visual 180°', desc:'Mové un objeto lentamente de un lado al otro a 30cm. Debe seguirlo con los ojos de lado a lado.'},
+      {ic:'\uD83C\uDF99\uFE0F', label:'Vocalizaciones — turno y turno', desc:'Hacé un sonido, esperá su respuesta (sea cual sea), respondé. Primer protocolo de conversación.'},
+      {ic:'\uD83E\uDDD8', label:'Yoga de bebé', desc:'Extensión suave de brazos, rotación de caderas, "cobra" asistida. Con un adulto siempre guiando.'},
+      {ic:'\uD83D\uDCD6', label:'Primer libro de tela', desc:'Libros con caras, colores primarios y texturas. Nombrá lo que ven. No importa que "no entienda" — importa la voz.'}
+    ]
+  },
+  8: {
+    titulo: 'Semana 8-12 — Descubriendo el mundo',
+    foco: 'Coordinación y exploración',
+    actividades: [
+      {ic:'\uD83E\uDD32', label:'Tummy time 10 min/día', desc:'Ya debería levantar la cabeza 45°. Si no lo logra, consultá al pediatra. Base de toda la cadena motora futura.'},
+      {ic:'\uD83C\uDF88', label:'Móvil sobre la cuna', desc:'A 30cm, colores primarios, movimiento lento. No más de 15 min. Evitá los muy complejos o ruidosos.'},
+      {ic:'\uD83C\uDFBC', label:'Escucha activa musical', desc:'Cambiar géneros — clásico, folclore, jazz suave. El cerebro musical se construye desde ahora.'},
+      {ic:'\uD83D\uDC4C', label:'Apertura progresiva de manos', desc:'El reflejo de prensión se relaja. Empezá a poner objetos livianos en su mano. Los soltará enseguida.'},
+      {ic:'\uD83C\uDF3F', label:'Naturaleza y texturas', desc:'Grass, hojas, telas distintas. Con supervisión, dejar que sus manos toquen diferentes superficies.'}
+    ]
+  },
+  12: {
+    titulo: 'Semana 12+ — Bebé interactivo',
+    foco: 'Interacción plena y motricidad',
+    actividades: [
+      {ic:'\uD83E\uDD73', label:'Juego cara a cara', desc:'Imitación mutua, turnos de sonido, escondite simple. La reciprocidad social ya está instalada.'},
+      {ic:'\uD83C\uDFAF', label:'Objetos de contraste y texturas', desc:'Sonajeros, anillos de dentición, pelotas blandas. Enfocarse en lo táctil y sonoro más que en lo visual.'},
+      {ic:'\uD83D\uDEB6', label:'Estimulación motora activa', desc:'Resistencia suave en pies y manos. Ayudarlo a "pararse" (solo con soporte total). Le encanta la sensación.'},
+      {ic:'\uD83D\uDCAC', label:'Hablarle todo el tiempo', desc:'Narrar cada acción. "Ahora te pongo la remera azul, ¿ves? Azul." El vocabulario pasivo se construye ahora.'},
+      {ic:'\uD83C\uDF0A', label:'Agua lúdica', desc:'Baño como juego. Temperatura ideal, salpicaduras suaves con la mano. Base para nadar en el futuro.'}
+    ]
+  }
+};
+
+function getActividades() {
+  var semana = typeof ageW === 'function' ? ageW() : 0;
+  // Find the closest week bracket
+  var keys = [0,1,2,3,4,6,8,12];
+  var best = 0;
+  for (var i = 0; i < keys.length; i++) {
+    if (semana >= keys[i]) best = keys[i];
+    else break;
+  }
+  return ACTIVIDADES[best] || ACTIVIDADES[0];
+}
+
+// ─── VACUNAS ARGENTINA (Calendario Nacional 2024) ─────────────
+var VACUNAS_ARG = [
+  // RN
+  {id:'v01', nombre:'Hepatitis B (1° dosis)',       mes:0,  dia:true,  desc:'Al nacer. Protege contra hepatitis B.'},
+  {id:'v02', nombre:'BCG',                           mes:0,  dia:true,  desc:'Al nacer. Protege contra tuberculosis grave.'},
+  // 2 meses
+  {id:'v03', nombre:'Pentavalente (1° dosis)',       mes:2,  desc:'DTP + Hib + Hepatitis B. Incluye difteria, tétanos, coqueluche, Haemophilus influenzae b.'},
+  {id:'v04', nombre:'Salk IPV (1° dosis)',           mes:2,  desc:'Polio inactivada.'},
+  {id:'v05', nombre:'Neumococo 13 (1° dosis)',       mes:2,  desc:'Protege contra neumonía y meningitis neumocócica.'},
+  {id:'v06', nombre:'Rotavirus (1° dosis)',           mes:2,  desc:'Diarrea grave por rotavirus. Se toma vía oral.'},
+  {id:'v07', nombre:'Meningococo B (1° dosis)',      mes:2,  desc:'Protege contra meningitis por meningococo B.'},
+  // 3 meses
+  {id:'v08', nombre:'Meningococo C (1° dosis)',      mes:3,  desc:'Protege contra meningitis meningocócica C.'},
+  // 4 meses
+  {id:'v09', nombre:'Pentavalente (2° dosis)',       mes:4,  desc:'Segunda dosis. Ver 2 meses.'},
+  {id:'v10', nombre:'Salk IPV (2° dosis)',           mes:4,  desc:'Segunda dosis de polio.'},
+  {id:'v11', nombre:'Neumococo 13 (2° dosis)',       mes:4,  desc:'Segunda dosis.'},
+  {id:'v12', nombre:'Rotavirus (2° dosis)',           mes:4,  desc:'Segunda dosis oral.'},
+  {id:'v13', nombre:'Meningococo B (2° dosis)',      mes:4,  desc:'Segunda dosis.'},
+  // 5 meses
+  {id:'v14', nombre:'Meningococo C (2° dosis)',      mes:5,  desc:'Segunda dosis.'},
+  // 6 meses
+  {id:'v15', nombre:'Pentavalente (3° dosis)',       mes:6,  desc:'Tercera dosis.'},
+  {id:'v16', nombre:'Salk IPV (3° dosis)',           mes:6,  desc:'Tercera dosis.'},
+  {id:'v17', nombre:'Influenza (anual)',              mes:6,  desc:'Gripe. A partir de los 6 meses, anual. Primera vez: 2 dosis con 4 semanas de diferencia.'},
+  // 12 meses
+  {id:'v18', nombre:'SRP (triple viral)',             mes:12, desc:'Sarampión, rubéola y parotiditis (paperas).'},
+  {id:'v19', nombre:'Neumococo 13 (refuerzo)',       mes:12, desc:'Dosis de refuerzo.'},
+  {id:'v20', nombre:'Meningococo B (refuerzo)',      mes:12, desc:'Dosis de refuerzo.'},
+  {id:'v21', nombre:'Hepatitis A (1° dosis)',        mes:12, desc:'Primera dosis de hepatitis A.'},
+  // 15 meses
+  {id:'v22', nombre:'Varicela (1° dosis)',            mes:15, desc:'Primera dosis de varicela.'},
+  {id:'v23', nombre:'Meningococo ACYW (1° dosis)',   mes:15, desc:'Meningococo conjugado cuadrivalente.'},
+  // 18 meses
+  {id:'v24', nombre:'Pentavalente (refuerzo)',       mes:18, desc:'Refuerzo DTP + Hib + HepB.'},
+  {id:'v25', nombre:'Sabin (refuerzo)',              mes:18, desc:'Refuerzo polio oral.'},
+];
+
+function getVacunaStatus(v) {
+  var fn = D.bebe.fn ? new Date(D.bebe.fn) : new Date('2026-03-29');
+  var fechaVac = new Date(fn);
+  if (v.dia) {
+    // Vacuna de RN — ya se aplicó al nacer
+    if (v.id === 'v01') return {done: !!D.bebe.vacHepB, fecha: D.bebe.vacHepB || null};
+    if (v.id === 'v02') return {done: !!D.bebe.vacBCG, fecha: D.bebe.vacBCG || null};
+    return {done: false, fecha: null};
+  }
+  fechaVac.setMonth(fechaVac.getMonth() + v.mes);
+  var now = new Date();
+  var due = fechaVac <= now;
+  // Check if manually marked in D.bebe.vacunas
+  var marcada = D.bebe.vacunas && D.bebe.vacunas[v.id];
+  return {
+    done: !!marcada,
+    fecha: fechaVac,
+    due: due,
+    fechaStr: fechaVac.toLocaleDateString('es-AR', {day:'2-digit', month:'2-digit', year:'numeric'})
+  };
+}
+
+function markVacuna(id, done) {
+  if (!D.bebe.vacunas) D.bebe.vacunas = {};
+  if (done) D.bebe.vacunas[id] = new Date().toISOString();
+  else delete D.bebe.vacunas[id];
+  saveData();
+  render();
+}
+
+
+// ENTREGA B SCREENS
+// ═══════════════════════════════════════════════════════════════
+// ENTREGA B — PANTALLAS DE RENDER
+// Reemplaza el bloque "astro" existente con el módulo completo
+// ═══════════════════════════════════════════════════════════════
+
+// Esta función reemplaza el bloque D.step==='astro' en render()
+function renderModuloRecreativo(bd) {
+
+  // ── DISCLAIMER ──────────────────────────────────────────────
+  var disc = mkDiv('background:rgba(212,168,67,.08);border:1px solid rgba(212,168,67,.2);border-radius:12px;padding:10px 12px;margin-bottom:16px');
+  disc.appendChild(mkTxt('div',null,'\u26A0\uFE0F M\u00F3dulo recreativo \u2014 pseudociencia con disclaimer','font-size:10px;color:#d4a843;font-weight:bold;margin-bottom:3px'));
+  disc.appendChild(mkTxt('div',null,'Astrolog\u00EDa, numerolog\u00EDa y hor\u00F3scopo son contenido l\u00FAdico sin base cient\u00EDfica. No deben usarse para decisiones de salud o crianza.','font-size:11px;color:#a89070;line-height:1.5'));
+  bd.appendChild(disc);
+
+  // ── TABS internos ────────────────────────────────────────────
+  var tabRow = mkDiv('display:flex;gap:6px;margin-bottom:16px');
+  var subTabs = [
+    {k:'horoscopo', ic:'\u2728', lbl:'Hor\u00F3scopo'},
+    {k:'carta',     ic:'\uD83C\uDF20', lbl:'Carta astral'},
+    {k:'numeros',   ic:'\uD83D\uDD2E', lbl:'Numerolog\u00EDa'},
+  ];
+  var activeSub = D.astroTab || 'horoscopo';
+  subTabs.forEach(function(t) {
+    var btn = E.btn('fb' + (activeSub===t.k ? ' on' : ''), t.ic + ' ' + t.lbl, 'setAstroTab');
+    btn.dataset.k = t.k;
+    tabRow.appendChild(btn);
+  });
+  bd.appendChild(tabRow);
+
+  // ── HORÓSCOPO DIARIO ─────────────────────────────────────────
+  if (activeSub === 'horoscopo') {
+    var h = getHoroscopo();
+    var dateBox = mkDiv('text-align:center;margin-bottom:14px');
+    dateBox.appendChild(mkTxt('div',null,h.fecha,'font-size:13px;font-weight:bold;color:#f0d9a0'));
+    dateBox.appendChild(mkDiv('background:rgba(212,168,67,.15);border:1px solid rgba(212,168,67,.3);border-radius:20px;padding:4px 14px;display:inline-block;margin-top:6px').appendChild(mkTxt('span',null,h.energiaDia.ic + ' ' + h.energiaDia.txt,'font-size:11px;color:#d4c090')) || dateBox);
+    bd.appendChild(dateBox);
+
+    var energiaDayBox = mkDiv('background:rgba(212,168,67,.08);border:1px solid rgba(212,168,67,.15);border-radius:11px;padding:8px 12px;margin-bottom:10px;display:flex;align-items:center;gap:8px');
+    energiaDayBox.appendChild(mkTxt('span',null,h.energiaDia.ic,'font-size:22px;flex-shrink:0'));
+    energiaDayBox.appendChild(mkTxt('span',null,h.energiaDia.txt,'font-size:12px;color:#d4c090;line-height:1.4'));
+    bd.appendChild(energiaDayBox);
+
+    var secs = [
+      {ic:'\u2600\uFE0F', title:'Energ\u00EDa de hoy', txt:h.energia},
+      {ic:'\uD83C\uDF19', title:'Luna en Tauro \u2014 Emocional', txt:h.luna},
+      {ic:'\uD83D\uDCA1', title:'Consejo del d\u00EDa', txt:h.consejo},
+    ];
+    secs.forEach(function(s) {
+      var c = E.div('card');
+      var hd = mkDiv('display:flex;align-items:center;gap:8px;margin-bottom:8px');
+      hd.appendChild(mkTxt('span',null,s.ic,'font-size:20px'));
+      hd.appendChild(mkTxt('span',null,s.title,'font-size:13px;font-weight:bold;color:#d4a843'));
+      c.appendChild(hd);
+      c.appendChild(mkTxt('div',null,s.txt,'font-size:12px;color:#d4c090;line-height:1.7'));
+      bd.appendChild(c);
+    });
+  }
+
+  // ── CARTA ASTRAL ─────────────────────────────────────────────
+  else if (activeSub === 'carta') {
+    var astro = calcAstro();
+    var ac = E.div('card');
+    ac.appendChild(mkTxt('div',null,'Carta Astral de ' + D.bebe.apodo,'font-size:16px;font-weight:bold;color:#f0d9a0;margin-bottom:4px'));
+    ac.appendChild(mkTxt('div',null,D.bebe.fn+' \u00B7 '+D.bebe.hora+'hs \u00B7 San Isidro, Buenos Aires','font-size:10px;color:#a89070;margin-bottom:14px'));
+    var astRow = mkDiv('display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px');
+    var mkAstro = function(emoji,label,val) {
+      var d = mkDiv('background:rgba(255,255,255,.04);border:1px solid rgba(210,175,120,.1);border-radius:10px;padding:10px;text-align:center');
+      d.appendChild(mkTxt('div',null,emoji,'font-size:20px;margin-bottom:3px'));
+      d.appendChild(mkTxt('div',null,val,'font-size:13px;font-weight:bold;color:#f0d9a0'));
+      d.appendChild(mkTxt('div',null,label,'font-size:9px;color:#a89070;text-transform:uppercase;letter-spacing:1px'));
+      return d;
+    };
+    astRow.appendChild(mkAstro('\u2600\uFE0F','Sol',astro.signo));
+    astRow.appendChild(mkAstro('\uD83C\uDF19','Luna',astro.luna));
+    astRow.appendChild(mkAstro('\u2B50','Asc.',astro.ascendente));
+    ac.appendChild(astRow);
+    var mkSec = function(title,txt) {
+      var s = mkDiv('margin-bottom:14px');
+      s.appendChild(mkTxt('div',null,title,'font-size:11px;font-weight:bold;color:#d4a843;margin-bottom:6px'));
+      s.appendChild(mkTxt('div',null,txt,'font-size:12px;color:#d4c090;line-height:1.6'));
+      return s;
+    };
+    ac.appendChild(mkSec('\u2600\uFE0F Sol en Aries \u2014 El Pionero',astro.descripcionSigno));
+    ac.appendChild(mkSec('\uD83C\uDF19 Luna en Tauro \u2014 Vida emocional',astro.descripcionLuna));
+    ac.appendChild(mkSec('\u2B50 Ascendente Capricornio',astro.descripcionAsc));
+    ac.appendChild(mkSec('\uD83D\uDCA1 La combinaci\u00F3n',astro.descripcionCombinada));
+    bd.appendChild(ac);
+  }
+
+  // ── NUMEROLOGÍA ───────────────────────────────────────────────
+  else if (activeSub === 'numeros') {
+    var astro2 = calcAstro();
+    var nc = E.div('card');
+    nc.appendChild(mkTxt('div',null,'Numerolog\u00EDa de Cefe','font-size:16px;font-weight:bold;color:#f0d9a0;margin-bottom:12px'));
+    var numBox = mkDiv('background:rgba(180,140,220,.1);border:1px solid rgba(180,140,220,.3);border-radius:12px;padding:16px;text-align:center;margin-bottom:14px');
+    numBox.appendChild(mkTxt('div',null,'N\u00FAmero de Vida','font-size:9px;color:#a89070;text-transform:uppercase;letter-spacing:2px;margin-bottom:6px'));
+    numBox.appendChild(mkTxt('div',null,String(astro2.numerologia),'font-size:48px;font-weight:bold;color:#b48cdc'));
+    numBox.appendChild(mkTxt('div',null,'29/03/2026 \u2192 2+9+0+3+2+0+2+6 = 24 \u2192 2+4 = 6','font-size:10px;color:#a89070;margin-top:6px'));
+    nc.appendChild(numBox);
+    nc.appendChild(mkTxt('div',null,astro2.descripcionNum,'font-size:12px;color:#d4c090;line-height:1.6'));
+    bd.appendChild(nc);
+  }
+}
+
+// Handler para cambio de tab interno en astro
+// (se agrega al handleAction existente)
+function setAstroTab(k) {
+  D.astroTab = k;
+  render();
+}
+
 </script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 var cfg={apiKey:"AIzaSyC5iVBZbLlD0a7yVRx4eDg6pOjRKNO28kA",authDomain:"cefe-app.firebaseapp.com",databaseURL:"https://cefe-app-default-rtdb.firebaseio.com",projectId:"cefe-app",storageBucket:"cefe-app.firebasestorage.app",messagingSenderId:"40391677831",appId:"1:40391677831:web:3640958b4450f2cd5ae522"};
 var app=initializeApp(cfg);var db=getDatabase(app);
-var dot=document.getElementById('sync-dot');
+var dot=document.getElementById('sync-dot');var fbReady=false;
 function setDot(c,t){if(dot){dot.style.color=c;dot.title=t||'';}}
+function restoreDate(v){if(!v)return null;var d=new Date(v);return isNaN(d.getTime())?null:d;}
+function restoreEntry(e){
+  if(!e)return null;
+  try{
+    if(e.type==='toma'){var s=restoreDate(e.s);if(!s)return null;e.s=s;e.e=restoreDate(e.e)||new Date(s.getTime()+(e.tot||0)*60000);e.nt=restoreDate(e.nt)||new Date(s.getTime()+180*60000);}
+    if(e.type==='panal'){var t=restoreDate(e.t);if(!t)return null;e.t=t;}
+  }catch(ex){return null;}
+  return e;
+}
 window.fbSave=function(data){
+  if(!fbReady)return;
   setDot('#d4a843','Guardando...');
   set(ref(db,'cefe'),data).then(function(){setDot('#64c8b4','Sincronizado');}).catch(function(){setDot('#e07070','Error');});
 };
-function pe(e){if(!e)return null;try{if(e.type==='toma'){e.s=new Date(e.s);e.e=new Date(e.e);e.nt=new Date(e.nt);}if(e.type==='panal'){e.t=new Date(e.t);}}catch(ex){}return e;}
 onValue(ref(db,'cefe'),function(snap){
-  var data=snap.val();
-  if(!data){setDot('#64c8b4','Conectado');return;}
-  if(data.hist)D.hist=data.hist.map(pe).filter(Boolean);
-  if(data.pesos)D.pesos=data.pesos.map(function(p){if(p)p.t=new Date(p.t);return p;}).filter(Boolean);
-  if(data.meds)D.meds=data.meds.filter(Boolean);
-  if(data.visits)D.visits=data.visits.map(function(v){if(v)v.dt=new Date(v.dt);return v;}).filter(Boolean);
-  if(data.bebe)D.bebe=data.bebe;
-  if(data.padres)D.padres=data.padres.filter(Boolean);
+  var data=snap.val();fbReady=true;
+  if(!data){setDot('#64c8b4','Conectado');if(typeof render==='function')render();return;}
+  if(data.hist&&Array.isArray(data.hist))D.hist=data.hist.map(restoreEntry).filter(Boolean);
+  if(data.pesos&&Array.isArray(data.pesos))D.pesos=data.pesos.map(function(p){if(!p)return null;var t=restoreDate(p.t);if(!t)return null;return{t:t,g:p.g,n:p.n||''};}).filter(Boolean);
+  if(data.meds&&Array.isArray(data.meds))D.meds=data.meds.filter(Boolean);
+  if(data.visits&&Array.isArray(data.visits))D.visits=data.visits.map(function(v){if(!v)return null;var dt=restoreDate(v.dt);if(!dt)return null;return Object.assign({},v,{dt:dt});}).filter(Boolean);
+  if(data.bebe&&typeof data.bebe==='object')D.bebe=Object.assign({},D.bebe,data.bebe);
+  if(data.padres&&Array.isArray(data.padres))D.padres=data.padres.filter(Boolean);
+  if(data.notas&&Array.isArray(data.notas))D.notas=data.notas.filter(Boolean);
+  if(data.sintomas&&Array.isArray(data.sintomas))D.sintomas=data.sintomas.map(function(s){if(!s)return null;var t=restoreDate(s.t);if(!t)return null;return Object.assign({},s,{t:t});}).filter(Boolean);
+  if(data.hitos&&Array.isArray(data.hitos))D.hitos=data.hitos.filter(Boolean);
+  if(data.cartas&&Array.isArray(data.cartas))D.cartas=data.cartas.filter(Boolean);
+  if(data.sleepLog&&Array.isArray(data.sleepLog))D.sleepLog=data.sleepLog;
+  if(data.sleepStart)D.sleepStart=data.sleepStart;
+  if(typeof data.nightMode==='boolean')D.nightMode=data.nightMode;
+  if(typeof data.alarmMaxInterval==='number')D.alarmMaxInterval=data.alarmMaxInterval;
   setDot('#64c8b4','Sincronizado');
+  if(typeof applyNightMode==='function')applyNightMode();
   if(typeof render==='function')render();
-},function(err){setDot('#e07070','Error Firebase');console.error(err);});
+},function(err){fbReady=true;setDot('#e07070','Error Firebase');console.error(err);});
 </script>
 </body>
 </html>
