@@ -1,0 +1,1910 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Cefe Calendario">
+<meta name="theme-color" content="#0f1923">
+<title>Cefe Calendario</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{min-height:100vh;background:linear-gradient(135deg,#0f1923,#1a2d3d,#0f2030);font-family:Georgia,serif;color:#e8dcc8;display:flex;flex-direction:column;align-items:center;padding-bottom:90px}
+body.night{background:linear-gradient(135deg,#050a0f,#0a1520,#050f18)}
+button{font-family:Georgia,serif;-webkit-appearance:none}
+#app{width:100%;max-width:480px;display:flex;flex-direction:column;min-height:100vh}
+#hdr{padding:14px 18px 10px;border-bottom:1px solid rgba(210,175,120,.2);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:rgba(15,25,35,.95);backdrop-filter:blur(10px);z-index:50}
+.hl{font-size:9px;letter-spacing:3px;color:#a89070;text-transform:uppercase;margin-bottom:2px}
+.hm{font-size:18px;font-weight:bold;color:#f0d9a0}
+.hr{display:flex;gap:6px;align-items:center}
+.tb{background:rgba(255,255,255,.06);border:1px solid rgba(210,175,120,.2);border-radius:10px;padding:5px 9px;color:#a89070;font-size:10px;cursor:pointer}
+.tb.on{background:rgba(212,168,67,.15);border-color:rgba(212,168,67,.4);color:#f0d9a0}
+#bd{padding:16px;flex:1}
+/* ─── BOTTOM NAV ─── */
+#bnav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:rgba(10,18,28,.96);backdrop-filter:blur(12px);border-top:1px solid rgba(210,175,120,.15);display:flex;align-items:stretch;z-index:100;padding-bottom:env(safe-area-inset-bottom,0)}
+.bnav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 0 6px;background:none;border:none;cursor:pointer;color:#a89070;min-height:56px;position:relative;text-decoration:none}
+.bnav-btn.on{color:#f0d9a0}
+.bnav-btn.on::after{content:'';position:absolute;top:0;left:20%;right:20%;height:2px;background:linear-gradient(90deg,#d4a843,#f0d9a0);border-radius:0 0 3px 3px}
+.bnav-ic{font-size:20px;line-height:1;margin-bottom:3px;display:block}
+.bnav-lbl{font-size:9px;letter-spacing:.5px;text-transform:uppercase;font-family:Georgia,serif}
+/* ─── CALENDAR GRID ─── */
+.cal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.cal-title{font-size:18px;font-weight:bold;color:#f0d9a0}
+.cal-nav{background:rgba(255,255,255,.06);border:1px solid rgba(210,175,120,.2);border-radius:10px;padding:6px 12px;color:#d4a843;cursor:pointer;font-size:16px}
+.cal-dow{display:grid;grid-template-columns:repeat(7,1fr);margin-bottom:6px}
+.cal-dow-cell{text-align:center;font-size:9px;color:#a89070;padding:4px 0;text-transform:uppercase;letter-spacing:1px}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:20px}
+.cal-cell{min-height:44px;border-radius:10px;padding:4px;cursor:pointer;position:relative;display:flex;flex-direction:column;align-items:center;transition:background .15s}
+.cal-cell:active{background:rgba(212,168,67,.2)}
+.cal-cell.today{background:rgba(212,168,67,.12);border:1px solid rgba(212,168,67,.3)}
+.cal-cell.selected{background:rgba(212,168,67,.25);border:1px solid rgba(212,168,67,.6)}
+.cal-cell.other-month{opacity:.35}
+.cal-cell.feriado{background:rgba(150,150,150,.08)}
+.cal-cell.celebracion-day{background:rgba(212,168,67,.08);border:1px solid rgba(212,168,67,.25)}
+.cal-day-num.golden{background:linear-gradient(135deg,#d4a843,#f0d9a0);color:#0f1923;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;margin:0 auto;font-weight:bold}
+.cal-day-num{font-size:13px;font-weight:bold;color:#f0d9a0;line-height:1}
+.cal-cell.today .cal-day-num{color:#d4a843}
+.cal-cell.other-month .cal-day-num{color:#666}
+.cal-dots{display:flex;gap:2px;flex-wrap:wrap;justify-content:center;margin-top:3px}
+.cal-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+/* ─── EVENT COLORS ─── */
+.dot-toma{background:#4a9eff}
+.dot-peso{background:#d4a843}
+.dot-vacuna{background:#e07070}
+.dot-vacuna-ok{background:#64c8b4}
+.dot-visita{background:#b48cdc}
+.dot-hito{background:#f0d9a0}
+.dot-feriado{background:#888}
+.dot-nota{background:#64c8b4}
+.dot-sintoma{background:#e07070}
+/* ─── DAY DETAIL ─── */
+.day-detail{background:rgba(255,255,255,.03);border:1px solid rgba(210,175,120,.12);border-radius:16px;padding:14px;margin-bottom:16px}
+.day-detail-title{font-size:13px;font-weight:bold;color:#d4a843;margin-bottom:12px;text-transform:uppercase;letter-spacing:1px}
+.event-row{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid rgba(210,175,120,.08)}
+.event-row:last-child{border-bottom:none}
+.event-dot-big{width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:4px}
+.event-content{flex:1}
+.event-title{font-size:13px;font-weight:bold;color:#f0d9a0;margin-bottom:2px}
+.event-sub{font-size:11px;color:#a89070;line-height:1.5}
+.event-actions{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.event-btn{padding:5px 10px;border-radius:8px;font-size:11px;cursor:pointer;border:none;font-family:Georgia,serif}
+.event-btn.confirm{background:rgba(100,200,180,.2);border:1px solid rgba(100,200,180,.4);color:#64c8b4}
+.event-btn.gcal{background:rgba(66,133,244,.15);border:1px solid rgba(66,133,244,.3);color:#7ab4f5}
+.event-btn.ics{background:rgba(212,168,67,.15);border:1px solid rgba(212,168,67,.3);color:#d4a843}
+.event-btn.share{background:rgba(37,211,102,.15);border:1px solid rgba(37,211,102,.3);color:#25d366}
+.event-btn.edit{background:rgba(255,255,255,.06);border:1px solid rgba(210,175,120,.2);color:#a89070}
+/* ─── LEGEND ─── */
+.legend{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+.legend-item{display:flex;align-items:center;gap:5px;font-size:10px;color:#a89070}
+.legend-dot{width:8px;height:8px;border-radius:50%}
+/* ─── CARDS ─── */
+.card{background:rgba(255,255,255,.04);border:1px solid rgba(210,175,120,.15);border-radius:16px;padding:14px;margin-bottom:12px}
+.slbl{font-size:9px;letter-spacing:3px;color:#a89070;text-transform:uppercase;margin-bottom:8px}
+.pb{border-radius:12px;padding:12px 18px;font-size:13px;font-weight:bold;cursor:pointer;width:100%;display:block;border:none;margin-bottom:8px}
+.pb.go{background:#d4a843;color:#0f1923}
+.pb.gr{background:#25d366;color:#fff}
+.pb.bl{background:rgba(100,150,220,.8);color:#fff}
+.pb.gy{background:#a89070;color:#0f1923}
+.gb{background:transparent;border-radius:12px;padding:10px 18px;font-size:12px;cursor:pointer;width:100%;display:block;margin-top:6px;border:1px solid rgba(210,175,120,.2);color:#a89070}
+.fi{width:100%;background:rgba(255,255,255,.04);border:1px solid rgba(210,175,120,.2);border-radius:10px;padding:10px 12px;color:#e8dcc8;font-family:Georgia,serif;font-size:13px;outline:none}
+.fi::placeholder{color:#a89070}
+.fs{width:100%;background:rgba(20,30,45,.9);border:1px solid rgba(210,175,120,.2);border-radius:10px;padding:10px 12px;color:#e8dcc8;font-family:Georgia,serif;font-size:13px;outline:none;-webkit-appearance:none}
+.ff{margin-bottom:12px}
+.fl{font-size:9px;letter-spacing:2px;color:#a89070;text-transform:uppercase;margin-bottom:5px;display:block}
+.frow{display:flex;gap:10px;margin-bottom:12px}
+.frow .ff{flex:1}
+.bk{background:none;border:none;color:#a89070;cursor:pointer;font-size:12px;padding:0 0 12px 0;display:block}
+.msgbox{background:rgba(37,211,102,.06);border:1px solid rgba(37,211,102,.25);border-radius:14px;padding:14px;margin-bottom:14px;font-size:12px;line-height:1.75;color:#d4e8d0;white-space:pre-wrap}
+.rb{flex:1;border-radius:10px;padding:9px;font-size:12px;cursor:pointer;background:rgba(255,255,255,.05);border:1px solid rgba(210,175,120,.2);color:#a89070;text-align:center}
+.rb.on{background:rgba(212,168,67,.2);border-color:rgba(212,168,67,.5);color:#f0d9a0}
+.notify-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.notify-chip{padding:5px 10px;border-radius:8px;font-size:11px;cursor:pointer;background:rgba(255,255,255,.05);border:1px solid rgba(210,175,120,.2);color:#a89070}
+.notify-chip.on{background:rgba(212,168,67,.15);border-color:rgba(212,168,67,.4);color:#d4a843}
+.upcoming-row{background:rgba(255,255,255,.03);border:1px solid rgba(210,175,120,.1);border-radius:12px;padding:11px;margin-bottom:8px;display:flex;gap:10px;align-items:flex-start}
+.upcoming-date{text-align:center;min-width:44px}
+.upcoming-day-num{font-size:20px;font-weight:bold;color:#f0d9a0;line-height:1}
+.upcoming-day-name{font-size:9px;color:#a89070;text-transform:uppercase}
+.upcoming-content{flex:1}
+.upcoming-title{font-size:13px;font-weight:bold;color:#f0d9a0;margin-bottom:2px}
+.upcoming-sub{font-size:11px;color:#a89070}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="hdr">
+    <div>
+      <div class="hl">Cefe · Calendario</div>
+      <div class="hm">abril de 2026</div>
+    </div>
+    <div class="hr">
+      <span id="sync-dot" style="font-size:9px;color:#d4a843" title="Conectando">●</span>
+      <button class="tb" data-action="goMainApp">← App</button>
+    </div>
+  </div>
+  <div id="bd"></div>
+  <nav id="bnav">
+    <button class="bnav-btn on" data-action="goMes" id="bn-mes">
+      <span class="bnav-ic">📅</span><span class="bnav-lbl">Mes</span>
+    </button>
+    <button class="bnav-btn" data-action="goProximos" id="bn-proximos">
+      <span class="bnav-ic">⏭️</span><span class="bnav-lbl">Próximos</span>
+    </button>
+    <button class="bnav-btn" data-action="goActividades" id="bn-actividades">
+      <span class="bnav-ic">🌟</span><span class="bnav-lbl">Actividades</span>
+    </button>
+    <button class="bnav-btn" data-action="newEvento" id="bn-new">
+      <span class="bnav-ic">+</span><span class="bnav-lbl">Nuevo</span>
+    </button>
+    <a class="bnav-btn" href="cefe-lactancia.html" id="bn-app">
+      <span class="bnav-ic">🏠</span><span class="bnav-lbl">App</span>
+    </a>
+  </nav>
+</div>
+<script>
+
+// ═══════════════════════════════════════════════════════════
+// CEFE CALENDARIO — Módulo independiente
+// Comparte Firebase con cefe-lactancia.html
+// ═══════════════════════════════════════════════════════════
+
+// ─── STATIC DATA ────────────────────────────────────────────
+
+var FERIADOS_ARG = [
+  {
+    "f": "2026-01-01",
+    "n": "Año Nuevo"
+  },
+  {
+    "f": "2026-02-16",
+    "n": "Carnaval"
+  },
+  {
+    "f": "2026-02-17",
+    "n": "Carnaval"
+  },
+  {
+    "f": "2026-03-23",
+    "n": "Día Nac. de la Memoria por la Verdad y la Justicia"
+  },
+  {
+    "f": "2026-04-02",
+    "n": "Día del Veterano y de los Caídos en Malvinas"
+  },
+  {
+    "f": "2026-04-03",
+    "n": "Viernes Santo"
+  },
+  {
+    "f": "2026-05-01",
+    "n": "Día del Trabajador"
+  },
+  {
+    "f": "2026-05-25",
+    "n": "Día de la Revolución de Mayo"
+  },
+  {
+    "f": "2026-06-15",
+    "n": "Paso a la Inmortalidad del Gral. Belgrano"
+  },
+  {
+    "f": "2026-07-09",
+    "n": "Día de la Independencia"
+  },
+  {
+    "f": "2026-08-17",
+    "n": "Paso a la Inmortalidad del Gral. San Martín"
+  },
+  {
+    "f": "2026-10-12",
+    "n": "Día del Respeto a la Diversidad Cultural"
+  },
+  {
+    "f": "2026-11-20",
+    "n": "Día de la Soberanía Nacional"
+  },
+  {
+    "f": "2026-12-08",
+    "n": "Inmaculada Concepción de María"
+  },
+  {
+    "f": "2026-12-25",
+    "n": "Navidad"
+  },
+  {
+    "f": "2027-01-01",
+    "n": "Año Nuevo"
+  },
+  {
+    "f": "2027-03-01",
+    "n": "Carnaval"
+  },
+  {
+    "f": "2027-03-02",
+    "n": "Carnaval"
+  },
+  {
+    "f": "2027-03-24",
+    "n": "Día Nac. de la Memoria por la Verdad y la Justicia"
+  },
+  {
+    "f": "2027-04-02",
+    "n": "Día del Veterano y de los Caídos en Malvinas"
+  },
+  {
+    "f": "2027-04-02",
+    "n": "Viernes Santo"
+  },
+  {
+    "f": "2027-05-03",
+    "n": "Feriado Puente"
+  },
+  {
+    "f": "2027-05-24",
+    "n": "Feriado Puente"
+  },
+  {
+    "f": "2027-05-25",
+    "n": "Día de la Revolución de Mayo"
+  },
+  {
+    "f": "2027-06-20",
+    "n": "Paso a la Inmortalidad del Gral. Belgrano"
+  },
+  {
+    "f": "2027-07-09",
+    "n": "Día de la Independencia"
+  },
+  {
+    "f": "2027-08-16",
+    "n": "Paso a la Inmortalidad del Gral. San Martín"
+  },
+  {
+    "f": "2027-10-11",
+    "n": "Día del Respeto a la Diversidad Cultural"
+  },
+  {
+    "f": "2027-11-22",
+    "n": "Día de la Soberanía Nacional"
+  },
+  {
+    "f": "2027-12-08",
+    "n": "Inmaculada Concepción de María"
+  },
+  {
+    "f": "2027-12-25",
+    "n": "Navidad"
+  },
+  {
+    "f": "2028-01-01",
+    "n": "Año Nuevo"
+  },
+  {
+    "f": "2028-02-28",
+    "n": "Carnaval"
+  },
+  {
+    "f": "2028-02-29",
+    "n": "Carnaval"
+  },
+  {
+    "f": "2028-03-24",
+    "n": "Día Nac. de la Memoria por la Verdad y la Justicia"
+  },
+  {
+    "f": "2028-04-02",
+    "n": "Día del Veterano y de los Caídos en Malvinas"
+  },
+  {
+    "f": "2028-04-14",
+    "n": "Viernes Santo"
+  },
+  {
+    "f": "2028-05-01",
+    "n": "Día del Trabajador"
+  },
+  {
+    "f": "2028-05-25",
+    "n": "Día de la Revolución de Mayo"
+  },
+  {
+    "f": "2028-06-19",
+    "n": "Paso a la Inmortalidad del Gral. Belgrano"
+  },
+  {
+    "f": "2028-07-09",
+    "n": "Día de la Independencia"
+  },
+  {
+    "f": "2028-08-21",
+    "n": "Paso a la Inmortalidad del Gral. San Martín"
+  },
+  {
+    "f": "2028-10-09",
+    "n": "Día del Respeto a la Diversidad Cultural"
+  },
+  {
+    "f": "2028-11-20",
+    "n": "Día de la Soberanía Nacional"
+  },
+  {
+    "f": "2028-12-08",
+    "n": "Inmaculada Concepción de María"
+  },
+  {
+    "f": "2028-12-25",
+    "n": "Navidad"
+  }
+];
+
+var ACTIVIDADES_CAL = {
+  "0": {
+    "titulo": "Semana 0-1 — Llegada al mundo",
+    "foco": "Adaptación, vínculo y regulación",
+    "actividades": [
+      {
+        "ic": "🤍",
+        "label": "Piel con piel",
+        "desc": "30-60 min/día sobre el pecho de mamá o papá. Regula temperatura, frecuencia cardíaca y cortisol. Base del apego seguro."
+      },
+      {
+        "ic": "👁️",
+        "label": "Contacto visual cercano",
+        "desc": "A 20-30cm de distancia — el rango focal del RN. Hablale despacio con tu cara a esa distancia."
+      },
+      {
+        "ic": "🎵",
+        "label": "Voz y canciones conocidas",
+        "desc": "Ya escuchó tu voz en el útero. Cantale o hablale suavemente, especialmente en el baño y el cambio."
+      },
+      {
+        "ic": "💤",
+        "label": "Dejar dormir sin culpa",
+        "desc": "Dormir ES desarrollarse. El sueño REM forma conexiones cerebrales. No fuerces la vigilia."
+      },
+      {
+        "ic": "🤲",
+        "label": "Masaje suave post-baño",
+        "desc": "Movimientos circulares en panza (sentido horario) para cólicos. Evitá la zona umbilical hasta que cicatrice."
+      }
+    ]
+  },
+  "1": {
+    "titulo": "Semana 1-2 — Primeros reflejos",
+    "foco": "Estimulación sensorial suave",
+    "actividades": [
+      {
+        "ic": "👶",
+        "label": "Tiempo boca abajo (Tummy time)",
+        "desc": "2-3 min supervisado cuando está alerta. Base del desarrollo motor. Siempre con adulto presente."
+      },
+      {
+        "ic": "🚗",
+        "label": "Movimiento rítmico (fular/brazos)",
+        "desc": "El movimiento vestibular calma y organiza el sistema nervioso. Lo recuerda del útero."
+      },
+      {
+        "ic": "🎶",
+        "label": "Música suave",
+        "desc": "Clásica, folclore, jazz tranquilo. Volumen bajo. No más de 20 min continuos."
+      },
+      {
+        "ic": "👁️",
+        "label": "Seguimiento visual simple",
+        "desc": "Un objeto rojo o en blanco y negro a 25cm. Movelo lentamente. ¿Lo sigue con los ojos?"
+      },
+      {
+        "ic": "🤏",
+        "label": "Masaje en manos y pies",
+        "desc": "Estimula terminaciones nerviosas. Aflojá los puños suavemente, masajeá cada dedo."
+      }
+    ]
+  },
+  "2": {
+    "titulo": "Semana 2-3 — Despertar social",
+    "foco": "Interacción y reconocimiento",
+    "actividades": [
+      {
+        "ic": "😊",
+        "label": "Provocar la primera sonrisa",
+        "desc": "Es todavía refleja. Tu cara a 20cm haciendo expresiones exageradas puede lograrlo. Normal hasta semana 6."
+      },
+      {
+        "ic": "🗣️",
+        "label": "Narrar la rutina",
+        "desc": "\"Ahora te cambiamos el pañal, sentís el fresquito?\" Asociar palabras a sensaciones es base del lenguaje."
+      },
+      {
+        "ic": "⬛",
+        "label": "Estimulación visual de contraste",
+        "desc": "Tarjetas o dibujos en blanco y negro. El sistema visual a esta edad responde mejor a alto contraste."
+      },
+      {
+        "ic": "🛁",
+        "label": "Baño como terapia sensorial",
+        "desc": "Agua a 36-37°C. Hablale durante todo el proceso. El agua es un ambiente familiar para Cefe."
+      },
+      {
+        "ic": "🌤️",
+        "label": "Luz natural 10-15 min",
+        "desc": "Ayuda a regular el ritmo circadiano y sintetizar vitamina D. Sin sol directo."
+      }
+    ]
+  },
+  "3": {
+    "titulo": "Semana 3-4 — Primer mes",
+    "foco": "Patrones y rutina",
+    "actividades": [
+      {
+        "ic": "🕐",
+        "label": "Instalar rutina día/noche",
+        "desc": "Luz y sonido durante el día, oscuridad y silencio de noche. El cerebro empieza a distinguir ciclos."
+      },
+      {
+        "ic": "🎽",
+        "label": "Porteo funcional",
+        "desc": "Fular o mochila ergonómica. Libera las manos y mantiene la posición ideal para la cadera de Cefe."
+      },
+      {
+        "ic": "🏋️",
+        "label": "Tummy time 3-5 min",
+        "desc": "Aumentar gradualmente. Poneté a su nivel y hablale. Primera \"sala de musculación\"."
+      },
+      {
+        "ic": "😝",
+        "label": "Imitación facial",
+        "desc": "Sacá la lengua despacio. Algunos bebés de 3-4 semanas ya imitan. Hito precoz de conexión social."
+      },
+      {
+        "ic": "📵",
+        "label": "Reducir estimulación al atardecer",
+        "desc": "El llanto del atardecer suele ser por exceso de input. Luces bajas, silencio y pecho: el reset perfecto."
+      }
+    ]
+  },
+  "4": {
+    "titulo": "Semana 4-6 — Cólicos y saltos",
+    "foco": "Manejo del malestar",
+    "actividades": [
+      {
+        "ic": "✈️",
+        "label": "Posición \"avioncito\"",
+        "desc": "Boca abajo sobre tu antebrazo, cabeza en tu mano, piernas a los lados del codo. Presión en panza alivia cólicos."
+      },
+      {
+        "ic": "🔊",
+        "label": "Ruido blanco",
+        "desc": "Aspiradora o apps de white noise. Recuerda el ruido del útero (~85dB). Calma rápido."
+      },
+      {
+        "ic": "🚴",
+        "label": "Pedaleo de piernas",
+        "desc": "Boca arriba, mové sus piernas como en bicicleta. Ayuda a liberar gases y fortalece caderas."
+      },
+      {
+        "ic": "🤜",
+        "label": "Refuerzo de prensión",
+        "desc": "Pone tu dedo en su palma. Va a apretar. El reflejo de prensión Palmer empieza a volverse voluntario."
+      },
+      {
+        "ic": "🏠",
+        "label": "Paseos cortos (con OK del pediatra)",
+        "desc": "15-20 min. El cambio de ambiente estimula nuevas conexiones sensoriales."
+      }
+    ]
+  },
+  "6": {
+    "titulo": "Semana 6-8 — Primera sonrisa social",
+    "foco": "Comunicación consciente",
+    "actividades": [
+      {
+        "ic": "😁",
+        "label": "Provocar sonrisa social",
+        "desc": "Aparece entre semana 6-8. Requiere contacto visual sostenido y tu voz. Hito neurológico clave."
+      },
+      {
+        "ic": "👀",
+        "label": "Seguimiento visual 180°",
+        "desc": "Mové un objeto lentamente de un lado al otro. Debe seguirlo con los ojos en todo el arco."
+      },
+      {
+        "ic": "🎤",
+        "label": "Protocolo de conversación",
+        "desc": "Hacé un sonido, esperá su respuesta (sea cual sea), respondé. Primer turno de conversación."
+      },
+      {
+        "ic": "🧘",
+        "label": "Yoga de bebé asistido",
+        "desc": "Extensión suave de brazos, rotación de caderas. Siempre con un adulto guiando."
+      },
+      {
+        "ic": "📖",
+        "label": "Primer libro de tela",
+        "desc": "Caras, colores primarios, texturas. Nombrá lo que ven. El vocabulario pasivo se construye ahora."
+      }
+    ]
+  },
+  "8": {
+    "titulo": "Semana 8-12 — Descubriendo el mundo",
+    "foco": "Coordinación y exploración",
+    "actividades": [
+      {
+        "ic": "💪",
+        "label": "Tummy time 10 min/día",
+        "desc": "Debe levantar la cabeza 45°. Base de toda la cadena motora futura."
+      },
+      {
+        "ic": "🎠",
+        "label": "Móvil sobre la cuna",
+        "desc": "A 30cm, colores primarios, movimiento lento. No más de 15 min. Evitá los muy complejos."
+      },
+      {
+        "ic": "🎼",
+        "label": "Variedad musical",
+        "desc": "Cambiar géneros. El cerebro musical se construye desde ahora."
+      },
+      {
+        "ic": "👐",
+        "label": "Apertura progresiva de manos",
+        "desc": "El reflejo de prensión se relaja. Pone objetos livianos en su mano — los soltará enseguida."
+      },
+      {
+        "ic": "🌿",
+        "label": "Exploración de texturas",
+        "desc": "Grass, hojas, telas distintas. Con supervisión, diferentes superficies en sus manos."
+      }
+    ]
+  },
+  "13": {
+    "titulo": "3-4 meses — Bebé interactivo",
+    "foco": "Reciprocidad y motricidad gruesa",
+    "actividades": [
+      {
+        "ic": "🎭",
+        "label": "Juego cara a cara",
+        "desc": "Imitación mutua, turnos de sonido, escondite simple. La reciprocidad social ya está instalada."
+      },
+      {
+        "ic": "🤸",
+        "label": "Rodar asistido",
+        "desc": "Ayudarlo a darse vuelta de panza a espalda. Celebrá cada logro con entusiasmo."
+      },
+      {
+        "ic": "🪞",
+        "label": "Espejo de bebé",
+        "desc": "Le fascinará su propio reflejo. No entiende que es él, pero estimula la atención visual."
+      },
+      {
+        "ic": "🎯",
+        "label": "Alcanzar objetos",
+        "desc": "Colgá un objeto colorido sobre él. Intentará alcanzarlo. Coordina ojo-mano."
+      },
+      {
+        "ic": "🌊",
+        "label": "Agua lúdica en bañera",
+        "desc": "Salpicaduras suaves, temperatura ideal. Base para amar el agua y nadar en el futuro."
+      }
+    ]
+  },
+  "17": {
+    "titulo": "4-6 meses — Movimiento activo",
+    "foco": "Movilidad, exploración oral",
+    "actividades": [
+      {
+        "ic": "🏃",
+        "label": "Rodar solo",
+        "desc": "A los 4-5 meses suelen rodar solos. Nunca dejarlo en altura sin supervisión."
+      },
+      {
+        "ic": "👄",
+        "label": "Exploración oral de objetos",
+        "desc": "Todo va a la boca. Es normal y necesario. Asegurate que lo que toca sea seguro."
+      },
+      {
+        "ic": "🎸",
+        "label": "Estímulo musical activo",
+        "desc": "Instrumentos de juguete, zapateo rítmico. Responde al ritmo y lo disfruta."
+      },
+      {
+        "ic": "💬",
+        "label": "\"Sirenas\" y vocalizaciones",
+        "desc": "Hace sonidos de vocales largas. Imitalo, variá el tono. Le encanta el juego vocal."
+      },
+      {
+        "ic": "🥄",
+        "label": "Introducción a texturas (si OK pediatra)",
+        "desc": "A los 6 meses puede empezar BLW o purés. Siempre con guía del pediatra."
+      }
+    ]
+  },
+  "26": {
+    "titulo": "6-9 meses — Movilidad y BLW",
+    "foco": "Autonomía motora y alimentación",
+    "actividades": [
+      {
+        "ic": "🐛",
+        "label": "Gateo y arrastre",
+        "desc": "Algunos gatean, otros se arrastran, otros van directo a caminar. Todas las variantes son válidas."
+      },
+      {
+        "ic": "🧊",
+        "label": "Juego de objeto permanente",
+        "desc": "\"Peek-a-boo\". Entiende que lo que desaparece sigue existiendo. Gran hito cognitivo."
+      },
+      {
+        "ic": "🍎",
+        "label": "BLW o purés con texturas",
+        "desc": "Exploración de sabores y texturas. Come con las manos — es desarrollo, no suciedad."
+      },
+      {
+        "ic": "📦",
+        "label": "Meter y sacar objetos",
+        "desc": "Tarros con objetos dentro que pueda sacar. Estimula la resolución de problemas."
+      },
+      {
+        "ic": "👋",
+        "label": "\"Chau chau\" y aplaudir",
+        "desc": "Imita gestos sociales. Aplaudir, saludar. Base de la comunicación preverbal."
+      }
+    ]
+  },
+  "39": {
+    "titulo": "9-12 meses — Primeras palabras",
+    "foco": "Lenguaje y locomoción",
+    "actividades": [
+      {
+        "ic": "🚶",
+        "label": "Marcha con apoyo",
+        "desc": "Se para agarrándose de muebles. Caminata lateral. No apresures el primer paso."
+      },
+      {
+        "ic": "🗺️",
+        "label": "Exploración supervisada libre",
+        "desc": "Dejalo explorar en un espacio seguro. La autonomía de movimiento forma el cerebro."
+      },
+      {
+        "ic": "📚",
+        "label": "Libros de cartón interactivos",
+        "desc": "Con solapas, texturas, sonidos. Nombrá todo. El vocabulario pasivo es enorme ahora."
+      },
+      {
+        "ic": "🎮",
+        "label": "Encaje simple y cubos",
+        "desc": "Meter formas en agujeros, apilar 2 cubos. Estimula la coordinación fina y la resolución."
+      },
+      {
+        "ic": "💬",
+        "label": "Primeras palabras (mama/papa)",
+        "desc": "Entre 9-12 meses aparecen las primeras palabras con significado. Celebrá cada una."
+      }
+    ]
+  },
+  "52": {
+    "titulo": "12-18 meses — Caminante explorador",
+    "foco": "Autonomía, lenguaje explosivo",
+    "actividades": [
+      {
+        "ic": "🦶",
+        "label": "Primeros pasos solos",
+        "desc": "El hito más esperado. Caídas son normales y necesarias. No pongas andador."
+      },
+      {
+        "ic": "🖊️",
+        "label": "Garabatos con crayón gordo",
+        "desc": "La mano aún no es precisa, pero el trazo libre es expresión pura. Dale papel grande."
+      },
+      {
+        "ic": "🎭",
+        "label": "Juego simbólico simple",
+        "desc": "Dar de comer a un muñeco, hablar por teléfono de juguete. Base de la creatividad."
+      },
+      {
+        "ic": "📖",
+        "label": "Leer juntos a diario",
+        "desc": "5-10 min de lectura compartida. El vocabulario a los 2 años predice el desempeño escolar."
+      },
+      {
+        "ic": "🧹",
+        "label": "Pequeñas tareas domésticas",
+        "desc": "Tirar algo a la basura, alcanzar un objeto. Sentido de contribución desde muy pequeño."
+      }
+    ]
+  },
+  "79": {
+    "titulo": "18 meses - 2 años — Autonomía y berrinches",
+    "foco": "Independencia y límites",
+    "actividades": [
+      {
+        "ic": "🦁",
+        "label": "Berrinches: validar la emoción",
+        "desc": "\"Entiendo que estás enojado\". El berrinche es comunicación primitiva. No discutir en el pico."
+      },
+      {
+        "ic": "🧩",
+        "label": "Puzzles de 2-4 piezas",
+        "desc": "Coordinación fina y resolución de problemas. Celebrá el proceso, no solo el resultado."
+      },
+      {
+        "ic": "🎨",
+        "label": "Arte libre con dedos",
+        "desc": "Pintura dactilar, barro. La exploración sensorial estimula múltiples áreas cognitivas."
+      },
+      {
+        "ic": "👫",
+        "label": "Juego paralelo con otros niños",
+        "desc": "A esta edad juegan al lado, no juntos. Es normal. No forzar la interacción."
+      },
+      {
+        "ic": "🚿",
+        "label": "Inicio del control de esfínteres",
+        "desc": "Solo si el niño muestra señales de preparación. Sin presión ni castigo."
+      }
+    ]
+  },
+  "104": {
+    "titulo": "2-3 años — Lenguaje y creatividad",
+    "foco": "Explosión del lenguaje",
+    "actividades": [
+      {
+        "ic": "💬",
+        "label": "Oraciones de 3-4 palabras",
+        "desc": "A los 2 años deben aparecer. Si no: consultar al pediatra/fonoaudiólogo."
+      },
+      {
+        "ic": "🎪",
+        "label": "Teatro y disfraz",
+        "desc": "Le encanta hacer \"como si\". Jugá a ser animales, personajes, situaciones."
+      },
+      {
+        "ic": "✂️",
+        "label": "Actividades de motricidad fina",
+        "desc": "Plastilina, enhebrar cuentas grandes, rasgar papel. Preparan la mano para escribir."
+      },
+      {
+        "ic": "🌳",
+        "label": "Naturaleza y exploración al aire libre",
+        "desc": "30-60 min diarios de actividad física al aire libre. Esencial para el desarrollo integral."
+      },
+      {
+        "ic": "📐",
+        "label": "Conceptos básicos",
+        "desc": "Colores, formas, arriba/abajo, grande/chico. Aparecen naturalmente en el juego."
+      }
+    ]
+  },
+  "156": {
+    "titulo": "3-4 años — Preescolar temprano",
+    "foco": "Socialización y pensamiento lógico",
+    "actividades": [
+      {
+        "ic": "👭",
+        "label": "Juego cooperativo",
+        "desc": "Ya puede jugar CON otros, no solo al lado. Turnos, reglas simples, resolución de conflictos."
+      },
+      {
+        "ic": "🔢",
+        "label": "Inicio de conceptos numéricos",
+        "desc": "Contar hasta 10, reconocer cantidades. No mecanizar, sino entender el concepto."
+      },
+      {
+        "ic": "📝",
+        "label": "Pre-escritura",
+        "desc": "Trazos, laberintos, dibujos de figuras humanas simples. Preparan para leer y escribir."
+      },
+      {
+        "ic": "🎭",
+        "label": "Juego de roles elaborado",
+        "desc": "Juega a la maestra, al médico, a la familia. Procesa el mundo a través del juego."
+      },
+      {
+        "ic": "❓",
+        "label": "Por qué, por qué, por qué",
+        "desc": "La etapa de las preguntas. Respondé con honestidad. Si no sabés: \"Qué buena pregunta, busquemos juntos\"."
+      }
+    ]
+  },
+  "208": {
+    "titulo": "4-6 años — Expansión del mundo",
+    "foco": "Autonomía, lectoescritura, amigos",
+    "actividades": [
+      {
+        "ic": "📚",
+        "label": "Pre-lectura y primeras letras",
+        "desc": "No forzar, pero sí acompañar el interés. Los cuentos leídos en voz alta son la mejor preparación."
+      },
+      {
+        "ic": "🚲",
+        "label": "Bicicleta sin pedales → con pedales",
+        "desc": "Primero equilibrio, luego pedales. La secuencia natural evita la frustración."
+      },
+      {
+        "ic": "🎭",
+        "label": "Teatro, danza, música",
+        "desc": "Cualquier expresión artística a esta edad es puro desarrollo neurológico. Sin presión de resultado."
+      },
+      {
+        "ic": "🤝",
+        "label": "Primer mejor amigo",
+        "desc": "Las amistades se vuelven más exclusivas e importantes. Acompañar los conflictos sin resolver por ellos."
+      },
+      {
+        "ic": "🏃",
+        "label": "Deporte o actividad física grupal",
+        "desc": "Natación, fútbol, atletismo. No para competir: para coordinación, normas y pertenencia."
+      }
+    ]
+  },
+  "312": {
+    "titulo": "6-8 años — Escuela y lógica",
+    "foco": "Lectoescritura, pensamiento concreto",
+    "actividades": [
+      {
+        "ic": "📖",
+        "label": "Lectura en voz alta juntos",
+        "desc": "Aunque ya lea solo, leer juntos sostiene el vínculo y amplía vocabulario y comprensión."
+      },
+      {
+        "ic": "♟️",
+        "label": "Juegos de estrategia",
+        "desc": "Ajedrez, damas, juegos de mesa con reglas. Desarrollan pensamiento lógico y tolerancia a la frustración."
+      },
+      {
+        "ic": "🔬",
+        "label": "Exploración científica simple",
+        "desc": "Experimentos de cocina, observar insectos, plantar semillas. La curiosidad es el motor del aprendizaje."
+      },
+      {
+        "ic": "💰",
+        "label": "Noción del dinero y el esfuerzo",
+        "desc": "Pequeñas responsabilidades con asignación. Entienden causa-efecto y valor del trabajo."
+      },
+      {
+        "ic": "📱",
+        "label": "Primeras pantallas con límites",
+        "desc": "Contenido educativo o de entretenimiento de calidad, con tiempo acordado y diálogo sobre lo que ven."
+      }
+    ]
+  },
+  "416": {
+    "titulo": "8-10 años — Autonomía creciente",
+    "foco": "Competencia, amistad, identidad",
+    "actividades": [
+      {
+        "ic": "🎯",
+        "label": "Proyecto personal largo",
+        "desc": "Coleccionar algo, aprender a tocar un instrumento, construir algo. La perseverancia se entrena."
+      },
+      {
+        "ic": "👨‍👩‍👦",
+        "label": "Conversaciones sobre identidad",
+        "desc": "\"¿Cómo me veo? ¿Qué me gusta? ¿En qué soy bueno?\" Preguntas que empiezan a aparecer."
+      },
+      {
+        "ic": "📰",
+        "label": "Contexto del mundo",
+        "desc": "Noticias en versión para niños. Hablar de lo que pasa. Ciudadanos activos se forman desde chicos."
+      },
+      {
+        "ic": "🤲",
+        "label": "Voluntariado o servicio",
+        "desc": "Ayudar a un abuelo, colaborar en un comedor. La empatía se entrena con acción."
+      },
+      {
+        "ic": "💪",
+        "label": "Deporte con compromiso",
+        "desc": "Entrenamiento, esfuerzo, equipo. La constancia en algo físico enseña más que muchas palabras."
+      }
+    ]
+  },
+  "520": {
+    "titulo": "10-12 años — Preadolescencia",
+    "foco": "Grupo de pares, pensamiento abstracto",
+    "actividades": [
+      {
+        "ic": "🧠",
+        "label": "Pensamiento hipotético",
+        "desc": "\"¿Qué pasaría si...?\" La capacidad de razonar sobre situaciones imaginarias aparece ahora."
+      },
+      {
+        "ic": "👫",
+        "label": "Grupo de amigos como referencia",
+        "desc": "Normal que la opinión del grupo importe más que la de los padres. Seguir presente sin controlar."
+      },
+      {
+        "ic": "🎨",
+        "label": "Expresión creativa propia",
+        "desc": "Música, escritura, dibujo, código. Cualquier medio que les permita procesar y crear."
+      },
+      {
+        "ic": "💬",
+        "label": "Conversaciones sobre el cuerpo",
+        "desc": "Pubertad, cambios, sexualidad — con honestidad y sin dramatizar. Preferible antes de que suceda."
+      },
+      {
+        "ic": "📱",
+        "label": "Redes sociales: acompañamiento",
+        "desc": "Si ya las usan: conocerlas juntos, hablar de privacidad, de lo que comparten, de lo que ven."
+      }
+    ]
+  },
+  "624": {
+    "titulo": "12-14 años — Adolescencia temprana",
+    "foco": "Identidad, autonomía, emociones",
+    "actividades": [
+      {
+        "ic": "🗣️",
+        "label": "Escuchar sin opinar (cuando no te piden)",
+        "desc": "El adolescente quiere ser escuchado, no guiado. Guardá el consejo para cuando lo pidan."
+      },
+      {
+        "ic": "🚪",
+        "label": "Respetar su espacio",
+        "desc": "Golpear antes de entrar. Respetar la intimidad del cuarto. Es ensayo de independencia."
+      },
+      {
+        "ic": "💪",
+        "label": "Fortalecer la autoestima",
+        "desc": "Encontrar aquello en lo que son genuinamente buenos y dárselo. No comparar con otros."
+      },
+      {
+        "ic": "🤝",
+        "label": "Negociar límites juntos",
+        "desc": "Los límites acordados se respetan más. Involucrarlo en la discusión. Ceder donde se pueda."
+      },
+      {
+        "ic": "❤️",
+        "label": "Mantener el ritual de conexión",
+        "desc": "Cenar juntos, un viaje al año, una actividad compartida. El vínculo se cuida con tiempo."
+      }
+    ]
+  },
+  "728": {
+    "titulo": "14-16 años — Adolescencia media",
+    "foco": "Autonomía real, primeras elecciones",
+    "actividades": [
+      {
+        "ic": "🎓",
+        "label": "Orientación vocacional temprana",
+        "desc": "No para decidir ya, sino para explorar. Ferias de carreras, hablar con profesionales, voluntariado."
+      },
+      {
+        "ic": "💸",
+        "label": "Primer trabajo part-time (si elige)",
+        "desc": "Responsabilidad real, dinero propio, experiencia social. Enorme formación."
+      },
+      {
+        "ic": "🏕️",
+        "label": "Viaje sin padres (campamento, intercambio)",
+        "desc": "Gestionar la vida sin red de seguridad es una de las mejores escuelas."
+      },
+      {
+        "ic": "💬",
+        "label": "Conversaciones sobre decisiones de riesgo",
+        "desc": "Alcohol, drogas, sexo — sin prohibición moralista sino con información real y diálogo abierto."
+      },
+      {
+        "ic": "🔥",
+        "label": "Apoyar su pasión aunque no la entiendas",
+        "desc": "Gaming, K-pop, skate. Lo que le apasiona es la puerta de entrada a la constancia y la identidad."
+      }
+    ]
+  },
+  "832": {
+    "titulo": "16-18 años — Adolescencia tardía",
+    "foco": "Preparación para la vida adulta",
+    "actividades": [
+      {
+        "ic": "🏛️",
+        "label": "Proceso universitario o laboral",
+        "desc": "Acompañar la elección sin imponer. Explorar opciones juntos. Validar incluso lo que no elegiríamos."
+      },
+      {
+        "ic": "🧾",
+        "label": "Educación financiera real",
+        "desc": "Presupuesto, ahorro, tarjeta de crédito, impuestos. Cosas que la escuela no enseña."
+      },
+      {
+        "ic": "🌍",
+        "label": "Consciencia del mundo adulto",
+        "desc": "Política, economía, medio ambiente. Ciudadano activo en formación."
+      },
+      {
+        "ic": "🤗",
+        "label": "Decirle lo que admirás de él",
+        "desc": "Específico y genuino. No solo \"te quiero\" sino \"admiro cómo manejaste tal situación\"."
+      },
+      {
+        "ic": "🛫",
+        "label": "Preparar el lanzamiento",
+        "desc": "La meta de la crianza es que no te necesite. Celebrar la autonomía es el mayor logro."
+      }
+    ]
+  }
+};
+
+function getActividadesPorEdad(diasDeVida) {
+  var semana = Math.floor(diasDeVida / 7);
+  var edad_meses = Math.floor(diasDeVida / 30.4);
+  var keys = Object.keys(ACTIVIDADES_CAL).map(Number).sort(function(a,b){return a-b;});
+  var best = keys[0];
+  for (var i = 0; i < keys.length; i++) {
+    if (semana >= keys[i]) best = keys[i];
+    else break;
+  }
+  return ACTIVIDADES_CAL[best];
+}
+
+
+// ─── STATE ──────────────────────────────────────────────────
+var CAL = {
+  bebe: {
+    nombre:'Ceferino', apellido:'Diaz Palacios', apodo:'Cefe',
+    fn:'2026-03-29', hora:'05:20', sexo:'M', pn:3365,
+    pa:2980, fa:'2026-04-01', dni:'71.013.834',
+    vacunas: {v01:'2026-03-29', v02:'2026-03-29'} // HepB y BCG al nacer
+  },
+  padres: [],
+  hist: [], pesos: [], meds: [], visits: [], hitos: [],
+  notas: [], sintomas: [],
+  calEventos: [], // {id, tipo, fecha, titulo, desc, confirmado, cancelado, datos:{}}
+  // UI state
+  step: 'mes',
+  viewYear: new Date().getFullYear(),
+  viewMonth: new Date().getMonth(),
+  selectedDate: null,
+  editEvento: null,
+  nightMode: false,
+};
+
+// ─── UTILS ──────────────────────────────────────────────────
+function p2(n){return String(n).padStart(2,'0');}
+function fiso(d){var dt=new Date(d);return dt.getFullYear()+'-'+p2(dt.getMonth()+1)+'-'+p2(dt.getDate());}
+function fd(d){return new Date(d).toLocaleDateString('es-AR',{weekday:'short',day:'2-digit',month:'2-digit'});}
+function flong(d){return new Date(d).toLocaleDateString('es-AR',{weekday:'long',day:'2-digit',month:'long',year:'numeric'});}
+function ft(d){return new Date(d).toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'});}
+function meses(){return ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];}
+function dias_cortos(){return ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];}
+function diasDeVida(f){return Math.floor((Date.now()-new Date(f||CAL.bebe.fn).getTime())/86400000);}
+function ageW(){return Math.floor(diasDeVida()/7);}
+function gkg(g){return(g/1000).toFixed(3);}
+function copyText(txt){
+  navigator.clipboard.writeText(txt).catch(function(){
+    var ta=document.createElement('textarea');ta.value=txt;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);
+  });
+}
+function shareText(txt){if(navigator.share)navigator.share({text:txt}).catch(function(){});else copyText(txt);}
+
+// ─── STORAGE ────────────────────────────────────────────────
+function ls(k){try{return localStorage.getItem('cefe_'+k);}catch(e){return null;}}
+function lss(k,v){try{localStorage.setItem('cefe_'+k,JSON.stringify(v));}catch(e){}}
+
+function saveCalEventos(){
+  lss('calEventos', CAL.calEventos);
+  if(window.fbSave){
+    window.fbSave({
+      hist:CAL.hist, pesos:CAL.pesos, meds:CAL.meds,
+      visits:CAL.visits, bebe:CAL.bebe, padres:CAL.padres,
+      hitos:CAL.hitos, notas:CAL.notas, sintomas:CAL.sintomas,
+      calEventos:CAL.calEventos
+    });
+  }
+}
+
+function loadLocal(){
+  try{
+    var b=ls('bebe'); if(b) CAL.bebe=Object.assign({},CAL.bebe,JSON.parse(b));
+    var h=ls('hist'); if(h) CAL.hist=JSON.parse(h).map(function(e){
+      if(!e)return null;
+      if(e.type==='toma'){e.s=new Date(e.s);e.e=new Date(e.e);e.nt=new Date(e.nt);}
+      if(e.type==='panal')e.t=new Date(e.t);
+      return e;
+    }).filter(Boolean);
+    var p=ls('pesos'); if(p) CAL.pesos=JSON.parse(p).map(function(e){if(e)e.t=new Date(e.t);return e;}).filter(Boolean);
+    var m=ls('meds'); if(m) CAL.meds=JSON.parse(m).filter(Boolean);
+    var v=ls('visits'); if(v) CAL.visits=JSON.parse(v).map(function(e){if(e)e.dt=new Date(e.dt);return e;}).filter(Boolean);
+    var pa=ls('padres'); if(pa) CAL.padres=JSON.parse(pa).filter(Boolean);
+    var hi=ls('hitos'); if(hi) CAL.hitos=JSON.parse(hi).filter(Boolean);
+    var no=ls('notas'); if(no) CAL.notas=JSON.parse(no).filter(Boolean);
+    var si=ls('sintomas'); if(si) CAL.sintomas=JSON.parse(si).map(function(e){if(e)e.t=new Date(e.t);return e;}).filter(Boolean);
+    var ce=ls('calEventos'); if(ce) CAL.calEventos=JSON.parse(ce).filter(Boolean);
+    var nm=ls('nightMode'); if(nm) CAL.nightMode=JSON.parse(nm);
+  }catch(e){}
+}
+
+var HITOS_DEF = [
+  // ── HITOS DE VIDA ─────────────────────────────────────────
+  // (momentos que los padres eligen recordar)
+  {id:'v01', cat:'vida',  semanas:0,  ic:'🏥', label:'Alta del sanatorio',              celebracion:true},
+  {id:'v02', cat:'vida',  semanas:0,  ic:'🏠', label:'Primera vez en casa',             celebracion:true},
+  {id:'v03', cat:'vida',  semanas:1,  ic:'🚶', label:'Primera salida a la calle',       celebracion:false},
+  {id:'v04', cat:'vida',  semanas:1,  ic:'🚿', label:'Primer baño de balde',       celebracion:true},
+  {id:'v05', cat:'vida',  semanas:2,  ic:'👶', label:'Cayó el cordón umbilical', celebracion:false},
+  {id:'v06', cat:'vida',  semanas:4,  ic:'👨‍👩‍👦', label:'Primera foto familiar', celebracion:false},
+  {id:'v07', cat:'vida',  semanas:8,  ic:'🎉', label:'Primer mes cumplido',             celebracion:true},
+  {id:'v08', cat:'vida',  semanas:13, ic:'🎉', label:'Tres meses',                      celebracion:true},
+  {id:'v09', cat:'vida',  semanas:26, ic:'🎉', label:'Seis meses',                      celebracion:true},
+  {id:'v10', cat:'vida',  semanas:39, ic:'🕯️', label:'Nueve meses',               celebracion:true},
+  {id:'v11', cat:'vida',  semanas:52, ic:'🎂', label:'Primer año',                 celebracion:true},
+  {id:'v12', cat:'vida',  semanas:52, ic:'👣', label:'Primer cumpleaños',          celebracion:true},
+  {id:'v13', cat:'vida',  semanas:78, ic:'🎉', label:'Año y medio',                celebracion:false},
+  {id:'v14', cat:'vida',  semanas:104,ic:'🎉', label:'Dos años',                   celebracion:true},
+  {id:'v15', cat:'vida',  semanas:130,ic:'🏫', label:'Comienza maternal / jardín', celebracion:true},
+  {id:'v16', cat:'vida',  semanas:156,ic:'🎓', label:'Primer día de preescolar',   celebracion:true},
+  {id:'v17', cat:'vida',  semanas:208,ic:'🎓', label:'Primer día de primaria',     celebracion:true},
+  {id:'v18', cat:'vida',  semanas:0,  ic:'🤝', label:'Primer mejor amigo',              celebracion:false},
+  {id:'v19', cat:'vida',  semanas:0,  ic:'🏊', label:'Primera actividad deportiva',    celebracion:false},
+  {id:'v20', cat:'vida',  semanas:0,  ic:'✈️', label:'Primer viaje en avión',      celebracion:false},
+  // ── HITOS DEL DESARROLLO ──────────────────────────────────
+  // (pautas AAP / SAP — marco orientativo, consultar pediatra)
+  {id:'h01', cat:'desarrollo', semanas:2,  ic:'👁️', label:'Sigue objeto con la vista'},
+  {id:'h02', cat:'desarrollo', semanas:4,  ic:'🔔',      label:'Responde a sonidos fuertes'},
+  {id:'h03', cat:'desarrollo', semanas:6,  ic:'😃',      label:'Primera sonrisa social',    celebracion:true},
+  {id:'h04', cat:'desarrollo', semanas:8,  ic:'🗣️',label:'Vocaliza (agu-agu)'},
+  {id:'h05', cat:'desarrollo', semanas:12, ic:'💪',      label:'Sostiene la cabeza 45°'},
+  {id:'h06', cat:'desarrollo', semanas:16, ic:'😂',      label:'Ríe a carcajadas',     celebracion:true},
+  {id:'h07', cat:'desarrollo', semanas:16, ic:'👀',      label:'Sigue con la vista 180°'},
+  {id:'h08', cat:'desarrollo', semanas:20, ic:'🤲',      label:'Se lleva objetos a la boca'},
+  {id:'h09', cat:'desarrollo', semanas:20, ic:'🧘',      label:'Sostiene cabeza sentado con ayuda'},
+  {id:'h10', cat:'desarrollo', semanas:24, ic:'🔄',      label:'Se da vuelta (panza → espalda)', celebracion:true},
+  {id:'h11', cat:'desarrollo', semanas:28, ic:'🧘',      label:'Se sienta con apoyo'},
+  {id:'h12', cat:'desarrollo', semanas:32, ic:'🤚',      label:'Pinza radial (toma objetos)'},
+  {id:'h13', cat:'desarrollo', semanas:36, ic:'🗣️',label:'Dice “mamá” / “papá”', celebracion:true},
+  {id:'h14', cat:'desarrollo', semanas:40, ic:'🤟',      label:'Pinza fina (pulgar-índice)'},
+  {id:'h15', cat:'desarrollo', semanas:40, ic:'🚶',      label:'Gateo'},                    
+  {id:'h16', cat:'desarrollo', semanas:44, ic:'🧗',      label:'Se para con apoyo'},
+  {id:'h17', cat:'desarrollo', semanas:48, ic:'🚶',      label:'Marcha con apoyo (crucero)'},
+  {id:'h18', cat:'desarrollo', semanas:52, ic:'🚶',      label:'Primeros pasos solos',      celebracion:true},
+  {id:'h19', cat:'desarrollo', semanas:65, ic:'🗣️',label:'Primeras palabras con significado'},
+  {id:'h20', cat:'desarrollo', semanas:78, ic:'🧩',      label:'Primeras combinaciones de 2 palabras'},
+  {id:'h21', cat:'desarrollo', semanas:104,ic:'🎨',      label:'Juego simbólico (juega a “hacerse”)'},
+];
+
+// ─── VACUNAS (Calendar Nacional 2024/2025) ─────────────────
+var VACUNAS_DEF = [
+  {id:'v01',nombre:'Hepatitis B',mes:0,dia:true,desc:'Al nacer'},
+  {id:'v02',nombre:'BCG',mes:0,dia:true,desc:'Al nacer — Tuberculosis'},
+  {id:'v03',nombre:'Pentavalente (1°)',mes:2,desc:'DTP + Hib + HepB'},
+  {id:'v04',nombre:'Salk IPV (1°)',mes:2,desc:'Polio inactivada'},
+  {id:'v05',nombre:'Neumococo 13 (1°)',mes:2,desc:'Neumonía y meningitis'},
+  {id:'v06',nombre:'Rotavirus (1°)',mes:2,desc:'Diarrea grave — vía oral'},
+  {id:'v07',nombre:'Meningococo B (1°)',mes:2,desc:'Meningitis B'},
+  {id:'v08',nombre:'Meningococo C (1°)',mes:3,desc:'Meningitis C'},
+  {id:'v09',nombre:'Pentavalente (2°)',mes:4,desc:'Segunda dosis'},
+  {id:'v10',nombre:'Salk IPV (2°)',mes:4,desc:'Segunda dosis'},
+  {id:'v11',nombre:'Neumococo 13 (2°)',mes:4,desc:'Segunda dosis'},
+  {id:'v12',nombre:'Rotavirus (2°)',mes:4,desc:'Segunda dosis — oral'},
+  {id:'v13',nombre:'Meningococo B (2°)',mes:4,desc:'Segunda dosis'},
+  {id:'v14',nombre:'Meningococo C (2°)',mes:5,desc:'Segunda dosis'},
+  {id:'v15',nombre:'Pentavalente (3°)',mes:6,desc:'Tercera dosis'},
+  {id:'v16',nombre:'Salk IPV (3°)',mes:6,desc:'Tercera dosis'},
+  {id:'v17',nombre:'Influenza (anual)',mes:6,desc:'Gripe — anual desde 6 meses'},
+  {id:'v18',nombre:'SRP (Triple viral)',mes:12,desc:'Sarampión, rubéola, paperas'},
+  {id:'v19',nombre:'Neumococo 13 (refuerzo)',mes:12,desc:'Dosis de refuerzo'},
+  {id:'v20',nombre:'Meningococo B (refuerzo)',mes:12,desc:'Dosis de refuerzo'},
+  {id:'v21',nombre:'Hepatitis A',mes:12,desc:'Primera dosis'},
+  {id:'v22',nombre:'Varicela (1°)',mes:15,desc:'Primera dosis'},
+  {id:'v23',nombre:'Meningococo ACYW',mes:15,desc:'Cuadrivalente conjugado'},
+  {id:'v24',nombre:'Pentavalente (refuerzo)',mes:18,desc:'Refuerzo DTP + Hib + HepB'},
+  {id:'v25',nombre:'Sabin (refuerzo)',mes:18,desc:'Refuerzo polio oral'},
+];
+
+function getVacunaFecha(v){
+  var fn=new Date(CAL.bebe.fn||'2026-03-29');
+  if(v.dia) return new Date(fn);
+  var d=new Date(fn);
+  d.setMonth(d.getMonth()+v.mes);
+  return d;
+}
+function isVacunaConfirmada(id){
+  return !!(CAL.bebe.vacunas && CAL.bebe.vacunas[id]);
+}
+
+// ─── EVENT AGGREGATION ──────────────────────────────────────
+// Returns all events for a given date string 'YYYY-MM-DD'
+function getEventosDelDia(dateStr){
+  var eventos = [];
+  var d = new Date(dateStr + 'T12:00');
+
+  // 1. Feriados
+  var feriado = FERIADOS_ARG.find(function(f){return f.f===dateStr;});
+  if(feriado) eventos.push({tipo:'feriado',titulo:feriado.n,color:'#888',ic:'🇦🇷'});
+
+  // 2. Tomas del día (resumen)
+  var tomasDia = CAL.hist.filter(function(h){
+    if(h.type!=='toma')return false;
+    return fiso(h.s)===dateStr;
+  });
+  if(tomasDia.length>0){
+    var totalMin=tomasDia.reduce(function(a,b){return a+b.tot;},0);
+    eventos.push({tipo:'toma',titulo:tomasDia.length+' toma'+(tomasDia.length>1?'s':''),
+      sub:'Total: '+totalMin+' min',color:'#4a9eff',ic:'🍼',datos:{tomas:tomasDia}});
+  }
+
+  // 3. Pañales del día (resumen)
+  var panalesDia = CAL.hist.filter(function(h){
+    if(h.type!=='panal')return false;
+    return fiso(h.t)===dateStr;
+  });
+  if(panalesDia.length>0){
+    var cc=panalesDia.filter(function(p){return p.p==='Caca'||p.p==='Mixto';}).length;
+    eventos.push({tipo:'panal',titulo:panalesDia.length+' pañal'+(panalesDia.length>1?'es':''),
+      sub:'Caca/Mix: '+cc,color:'#64c8b4',ic:'🧷',datos:{panales:panalesDia}});
+  }
+
+  // 4. Pesos
+  var pesosDia = CAL.pesos.filter(function(p){return fiso(p.t)===dateStr;});
+  pesosDia.forEach(function(p){
+    eventos.push({tipo:'peso',titulo:gkg(p.g)+' kg',sub:p.n||'Control de peso',color:'#d4a843',ic:'⚖️'});
+  });
+
+  // 5. Visitas médicas
+  var visitasDia = CAL.visits.filter(function(v){return fiso(v.dt)===dateStr;});
+  visitasDia.forEach(function(v){
+    var med = CAL.meds[v.mi]||{};
+    eventos.push({tipo:'visita',titulo:'Dr/a. '+(med.nom||'')+(med.ape?' '+med.ape:''),
+      sub:ft(v.dt)+' — '+(med.esp||'')+(v.mod?' | '+v.mod:''),
+      color:'#b48cdc',ic:'🏥',datos:v,med:med});
+  });
+
+  // 6. Hitos (vida + desarrollo)
+  var hitosDia = CAL.hitos.filter(function(h){
+    if(!h.fecha)return false;
+    // Accept both ISO date and date string
+    var hDate = h.fecha.length>10 ? h.fecha.substring(0,10) : h.fecha;
+    return hDate===dateStr;
+  });
+  hitosDia.forEach(function(hi){
+    var def = typeof HITOS_DEF !== 'undefined' ? HITOS_DEF : [];
+    var hDef = def.find(function(x){return x.id===hi.id;})||{label:'Hito',ic:'⭐',cat:'desarrollo'};
+    var esCelebracion = hDef.celebracion===true;
+    eventos.push({
+      tipo: esCelebracion ? 'celebracion' : 'hito',
+      titulo: (hDef.ic||'⭐')+' '+hDef.label,
+      sub: hi.nota||'',
+      color: esCelebracion ? '#d4a843' : '#f0d9a0',
+      ic: esCelebracion ? '🎉' : '⭐',
+      datos:{hito:hi, def:hDef}
+    });
+  });
+
+  // 7. Síntomas
+  var sintomasDia = CAL.sintomas.filter(function(s){return fiso(s.t)===dateStr;});
+  sintomasDia.forEach(function(s){
+    eventos.push({tipo:'sintoma',titulo:s.tipo+(s.valor?' — '+s.valor:''),sub:s.nota||'',color:'#e07070',ic:'🩺'});
+  });
+
+  // 8. Notas del día
+  var notaDia = CAL.notas.find(function(n){return n.fecha===dateStr;});
+  if(notaDia&&notaDia.texto) eventos.push({tipo:'nota',titulo:'Nota del día',sub:notaDia.texto.substring(0,60),color:'#64c8b4',ic:'📝'});
+
+  // 9. Vacunas proyectadas
+  VACUNAS_DEF.forEach(function(v){
+    var fecha = getVacunaFecha(v);
+    if(fiso(fecha)===dateStr){
+      var confirmada = isVacunaConfirmada(v.id);
+      eventos.push({tipo:confirmada?'vacuna-ok':'vacuna',
+        titulo:v.nombre,sub:v.desc+(confirmada?' — ✅ Aplicada':''),
+        color:confirmada?'#64c8b4':'#e07070',ic:'💉',
+        datos:{vacuna:v, confirmada:confirmada}});
+    }
+  });
+
+  // 10. Eventos custom del calendario
+  var customDia = CAL.calEventos.filter(function(e){return e.fecha===dateStr&&!e.cancelado;});
+  customDia.forEach(function(e){
+    eventos.push({tipo:'custom',titulo:e.titulo,sub:e.desc||'',color:'#b48cdc',ic:'📅',datos:e});
+  });
+
+  return eventos;
+}
+
+// Returns all dates in a month that have events (for dots)
+function getEventDatesInMonth(year, month){
+  var result = {};
+  var daysInMonth = new Date(year, month+1, 0).getDate();
+
+  for(var day=1; day<=daysInMonth; day++){
+    var dateStr = year+'-'+p2(month+1)+'-'+p2(day);
+    var eventos = getEventosDelDia(dateStr);
+    if(eventos.length>0){
+      result[dateStr] = eventos.map(function(e){return e.tipo;});
+    }
+  }
+  return result;
+}
+
+// ─── ICS GENERATOR ──────────────────────────────────────────
+function makeICS(evento,fecha,hora,durMin,titulo,desc,lugar,padres){
+  var s2=new Date(fecha+'T'+(hora||'09:00'));
+  var e2=new Date(s2.getTime()+(durMin||60)*60000);
+  function fmt(d){return d.getFullYear()+p2(d.getMonth()+1)+p2(d.getDate())+'T'+p2(d.getHours())+p2(d.getMinutes())+'00';}
+  function esc(s){return (s||'').split(',').join('\\,').split(String.fromCharCode(10)).join('\\n');}
+  var uid=Date.now()+'@cefe-app';
+  var L=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//CefeApp//Calendario//ES',
+    'BEGIN:VEVENT','UID:'+uid,'DTSTART:'+fmt(s2),'DTEND:'+fmt(e2),
+    'SUMMARY:'+esc(titulo),'DESCRIPTION:'+esc(desc||'')];
+  if(lugar)L.push('LOCATION:'+esc(lugar));
+  (padres||[]).forEach(function(p){if(p.email)L.push('ATTENDEE;ROLE=REQ-PARTICIPANT:mailto:'+p.email);});
+  L.push('END:VEVENT','END:VCALENDAR');
+  var CRLF=String.fromCharCode(13)+String.fromCharCode(10);
+  return L.join(CRLF);
+}
+
+function downloadICS(ics, filename){
+  var blob = new Blob([ics], {type:'text/calendar;charset=utf-8;'});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href=url; a.download=filename||'evento-cefe.ics';
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a); URL.revokeObjectURL(url);
+}
+
+function makeGCalURL(titulo, fecha, hora, durMin, desc, lugar){
+  var start = new Date(fecha+'T'+(hora||'09:00'));
+  var end = new Date(start.getTime()+(durMin||60)*60000);
+  function fmt(d){return d.getFullYear()+p2(d.getMonth()+1)+p2(d.getDate())+'T'+p2(d.getHours())+p2(d.getMinutes())+'00';}
+  var url = 'https://calendar.google.com/calendar/render?action=TEMPLATE';
+  url += '&text='+encodeURIComponent(titulo);
+  url += '&dates='+fmt(start)+'/'+fmt(end);
+  if(desc) url += '&details='+encodeURIComponent(desc);
+  if(lugar) url += '&location='+encodeURIComponent(lugar);
+  return url;
+}
+
+function makeShareMsg(titulo,fecha,hora,desc,gcalUrl,lugar,link){
+  var NL=String.fromCharCode(10);
+  var lines=['📅 *'+titulo+'*','📆 '+flong(fecha)];
+  if(hora)lines.push('🕐 '+hora+'hs');
+  if(lugar)lines.push('📍 '+lugar);
+  if(link)lines.push('🔗 '+link);
+  if(desc)lines.push('📝 '+desc);
+  lines.push('');
+  lines.push('Agendar: '+gcalUrl);
+  return lines.join(NL);
+}
+
+// ─── ACTIONS ────────────────────────────────────────────────
+function setStep(s){CAL.step=s;render();}
+function prevMonth(){
+  if(CAL.viewMonth===0){CAL.viewMonth=11;CAL.viewYear--;}
+  else CAL.viewMonth--;
+  render();
+}
+function nextMonth(){
+  if(CAL.viewMonth===11){CAL.viewMonth=0;CAL.viewYear++;}
+  else CAL.viewMonth++;
+  render();
+}
+function selectDay(dateStr){CAL.selectedDate=dateStr;render();}
+function goToday(){CAL.viewYear=new Date().getFullYear();CAL.viewMonth=new Date().getMonth();CAL.selectedDate=null;render();}
+
+function confirmVacuna(id){
+  if(!CAL.bebe.vacunas)CAL.bebe.vacunas={};
+  CAL.bebe.vacunas[id]=new Date().toISOString();
+  lss('bebe',CAL.bebe);
+  saveCalEventos();
+  render();
+}
+
+function openEventoForm(preset){
+  CAL.editEvento=preset||{fecha:CAL.selectedDate||fiso(new Date()),hora:'09:00',titulo:'',desc:'',lugar:'',link:'',tipo:'custom',modalidad:'presencial',notifs:['1dia']};
+  setStep('eventoForm');
+}
+
+function saveEvento(){
+  var ev=CAL.editEvento;
+  if(!ev.titulo.trim()){alert('Ingresá un título.');return;}
+  if(!ev.fecha){alert('Ingresá una fecha.');return;}
+  var id=ev.id||Date.now()+'';
+  var nuevo={id:id,fecha:ev.fecha,hora:ev.hora,titulo:ev.titulo,desc:ev.desc,lugar:ev.lugar,link:ev.link,tipo:ev.tipo,modalidad:ev.modalidad,notifs:ev.notifs||[],confirmado:true};
+  var idx=CAL.calEventos.findIndex(function(e){return e.id===id;});
+  if(idx>=0)CAL.calEventos[idx]=nuevo;else CAL.calEventos.push(nuevo);
+  saveCalEventos();
+  CAL.editEvento=null;
+  CAL.selectedDate=nuevo.fecha;
+  setStep('mes');
+}
+
+function deleteEvento(id){
+  if(!confirm('¿Eliminar este evento?'))return;
+  CAL.calEventos=CAL.calEventos.filter(function(e){return e.id!==id;});
+  saveCalEventos();render();
+}
+
+// ─── DOM HELPERS ────────────────────────────────────────────
+function mk(tag,cls,txt,style){
+  var el=document.createElement(tag);
+  if(cls)el.className=cls;
+  if(txt!==undefined)el.textContent=txt;
+  if(style)el.style.cssText=style;
+  return el;
+}
+function mkBtn(cls,txt,action,data){
+  var el=mk('button',cls,txt);
+  el.dataset.action=action;
+  if(data)Object.keys(data).forEach(function(k){el.dataset[k]=data[k];});
+  return el;
+}
+function mkDiv(cls,style){var d=mk('div',cls);if(style)d.style.cssText=style;return d;}
+function ap(parent){
+  var args=Array.prototype.slice.call(arguments,1);
+  args.forEach(function(c){if(c)parent.appendChild(c);});
+  return parent;
+}
+
+// ─── EVENT DELEGATION ───────────────────────────────────────
+document.addEventListener('click',function(ev){
+  var t=ev.target;
+  while(t&&t!==document.body){
+    if(t.dataset&&t.dataset.action){
+      var d=t.dataset;
+      switch(d.action){
+        case 'prevMonth': prevMonth();break;
+        case 'nextMonth': nextMonth();break;
+        case 'goToday': goToday();break;
+        case 'selectDay': selectDay(d.date);break;
+        case 'goMes': setStep('mes');break;
+        case 'goProximos': setStep('proximos');break;
+        case 'goActividades': setStep('actividades');break;
+        case 'newEvento': openEventoForm();break;
+        case 'saveEvento': saveEvento();break;
+        case 'deleteEvento': deleteEvento(d.id);break;
+        case 'confirmVacuna': confirmVacuna(d.id);break;
+        case 'editModalidad':
+          document.querySelectorAll('.rb').forEach(function(b){b.classList.remove('on');});
+          t.classList.add('on');
+          if(CAL.editEvento)CAL.editEvento.modalidad=d.v;break;
+        case 'toggleNotif':
+          if(CAL.editEvento){
+            var notifs=CAL.editEvento.notifs||[];
+            var idx=notifs.indexOf(d.v);
+            if(idx>=0)notifs.splice(idx,1);else notifs.push(d.v);
+            CAL.editEvento.notifs=notifs;
+            t.classList.toggle('on');
+          }break;
+        case 'goMainApp':
+          window.location.href='cefe-lactancia.html';break;
+        case 'downloadICS': {
+          var ev2=JSON.parse(decodeURIComponent(d.ev||'{}'));
+          var ics=makeICS(ev2,ev2.fecha,ev2.hora,60,ev2.titulo,ev2.desc||'',ev2.lugar||'',(CAL.padres||[]).filter(function(p){return p.email;}));
+          downloadICS(ics,(ev2.titulo||'evento').replace(/s/g,'_')+'.ics');
+        }break;
+        case 'openGCal': {
+          var ev3=JSON.parse(decodeURIComponent(d.ev||'{}'));
+          var url=makeGCalURL(ev3.titulo,ev3.fecha,ev3.hora,60,ev3.desc||'',ev3.lugar||ev3.link||'');
+          window.open(url,'_blank');
+        }break;
+        case 'shareEvento': {
+          var ev4=JSON.parse(decodeURIComponent(d.ev||'{}'));
+          var gcal=makeGCalURL(ev4.titulo,ev4.fecha,ev4.hora,60,ev4.desc||'',ev4.lugar||ev4.link||'');
+          var msg=makeShareMsg(ev4.titulo,ev4.fecha,ev4.hora,ev4.desc||'',gcal,ev4.lugar||'',ev4.link||'');
+          shareText(msg);
+        }break;
+      }
+      return;
+    }
+    t=t.parentElement;
+  }
+});
+
+// ─── RENDER ─────────────────────────────────────────────────
+function render(){
+  var bd=document.getElementById('bd');
+  if(!bd)return;
+  while(bd.firstChild)bd.removeChild(bd.firstChild);
+
+  // Update nav
+  ['mes','proximos','actividades'].forEach(function(tab){
+    var el=document.getElementById('bn-'+tab);
+    if(el)el.className='bnav-btn'+(CAL.step===tab||
+      (tab==='mes'&&CAL.step==='eventoForm')?' on':'');
+  });
+
+  if(CAL.step==='mes') renderMes(bd);
+  else if(CAL.step==='proximos') renderProximos(bd);
+  else if(CAL.step==='actividades') renderActividades(bd);
+  else if(CAL.step==='eventoForm') renderEventoForm(bd);
+}
+
+// ── CALENDAR MONTH VIEW ─────────────────────────────────────
+function renderMes(bd){
+  var year=CAL.viewYear, month=CAL.viewMonth;
+  var today=fiso(new Date());
+  var eventDates=getEventDatesInMonth(year,month);
+
+  // Header
+  var hdr=mkDiv('cal-header');
+  var prev=mkBtn('cal-nav','◀','prevMonth');
+  var title=mk('div','cal-title',meses()[month]+' '+year);
+  var next=mkBtn('cal-nav','▶','nextMonth');
+  var todayBtn=mkBtn('tb','Hoy','goToday');todayBtn.style.marginLeft='8px';
+  ap(hdr,prev,title,ap(mkDiv(),next,todayBtn));
+  bd.appendChild(hdr);
+
+  // Legend
+  var leg=mkDiv('legend');
+  var legendItems=[
+    {cls:'dot-toma',lbl:'Tomas'},{cls:'dot-vacuna',lbl:'Vacuna'},{cls:'dot-vacuna-ok',lbl:'Aplicada'},
+    {cls:'dot-visita',lbl:'Médico'},{cls:'dot-peso',lbl:'Peso'},{cls:'dot-feriado',lbl:'Feriado'},
+    {cls:'dot-hito',lbl:'Hito'},{cls:'dot-nota',lbl:'Nota'},
+  ];
+  legendItems.forEach(function(li){
+    var item=mkDiv('legend-item');
+    var dot=mkDiv('legend-dot '+li.cls);
+    item.appendChild(dot);
+    item.appendChild(mk('span','',li.lbl));
+    leg.appendChild(item);
+  });
+  bd.appendChild(leg);
+
+  // Days of week header
+  var dow=mkDiv('cal-dow');
+  dias_cortos().forEach(function(d){
+    dow.appendChild(mk('div','cal-dow-cell',d));
+  });
+  bd.appendChild(dow);
+
+  // Calendar grid
+  var grid=mkDiv('cal-grid');
+  var firstDay=new Date(year,month,1).getDay(); // 0=Sun
+  var daysInMonth=new Date(year,month+1,0).getDate();
+  var prevDays=new Date(year,month,0).getDate();
+
+  // Previous month cells
+  for(var i=0;i<firstDay;i++){
+    var day=prevDays-firstDay+1+i;
+    var pm=month===0?year-1:year, pmm=month===0?11:month-1;
+    var dateStr=pm+'-'+p2(pmm+1)+'-'+p2(day);
+    var cell=mkDiv('cal-cell other-month');
+    cell.appendChild(mk('div','cal-day-num',String(day)));
+    cell.dataset.action='selectDay';cell.dataset.date=dateStr;
+    grid.appendChild(cell);
+  }
+
+  // Current month cells
+  for(var d2=1;d2<=daysInMonth;d2++){
+    var dateStr2=year+'-'+p2(month+1)+'-'+p2(d2);
+    var isToday=dateStr2===today;
+    var isSelected=dateStr2===CAL.selectedDate;
+    var feriado2=FERIADOS_ARG.find(function(f){return f.f===dateStr2;});
+    var cls='cal-cell'+(isToday?' today':'')+(isSelected?' selected':'')+(feriado2?' feriado':'');
+    var cell2=mkDiv(cls);
+    cell2.appendChild(mk('div','cal-day-num',String(d2)));
+    cell2.dataset.action='selectDay';cell2.dataset.date=dateStr2;
+
+    // Event dots — 3 levels
+    var tipos=eventDates[dateStr2]||[];
+    var hasCelebracion=tipos.indexOf('celebracion')>=0;
+    var hasHito=tipos.indexOf('hito')>=0||hasCelebracion;
+    var hasImportante=['vacuna','visita','custom'].some(function(t){return tipos.indexOf(t)>=0;});
+
+    // Level 3: Celebration day — golden bg on the day number
+    if(hasCelebracion){
+      // Mark celebration day cell
+      cell2.className += ' celebracion-day';
+      var dayNumEl = cell2.firstChild;
+      if(dayNumEl) dayNumEl.className += ' golden';
+    }
+    // Level 2: Hito — star emoji above number
+    else if(hasHito){
+      var star=mk('div','','⭐','font-size:8px;line-height:1;text-align:center');
+      cell2.insertBefore(star,cell2.firstChild);
+    }
+
+    if(tipos.length>0){
+      var dots=mkDiv('cal-dots');
+      var tipoMap={'toma':'dot-toma','panal':'dot-nota','peso':'dot-peso',
+        'vacuna':'dot-vacuna','vacuna-ok':'dot-vacuna-ok','visita':'dot-visita',
+        'hito':'dot-hito','celebracion':'dot-hito','feriado':'dot-feriado',
+        'nota':'dot-nota','sintoma':'dot-sintoma','custom':'dot-visita'};
+      var shown={};
+      tipos.forEach(function(tipo){
+        if(tipo==='toma'||tipo==='panal')return; // skip routine — shown in detail only
+        if(shown[tipo])return;shown[tipo]=true;
+        var dot=mkDiv('cal-dot '+(tipoMap[tipo]||'dot-nota'));
+        if(tipo==='celebracion'||tipo==='hito')dot.style.cssText='width:7px;height:7px;background:#d4a843;border-radius:50%';
+        dots.appendChild(dot);
+      });
+      // Show a small grey dot if there are only routine events
+      if(dots.children.length===0&&tipos.length>0){
+        var rdot=mkDiv('cal-dot');rdot.style.cssText='width:4px;height:4px;background:rgba(255,255,255,.2);border-radius:50%';
+        dots.appendChild(rdot);
+      }
+      if(dots.children.length>0)cell2.appendChild(dots);
+    }
+    grid.appendChild(cell2);
+  }
+
+  // Fill remaining cells
+  var total=firstDay+daysInMonth;
+  var remaining=(total%7===0)?0:7-(total%7);
+  for(var i2=1;i2<=remaining;i2++){
+    var nm2=month===11?year+1:year, nmm2=month===11?0:month+1;
+    var dateStr3=nm2+'-'+p2(nmm2+1)+'-'+p2(i2);
+    var cell3=mkDiv('cal-cell other-month');
+    cell3.appendChild(mk('div','cal-day-num',String(i2)));
+    cell3.dataset.action='selectDay';cell3.dataset.date=dateStr3;
+    grid.appendChild(cell3);
+  }
+  bd.appendChild(grid);
+
+  // Selected day detail
+  if(CAL.selectedDate){
+    var eventos=getEventosDelDia(CAL.selectedDate);
+    var detail=mkDiv('day-detail');
+    var dtitle=mk('div','day-detail-title',flong(CAL.selectedDate).toUpperCase());
+    detail.appendChild(dtitle);
+
+    if(eventos.length===0){
+      detail.appendChild(mk('div','','Sin eventos registrados en este día.','font-size:12px;color:#a89070'));
+    } else {
+      eventos.forEach(function(ev){renderEventoRow(ev, detail);});
+    }
+
+    // Add event button
+    var addBtn=mkBtn('pb go','+ Agregar evento','newEvento');
+    addBtn.style.cssText='margin-top:12px;font-size:13px;padding:10px 14px';
+    detail.appendChild(addBtn);
+    bd.appendChild(detail);
+  } else {
+    // Hint
+    var hint=mk('div','','Tap en un día para ver el detalle.','font-size:12px;color:#a89070;text-align:center;padding:16px');
+    bd.appendChild(hint);
+  }
+}
+
+function renderEventoRow(ev, container){
+  var row=mkDiv('event-row');
+  var dot=mkDiv('event-dot-big');dot.style.background=ev.color||'#888';
+  var content=mkDiv('event-content');
+  ap(content,
+    mk('div','event-title',ev.ic+' '+ev.titulo),
+    ev.sub?mk('div','event-sub',ev.sub):null
+  );
+
+  var actions=mkDiv('event-actions');
+
+  // Vacuna: confirmar si no está aplicada
+  if(ev.tipo==='vacuna'&&ev.datos&&ev.datos.vacuna){
+    var vac=ev.datos.vacuna;
+    var confirmBtn=mkBtn('event-btn confirm','✅ Marcar aplicada','confirmVacuna');
+    confirmBtn.dataset.id=vac.id;
+    actions.appendChild(confirmBtn);
+  }
+
+  // Para eventos agendables (visita, vacuna, custom): Google Cal + ICS + Compartir
+  if(['vacuna','vacuna-ok','visita','custom'].indexOf(ev.tipo)>=0){
+    var fecha=CAL.selectedDate;
+    var hora=ev.datos&&ev.datos.dt?ft(ev.datos.dt):(ev.datos&&ev.datos.hora)||'09:00';
+    var lugar='';
+    if(ev.tipo==='visita'&&ev.med)lugar=ev.med.dir||'';
+    if(ev.datos&&ev.datos.lugar)lugar=ev.datos.lugar;
+    if(ev.datos&&ev.datos.link&&!lugar)lugar=ev.datos.link;
+
+    var evData=JSON.stringify({titulo:ev.titulo,fecha:fecha,hora:hora,desc:ev.sub||'',lugar:lugar});
+    var evEnc=encodeURIComponent(evData);
+
+    var gcalBtn=mkBtn('event-btn gcal','📅 Google Cal','openGCal');gcalBtn.dataset.ev=evEnc;
+    var icsBtn=mkBtn('event-btn ics','📥 .ics','downloadICS');icsBtn.dataset.ev=evEnc;
+    var shareBtn=mkBtn('event-btn share','↗️ Compartir','shareEvento');shareBtn.dataset.ev=evEnc;
+    ap(actions,gcalBtn,icsBtn,shareBtn);
+  }
+
+  // Custom events: edit/delete
+  if(ev.tipo==='custom'&&ev.datos&&ev.datos.id){
+    var delBtn=mkBtn('event-btn edit','🗑','deleteEvento');delBtn.dataset.id=ev.datos.id;
+    actions.appendChild(delBtn);
+  }
+
+  if(actions.children.length>0)content.appendChild(actions);
+  ap(row,dot,content);
+  container.appendChild(row);
+}
+
+// ── PRÓXIMOS EVENTOS ─────────────────────────────────────────
+function renderProximos(bd){
+  bd.appendChild(mk('div','','Próximos eventos','font-size:17px;font-weight:bold;color:#f0d9a0;margin-bottom:16px'));
+
+  var today=new Date(); today.setHours(0,0,0,0);
+  var upcoming=[];
+
+  // Next 90 days
+  for(var i=0;i<90;i++){
+    var d=new Date(today.getTime()+i*86400000);
+    var dateStr=fiso(d);
+    var eventos=getEventosDelDia(dateStr);
+    eventos.forEach(function(ev){
+      if(['feriado','toma','panal','nota'].indexOf(ev.tipo)<0||ev.tipo==='feriado'){
+        if(ev.tipo!=='toma'&&ev.tipo!=='panal'&&ev.tipo!=='nota')
+          upcoming.push({date:d,dateStr:dateStr,ev:ev});
+      }
+    });
+  }
+
+  if(upcoming.length===0){
+    bd.appendChild(mk('div','','Sin eventos próximos en los próximos 90 días.','font-size:12px;color:#a89070'));
+    return;
+  }
+
+  upcoming.slice(0,20).forEach(function(item){
+    var row=mkDiv('upcoming-row');
+    var dDate=mkDiv('upcoming-date');
+    dDate.appendChild(mk('div','upcoming-day-num',String(item.date.getDate())));
+    dDate.appendChild(mk('div','upcoming-day-name',dias_cortos()[item.date.getDay()]+' '+meses()[item.date.getMonth()].substring(0,3)));
+
+    var content=mkDiv('upcoming-content');
+    var ev=item.ev;
+    var dot=mkDiv('cal-dot');dot.style.cssText='background:'+ev.color+';margin-right:6px;display:inline-block;margin-bottom:2px';
+    var titleDiv=mkDiv('upcoming-title');titleDiv.appendChild(dot);
+    titleDiv.appendChild(document.createTextNode(ev.ic+' '+ev.titulo));
+    content.appendChild(titleDiv);
+    if(ev.sub)content.appendChild(mk('div','upcoming-sub',ev.sub));
+
+    // Action buttons for upcoming
+    if(['vacuna','visita','custom'].indexOf(ev.tipo)>=0){
+      var actions=mkDiv('event-actions');actions.style.marginTop='6px';
+      var evData=JSON.stringify({titulo:ev.titulo,fecha:item.dateStr,hora:(ev.datos&&ev.datos.hora)||'09:00',desc:ev.sub||'',lugar:(ev.datos&&(ev.datos.lugar||ev.datos.link))||''});
+      var evEnc=encodeURIComponent(evData);
+      var gcalBtn=mkBtn('event-btn gcal','📅 Google Cal','openGCal');gcalBtn.dataset.ev=evEnc;
+      var shareBtn=mkBtn('event-btn share','↗️ Compartir','shareEvento');shareBtn.dataset.ev=evEnc;
+      ap(actions,gcalBtn,shareBtn);
+      content.appendChild(actions);
+    }
+    if(ev.tipo==='vacuna'&&ev.datos&&ev.datos.vacuna){
+      var actions2=mkDiv('event-actions');actions2.style.marginTop='6px';
+      var cb=mkBtn('event-btn confirm','✅ Aplicada','confirmVacuna');cb.dataset.id=ev.datos.vacuna.id;
+      actions2.appendChild(cb);content.appendChild(actions2);
+    }
+
+    ap(row,dDate,content);
+    bd.appendChild(row);
+  });
+
+  if(upcoming.length>20){
+    bd.appendChild(mk('div','','+'+( upcoming.length-20)+' eventos más en los próximos 90 días.','font-size:11px;color:#a89070;text-align:center;padding:12px'));
+  }
+}
+
+// ── ACTIVIDADES ─────────────────────────────────────────────
+function renderActividades(bd){
+  var dvida=diasDeVida();
+  var act=getActividadesPorEdad(dvida);
+  var semana=ageW();
+
+  bd.appendChild(mk('div','',act.titulo,'font-size:16px;font-weight:bold;color:#f0d9a0;margin-bottom:4px'));
+  bd.appendChild(mk('div','','Semana '+semana+' · Foco: '+act.foco,'font-size:11px;color:#a89070;margin-bottom:16px'));
+
+  act.actividades.forEach(function(a){
+    var card=mkDiv('card');
+    var hd=mkDiv('',null,'display:flex;align-items:flex-start;gap:12px');
+    hd.style.cssText='display:flex;align-items:flex-start;gap:12px;margin-bottom:8px';
+    var ic=mk('span','',a.ic,'font-size:26px;flex-shrink:0;line-height:1');
+    var right=mkDiv();
+    right.style.flex='1';
+    right.appendChild(mk('div','',a.label,'font-size:14px;font-weight:bold;color:#f0d9a0;margin-bottom:4px'));
+    right.appendChild(mk('div','',a.desc,'font-size:12px;color:#d4c090;line-height:1.7'));
+    ap(hd,ic,right);
+    card.appendChild(hd);
+    bd.appendChild(card);
+  });
+
+  bd.appendChild(mk('div','','Fuentes: AAP, SAP, Denver II, T. Berry Brazelton','font-size:10px;color:#a89070;text-align:center;margin-top:4px;padding-bottom:8px'));
+}
+
+// ── NUEVO EVENTO FORM ────────────────────────────────────────
+function renderEventoForm(bd){
+  var ev=CAL.editEvento||{};
+  bd.appendChild(mkBtn('bk','← Volver','goMes'));
+  bd.appendChild(mk('div','',ev.id?'Editar evento':'Nuevo evento','font-size:17px;font-weight:bold;color:#f0d9a0;margin-bottom:4px'));
+  bd.appendChild(mk('div','','Se agregará al calendario de Cefe','font-size:12px;color:#a89070;margin-bottom:16px'));
+
+  function field(lbl,inp){var d=mkDiv('ff');d.appendChild(mk('label','fl',lbl));d.appendChild(inp);return d;}
+  function frow2(f1,f2){var r=mkDiv('frow');r.appendChild(f1);r.appendChild(f2);return r;}
+  function inp(id,type,ph,val){var i=document.createElement('input');i.className='fi';i.id='ev-'+id;i.type=type||'text';if(ph)i.placeholder=ph;if(val!==undefined)i.value=val;return i;}
+
+  bd.appendChild(field('Título del evento',inp('titulo','text','Ej: Vacuna Pentavalente',ev.titulo||'')));
+
+  var fr1=frow2(
+    field('Fecha',inp('fecha','date',null,ev.fecha||fiso(new Date()))),
+    field('Hora',inp('hora','time',null,ev.hora||'09:00'))
+  );
+  bd.appendChild(fr1);
+
+  // Modalidad
+  bd.appendChild(mk('label','fl','Modalidad'));
+  var modRow=mkDiv();modRow.style.cssText='display:flex;gap:8px;margin-bottom:12px';
+  var rbP=mkBtn('rb'+((!ev.modalidad||ev.modalidad==='presencial')?' on':''),'Presencial','editModalidad');rbP.dataset.v='presencial';
+  var rbV=mkBtn('rb'+(ev.modalidad==='virtual'?' on':''),'Virtual','editModalidad');rbV.dataset.v='virtual';
+  ap(modRow,rbP,rbV);
+  bd.appendChild(modRow);
+
+  bd.appendChild(field('Lugar / Dirección (presencial)',inp('lugar','text','Ej: Av. del Libertador 1000',ev.lugar||'')));
+  bd.appendChild(field('Link (virtual — Google Meet, Zoom...)',inp('link','url','https://meet.google.com/...',ev.link||'')));
+  bd.appendChild(field('Descripción / Notas',inp('desc','text','Motivo, observaciones...',ev.desc||'')));
+
+  // Notificaciones
+  bd.appendChild(mk('label','fl','Notificaciones (incluir en .ics)'));
+  var notifRow=mkDiv('notify-row');
+  var notifOpts=[{v:'1dia',lbl:'1 día antes'},{v:'2hs',lbl:'2 hs antes'},{v:'30min',lbl:'30 min antes'}];
+  notifOpts.forEach(function(n){
+    var chip=mkBtn('notify-chip'+((ev.notifs||[]).indexOf(n.v)>=0?' on':''),n.lbl,'toggleNotif');
+    chip.dataset.v=n.v;
+    notifRow.appendChild(chip);
+  });
+  bd.appendChild(notifRow);
+
+  // Invitar a padres
+  if(CAL.padres&&CAL.padres.length>0){
+    var padresConEmail=CAL.padres.filter(function(p){return p.email;});
+    if(padresConEmail.length>0){
+      var padresInfo=mkDiv();
+      padresInfo.style.cssText='background:rgba(100,200,180,.06);border:1px solid rgba(100,200,180,.15);border-radius:11px;padding:10px;margin-bottom:12px';
+      padresInfo.appendChild(mk('div','fl','Incluir en el .ics como invitados:'));
+      padresConEmail.forEach(function(p){
+        padresInfo.appendChild(mk('div','','✓ '+(p.apodo||p.nom)+' ('+p.email+')','font-size:12px;color:#64c8b4;margin-bottom:3px'));
+      });
+      bd.appendChild(padresInfo);
+    }
+  }
+
+  // Save
+  var saveBtn=mkBtn('pb go','Guardar evento','saveEvento');
+  saveBtn.addEventListener('click',function(){
+    // Read form values before saving
+    ['titulo','fecha','hora','lugar','link','desc'].forEach(function(f){
+      var el=document.getElementById('ev-'+f);
+      if(el)CAL.editEvento[f]=el.value.trim();
+    });
+  });
+  bd.appendChild(saveBtn);
+
+  if(ev.id){
+    var delBtn=mkBtn('gb','Eliminar evento','deleteEvento');delBtn.dataset.id=ev.id;
+    delBtn.style.color='#e07070';delBtn.style.borderColor='rgba(224,112,112,.3)';
+    bd.appendChild(delBtn);
+  }
+
+  bd.appendChild(mkBtn('gb','Cancelar','goMes'));
+}
+
+// ─── INIT ───────────────────────────────────────────────────
+loadLocal();
+render();
+
+</script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+var cfg={apiKey:"AIzaSyC5iVBZbLlD0a7yVRx4eDg6pOjRKNO28kA",authDomain:"cefe-app.firebaseapp.com",databaseURL:"https://cefe-app-default-rtdb.firebaseio.com",projectId:"cefe-app",storageBucket:"cefe-app.firebasestorage.app",messagingSenderId:"40391677831",appId:"1:40391677831:web:3640958b4450f2cd5ae522"};
+var app=initializeApp(cfg);var db=getDatabase(app);
+var dot=document.getElementById('sync-dot');
+var fbReady=false;
+function setDot(c,t){if(dot){dot.style.color=c;dot.title=t||'';}}
+function rd(v){if(!v)return null;var d=new Date(v);return isNaN(d)?null:d;}
+window.fbSave=function(data){
+  if(!fbReady)return;
+  setDot('#d4a843','Guardando...');
+  set(ref(db,'cefe'),data).then(function(){setDot('#64c8b4','OK');}).catch(function(){setDot('#e07070','Error');});
+};
+onValue(ref(db,'cefe'),function(snap){
+  fbReady=true;
+  var data=snap.val();
+  if(!data){setDot('#64c8b4','Conectado');render();return;}
+  function re(e){if(!e)return null;try{if(e.type==='toma'){var s=rd(e.s);if(!s)return null;e.s=s;e.e=rd(e.e)||new Date(s.getTime()+(e.tot||0)*60000);e.nt=rd(e.nt)||new Date(s.getTime()+180*60000);}if(e.type==='panal'){var t=rd(e.t);if(!t)return null;e.t=t;}}catch(ex){return null;}return e;}
+  if(data.hist)CAL.hist=data.hist.map(re).filter(Boolean);
+  if(data.pesos)CAL.pesos=data.pesos.map(function(p){if(!p)return null;var t=rd(p.t);if(!t)return null;return{t:t,g:p.g,n:p.n||''};}).filter(Boolean);
+  if(data.meds)CAL.meds=data.meds.filter(Boolean);
+  if(data.visits)CAL.visits=data.visits.map(function(v){if(!v)return null;var dt=rd(v.dt);if(!dt)return null;return Object.assign({},v,{dt:dt});}).filter(Boolean);
+  if(data.bebe&&typeof data.bebe==='object')CAL.bebe=Object.assign({},CAL.bebe,data.bebe);
+  if(data.hitos)CAL.hitos=data.hitos.filter(Boolean);
+  if(data.notas)CAL.notas=data.notas.filter(Boolean);
+  if(data.sintomas)CAL.sintomas=data.sintomas.map(function(s){if(!s)return null;var t=rd(s.t);if(!t)return null;return Object.assign({},s,{t:t});}).filter(Boolean);
+  if(data.padres)CAL.padres=data.padres.filter(Boolean);
+  // Cal-specific data
+  if(data.calEventos)CAL.calEventos=data.calEventos.filter(Boolean);
+  setDot('#64c8b4','Sincronizado');
+  render();
+},function(err){fbReady=true;setDot('#e07070','Error');console.error(err);});
+</script>
+</body>
+</html>
