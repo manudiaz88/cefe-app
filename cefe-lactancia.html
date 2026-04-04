@@ -21,7 +21,7 @@ button{font-family:Georgia,serif;-webkit-appearance:none}
 .hr{display:flex;gap:5px;align-items:center}
 .tb{background:rgba(255,255,255,.06);border:1px solid rgba(210,175,120,.2);border-radius:10px;padding:5px 9px;color:#a89070;font-size:10px;cursor:pointer}
 .tb.on{background:rgba(212,168,67,.15);border-color:rgba(212,168,67,.4);color:#f0d9a0}
-#bd{padding:18px 18px 100px 18px;flex:1;overflow-y:auto}
+#bd{padding:calc(env(safe-area-inset-top, 0px) + 4px) 18px 100px 18px;flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
 #bnav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:rgba(10,18,28,.96);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:1px solid rgba(210,175,120,.15);display:flex;align-items:stretch;z-index:100;padding-bottom:env(safe-area-inset-bottom,0)}
 .bnav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 0 6px;background:none;border:none;cursor:pointer;color:#a89070;min-height:56px;position:relative}
 .bnav-btn.on{color:#f0d9a0}
@@ -124,16 +124,40 @@ button{font-family:Georgia,serif;-webkit-appearance:none}
   </nav>
   <div id="mas-menu" class="mas-menu">
     <div class="mas-grid">
-      <button class="mas-item" data-action="goPerfil"><span class="mas-item-ic">👶</span><span><span class="mas-item-lbl">Perfil</span><span class="mas-item-sub">Datos de Cefe</span></span></button>
-      <button class="mas-item" data-action="goMedicos"><span class="mas-item-ic">🏥</span><span><span class="mas-item-lbl">Médicos</span><span class="mas-item-sub">Profesionales y visitas</span></span></button>
-      <button class="mas-item" data-action="goNotas"><span class="mas-item-ic">📝</span><span><span class="mas-item-lbl">Notas</span><span class="mas-item-sub">Observaciones del día</span></span></button>
-      <button class="mas-item" data-action="goSintomas"><span class="mas-item-ic">🩺</span><span><span class="mas-item-lbl">Síntomas</span><span class="mas-item-sub">Alertas y registros</span></span></button>
-      <button class="mas-item" data-action="goHitos"><span class="mas-item-ic">🌟</span><span><span class="mas-item-lbl">Hitos</span><span class="mas-item-sub">Desarrollo de Cefe</span></span></button>
-      <button class="mas-item" data-action="goCartas"><span class="mas-item-ic">💌</span><span><span class="mas-item-lbl">Cartas</span><span class="mas-item-sub">Memoria emocional</span></span></button>
-      <button class="mas-item" data-action="goActividades"><span class="mas-item-ic">🌟</span><span><span class="mas-item-lbl">Actividades</span><span class="mas-item-sub">Por semana de Cefe</span></span></button>
-      <button class="mas-item" data-action="goVacunas"><span class="mas-item-ic">💉</span><span><span class="mas-item-lbl">Vacunas</span><span class="mas-item-sub">Calendario nacional</span></span></button>
-      <button class="mas-item" data-action="goAstro"><span class="mas-item-ic">✨</span><span><span class="mas-item-lbl">Recreativo</span><span class="mas-item-sub">Astral y horóscopo</span></span></button>
-      <button class="mas-item" data-action="toggleNight"><span class="mas-item-ic" id="night-ic">🌙</span><span><span class="mas-item-lbl" id="night-lbl">Modo noche</span><span class="mas-item-sub">Tomas nocturnas</span></span></button>
+      <button class="mas-item" data-action="goHitos">
+        <span class="mas-item-ic">⭐</span>
+        <span><span class="mas-item-lbl">Hitos</span><span class="mas-item-sub">Momentos de Cefe</span></span>
+      </button>
+      <button class="mas-item" data-action="goMedicos">
+        <span class="mas-item-ic">🏥</span>
+        <span><span class="mas-item-lbl">Médicos</span><span class="mas-item-sub">Profesionales y visitas</span></span>
+      </button>
+      <button class="mas-item" data-action="goVacunas">
+        <span class="mas-item-ic">💉</span>
+        <span><span class="mas-item-lbl">Vacunas</span><span class="mas-item-sub">Calendario nacional</span></span>
+      </button>
+      <button class="mas-item" data-action="goActividades">
+        <span class="mas-item-ic">🎯</span>
+        <span><span class="mas-item-lbl">Actividades</span><span class="mas-item-sub">Semana 0 de Cefe</span></span>
+      </button>
+      <button class="mas-item" data-action="goMemoria">
+        <span class="mas-item-ic">📖</span>
+        <span><span class="mas-item-lbl">Memoria</span><span class="mas-item-sub">Notas, cartas, síntomas</span></span>
+      </button>
+      <button class="mas-item" data-action="toggleNight">
+        <span class="mas-item-ic" id="night-ic">🌙</span>
+        <span><span class="mas-item-lbl" id="night-lbl">Modo noche</span><span class="mas-item-sub">Tomas nocturnas</span></span>
+      </button>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:8px">
+      <button class="mas-item" style="flex:1" data-action="goPerfil">
+        <span class="mas-item-ic">👶</span>
+        <span><span class="mas-item-lbl">Perfil de Cefe</span></span>
+      </button>
+      <button class="mas-item" style="flex:1" data-action="goAstro">
+        <span class="mas-item-ic">✨</span>
+        <span><span class="mas-item-lbl">Recreativo</span></span>
+      </button>
     </div>
   </div>
 </div>
@@ -407,18 +431,65 @@ function loadData() {
   }
 }
 
+function toISO(d){
+  if(!d) return null;
+  if(d instanceof Date) return isNaN(d.getTime()) ? null : d.toISOString();
+  return String(d);
+}
+function serHist(){
+  return (D.hist||[]).map(function(e){
+    if(!e) return null;
+    if(e.type==='toma') return Object.assign({},e,{s:toISO(e.s),e:toISO(e.e),nt:toISO(e.nt)});
+    if(e.type==='panal') return Object.assign({},e,{t:toISO(e.t)});
+    return e;
+  }).filter(Boolean);
+}
+function serPesos(){
+  return (D.pesos||[]).map(function(p){
+    if(!p) return null;
+    return Object.assign({},p,{t:toISO(p.t)});
+  }).filter(Boolean);
+}
+function serVisits(){
+  return (D.visits||[]).map(function(v){
+    if(!v) return null;
+    return Object.assign({},v,{dt:toISO(v.dt)});
+  }).filter(Boolean);
+}
+function serSintomas(){
+  return (D.sintomas||[]).map(function(s){
+    if(!s) return null;
+    return Object.assign({},s,{t:toISO(s.t)});
+  }).filter(Boolean);
+}
 function saveData() {
+  // localStorage: JSON.stringify handles Date objects natively
   lss('version', APP_VERSION);
-  lss('hist', D.hist); lss('pesos', D.pesos); lss('meds', D.meds);
-  lss('visits', D.visits); lss('bebe', D.bebe); lss('padres', D.padres);
-  lss('notas', D.notas); lss('sintomas', D.sintomas);
+  lss('hist', serHist()); lss('pesos', serPesos()); lss('meds', D.meds);
+  lss('visits', serVisits()); lss('bebe', D.bebe); lss('padres', D.padres);
+  lss('notas', D.notas); lss('sintomas', serSintomas());
   lss('hitos', D.hitos); lss('cartas', D.cartas);
   lss('nightMode', D.nightMode);
-  if (window.fbSave) window.fbSave({
+  lss('alarmMax', D.alarmMaxInterval||180);
+  lss('sleepStart2', D.sleepStart||null);
+  lss('sleepLog2', D.sleepLog||[]);
+  // Firebase: must serialize all Date objects to ISO strings first
+  if(window.fbSave) window.fbSave({
     version: APP_VERSION,
-    hist:D.hist, pesos:D.pesos, meds:D.meds, visits:D.visits,
-    bebe:D.bebe, padres:D.padres, notas:D.notas,
-    sintomas:D.sintomas, hitos:D.hitos, cartas:D.cartas
+    hist: serHist(),
+    pesos: serPesos(),
+    meds: D.meds,
+    visits: serVisits(),
+    bebe: D.bebe,
+    padres: D.padres,
+    notas: D.notas,
+    sintomas: serSintomas(),
+    hitos: D.hitos,
+    cartas: D.cartas,
+    sleepLog: D.sleepLog||[],
+    sleepStart: D.sleepStart||null,
+    nightMode: D.nightMode,
+    alarmMaxInterval: D.alarmMaxInterval||180
   });
 }
 
@@ -1163,7 +1234,7 @@ function medCard(m,i){
 // ─── RENDER ───────────────────────────────────────────────────
 function render(){
   applyNightMode();
-  var MAS_STEPS=['perfil','editBebe','editPadre','medicos','editMed','visitaForm','extras','notas','editNota','sintomas','editSintoma','hitos','cartas','editCarta','astro','actividades','vacunas'];
+  var MAS_STEPS=['perfil','editBebe','editPadre','medicos','editMed','visitaForm','extras','notas','editNota','sintomas','editSintoma','hitos','cartas','editCarta','astro','actividades','vacunas','memoria'];
   var TAB_MAP={home:['home'],history:['history'],peso:['peso','pesoEntry'],dash:['dash'],mas:MAS_STEPS};
   Object.keys(TAB_MAP).forEach(function(t){
     var el=document.getElementById('bn-'+t);if(!el)return;
@@ -1171,7 +1242,7 @@ function render(){
   });
   var nb=document.getElementById('night-btn');if(nb)nb.style.color=D.nightMode?'#f0d9a0':'#a89070';
   var htEl=document.getElementById('hdr-title');
-  if(htEl){var TITLES={home:'Ceferino',history:'Historial',peso:'Peso',pesoEntry:'Peso',dash:'Dashboard',perfil:'Perfil',editBebe:'Perfil',editPadre:'Perfil',medicos:'M\u00e9dicos',editMed:'M\u00e9dicos',visitaForm:'M\u00e9dicos',extras:'Extras',notas:'Notas',editNota:'Nueva Nota',sintomas:'S\u00edntomas',editSintoma:'S\u00edntoma',hitos:'Hitos',cartas:'Cartas',editCarta:'Carta',astro:'Recreativo',actividades:'Actividades',vacunas:'Vacunas',toma:'Toma',panal:'Pa\u00f1al',preview:'Confirmar',summary:'Mensaje'};
+  if(htEl){var TITLES={home:'Ceferino',history:'Historial',peso:'Peso',pesoEntry:'Peso',dash:'Dashboard',perfil:'Perfil',editBebe:'Perfil',editPadre:'Perfil',medicos:'M\u00e9dicos',editMed:'M\u00e9dicos',visitaForm:'M\u00e9dicos',extras:'Extras',notas:'Notas',editNota:'Nueva Nota',sintomas:'S\u00edntomas',editSintoma:'S\u00edntoma',hitos:'Hitos',cartas:'Cartas',editCarta:'Carta',astro:'Recreativo',actividades:'Actividades',vacunas:'Vacunas',memoria:'Memoria de Cefe',toma:'Toma',panal:'Pa\u00f1al',preview:'Confirmar',summary:'Mensaje'};
   htEl.textContent=TITLES[D.step]||'Ceferino';}
 
   var bd=document.getElementById('bd');if(!bd)return;
@@ -1183,7 +1254,13 @@ function render(){
 
   // ── HOME ──────────────────────────────────────────────────────
   if(D.step==='home'){
-    if(D.alarmFired&&D.nextToma){
+    // Calendar shortcut banner
+    var calBanner=mkDiv('display:flex;align-items:center;justify-content:space-between;background:rgba(212,168,67,.06);border:1px solid rgba(212,168,67,.12);border-radius:12px;padding:10px 14px;margin-bottom:12px;cursor:pointer');
+    calBanner.onclick=function(){window.location.href='cefe-calendario.html';};
+    calBanner.appendChild(mkTxt('span',null,'\uD83D\uDCC5  Ver Calendario de Cefe','font-size:13px;color:#d4a843'));
+    calBanner.appendChild(mkTxt('span',null,'\u2192','font-size:16px;color:#d4a843'));
+    bd.appendChild(calBanner);
+        if(D.alarmFired&&D.nextToma){
       var alb=E.div('albox');
       var ald=mkDiv('flex:1');
       ald.appendChild(mkTxt('div',null,'Hora de la toma de Cefe','font-size:10px;color:#a89070'));
@@ -1826,7 +1903,49 @@ function render(){
   }
 
 
+
+
+  else if(D.step==='memoria'){
+    bd.appendChild(E.el('div',{cls:'st',txt:'\uD83D\uDCD6 Memoria de Cefe'}));
+    bd.appendChild(mkTxt('div',null,'Todo lo anotado sobre Cefe, en un solo lugar.','font-size:11px;color:#a89070;margin-bottom:12px'));
+    var qaRow=mkDiv('display:flex;gap:6px;margin-bottom:16px');
+    var btnNota=E.btn('tb','\uD83D\uDCDD Nota','goNotas');btnNota.style.flex='1';
+    var btnCarta=E.btn('tb','\uD83D\uDC8C Carta','goCartas');btnCarta.style.flex='1';
+    var btnSint=E.btn('tb','\uD83E\uDE7A S\u00EDntoma','newSintoma');btnSint.style.flex='1';
+    qaRow.appendChild(btnNota);qaRow.appendChild(btnCarta);qaRow.appendChild(btnSint);
+    bd.appendChild(qaRow);
+    var items=[];
+    (D.notas||[]).forEach(function(n){if(n&&n.texto)items.push({tipo:'nota',fecha:n.fecha,ic:'\uD83D\uDCDD',titulo:'Nota del d\u00EDa',sub:n.texto.substring(0,80),color:'#64c8b4'});});
+    (D.cartas||[]).forEach(function(c){if(c&&c.titulo)items.push({tipo:'carta',fecha:c.fecha||'',ic:'\uD83D\uDC8C',titulo:c.titulo,sub:(c.texto||'').substring(0,80),color:'#b48cdc'});});
+    (D.sintomas||[]).forEach(function(s){if(s){var sd=safeDate(s.t);if(sd)items.push({tipo:'sintoma',fecha:sd.toISOString().substring(0,10),ic:'\uD83E\uDE7A',titulo:s.tipo+(s.valor?' \u2014 '+s.valor:''),sub:s.nota||'',color:'#e07070'});}});
+    (D.hitos||[]).forEach(function(h){if(h&&h.id){var hd=HITOS_DEF.find(function(x){return x.id===h.id;})||{label:'Hito',ic:'\u2B50',celebracion:false};var fecha=h.fecha?(h.fecha.length>10?h.fecha.substring(0,10):h.fecha):'';if(fecha)items.push({tipo:'hito',fecha:fecha,ic:hd.ic||'\u2B50',titulo:hd.label,sub:h.nota||'',color:hd.celebracion?'#d4a843':'#f0d9a0'});}});
+    items.sort(function(a,b){return (b.fecha||'').localeCompare(a.fecha||'');});
+    if(items.length===0){
+      var emp=mkDiv('background:rgba(255,255,255,.03);border:1px solid rgba(210,175,120,.1);border-radius:14px;padding:24px;text-align:center');
+      emp.appendChild(mkTxt('div',null,'\uD83D\uDCF7','font-size:32px;margin-bottom:8px'));
+      emp.appendChild(mkTxt('div',null,'A\u00FAn no hay anotaciones.','font-size:13px;color:#f0d9a0;margin-bottom:4px'));
+      emp.appendChild(mkTxt('div',null,'Cada nota, carta, s\u00EDntoma o hito aparecer\u00E1 ac\u00E1.','font-size:11px;color:#a89070;line-height:1.6'));
+      bd.appendChild(emp);
+    } else {
+      var seen={};
+      items.forEach(function(item){
+        if(!seen[item.fecha]){
+          seen[item.fecha]=true;
+          try{bd.appendChild(mkTxt('div',null,new Date(item.fecha+'T12:00').toLocaleDateString('es-AR',{weekday:'short',day:'2-digit',month:'short'}),'font-size:10px;font-weight:bold;color:#d4a843;text-transform:uppercase;letter-spacing:1px;margin:10px 0 6px'));}catch(e){}
+        }
+        var row=mkDiv('background:rgba(255,255,255,.03);border-left:3px solid '+item.color+';border-radius:0 12px 12px 0;padding:10px 12px;margin-bottom:6px;display:flex;gap:10px;align-items:flex-start');
+        row.appendChild(mkTxt('span',null,item.ic,'font-size:20px;flex-shrink:0'));
+        var cnt=mkDiv('flex:1');cnt.style.flex='1';
+        cnt.appendChild(mkTxt('div',null,item.titulo,'font-size:13px;font-weight:bold;color:#f0d9a0;margin-bottom:2px'));
+        if(item.sub)cnt.appendChild(mkTxt('div',null,item.sub,'font-size:11px;color:#a89070;line-height:1.5'));
+        row.appendChild(cnt);bd.appendChild(row);
+      });
+    }
+  }
 }
+
+
+
 // ─── NAVIGATION HELPERS ───────────────────────────────────────
 // These are called from handleAction for steps not covered by main switch
 document.addEventListener('click', function(ev) {
@@ -1842,6 +1961,7 @@ document.addEventListener('click', function(ev) {
         case 'goActividades': closeMasMenu(); setStep('actividades'); return;
         case 'goVacunas': closeMasMenu(); setStep('vacunas'); return;
         case 'goNotas': closeMasMenu(); setStep('notas'); return;
+        case 'goMemoria': closeMasMenu(); setStep('memoria'); return;
         case 'goSintomas': closeMasMenu(); setStep('sintomas'); return;
         case 'goHitos': closeMasMenu(); setStep('hitos'); return;
         case 'goCartas': closeMasMenu(); setStep('cartas'); return;
