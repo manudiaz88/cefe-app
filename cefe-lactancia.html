@@ -2,12 +2,14 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Cefe">
 <meta name="theme-color" content="#0f1923">
-<title>Cefe App v2.2</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<title>Cefe App v2.3</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 body{min-height:100vh;background:linear-gradient(135deg,#0f1923,#1a2d3d,#0f2030);font-family:Georgia,serif;color:#e8dcc8;display:flex;flex-direction:column;align-items:center;padding-bottom:40px;transition:background .3s}
@@ -103,6 +105,7 @@ button{font-family:Georgia,serif;-webkit-appearance:none}
 /* ── CONTEXTUAL POPUP ── */
 #cpop-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:500;display:flex;align-items:flex-end;justify-content:center;padding:0 0 env(safe-area-inset-bottom,0)}
 #cpop-overlay.hidden{display:none}
+#onboard-overlay.hidden{display:none}
 #cpop-sheet{width:100%;max-width:480px;border-radius:22px 22px 0 0;padding:24px 20px 32px;animation:slideUp .3s ease}
 @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
 .cpop-icon{font-size:42px;text-align:center;margin-bottom:10px}
@@ -140,6 +143,23 @@ button{font-family:Georgia,serif;-webkit-appearance:none}
 </style>
 </head>
 <body>
+<!-- ONBOARDING -->
+<div id="onboard-overlay" class="hidden" style="position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:600;display:flex;align-items:center;justify-content:center;padding:20px">
+  <div style="width:100%;max-width:380px;background:linear-gradient(160deg,#0f1923,#1a2d3d);border:1px solid rgba(212,168,67,.3);border-radius:20px;padding:28px 22px;text-align:center">
+    <div style="font-size:40px;margin-bottom:12px">👶</div>
+    <div style="font-size:18px;font-weight:bold;color:#f0d9a0;margin-bottom:6px">Bienvenido a la app de Cefe</div>
+    <div style="font-size:12px;color:#a89070;margin-bottom:20px;line-height:1.6">¿Cómo te llamás? Así podemos saber quién registra cada cosa y sincronizar las alertas entre dispositivos.</div>
+    <input id="onboard-name-input" type="text" placeholder="Tu nombre (ej: Manu, Sari…)"
+      style="width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(212,168,67,.3);border-radius:10px;padding:12px 14px;color:#f0d9a0;font-family:Georgia,serif;font-size:16px;outline:none;margin-bottom:14px;text-align:center"
+      onkeydown="if(event.key==='Enter')saveOnboardingName()">
+    <button onclick="saveOnboardingName()"
+      style="width:100%;padding:13px;border-radius:12px;border:none;background:rgba(212,168,67,.8);color:#1a1200;font-size:15px;font-weight:bold;cursor:pointer;font-family:Georgia,serif">
+      Empezar ✓
+    </button>
+    <div style="font-size:10px;color:#a89070;margin-top:10px">Tu nombre se guarda solo en este dispositivo</div>
+  </div>
+</div>
+
 <!-- CONTEXTUAL POPUP -->
 <div id="cpop-overlay" class="hidden">
   <div id="cpop-sheet">
@@ -190,6 +210,10 @@ button{font-family:Georgia,serif;-webkit-appearance:none}
         <span class="mas-item-ic">🎯</span>
         <span><span class="mas-item-lbl">Actividades</span><span class="mas-item-sub">Semana 0 de Cefe</span></span>
       </button>
+      <button class="mas-item" data-action="goHistoria">
+        <span class="mas-item-ic">📜</span>
+        <span><span class="mas-item-lbl">Historia de Cefe</span><span class="mas-item-sub">Línea de tiempo completa</span></span>
+      </button>
       <button class="mas-item" data-action="goMemoria">
         <span class="mas-item-ic">📖</span>
         <span><span class="mas-item-lbl">Memoria</span><span class="mas-item-sub">Notas, cartas, síntomas</span></span>
@@ -216,7 +240,7 @@ button{font-family:Georgia,serif;-webkit-appearance:none}
 // CEFE LACTANCIA APP  —  v2.0
 // ═══════════════════════════════════════════════════════════════
 
-var APP_VERSION = 2;
+var APP_VERSION = 3;
 
 // ─── ELEMENT BUILDER ──────────────────────────────────────────
 var E = {
@@ -304,7 +328,8 @@ var E = {
     var row = document.createElement('div');
     if (h.type === 'toma') {
       row.className = 'hr2 to';
-      var lt = h.lados.map(function(l) { return l.s.split(' ')[0] + ' ' + l.m + 'm'; }).join(' \u00B7 ');
+      var senoHR={izq:0,der:0};h.lados.forEach(function(l){var seno=l.s.toLowerCase().indexOf('der')>=0?'der':'izq';senoHR[seno]+=l.m;});
+      var lt='🤱 Izq:'+senoHR.izq+'m | Der:'+senoHR.der+'m';
       var lDiv = document.createElement('div');
       var t1 = document.createElement('div'); t1.className = 'hrt'; t1.textContent = '\uD83C\uDF7C ' + ft(h.s);
       var t2 = document.createElement('div'); t2.className = 'hrs'; t2.textContent = lt + (h.note ? ' | ' + h.note.substring(0, 20) : '');
@@ -452,6 +477,33 @@ function migrate(savedVersion) {
     if (!D.hitos) D.hitos = [];
     if (!D.cartas) D.cartas = [];
   }
+  // v2 -> v3: migrate momentos.descartados to per-device structure
+  if (savedVersion < 3) {
+    if (D.momentos && D.momentos.descartados) {
+      var oldDesc = D.momentos.descartados;
+      var hasOldKeys = Object.keys(oldDesc).some(function(k){
+        return typeof oldDesc[k] !== 'object' || oldDesc[k] === null;
+      });
+      if (hasOldKeys) {
+        // Move old flat keys under DEVICE_ID
+        var deviceDesc = {};
+        Object.keys(oldDesc).forEach(function(k){
+          if (typeof oldDesc[k] !== 'object' || oldDesc[k] === null) {
+            deviceDesc[k] = oldDesc[k];
+          }
+        });
+        D.momentos.descartados = {};
+        D.momentos.descartados[DEVICE_ID] = deviceDesc;
+      }
+    }
+    // Normalize D.hitos: convert string[] to object[]
+    if (D.hitos) {
+      D.hitos = D.hitos.map(function(h){
+        if (typeof h === 'string') return { id:h, fecha:'', nota:'' };
+        return h;
+      }).filter(Boolean);
+    }
+  }
 }
 
 function loadData() {
@@ -561,6 +613,32 @@ var WHO_G={0:[2300,2600,3200,3700,4200],1:[2500,2800,3300,3900,4400],2:[2700,310
 function whoRow(w){var t=D.bebe.sexo==='F'?WHO_G:WHO_B;return t[Math.min(Math.max(Math.floor(w),0),13)];}
 function pctLbl(g,w){var p=whoRow(w);if(!p)return '\u2014';if(g<=p[0])return '<P3';if(g<=p[1])return 'P3-P15';if(g<=p[2])return 'P15-P50';if(g<=p[3])return 'P50-P85';if(g<=p[4])return 'P85-P97';return '>P97';}
 function pctClr(l){return l==='<P3'?'#e07070':l==='>P97'?'#d4a843':'#64c8b4';}
+
+function calcSenoTotals(lados, cSide, cStart, elapsed) {
+  // Calcula tiempo por seno incluyendo lado activo
+  var senoMap = {izq:0, der:0};
+  (lados||[]).forEach(function(l){
+    var seno = l.s.toLowerCase().indexOf('der')>=0 ? 'der' : 'izq';
+    senoMap[seno] += l.m;
+  });
+  if (cSide && cStart) {
+    var mins = Math.floor((Date.now()-cStart)/60000);
+    var activeSeno = cSide.toLowerCase().indexOf('der')>=0 ? 'der' : 'izq';
+    senoMap[activeSeno] += mins;
+  }
+  return senoMap;
+}
+
+function calcMLEstimate(lados, cSide, cStart, efi, mlProv) {
+  // Calcula ml estimados con todos los lados + el activo
+  var allLados = (lados||[]).slice();
+  if (cSide && cStart) {
+    var mins = Math.floor((Date.now()-cStart)/60000);
+    if (mins > 0) allLados.push({s:cSide, m:mins});
+  }
+  if (!efi || allLados.length===0) return {mn:mlProv||0, mx:mlProv||0, txt:(mlProv||0)>0?(mlProv||0)+'ml':'—'};
+  return estimateMLRange(allLados, efi, mlProv||0);
+}
 
 function gasC() {
   var d=ageD(),lp=D.pesos[0],pg=lp?lp.g:(D.bebe.pn||3365);
@@ -752,8 +830,11 @@ function genMsg(entry){
     lines.push('*Lactancia - Ultima Sesion*');
     lines.push('Inicio: '+ft(entry.s)+' | Fin: '+ft(entry.e));
     lines.push('Duracion: '+entry.tot+' min');
-    lines.push('Lados: '+lPct);
-    if(entry.ext.l||entry.ext.r)lines.push('Extraccion: izq '+entry.ext.l+'ml / der '+entry.ext.r+'ml');
+    var senoMapW={};entry.lados.forEach(function(l){var seno=l.s.toLowerCase().indexOf('der')>=0?'der':'izq';senoMapW[seno]=(senoMapW[seno]||0)+l.m;});
+    lines.push('Seno: izq '+(senoMapW['izq']||0)+'min | der '+(senoMapW['der']||0)+'min');
+    lines.push('Posiciones: '+lPct);
+    if(entry.mlProvistos)lines.push('Leche extraida dada: '+entry.mlProvistos+'ml');
+    if(entry.ext&&(entry.ext.l||entry.ext.r))lines.push('Extraccion sacaleches: izq '+(entry.ext.l||0)+'ml / der '+(entry.ext.r||0)+'ml');
     lines.push('Proxima toma: ~'+ft(entry.nt));
     if(entry.efi)lines.push('Eficiencia: '+entry.efi+'/5');
     if(entry.note&&entry.note.trim())lines.push('Nota: '+entry.note.trim());
@@ -864,7 +945,7 @@ function finishToma(){
   }
   var tot=lados.reduce(function(a,b){return a+b.m;},0);
   var noteEl=document.getElementById('tnote');
-  D.pend={type:'toma',s:sT,e:eT,lados:lados,tot:tot,ext:{l:D.ext.l,r:D.ext.r},nt:addM(sT,180),note:noteEl?noteEl.value:''};
+  D.pend={type:'toma',s:sT,e:eT,lados:lados,tot:tot,ext:{l:D.ext.l,r:D.ext.r},mlProvistos:D.mlProvistos||0,nt:addM(sT,180),note:noteEl?noteEl.value:''};
   D.efi=0;setStep('preview');
 }
 function addManualLado(){
@@ -882,10 +963,15 @@ function selectPanal(p){
 }
 function confirmEntry(){
   if(!D.pend)return;
-  if(D.pend.type==='toma'){if(!D.efi){alert('Selecciona la eficiencia (1-5).');return;}D.pend.efi=D.efi;}
+  if(D.pend.type==='toma'){
+    if(!D.efi){alert('Selecciona la eficiencia (1-5).');return;}
+    D.pend.efi=D.efi;
+    D.pend.mlProvistos=D.mlProvistos||0;
+    D.pend.mlEst=estimateML(D.pend.lados,D.efi,D.mlProvistos||0);
+  }
   D.msg=genMsg(D.pend);D.msgType=D.pend.type;
   D.hist.unshift(D.pend);saveData();
-  if(D.pend.type==='toma')schedAlarm(D.pend.nt);
+  if(D.pend.type==='toma'){schedAlarm(D.pend.nt);D.mlProvistos=0;}
   D.pend=null;setStep('summary');
 }
 function discardPending(){D.pend=null;setStep('home');}
@@ -893,6 +979,12 @@ function discardCurrent(){stopTimer();D.cSide=null;D.cStart=null;setStep('home')
 
 function savePeso(){
   if(!D.pg){alert('Ingresa un peso.');return;}
+  if(D.pg < 1000){alert('Peso muy bajo ('+D.pg+'g). ¿Ingresaste kg en lugar de gramos? Usá el campo de kg.');return;}
+  if(D.pg > 30000){alert('Peso muy alto ('+gkg(D.pg)+'kg). Verificá el valor ingresado.');return;}
+  if(D.pesos.length>0){
+    var ult=D.pesos[0].g, variacion=Math.abs(D.pg-ult)/ult;
+    if(variacion>0.15&&!confirm('El peso '+gkg(D.pg)+'kg difiere un '+(Math.round(variacion*100))+'% del último registro ('+gkg(ult)+'kg). ¿Es correcto?'))return;
+  }
   var nEl=document.getElementById('pnote2');
   var fv=gv('pesofecha'),hv=gv('pesohora');
   var t=new Date();
@@ -908,14 +1000,28 @@ function adjustPeso(d){
   var inp=document.getElementById('pinp');if(inp)inp.value=(D.pg/1000).toFixed(3);
 }
 
+function validatePhone(v){
+  if(!v||!v.trim())return true; // opcional
+  var clean=v.replace(/[\s\-\(\)\+]/g,'');
+  return /^[0-9]{7,15}$/.test(clean);
+}
+function validateEmail(v){
+  if(!v||!v.trim())return true; // opcional
+  return /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v.trim());
+}
 function saveMed(){
-  var m={esp:gv('mesp'),nom:gv('mnom'),ape:gv('mape'),dir:gv('mdir'),tel:gv('mtel'),email:gv('memail')};
+  var m={esp:gv('mesp'),nom:gv('mnom'),ape:gv('mape'),dir:gv('mdir'),tel:gv('mtel'),telcons:gv('mtelcons'),email:gv('memail')};
+  if(!validatePhone(m.tel)){alert('Teléfono celular inválido. Usá formato internacional: 5491112345678');return;}
+  if(!validatePhone(m.telcons)){alert('Teléfono de consultorio inválido.');return;}
+  if(!validateEmail(m.email)){alert('Email inválido. Verificá el formato.');return;}
   if(!m.nom||!m.ape){alert('Nombre y apellido obligatorios.');return;}
   if(D.editMedIdx>=0)D.meds[D.editMedIdx]=m;else D.meds.push(m);
   D.editMedIdx=-1;saveData();setStep('medicos');
 }
 function savePadre(){
   var p={nom:gv('pnom'),ape:gv('pape'),apodo:gv('papodo'),cel:gv('pcel'),email:gv('pemail'),dom:gv('pdom'),dni:gv('pdni'),os:gv('pos'),plan:gv('pplan'),cred:gv('pcred')};
+  if(typeof validatePhone==='function'&&!validatePhone(p.cel)){alert('Celular inválido. Formato: 5491112345678');return;}
+  if(typeof validateEmail==='function'&&!validateEmail(p.email)){alert('Email inválido. Formato: usuario@dominio.com');return;}
   if(D.editPadreIdx>=0)D.padres[D.editPadreIdx]=p;else D.padres.push(p);
   D.editPadre=null;D.editPadreIdx=-1;saveData();setStep('perfil');
 }
@@ -1051,14 +1157,34 @@ function drawChart(){
   wks.forEach(function(w,i){if(i===0)ctx.moveTo(xP(w),yP(tbl[w][0]));else ctx.lineTo(xP(w),yP(tbl[w][0]));});
   wks.slice().reverse().forEach(function(w){ctx.lineTo(xP(w),yP(tbl[w][4]));});
   ctx.closePath();ctx.fillStyle='rgba(100,200,180,0.07)';ctx.fill();
-  ctx.beginPath();ctx.strokeStyle='rgba(100,200,180,0.5)';ctx.lineWidth=1.5;ctx.setLineDash([4,3]);
+  // Banda P3-P97 (ya dibujada como fill)
+  // P97 line
+  ctx.beginPath();ctx.strokeStyle='rgba(224,112,112,0.3)';ctx.lineWidth=1;ctx.setLineDash([2,4]);
+  wks.forEach(function(w,i){if(i===0)ctx.moveTo(xP(w),yP(tbl[w][4]));else ctx.lineTo(xP(w),yP(tbl[w][4]));});
+  ctx.stroke();ctx.setLineDash([]);
+  // P85 line
+  ctx.beginPath();ctx.strokeStyle='rgba(212,168,67,0.35)';ctx.lineWidth=1;ctx.setLineDash([3,4]);
+  wks.forEach(function(w,i){if(i===0)ctx.moveTo(xP(w),yP(tbl[w][3]));else ctx.lineTo(xP(w),yP(tbl[w][3]));});
+  ctx.stroke();ctx.setLineDash([]);
+  // P50 line (principal)
+  ctx.beginPath();ctx.strokeStyle='rgba(100,200,180,0.6)';ctx.lineWidth=1.5;ctx.setLineDash([4,3]);
   wks.forEach(function(w,i){if(i===0)ctx.moveTo(xP(w),yP(tbl[w][2]));else ctx.lineTo(xP(w),yP(tbl[w][2]));});
   ctx.stroke();ctx.setLineDash([]);
-  ctx.beginPath();ctx.strokeStyle='rgba(224,112,112,0.4)';ctx.lineWidth=1;
+  // P15 line
+  ctx.beginPath();ctx.strokeStyle='rgba(212,168,67,0.35)';ctx.lineWidth=1;ctx.setLineDash([3,4]);
+  wks.forEach(function(w,i){if(i===0)ctx.moveTo(xP(w),yP(tbl[w][1]));else ctx.lineTo(xP(w),yP(tbl[w][1]));});
+  ctx.stroke();ctx.setLineDash([]);
+  // P3 line
+  ctx.beginPath();ctx.strokeStyle='rgba(224,112,112,0.3)';ctx.lineWidth=1;ctx.setLineDash([2,4]);
   wks.forEach(function(w,i){if(i===0)ctx.moveTo(xP(w),yP(tbl[w][0]));else ctx.lineTo(xP(w),yP(tbl[w][0]));});
-  ctx.stroke();
-  ctx.fillStyle='rgba(100,200,180,0.6)';ctx.font='8px Georgia';ctx.textAlign='left';ctx.fillText('P50',pl+2,yP(tbl[13][2])-3);
-  ctx.fillStyle='rgba(224,112,112,0.5)';ctx.fillText('P3',pl+2,yP(tbl[13][0])-3);
+  ctx.stroke();ctx.setLineDash([]);
+  // Labels en el margen derecho
+  ctx.font='7px Georgia';ctx.textAlign='left';
+  ctx.fillStyle='rgba(224,112,112,0.7)';ctx.fillText('P97',pl+cW+2,yP(tbl[Math.min(13,Math.floor(ageW()))][4])+3);
+  ctx.fillStyle='rgba(212,168,67,0.8)';ctx.fillText('P85',pl+cW+2,yP(tbl[Math.min(13,Math.floor(ageW()))][3])+3);
+  ctx.fillStyle='rgba(100,200,180,0.9)';ctx.fillText('P50',pl+cW+2,yP(tbl[Math.min(13,Math.floor(ageW()))][2])+3);
+  ctx.fillStyle='rgba(212,168,67,0.8)';ctx.fillText('P15',pl+cW+2,yP(tbl[Math.min(13,Math.floor(ageW()))][1])+3);
+  ctx.fillStyle='rgba(224,112,112,0.7)';ctx.fillText('P3',pl+cW+2,yP(tbl[Math.min(13,Math.floor(ageW()))][0])+3);
   var bw=D.bebe.pn||3365;
   ctx.beginPath();ctx.strokeStyle='rgba(212,168,67,0.4)';ctx.lineWidth=1;ctx.setLineDash([3,3]);
   ctx.moveTo(pl,yP(bw));ctx.lineTo(pl+cW,yP(bw));ctx.stroke();ctx.setLineDash([]);
@@ -1238,18 +1364,35 @@ function handleAction(action,data){
 
 // ─── RENDER HELPERS ───────────────────────────────────────────
 function renderExtBox(){
-  var eb=E.div('ebox');eb.appendChild(E.slbl('Extraccion sacaleches (ml)'));
+  // Box 1: ml de leche extraída previamente que se le proveen en esta toma
+  var provBox=E.div('ebox');
+  provBox.appendChild(E.slbl('🍼 Leche extraída que se le da en esta toma (ml)'));
+  provBox.appendChild(mkTxt('div',null,'Solo si se complementa con leche del sacaleches','font-size:10px;color:#a89070;margin-bottom:8px'));
+  var provRow=mkDiv('display:flex;align-items:center;gap:10px');
+  provRow.appendChild(E.btn('mbtn','-','mlProvMinus'));
+  var provVal=mkTxt('div','mv',(D.mlProvistos||0)+'ml');provVal.id='mlprov-val';
+  provRow.appendChild(provVal);
+  provRow.appendChild(E.btn('mbtn','+','mlProvPlus'));
+  provBox.appendChild(provRow);
+
+  // Box 2: extracción sacaleches (registro aparte, no se da ahora)
+  var eb=E.div('ebox');eb.style.marginTop='8px';
+  eb.appendChild(E.slbl('🔵 Extracción sacaleches — registro separado (ml)'));
+  eb.appendChild(mkTxt('div',null,'Leche extraída durante o después — no se le da en esta toma','font-size:10px;color:#a89070;margin-bottom:8px'));
   var mr=E.div('mr');
   ['l','r'].forEach(function(side){
     var mc=E.div('mc');
-    mc.appendChild(mkTxt('div','mlbl',side==='l'?'Izquierdo':'Derecho'));
+    mc.appendChild(mkTxt('div','mlbl',side==='l'?'Izq':'Der'));
     var ctrl=E.div('mctrl');
     ctrl.appendChild(E.btn('mbtn','-','extMinus',{side:side}));
     var val=mkTxt('div','mv',D.ext[side]);val.id='mv'+side;ctrl.appendChild(val);
     ctrl.appendChild(E.btn('mbtn','+','extPlus',{side:side}));
     mc.appendChild(ctrl);mr.appendChild(mc);
   });
-  eb.appendChild(mr);return eb;
+  eb.appendChild(mr);
+
+  var wrap=mkDiv('');wrap.appendChild(provBox);wrap.appendChild(eb);
+  return wrap;
 }
 function renderNoteBox(id,placeholder){
   var nb=E.div('nb');nb.appendChild(E.slbl('Nota (opcional)'));
@@ -1277,7 +1420,8 @@ function medCard(m,i){
   var mc=E.div('mcard pu');
   mc.appendChild(mkTxt('div',null,'Dr/a. '+m.nom+' '+m.ape,'font-size:13px;font-weight:bold;color:#f0d9a0'));
   mc.appendChild(mkTxt('div',null,m.esp||'','font-size:11px;color:#b48cdc'));
-  if(m.tel)mc.appendChild(mkTxt('div','hrs','Tel: '+m.tel));
+  if(m.tel)mc.appendChild(mkTxt('div','hrs','📱 '+m.tel));
+  if(m.telcons)mc.appendChild(mkTxt('div','hrs','📞 Consultorio: '+m.telcons));
   if(m.email)mc.appendChild(mkTxt('div','hrs',m.email));
   if(m.dir)mc.appendChild(mkTxt('div','hrs',m.dir));
   var row=mkDiv('display:flex;gap:7px;margin-top:8px');
@@ -1289,7 +1433,10 @@ function medCard(m,i){
 // ─── RENDER ───────────────────────────────────────────────────
 function render(){
   applyNightMode();
-  var MAS_STEPS=['perfil','editBebe','editPadre','medicos','editMed','visitaForm','extras','notas','editNota','sintomas','editSintoma','hitos','cartas','editCarta','astro','actividades','vacunas','memoria','pendientes'];
+  // Update device name display
+  var dnEl=document.getElementById('device-name-display');
+  if(dnEl)dnEl.textContent=getDeviceName()||'';
+  var MAS_STEPS=['perfil','editBebe','editPadre','medicos','editMed','visitaForm','extras','notas','editNota','sintomas','editSintoma','hitos','cartas','editCarta','astro','actividades','vacunas','memoria','pendientes','historia'];
   var TAB_MAP={home:['home'],history:['history'],peso:['peso','pesoEntry'],dash:['dash'],mas:MAS_STEPS};
   Object.keys(TAB_MAP).forEach(function(t){
     var el=document.getElementById('bn-'+t);if(!el)return;
@@ -1298,7 +1445,7 @@ function render(){
   var nb=document.getElementById('night-btn');if(nb)nb.style.color=D.nightMode?'#f0d9a0':'#a89070';
   var htEl=document.getElementById('hdr-title');
   if(typeof updatePendBadge==='function')updatePendBadge();
-  if(htEl){var TITLES={home:'Ceferino',history:'Historial',peso:'Peso',pesoEntry:'Peso',dash:'Dashboard',perfil:'Perfil',editBebe:'Perfil',editPadre:'Perfil',medicos:'M\u00e9dicos',editMed:'M\u00e9dicos',visitaForm:'M\u00e9dicos',extras:'Extras',notas:'Notas',editNota:'Nueva Nota',sintomas:'S\u00edntomas',editSintoma:'S\u00edntoma',hitos:'Hitos',cartas:'Cartas',editCarta:'Carta',astro:'Recreativo',actividades:'Actividades',vacunas:'Vacunas',memoria:'Memoria de Cefe',pendientes:'Pendientes',toma:'Toma',panal:'Pa\u00f1al',preview:'Confirmar',summary:'Mensaje'};
+  if(htEl){var TITLES={home:'Ceferino',history:'Historial',peso:'Peso',pesoEntry:'Peso',dash:'Dashboard',perfil:'Perfil',editBebe:'Perfil',editPadre:'Perfil',medicos:'M\u00e9dicos',editMed:'M\u00e9dicos',visitaForm:'M\u00e9dicos',extras:'Extras',notas:'Notas',editNota:'Nueva Nota',sintomas:'S\u00edntomas',editSintoma:'S\u00edntoma',hitos:'Hitos',cartas:'Cartas',editCarta:'Carta',astro:'Recreativo',actividades:'Actividades',vacunas:'Vacunas',memoria:'Memoria de Cefe',pendientes:'Pendientes',historia:'Historia de Cefe',toma:'Toma',panal:'Pa\u00f1al',preview:'Confirmar',summary:'Mensaje'};
   htEl.textContent=TITLES[D.step]||'Ceferino';}
 
   var bd=document.getElementById('bd');if(!bd)return;
@@ -1355,8 +1502,50 @@ function render(){
         var chip=E.div('wchip');chip.dataset.action='goPesoScreen';
         chip.textContent=gkg(lastP.g)+' kg | '+fd(lastP.t);card.appendChild(chip);
       }
+      // C: Pañales de hoy
+      var pHoy=panales.filter(function(p){return sameDay(p.t,new Date());});
+      if(pHoy.length>0){
+        var pChip=mkTxt('div',null,'🧷 Hoy: '+pHoy.length+' pañal'+(pHoy.length!==1?'es':'')+' · '+pHoy.filter(function(p){return p.p!=='Pis';}).length+' caca/mixto','font-size:11px;color:#a89070;margin-top:6px');
+        card.appendChild(pChip);
+      }
       bd.appendChild(card);
     }
+    // D: Racha de registro
+    (function(){
+      var racha=0,d=new Date();
+      for(var i=0;i<30;i++){
+        var dd=new Date(d);dd.setDate(dd.getDate()-i);
+        var tieneReg=D.hist.some(function(h){return sameDay(h.type==='toma'?h.s:h.t,dd);})||D.pesos.some(function(p){return sameDay(p.t,dd);});
+        if(tieneReg)racha++;else break;
+      }
+      if(racha>=2){
+        var rachaEl=mkDiv('display:flex;align-items:center;gap:8px;background:rgba(212,168,67,.07);border:1px solid rgba(212,168,67,.15);border-radius:11px;padding:8px 12px;margin-bottom:10px');
+        rachaEl.appendChild(mkTxt('span',null,'🔥','font-size:18px'));
+        rachaEl.appendChild(mkTxt('span',null,racha+' días de registro consecutivo','font-size:12px;color:#d4a843;font-weight:bold'));
+        bd.appendChild(rachaEl);
+      }
+    })();
+    // E: Próxima visita médica
+    (function(){
+      var now=Date.now(),soon=now+7*86400000;
+      var proxVisita=null,proxDiff=9999999999;
+      (D.visits||[]).forEach(function(v){
+        var vt=v.dt instanceof Date?v.dt.getTime():new Date(v.dt).getTime();
+        if(vt>=now&&vt<=soon&&vt<proxDiff){proxDiff=vt;proxVisita=v;}
+      });
+      if(proxVisita){
+        var med=D.meds[proxVisita.mi]||{};
+        var vBanner=mkDiv('display:flex;align-items:center;gap:10px;background:rgba(180,140,220,.08);border:1px solid rgba(180,140,220,.2);border-radius:12px;padding:10px 14px;margin-bottom:10px;cursor:pointer');
+        vBanner.onclick=function(){closeMasMenu&&closeMasMenu();setStep('medicos');};
+        vBanner.appendChild(mkTxt('span',null,'🏥','font-size:20px'));
+        var vTxt=mkDiv('flex:1');
+        vTxt.appendChild(mkTxt('div',null,'Visita en '+(Math.ceil((proxDiff-now)/86400000))+' día'+(Math.ceil((proxDiff-now)/86400000)===1?'':'s'),'font-size:10px;color:#b48cdc;text-transform:uppercase;letter-spacing:1px'));
+        vTxt.appendChild(mkTxt('div',null,(med.esp||'Médico')+' · '+ft(proxVisita.dt),'font-size:13px;color:#e8dcc8;font-weight:bold'));
+        vBanner.appendChild(vTxt);
+        vBanner.appendChild(mkTxt('span',null,'→','font-size:16px;color:#b48cdc'));
+        bd.appendChild(vBanner);
+      }
+    })();
     // Night mode toggle
     var nmBtn=mkDiv('display:flex;justify-content:flex-end;margin-bottom:10px');
     var nmb=E.btn('tb'+(D.nightMode?' on':''),D.nightMode?'\uD83C\uDF19 Modo noche ON':'\uD83C\uDF19 Modo noche','toggleNight');
@@ -1402,8 +1591,21 @@ function render(){
         var tb2=E.div('tbox');tb2.appendChild(mkTxt('div','td',D.cSide));
         var tt2=mkTxt('div','tt',Math.floor(D.elapsed/60)+':'+p2(D.elapsed%60));tt2.id='tmr';tb2.appendChild(tt2);
         var fb2=E.btn('pb go','Terminar lado','finishSide');fb2.style.cssText='margin-top:12px;width:auto;padding:10px 22px';tb2.appendChild(fb2);bd.appendChild(tb2);
-      } else {
-        bd.appendChild(mkTxt('div','mu',D.lados.length===0?'Por que lado empieza?':'Continua en otro lado?'));
+      }
+      // ── Mini resumen en tiempo real ──
+      if(D.lados.length>0 || D.cSide){
+        var rt=mkDiv('background:rgba(100,200,180,.08);border:1px solid rgba(100,200,180,.2);border-radius:11px;padding:10px 12px;margin-bottom:10px');
+        var senos=calcSenoTotals(D.lados,D.cSide,D.cStart,D.elapsed);
+        var totMin=(D.lados.reduce(function(a,b){return a+b.m;},0))+(D.cSide?Math.floor(D.elapsed/60):0);
+        rt.appendChild(mkTxt('div',null,'⏱ Total: '+totMin+'min  ·  🤱 Izq: '+senos.izq+'min  |  Der: '+senos.der+'min','font-size:12px;color:#64c8b4;font-weight:bold'));
+        if(D.efi){
+          var mlEst=calcMLEstimate(D.lados,D.cSide,D.cStart,D.efi,D.mlProvistos||0);
+          rt.appendChild(mkTxt('div',null,'≈ '+mlEst.txt+' estimados','font-size:11px;color:#a89070;margin-top:3px'));
+        }
+        bd.appendChild(rt);
+      }
+      if(!D.cSide){
+        bd.appendChild(mkTxt('div','mu',D.lados.length===0?'¿Por qué lado empieza?':'¿Continúa en otro lado?'));
         var sg=E.div('sg');SIDES.forEach(function(s){var sb3=E.btn('sbn',s,'startSide');sb3.dataset.side=s;sg.appendChild(sb3);});bd.appendChild(sg);
       }
       bd.appendChild(renderExtBox());bd.appendChild(renderNoteBox('tnote'));
@@ -1437,7 +1639,10 @@ function render(){
       var sm2={};D.pend.lados.forEach(function(l){sm2[l.s]=(sm2[l.s]||0)+l.m;});
       var tot2=D.pend.tot||1;
       var lp3=Object.keys(sm2).map(function(s){return s+' '+Math.round(sm2[s]/tot2*100)+'%';}).join(' | ');
-      var ln=[ft(D.pend.s)+' \u2192 '+ft(D.pend.e),'Duracion: '+D.pend.tot+' min','Lados: '+lp3];
+      // Tiempo total por seno (izq vs der)
+      var senoMap={};D.pend.lados.forEach(function(l){var seno=l.s.toLowerCase().indexOf('der')>=0?'der':'izq';senoMap[seno]=(senoMap[seno]||0)+l.m;});
+      var senoStr='Seno izq: '+(senoMap['izq']||0)+'min | Seno der: '+(senoMap['der']||0)+'min';
+      var ln=[ft(D.pend.s)+' \u2192 '+ft(D.pend.e),'Duracion: '+D.pend.tot+' min',senoStr,'Posiciones: '+lp3];
       if(D.pend.ext.l||D.pend.ext.r)ln.push('Extraccion: izq '+D.pend.ext.l+'ml / der '+D.pend.ext.r+'ml');
       if(D.pend.note)ln.push('Nota: '+D.pend.note);
       prev.textContent=ln.join('\n');
@@ -1449,14 +1654,26 @@ function render(){
     if(isT){
       var gcv=gasC();var gcb=E.div('gcbox');gcb.appendChild(E.slbl('Cap. gastrica hoy (dia '+ageD()+')'));
       gcb.appendChild(mkTxt('div',null,gcv.mn+' - '+gcv.mx+' ml / toma','font-size:15px;font-weight:bold;color:#f0d9a0'));bd.appendChild(gcb);
-      var efib=E.div('ebox');efib.appendChild(E.slbl('Eficiencia (obligatorio)'));
+      var efib=E.div('ebox');
+      efib.appendChild(E.slbl('Eficiencia de succión (obligatorio)'));
+      efib.appendChild(mkTxt('div',null,'1=muy distraído  5=succión eficaz continua','font-size:10px;color:#a89070;margin-bottom:8px'));
       var erow=mkDiv('display:flex;align-items:center;gap:6px');
       for(var n=1;n<=5;n++){
         var sb4=document.createElement('button');sb4.style.cssText='font-size:24px;background:none;border:none;cursor:pointer;padding:2px';
         sb4.textContent=D.efi>=n?'\u2605':'\u2606';sb4.dataset.action='setEfi';sb4.dataset.n=n;erow.appendChild(sb4);
       }
       erow.appendChild(mkTxt('span',null,D.efi?D.efi+'/5':'Selecciona','font-size:11px;color:#a89070'));
-      efib.appendChild(erow);bd.appendChild(efib);
+      efib.appendChild(erow);
+      if(D.efi&&D.pend&&D.pend.lados){
+        var mlEst2=estimateMLRange(D.pend.lados,D.efi,D.pend.mlProvistos||0);
+        var gcNow=gasC();
+        var pctGC=Math.round(((mlEst2.mn+mlEst2.mx)/2)/((gcNow.mn+gcNow.mx)/2)*100);
+        var mlBox=mkDiv('margin-top:10px;background:rgba(100,200,180,.08);border:1px solid rgba(100,200,180,.2);border-radius:9px;padding:9px 12px');
+        mlBox.appendChild(mkTxt('div',null,'≈ '+mlEst2.txt+' estimados en esta toma','font-size:14px;font-weight:bold;color:#64c8b4'));
+        mlBox.appendChild(mkTxt('div',null,pctGC+'% de la cap. gástrica ('+gcNow.mn+'-'+gcNow.mx+'ml/toma)','font-size:11px;color:#a89070;margin-top:3px'));
+        efib.appendChild(mlBox);
+      }
+      bd.appendChild(efib);
     }
     if(!isT||D.efi>0)bd.appendChild(E.btn('pb go','Guardar y generar mensaje','confirmEntry'));
     else bd.appendChild(mkTxt('div',null,'Selecciona la eficiencia para continuar','font-size:12px;color:#a89070;text-align:center;padding:10px'));
@@ -1570,6 +1787,44 @@ function render(){
       bd.appendChild(E.btn('pb gy','Copiar historial','copyHist'));
       filt.forEach(function(h){bd.appendChild(E.histRow(h,D.hist.indexOf(h)));});
     }
+    // H: Botón compartir resumen diario
+    (function(){
+      var hoy=new Date();
+      var tomHoy=tomas.filter(function(h){return h.type==='toma'&&sameDay(h.s,hoy);});
+      var panHoy=panales.filter(function(h){return sameDay(h.t,hoy);});
+      var pesoHoy=D.pesos.filter(function(p){return sameDay(p.t,hoy);});
+      if(tomHoy.length>0||panHoy.length>0){
+        var shareBtn=mkDiv('background:rgba(37,211,102,.08);border:1px solid rgba(37,211,102,.25);border-radius:13px;padding:12px 16px;margin-bottom:12px;cursor:pointer;display:flex;align-items:center;gap:10px');
+        shareBtn.appendChild(mkTxt('span',null,'📊','font-size:20px'));
+        var stxt=mkDiv('flex:1');
+        stxt.appendChild(mkTxt('div',null,'Compartir resumen del día','font-size:13px;font-weight:bold;color:#25d366'));
+        stxt.appendChild(mkTxt('div',null,tomHoy.length+' tomas · '+panHoy.length+' pañales'+(pesoHoy.length?' · Peso registrado':''),'font-size:11px;color:#a89070'));
+        shareBtn.appendChild(stxt);
+        shareBtn.appendChild(mkTxt('span',null,'→','font-size:16px;color:#25d366'));
+        shareBtn.onclick=function(){
+          var apodo=D.bebe.apodo||D.bebe.nombre||'Cefe';
+          var lines=['*📊 Resumen del día — '+apodo+'*','📅 '+hoy.toLocaleDateString('es-AR',{weekday:'long',day:'numeric',month:'long'}),''];
+          lines.push('*🍼 Tomas: '+tomHoy.length+'*');
+          var totMin=tomHoy.reduce(function(a,h){return a+h.tot;},0);
+          lines.push('Tiempo total: '+totMin+'min');
+          tomHoy.forEach(function(h){
+            var sm={izq:0,der:0};h.lados.forEach(function(l){var s=l.s.toLowerCase().indexOf('der')>=0?'der':'izq';sm[s]+=l.m;});
+            lines.push('· '+ft(h.s)+' — izq:'+sm.izq+'m der:'+sm.der+'m ('+h.tot+'min)');
+          });
+          lines.push('');lines.push('*🧷 Pañales: '+panHoy.length+'*');
+          var cc2=panHoy.filter(function(p){return p.p==='Caca';}).length;
+          var mx2=panHoy.filter(function(p){return p.p==='Mixto';}).length;
+          var pi2=panHoy.filter(function(p){return p.p==='Pis';}).length;
+          lines.push('Pis: '+pi2+' · Caca: '+cc2+' · Mixto: '+mx2);
+          if(pesoHoy.length>0){lines.push('');lines.push('*⚖️ Peso: '+gkg(pesoHoy[0].g)+'kg*');}
+          var gc2=gasC();
+          lines.push('');lines.push('_Cap. gástrica est.: '+gc2.mn+'-'+gc2.mx+'ml/toma_');
+          lines.push('_Cefe App_');
+          window.open('https://wa.me/?text='+encodeURIComponent(lines.join('\n')),'_blank');
+        };
+        bd.appendChild(shareBtn);
+      }
+    })();
     var expSec=mkDiv('margin-top:20px');expSec.appendChild(E.slbl('Exportar'));
     expSec.appendChild(E.aBtn('\uD83D\uDCCA','Exportar a CSV','Descarga para Excel','tl','exportCSV'));bd.appendChild(expSec);
   }
@@ -1604,6 +1859,25 @@ function render(){
     bd.appendChild(E.slbl('Padres / Cuidadores'));
     D.padres.forEach(function(p,i){bd.appendChild(mCard(p,i));});
     bd.appendChild(E.aBtn('+','Agregar cuidador','','pu','newPadre'));
+    // Device identity section
+    var devCard=mkDiv('background:rgba(255,255,255,.03);border:1px solid rgba(210,175,120,.12);border-radius:14px;padding:14px;margin-top:16px');
+    devCard.appendChild(E.slbl('Este dispositivo'));
+    var devRow=mkDiv('display:flex;align-items:center;gap:10px;margin-top:4px');
+    devRow.appendChild(mkTxt('span',null,'📱','font-size:20px'));
+    var devInp=E.input('fi','device-name-edit','text','Tu nombre (Manu, Sari…)',getDeviceName());
+    devInp.style.flex='1';
+    devRow.appendChild(devInp);
+    var devBtn=document.createElement('button');
+    devBtn.style.cssText='padding:10px 14px;border-radius:10px;border:1px solid rgba(212,168,67,.3);background:rgba(212,168,67,.1);color:#f0d9a0;font-size:12px;cursor:pointer;font-family:Georgia,serif;white-space:nowrap';
+    devBtn.textContent='Guardar';
+    devBtn.onclick=function(){
+      var v=document.getElementById('device-name-edit');
+      if(v&&v.value.trim()){setDeviceName(v.value.trim());DEVICE_NAME=v.value.trim();render();}
+    };
+    devRow.appendChild(devBtn);
+    devCard.appendChild(devRow);
+    devCard.appendChild(mkTxt('div',null,'ID: '+DEVICE_ID.slice(0,12)+'…','font-size:9px;color:#a89070;margin-top:6px'));
+    bd.appendChild(devCard);
   }
 
   // ── EDIT BEBE ─────────────────────────────────────────────────
@@ -1661,8 +1935,10 @@ function render(){
     bd.appendChild(E.el('div',{cls:'st',txt:(D.editMedIdx>=0?'Editar':'Agregar')+' medico'}));
     bd.appendChild(E.field('Especialidad',E.input('fi','mesp','text','Pediatra...',em3.esp||'')));
     bd.appendChild(E.frow([E.field('Nombre',E.input('fi','mnom','text',null,em3.nom||'')),E.field('Apellido',E.input('fi','mape','text',null,em3.ape||''))]));
-    bd.appendChild(E.field('Direccion',E.input('fi','mdir','text',null,em3.dir||'')));
-    bd.appendChild(E.frow([E.field('Telefono (cod. pais)',E.input('fi','mtel','text','5491112345678',em3.tel||'')),E.field('Email',E.input('fi','memail','email',null,em3.email||''))]));
+    bd.appendChild(E.field('Dirección',E.input('fi','mdir','text',null,em3.dir||'')));
+    bd.appendChild(E.frow([E.field('Cel (cód. país ej: 5491...',E.input('fi','mtel','text','5491112345678',em3.tel||'')),E.field('Tel. consultorio',E.input('fi','mtelcons','text','011...',em3.telcons||''))]));
+    bd.appendChild(E.field('Email',E.input('fi','memail','email',null,em3.email||'')));
+    bd.appendChild(mkTxt('div',null,'Teléfonos: incluí código de país (ej: 54911...) para el cel. Email: formato usuario@dominio.com','font-size:10px;color:#a89070;margin-bottom:12px'));
     bd.appendChild(E.btn('pb pu','Guardar','saveMed'));bd.appendChild(E.btn('gb rd','Cancelar','goMedicos'));
   }
 
@@ -1964,6 +2240,10 @@ function render(){
 
 
 
+  else if(D.step==='historia'){
+    bd.appendChild(mkTxt('div',null,'La historia de Cefe, cronológica y completa.','font-size:12px;color:#a89070;margin-bottom:4px;line-height:1.5'));
+    renderHistoria(bd);
+  }
   else if(D.step==='memoria'){
     bd.appendChild(E.el('div',{cls:'st',txt:'\uD83D\uDCD6 Memoria de Cefe'}));
     bd.appendChild(mkTxt('div',null,'Todo lo anotado sobre Cefe, en un solo lugar.','font-size:11px;color:#a89070;margin-bottom:12px'));
@@ -2022,6 +2302,7 @@ document.addEventListener('click', function(ev) {
         case 'goPendientes': closeMasMenu(); setStep('pendientes'); return;
         case 'goNotas': closeMasMenu(); setStep('notas'); return;
         case 'goMemoria': closeMasMenu(); setStep('memoria'); return;
+        case 'goHistoria': closeMasMenu(); setStep('historia'); return;
         case 'goSintomas': closeMasMenu(); setStep('sintomas'); return;
         case 'goHitos': closeMasMenu(); setStep('hitos'); return;
         case 'goCartas': closeMasMenu(); setStep('cartas'); return;
@@ -2034,6 +2315,411 @@ document.addEventListener('click', function(ev) {
     t = t.parentElement;
   }
 });
+
+
+// ─── DEVICE IDENTITY SYSTEM ───────────────────────────────────
+// UUID autogenerado por dispositivo + nombre editable
+// Permite sync de popups: descartados son por-device, respondidos son globales
+
+function generateUUID() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    var r = Math.random() * 16 | 0;
+    return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+  });
+}
+
+function getDeviceId() {
+  var id = localStorage.getItem('cefe_device_id');
+  if (!id) {
+    id = generateUUID();
+    localStorage.setItem('cefe_device_id', id);
+  }
+  return id;
+}
+
+function getDeviceName() {
+  return localStorage.getItem('cefe_device_name') || '';
+}
+
+function setDeviceName(name) {
+  localStorage.setItem('cefe_device_name', name.trim());
+}
+
+var DEVICE_ID   = getDeviceId();
+var DEVICE_NAME = getDeviceName();
+
+// ── Onboarding: pedir nombre si es la primera vez ─────────────
+function checkOnboarding() {
+  if (getDeviceName()) return; // ya tiene nombre
+  showOnboarding();
+}
+
+function showOnboarding() {
+  var ov = document.getElementById('onboard-overlay');
+  if (ov) ov.classList.remove('hidden');
+}
+
+function saveOnboardingName() {
+  var inp = document.getElementById('onboard-name-input');
+  if (!inp) return;
+  var name = inp.value.trim();
+  if (!name) { inp.style.borderColor = '#e07070'; return; }
+  setDeviceName(name);
+  DEVICE_NAME = name;
+  var ov = document.getElementById('onboard-overlay');
+  if (ov) ov.classList.add('hidden');
+  // Actualizar nombre en header si hay
+  var dnEl = document.getElementById('device-name-display');
+  if (dnEl) dnEl.textContent = name;
+}
+
+// ─── MOMENTOS: LÓGICA POR DEVICE ──────────────────────────────
+
+function getMisDescartados() {
+  if (!D.momentos) D.momentos = { respondidos:{}, descartados:{} };
+  var desc = D.momentos.descartados;
+  // Migración: si descartados tiene claves viejas (chk_ts_*) en el nivel raíz, migrar
+  var mioKey = DEVICE_ID;
+  if (!desc[mioKey]) {
+    desc[mioKey] = {};
+    // Migrar claves viejas al nuevo formato para este device
+    Object.keys(desc).forEach(function(k) {
+      if (k.startsWith('chk_ts_') || k.startsWith('chk_') || k.length < 30) {
+        if (typeof desc[k] === 'string' || typeof desc[k] === 'number') {
+          desc[mioKey][k] = desc[k];
+          delete desc[k];
+        }
+      }
+    });
+  }
+  return desc[mioKey];
+}
+
+function setMiDescartado(key, ts) {
+  getMisDescartados()[key] = ts || Date.now();
+  saveData();
+}
+
+function getMiDescartado(key) {
+  return getMisDescartados()[key];
+}
+
+function responderMomento(id, valor, accion) {
+  if (!D.momentos) D.momentos = { respondidos:{}, descartados:{} };
+
+  if (valor === 'si' || valor === 'agendado') {
+    // Respuesta definitiva → compartida con todos
+    D.momentos.respondidos[id] = { valor: valor, por: DEVICE_NAME || DEVICE_ID.slice(0,8), ts: Date.now() };
+    // Si es hito marcado como cumplido
+    if (id.startsWith('chk_')) {
+      var hitoId = id.replace('chk_', '');
+      if (!D.hitos) D.hitos = [];
+      // Normalizar: guardar como objeto con fecha si no existe
+      var yaExiste = D.hitos.some(function(h) {
+        return (typeof h === 'string' ? h : h.id) === hitoId;
+      });
+      if (!yaExiste) {
+        D.hitos.push({ id: hitoId, fecha: new Date().toISOString().slice(0,10), nota: 'Registrado vía app por ' + (DEVICE_NAME||'') });
+      }
+    }
+  } else if (valor === 'no_aun') {
+    // Solo descarta para este device — el otro sigue viendo el popup
+    setMiDescartado('ts_' + id, Date.now());
+  } else if (valor === 'descartado' || valor === 'pendiente') {
+    setMiDescartado(id, Date.now());
+  }
+
+  saveData();
+
+  // Limpiar botones extra del popup
+  var btnArea = document.getElementById('cpop-btn');
+  if (btnArea && btnArea.parentNode) {
+    btnArea.parentNode.querySelectorAll('.cpop-extra-btn').forEach(function(b){ b.remove(); });
+    btnArea.style.display = 'block';
+  }
+  closeCpop();
+  if (accion) { setStep(accion); return; }
+  updatePendBadge();
+  render();
+}
+
+// ─── OVERRIDE: getMomentosPendientes — usa device-aware descartados ───
+function getMomentosPendientes() {
+  if (!D.bebe || !D.bebe.fn) return [];
+  if (!D.momentos) D.momentos = { respondidos:{}, descartados:{} };
+  var misDesc = getMisDescartados();
+  var semsVida = Math.floor(Math.floor((Date.now() - new Date(D.bebe.fn).getTime()) / 86400000) / 7);
+  var pendientes = [];
+
+  RECORDATORIOS.forEach(function(rec) {
+    if (semsVida < rec.semMin || semsVida > rec.semMax) return;
+    var resp = D.momentos.respondidos[rec.id];
+    if (resp && (resp.valor === 'si' || resp.valor === 'agendado' || resp === 'si' || resp === 'agendado')) return;
+    if (misDesc[rec.id]) return; // yo lo descarte
+    pendientes.push({ tipo:'recordatorio', data:rec, id:rec.id });
+  });
+
+  HITO_CHECKS.forEach(function(chk) {
+    if (semsVida < chk.semTrigger) return;
+    var hitoMarcado = D.hitos && D.hitos.some(function(h){ return (typeof h==='string'?h:h.id)===chk.hitoId; });
+    if (hitoMarcado) return;
+    var resp = D.momentos.respondidos['chk_' + chk.hitoId];
+    if (resp && (resp.valor === 'si' || resp === 'si')) return; // respondido globalmente
+    if (misDesc['chk_' + chk.hitoId]) return; // yo lo descarte definitivamente
+    var tsNoAun = misDesc['ts_chk_' + chk.hitoId];
+    if (tsNoAun && (Date.now() - tsNoAun) / (7*86400000) < 3) return; // reaparece en 3 semanas
+    pendientes.push({ tipo:'check_hito', data:chk, id:'chk_' + chk.hitoId });
+  });
+
+  return pendientes;
+}
+
+// ─── OVERRIDE: buildMomentosQueue — device-aware ──────────────
+function buildMomentosQueue() {
+  if (!D.bebe || !D.bebe.fn) return [];
+  if (!D.momentos) D.momentos = { respondidos:{}, descartados:{} };
+  var misDesc = getMisDescartados();
+
+  var today = new Date(); today.setHours(0,0,0,0);
+  var fn = new Date(D.bebe.fn); fn.setHours(0,0,0,0);
+  var diasVida = Math.floor((today - fn) / 86400000);
+  var semsVida = Math.floor(diasVida / 7);
+  var queue = [];
+
+  // 1. Vacunas urgentes (compartidas — no dependen de device)
+  if (typeof VACUNAS_ARG !== 'undefined') {
+    VACUNAS_ARG.forEach(function(v) {
+      var st = getVacunaStatus(v);
+      if (st.done) return;
+      if (!st.fecha) return;
+      var fv = new Date(st.fecha); fv.setHours(0,0,0,0);
+      var diff = Math.floor((fv - today) / 86400000);
+      if (diff <= 7) queue.push({ prioridad:1, tipo:'vacuna', diff:diff, v:v, st:st });
+    });
+  }
+
+  // 2. Checks de hitos — por device
+  HITO_CHECKS.forEach(function(chk) {
+    if (semsVida < chk.semTrigger) return;
+    var hitoMarcado = D.hitos && D.hitos.some(function(h){ return (typeof h==='string'?h:h.id)===chk.hitoId; });
+    if (hitoMarcado) return;
+    var resp = D.momentos.respondidos['chk_' + chk.hitoId];
+    if (resp && (resp.valor === 'si' || resp === 'si')) return;
+    if (misDesc['chk_' + chk.hitoId]) return;
+    var tsNoAun = misDesc['ts_chk_' + chk.hitoId];
+    if (tsNoAun && (Date.now() - tsNoAun) / (7*86400000) < 3) return;
+    queue.push({ prioridad:2, tipo:'check_hito', chk:chk });
+  });
+
+  // 3. Recordatorios — por device
+  RECORDATORIOS.forEach(function(rec) {
+    if (semsVida < rec.semMin || semsVida > rec.semMax) return;
+    var resp = D.momentos.respondidos[rec.id];
+    if (resp && (resp.valor === 'si' || resp.valor === 'agendado' || resp === 'si' || resp === 'agendado')) return;
+    if (misDesc[rec.id]) return;
+    queue.push({ prioridad:3, tipo:'recordatorio', rec:rec });
+  });
+
+  // 4. Cumple semanas/meses — compartido pero localStorage por device
+  var esCumple = (diasVida > 0 && diasVida % 7 === 0);
+  var mesCumple = 0;
+  for (var m = 1; m <= 24; m++) {
+    var fm = new Date(fn); fm.setMonth(fm.getMonth()+m); fm.setHours(0,0,0,0);
+    if (fm.getTime() === today.getTime()) { mesCumple = m; break; }
+  }
+  var cpopCelKey = 'cpop_cel_' + DEVICE_ID + '_' + today.toISOString().slice(0,10);
+  if ((esCumple || mesCumple > 0) && !localStorage.getItem(cpopCelKey)) {
+    queue.push({ prioridad:4, tipo:'celebracion', diasVida:diasVida, semsVida:semsVida, mesCumple:mesCumple, cpopKey:cpopCelKey });
+  }
+
+  // 5. Tip semanal — por device
+  var tipKey = 'cpop_tip_' + DEVICE_ID + '_' + today.toISOString().slice(0,10);
+  if (!localStorage.getItem(tipKey)) {
+    var tip = TIPS_SEMANALES[TIPS_SEMANALES.length-1];
+    for (var i=0; i<TIPS_SEMANALES.length; i++) {
+      if (semsVida >= TIPS_SEMANALES[i].semMin && semsVida <= TIPS_SEMANALES[i].semMax) { tip = TIPS_SEMANALES[i]; break; }
+    }
+    queue.push({ prioridad:5, tipo:'tip', tip:tip, tipKey:tipKey });
+  }
+
+  return queue;
+}
+
+// ─── LÍNEA DE TIEMPO / HISTORIA ───────────────────────────────
+function renderHistoria(bd) {
+  var apodo = D.bebe.apodo || D.bebe.nombre || 'Cefe';
+  var fn = D.bebe.fn ? new Date(D.bebe.fn) : null;
+
+  // ── Filtros ──
+  if (!window._historiaFiltro) window._historiaFiltro = 'todo';
+  var filtros = [
+    { id:'todo',    ic:'📋', label:'Todo' },
+    { id:'hito',    ic:'🌟', label:'Hitos' },
+    { id:'carta',   ic:'💌', label:'Cartas' },
+    { id:'salud',   ic:'🏥', label:'Salud' },
+    { id:'nota',    ic:'📝', label:'Notas' },
+    { id:'peso',    ic:'⚖️', label:'Peso' },
+  ];
+  var filtRow = mkDiv('display:flex;gap:6px;margin-bottom:16px;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch');
+  filtros.forEach(function(f) {
+    var btn = document.createElement('button');
+    var active = window._historiaFiltro === f.id;
+    btn.style.cssText = 'flex-shrink:0;padding:6px 12px;border-radius:20px;border:1px solid rgba(210,175,120,'+(active?'.5':'.2')+');background:rgba(212,168,67,'+(active?'.15':'.04')+');color:'+(active?'#f0d9a0':'#a89070')+';font-size:11px;font-family:Georgia,serif;cursor:pointer;white-space:nowrap';
+    btn.textContent = f.ic + ' ' + f.label;
+    btn.onclick = function() { window._historiaFiltro = f.id; render(); };
+    filtRow.appendChild(btn);
+  });
+  bd.appendChild(filtRow);
+
+  // ── Construir items ──
+  var items = [];
+
+  // Hitos marcados (con fecha real)
+  (D.hitos||[]).forEach(function(h) {
+    if (!h) return;
+    var hid = typeof h === 'string' ? h : h.id;
+    var fecha = typeof h === 'string' ? null : h.fecha;
+    var nota = typeof h === 'string' ? '' : (h.nota||'');
+    var def = HITOS_DEF.find(function(x){return x.id===hid;}) || {label:'Hito',ic:'⭐',celebracion:false};
+    if (!fecha && fn) {
+      // Estimado: semana del hito
+      if (def.semanas) {
+        var est = new Date(fn);
+        est.setDate(est.getDate() + def.semanas*7);
+        fecha = est.toISOString().slice(0,10);
+      }
+    }
+    if (fecha) items.push({ tipo:'hito', fecha:fecha, ic:def.ic||'⭐', titulo:def.label, sub:nota, color:def.celebracion?'#d4a843':'#64c8b4', celebracion:def.celebracion });
+  });
+
+  // Cartas
+  (D.cartas||[]).forEach(function(c) {
+    if (!c||!c.titulo) return;
+    items.push({ tipo:'carta', fecha:c.fecha||'', ic:'💌', titulo:c.titulo, sub:(c.texto||'').slice(0,120)+'…', color:'#b48cdc' });
+  });
+
+  // Notas
+  (D.notas||[]).forEach(function(n) {
+    if (!n||!n.texto||!n.fecha) return;
+    items.push({ tipo:'nota', fecha:n.fecha, ic:'📝', titulo:'Nota del día', sub:n.texto.slice(0,120), color:'#64c8b4' });
+  });
+
+  // Síntomas
+  (D.sintomas||[]).forEach(function(s) {
+    if (!s) return;
+    var sd = safeDate(s.t);
+    if (!sd) return;
+    items.push({ tipo:'salud', fecha:sd.toISOString().slice(0,10), ic:'🩺', titulo:s.tipo+(s.valor?' — '+s.valor:''), sub:s.nota||'', color:'#e07070' });
+  });
+
+  // Vacunas aplicadas
+  if (D.bebe.vacunas) {
+    Object.keys(D.bebe.vacunas).forEach(function(vid) {
+      var vac = VACUNAS_ARG.find(function(v){return v.id===vid;});
+      if (!vac) return;
+      var fecha = D.bebe.vacunas[vid];
+      if (typeof fecha === 'string' && fecha.length >= 10) {
+        items.push({ tipo:'salud', fecha:fecha.slice(0,10), ic:'💉', titulo:vac.nombre, sub:'Aplicada ✓', color:'#64c88c' });
+      }
+    });
+  }
+
+  // Pesos
+  (D.pesos||[]).forEach(function(p, i) {
+    var pd = safeDate(p.t);
+    if (!pd) return;
+    var prev = D.pesos[i+1];
+    var diff = prev ? (p.g - prev.g) : null;
+    var diffStr = diff !== null ? (diff>=0?'+':'')+diff+'g vs anterior' : 'Peso nacimiento';
+    items.push({ tipo:'peso', fecha:pd.toISOString().slice(0,10), ic:'⚖️', titulo:gkg(p.g)+' kg', sub:diffStr+(p.n?' · '+p.n:''), color: diff===null?'#a89070':diff>=0?'#64c8b4':'#d4a843' });
+  });
+
+  // Cumpleaños automáticos (semanas y meses)
+  if (fn) {
+    var hoy = new Date();
+    for (var ms = 1; ms <= 24; ms++) {
+      var fcum = new Date(fn); fcum.setMonth(fcum.getMonth()+ms);
+      if (fcum <= hoy) {
+        items.push({ tipo:'hito', fecha:fcum.toISOString().slice(0,10), ic: ms===12?'🎂':'🎉',
+          titulo: ms===1?'¡Primer mes de '+apodo+'!': ms===12?'¡Primer año de '+apodo+'!':'¡'+ms+' meses de '+apodo+'!',
+          sub:'', color:'#d4a843', celebracion:true, auto:true });
+      }
+    }
+  }
+
+  // Filtrar
+  var filtro = window._historiaFiltro;
+  if (filtro !== 'todo') {
+    items = items.filter(function(it) {
+      if (filtro === 'salud') return it.tipo === 'salud';
+      return it.tipo === filtro;
+    });
+  }
+
+  // Ordenar desc
+  items.sort(function(a,b) { return (b.fecha||'').localeCompare(a.fecha||''); });
+
+  if (items.length === 0) {
+    var emp = mkDiv('text-align:center;padding:32px 16px');
+    emp.appendChild(mkTxt('div',null,'📭','font-size:36px;margin-bottom:10px'));
+    emp.appendChild(mkTxt('div',null,'Sin registros todavía','font-size:14px;color:#f0d9a0;margin-bottom:6px'));
+    emp.appendChild(mkTxt('div',null,'Empezá a registrar hitos, notas y cartas para ver la historia de '+apodo+' acá.','font-size:12px;color:#a89070;line-height:1.6'));
+    bd.appendChild(emp);
+    return;
+  }
+
+  // Renderizar agrupado por mes
+  var seenMonth = {};
+  items.forEach(function(item) {
+    if (!item.fecha) return;
+    var mesKey = item.fecha.slice(0,7);
+    if (!seenMonth[mesKey]) {
+      seenMonth[mesKey] = true;
+      try {
+        var d = new Date(item.fecha+'T12:00');
+        var mesLbl = d.toLocaleDateString('es-AR',{month:'long',year:'numeric'});
+        var mHdr = mkDiv('display:flex;align-items:center;gap:8px;margin:16px 0 8px');
+        mHdr.appendChild(mkTxt('span',null,'━','color:rgba(212,168,67,.3);font-size:16px'));
+        mHdr.appendChild(mkTxt('span',null,mesLbl.charAt(0).toUpperCase()+mesLbl.slice(1),'font-size:10px;font-weight:bold;color:#d4a843;text-transform:uppercase;letter-spacing:1.5px'));
+        bd.appendChild(mHdr);
+      } catch(e) {}
+    }
+
+    // Card de item
+    var card = mkDiv('position:relative;background:rgba(255,255,255,.03);border-left:3px solid '+item.color+';border-radius:0 12px 12px 0;padding:11px 12px;margin-bottom:8px');
+
+    // Celebración especial
+    if (item.celebracion) {
+      card.style.background = 'rgba(212,168,67,.06)';
+      card.style.border = '1px solid rgba(212,168,67,.2)';
+      card.style.borderLeft = '3px solid '+item.color;
+      card.style.borderRadius = '0 12px 12px 0';
+    }
+
+    var row = mkDiv('display:flex;align-items:flex-start;gap:10px');
+    row.appendChild(mkTxt('span',null,item.ic,'font-size:20px;flex-shrink:0;line-height:1.3'));
+    var txt = mkDiv('flex:1;min-width:0');
+    txt.appendChild(mkTxt('div',null,item.titulo,'font-size:13px;font-weight:bold;color:#f0d9a0;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis'));
+    if (item.sub) txt.appendChild(mkTxt('div',null,item.sub,'font-size:11px;color:#a89070;line-height:1.5;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical'));
+    // Fecha
+    try {
+      var fd2 = new Date(item.fecha+'T12:00');
+      txt.appendChild(mkTxt('div',null,fd2.toLocaleDateString('es-AR',{weekday:'short',day:'2-digit',month:'short'}),'font-size:10px;color:'+item.color+';margin-top:4px;opacity:.8'));
+    } catch(e){}
+    row.appendChild(txt);
+    card.appendChild(row);
+    bd.appendChild(card);
+  });
+
+  // Botón de acciones rápidas al fondo
+  var actRow = mkDiv('display:flex;gap:8px;margin-top:16px');
+  var bNota = E.btn('tb','📝 Nota','goNotas'); bNota.style.flex='1';
+  var bCarta = E.btn('tb','💌 Carta','goCartas'); bCarta.style.flex='1';
+  actRow.appendChild(bNota); actRow.appendChild(bCarta);
+  bd.appendChild(actRow);
+}
+
+
 
 // ─── INIT ─────────────────────────────────────────────────────
 
@@ -2681,6 +3367,7 @@ function checkContextualPopup() {
 loadData();
 applyNightMode();
 render();
+setTimeout(checkOnboarding, 800);
 
 
 // ENTREGA B DATA
@@ -3081,5 +3768,22 @@ onValue(ref(db,'cefe'),function(snap){
   }
 },function(err){fbReady=true;setDot('#e07070','Error Firebase');console.error(err);});
 </script>
+
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function() {
+    // iOS Safari en modo web (no instalada) puede rechazar el SW — es inofensivo
+    navigator.serviceWorker.register('/cefe-app/sw.js', { scope: '/cefe-app/' })
+      .then(function(reg) {
+        // SW activo — la app funciona offline
+        var dot = document.getElementById('sync-dot');
+        if (dot) dot.title = (dot.title || '') + ' | Offline: OK';
+      })
+      .catch(function(err) {
+        // Silencioso: en Safari web (no PWA instalada) es un error esperado
+        // La app funciona igual con Firebase
+      });
+  });
+}
+</script>
 </body>
-</html>
