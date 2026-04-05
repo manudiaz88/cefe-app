@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Cefe">
@@ -21,7 +21,7 @@ button{font-family:Georgia,serif;-webkit-appearance:none}
 .hr{display:flex;gap:5px;align-items:center}
 .tb{background:rgba(255,255,255,.06);border:1px solid rgba(210,175,120,.2);border-radius:10px;padding:5px 9px;color:#a89070;font-size:10px;cursor:pointer}
 .tb.on{background:rgba(212,168,67,.15);border-color:rgba(212,168,67,.4);color:#f0d9a0}
-#bd{padding:calc(env(safe-area-inset-top, 0px) + 4px) 18px calc(env(safe-area-inset-bottom, 0px) + 100px) 18px;flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;overflow-x:hidden}
+#bd{padding:calc(env(safe-area-inset-top, 0px) + 4px) 18px 100px 18px;flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
 #bnav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:rgba(10,18,28,.96);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:1px solid rgba(210,175,120,.15);display:flex;align-items:stretch;z-index:100;padding-bottom:env(safe-area-inset-bottom,0)}
 .bnav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 0 6px;background:none;border:none;cursor:pointer;color:#a89070;min-height:56px;position:relative}
 .bnav-btn.on{color:#f0d9a0}
@@ -36,7 +36,7 @@ button{font-family:Georgia,serif;-webkit-appearance:none}
 .mas-item-lbl{font-size:13px;font-weight:bold;color:#f0d9a0;display:block}
 .mas-item-sub{font-size:10px;color:#a89070;display:block;margin-top:1px}
 .card{background:rgba(255,255,255,.04);border:1px solid rgba(210,175,120,.15);border-radius:16px;padding:16px;margin-bottom:16px}
-.slbl{font-size:10px;letter-spacing:2.5px;color:#b89a70;text-transform:uppercase;margin-bottom:10px}
+.slbl{font-size:9px;letter-spacing:3px;color:#a89070;text-transform:uppercase;margin-bottom:10px}
 .srow{display:flex}.sbox{text-align:center;flex:1}
 .sv{font-size:22px;font-weight:bold;color:#f0d9a0}.sl{font-size:9px;color:#a89070;letter-spacing:1px;text-transform:uppercase}
 .wchip{display:inline-block;background:rgba(212,168,67,.15);border:1px solid rgba(212,168,67,.3);border-radius:20px;padding:4px 12px;font-size:11px;color:#d4a843;margin-top:8px;cursor:pointer}
@@ -66,12 +66,12 @@ button{font-family:Georgia,serif;-webkit-appearance:none}
 .mbtn{background:rgba(255,255,255,.08);border:1px solid rgba(210,175,120,.2);border-radius:7px;width:30px;height:30px;color:#e8dcc8;cursor:pointer;font-size:17px;display:flex;align-items:center;justify-content:center}
 .mv{font-size:14px;color:#f0d9a0;min-width:32px;text-align:center}
 .nb{background:rgba(255,255,255,.03);border:1px solid rgba(210,175,120,.1);border-radius:11px;padding:12px;margin-bottom:12px}
-.ni{width:100%;background:none;border:none;color:#e8dcc8;font-family:Georgia,serif;font-size:16px;resize:none;outline:none;min-height:46px;line-height:1.5}
+.ni{width:100%;background:none;border:none;color:#e8dcc8;font-family:Georgia,serif;font-size:12px;resize:none;outline:none;min-height:46px;line-height:1.5}
 .ni::placeholder{color:#a89070}
-.fi{width:100%;background:rgba(255,255,255,.04);border:1px solid rgba(210,175,120,.2);border-radius:10px;padding:10px 12px;color:#e8dcc8;font-family:Georgia,serif;font-size:16px;outline:none;-webkit-text-size-adjust:100%}
+.fi{width:100%;background:rgba(255,255,255,.04);border:1px solid rgba(210,175,120,.2);border-radius:10px;padding:10px 12px;color:#e8dcc8;font-family:Georgia,serif;font-size:13px;outline:none}
 .fi::placeholder{color:#a89070}
-.fs{width:100%;background:rgba(20,30,45,.9);border:1px solid rgba(210,175,120,.2);border-radius:10px;padding:10px 12px;color:#e8dcc8;font-family:Georgia,serif;font-size:16px;outline:none;-webkit-appearance:none}
-.frow{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:12px}.frow .ff{flex:1;min-width:100px}.ff{margin-bottom:12px}.fl{font-size:9px;letter-spacing:2px;color:#a89070;text-transform:uppercase;margin-bottom:5px;display:block}
+.fs{width:100%;background:rgba(20,30,45,.9);border:1px solid rgba(210,175,120,.2);border-radius:10px;padding:10px 12px;color:#e8dcc8;font-family:Georgia,serif;font-size:13px;outline:none;-webkit-appearance:none}
+.frow{display:flex;gap:10px;margin-bottom:12px}.frow .ff{flex:1}.ff{margin-bottom:12px}.fl{font-size:9px;letter-spacing:2px;color:#a89070;text-transform:uppercase;margin-bottom:5px;display:block}
 .pb{border-radius:13px;padding:13px 20px;font-size:14px;font-weight:bold;cursor:pointer;width:100%;display:block;border:none;margin-bottom:0}
 .pb.go{background:#d4a843;color:#0f1923}.pb.gr{background:#25d366;color:#fff}.pb.gy{background:#a89070;color:#0f1923;font-size:13px}
 .pb.tl{background:rgba(100,200,180,.8);color:#0f1923}.pb.pu{background:rgba(180,140,220,.8);color:#0f1923}.pb.bl{background:rgba(100,150,220,.8);color:#fff}.pb.rs{background:rgba(220,140,160,.8);color:#0f1923}
@@ -100,12 +100,57 @@ button{font-family:Georgia,serif;-webkit-appearance:none}
 .gcbox{background:rgba(212,168,67,.08);border:1px solid rgba(212,168,67,.15);border-radius:11px;padding:10px;margin-bottom:12px}
 .albox{background:rgba(212,168,67,.12);border:1px solid rgba(212,168,67,.4);border-radius:13px;padding:12px 14px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between}
 .ibanner{background:rgba(212,168,67,.1);border:1px solid rgba(212,168,67,.3);border-radius:13px;padding:12px 14px;margin-bottom:16px;font-size:12px;color:#d4c090;line-height:1.6}
+/* ── CONTEXTUAL POPUP ── */
+#cpop-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:500;display:flex;align-items:flex-end;justify-content:center;padding:0 0 env(safe-area-inset-bottom,0)}
+#cpop-overlay.hidden{display:none}
+#cpop-sheet{width:100%;max-width:480px;border-radius:22px 22px 0 0;padding:24px 20px 32px;animation:slideUp .3s ease}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.cpop-icon{font-size:42px;text-align:center;margin-bottom:10px}
+.cpop-badge{display:inline-block;font-size:9px;letter-spacing:2px;text-transform:uppercase;padding:3px 10px;border-radius:20px;margin-bottom:10px}
+.cpop-title{font-size:18px;font-weight:bold;margin-bottom:8px;line-height:1.3}
+.cpop-body{font-size:13px;line-height:1.65;margin-bottom:20px;opacity:.85}
+.cpop-btn{width:100%;padding:13px;border-radius:13px;border:none;font-size:14px;font-weight:bold;cursor:pointer;font-family:Georgia,serif}
+/* urgente = rojo/naranja */
+#cpop-sheet.urgente{background:linear-gradient(160deg,#1a1010,#2d1a0e)}
+#cpop-sheet.urgente .cpop-badge{background:rgba(224,112,112,.2);color:#e07070}
+#cpop-sheet.urgente .cpop-title{color:#f0c0a0}
+#cpop-sheet.urgente .cpop-body{color:#d4b090}
+#cpop-sheet.urgente .cpop-btn{background:rgba(224,112,112,.85);color:#fff}
+/* celebracion = dorado */
+#cpop-sheet.celebracion{background:linear-gradient(160deg,#120f00,#1e1800)}
+#cpop-sheet.celebracion .cpop-badge{background:rgba(212,168,67,.2);color:#d4a843}
+#cpop-sheet.celebracion .cpop-title{color:#f0d9a0}
+#cpop-sheet.celebracion .cpop-body{color:#c8b880}
+#cpop-sheet.celebracion .cpop-btn{background:rgba(212,168,67,.85);color:#1a1200}
+/* hito = verde */
+#cpop-sheet.hito{background:linear-gradient(160deg,#0a1810,#0f2018)}
+#cpop-sheet.hito .cpop-badge{background:rgba(100,200,140,.15);color:#64c88c}
+#cpop-sheet.hito .cpop-title{color:#a0e0b0}
+#cpop-sheet.hito .cpop-body{color:#80c090}
+#cpop-sheet.hito .cpop-btn{background:rgba(80,180,110,.8);color:#fff}
+/* info = azul */
+#cpop-sheet.info{background:linear-gradient(160deg,#0a1020,#0f1830)}
+#cpop-sheet.info .cpop-badge{background:rgba(100,160,220,.15);color:#80b0e0}
+#cpop-sheet.info .cpop-title{color:#c0d4f0}
+#cpop-sheet.info .cpop-body{color:#a0b8d0}
+#cpop-sheet.info .cpop-btn{background:rgba(80,130,200,.8);color:#fff}
 .rb{flex:1;border-radius:10px;padding:9px;font-size:12px;cursor:pointer;background:rgba(255,255,255,.05);border:1px solid rgba(210,175,120,.2);color:#a89070}
 .rb.on{background:rgba(212,168,67,.2);border-color:rgba(212,168,67,.5);color:#f0d9a0}
 .ntbox{background:rgba(212,168,67,.08);border:1px solid rgba(212,168,67,.2);border-radius:11px;padding:10px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between}
 </style>
 </head>
 <body>
+<!-- CONTEXTUAL POPUP -->
+<div id="cpop-overlay" class="hidden">
+  <div id="cpop-sheet">
+    <div class="cpop-icon" id="cpop-icon">🎉</div>
+    <div style="text-align:center"><span class="cpop-badge" id="cpop-badge">Recordatorio</span></div>
+    <div class="cpop-title" id="cpop-title"></div>
+    <div class="cpop-body" id="cpop-body"></div>
+    <button class="cpop-btn" id="cpop-btn" onclick="closeCpop()">Entendido</button>
+  </div>
+</div>
+
 <div id="app">
   <div id="hdr">
     <div><div class="hl">Registro · v2.2</div><div class="hm" id="hdr-title">Ceferino</div></div>
@@ -124,6 +169,11 @@ button{font-family:Georgia,serif;-webkit-appearance:none}
   </nav>
   <div id="mas-menu" class="mas-menu">
     <div class="mas-grid">
+      <button class="mas-item" data-action="goPendientes" id="mas-pend-btn">
+        <span class="mas-item-ic">📋</span>
+        <span style="flex:1"><span class="mas-item-lbl">Pendientes</span><span class="mas-item-sub">Checks y recordatorios</span></span>
+        <span id="pend-badge" style="display:none;background:#e07070;color:#fff;border-radius:10px;font-size:10px;font-weight:bold;padding:2px 7px;min-width:20px;text-align:center"></span>
+      </button>
       <button class="mas-item" data-action="goHitos">
         <span class="mas-item-ic">⭐</span>
         <span><span class="mas-item-lbl">Hitos</span><span class="mas-item-sub">Momentos de Cefe</span></span>
@@ -370,6 +420,8 @@ var D = {
   astroTab: 'horoscopo',
   // hitos tab
   hitoTab: 'vida',
+  // momentos / pendientes
+  momentos: { respondidos: {}, descartados: {} },
   // alarm state
   alarmTimer: null, alarmFired: false, nextToma: null, notifTimer: null
 };
@@ -415,6 +467,7 @@ function loadData() {
     var si = ls('sintomas'); if (si) D.sintomas = JSON.parse(si).map(function(e){ if(e) e.t=new Date(e.t); return e; }).filter(Boolean);
     var hi = ls('hitos'); if (hi) D.hitos = JSON.parse(hi);
     var ca = ls('cartas'); if (ca) D.cartas = JSON.parse(ca);
+    var mo = ls('momentos'); if (mo) D.momentos = JSON.parse(mo);
     var nm = ls('nightMode'); if (nm) D.nightMode = JSON.parse(nm);
   } catch(e) {}
 
@@ -469,6 +522,7 @@ function saveData() {
   lss('visits', serVisits()); lss('bebe', D.bebe); lss('padres', D.padres);
   lss('notas', D.notas); lss('sintomas', serSintomas());
   lss('hitos', D.hitos); lss('cartas', D.cartas);
+  lss('momentos', D.momentos);
   lss('nightMode', D.nightMode);
   lss('alarmMax', D.alarmMaxInterval||180);
   lss('sleepStart2', D.sleepStart||null);
@@ -486,6 +540,7 @@ function saveData() {
     sintomas: serSintomas(),
     hitos: D.hitos,
     cartas: D.cartas,
+    momentos: D.momentos,
     sleepLog: D.sleepLog||[],
     sleepStart: D.sleepStart||null,
     nightMode: D.nightMode,
@@ -1234,7 +1289,7 @@ function medCard(m,i){
 // ─── RENDER ───────────────────────────────────────────────────
 function render(){
   applyNightMode();
-  var MAS_STEPS=['perfil','editBebe','editPadre','medicos','editMed','visitaForm','extras','notas','editNota','sintomas','editSintoma','hitos','cartas','editCarta','astro','actividades','vacunas','memoria'];
+  var MAS_STEPS=['perfil','editBebe','editPadre','medicos','editMed','visitaForm','extras','notas','editNota','sintomas','editSintoma','hitos','cartas','editCarta','astro','actividades','vacunas','memoria','pendientes'];
   var TAB_MAP={home:['home'],history:['history'],peso:['peso','pesoEntry'],dash:['dash'],mas:MAS_STEPS};
   Object.keys(TAB_MAP).forEach(function(t){
     var el=document.getElementById('bn-'+t);if(!el)return;
@@ -1242,7 +1297,8 @@ function render(){
   });
   var nb=document.getElementById('night-btn');if(nb)nb.style.color=D.nightMode?'#f0d9a0':'#a89070';
   var htEl=document.getElementById('hdr-title');
-  if(htEl){var TITLES={home:'Ceferino',history:'Historial',peso:'Peso',pesoEntry:'Peso',dash:'Dashboard',perfil:'Perfil',editBebe:'Perfil',editPadre:'Perfil',medicos:'M\u00e9dicos',editMed:'M\u00e9dicos',visitaForm:'M\u00e9dicos',extras:'Extras',notas:'Notas',editNota:'Nueva Nota',sintomas:'S\u00edntomas',editSintoma:'S\u00edntoma',hitos:'Hitos',cartas:'Cartas',editCarta:'Carta',astro:'Recreativo',actividades:'Actividades',vacunas:'Vacunas',memoria:'Memoria de Cefe',toma:'Toma',panal:'Pa\u00f1al',preview:'Confirmar',summary:'Mensaje'};
+  if(typeof updatePendBadge==='function')updatePendBadge();
+  if(htEl){var TITLES={home:'Ceferino',history:'Historial',peso:'Peso',pesoEntry:'Peso',dash:'Dashboard',perfil:'Perfil',editBebe:'Perfil',editPadre:'Perfil',medicos:'M\u00e9dicos',editMed:'M\u00e9dicos',visitaForm:'M\u00e9dicos',extras:'Extras',notas:'Notas',editNota:'Nueva Nota',sintomas:'S\u00edntomas',editSintoma:'S\u00edntoma',hitos:'Hitos',cartas:'Cartas',editCarta:'Carta',astro:'Recreativo',actividades:'Actividades',vacunas:'Vacunas',memoria:'Memoria de Cefe',pendientes:'Pendientes',toma:'Toma',panal:'Pa\u00f1al',preview:'Confirmar',summary:'Mensaje'};
   htEl.textContent=TITLES[D.step]||'Ceferino';}
 
   var bd=document.getElementById('bd');if(!bd)return;
@@ -1323,8 +1379,7 @@ function render(){
     bd.appendChild(E.btn('bk','\u2190 Descartar','discardCurrent'));
     if(D.manualMode){
       bd.appendChild(E.el('div',{cls:'st',txt:'Toma Manual'}));
-      bd.appendChild(E.field('Fecha',E.input('fi','mdate','date',null,D.mDate)));
-      bd.appendChild(E.frow([E.field('Hora inicio',E.input('fi','mstart','time')),E.field('Hora fin (opcional)',E.input('fi','mend','time'))]));
+      bd.appendChild(E.frow([E.field('Fecha',E.input('fi','mdate','date',null,D.mDate)),E.field('Hora inicio',E.input('fi','mstart','time')),E.field('Hora fin (opcional)',E.input('fi','mend','time'))]));
       bd.appendChild(E.slbl('Lados'));
       if(D.mLados.length>0){
         var lb=E.div('lbox');
@@ -1885,6 +1940,9 @@ function render(){
     bd.appendChild(mkTxt('div',null,'📚 AAP / SAP / Denver II / Brazelton','font-size:10px;color:#a89070;margin-top:8px;text-align:center'));
   }
 
+  else if(D.step==='pendientes'){
+    renderPendientes(bd);
+  }
   else if(D.step==='vacunas'){
     bd.appendChild(E.el('div',{cls:'st',txt:'💉 Vacunas de Cefe'}));
     bd.appendChild(mkTxt('div',null,'Calendario Nacional Argentina 2024. Tap para marcar como aplicada.','font-size:11px;color:#a89070;margin-bottom:16px;line-height:1.5'));
@@ -1961,6 +2019,7 @@ document.addEventListener('click', function(ev) {
         case 'goAstro': closeMasMenu(); setStep('astro'); return;
         case 'goActividades': closeMasMenu(); setStep('actividades'); return;
         case 'goVacunas': closeMasMenu(); setStep('vacunas'); return;
+        case 'goPendientes': closeMasMenu(); setStep('pendientes'); return;
         case 'goNotas': closeMasMenu(); setStep('notas'); return;
         case 'goMemoria': closeMasMenu(); setStep('memoria'); return;
         case 'goSintomas': closeMasMenu(); setStep('sintomas'); return;
@@ -1977,6 +2036,648 @@ document.addEventListener('click', function(ev) {
 });
 
 // ─── INIT ─────────────────────────────────────────────────────
+
+
+// ─── SISTEMA DE MOMENTOS ──────────────────────────────────────
+// Checks interactivos, recordatorios accionables y tips contextuales
+
+// ── Definición de RECORDATORIOS por etapa ────────────────────
+var RECORDATORIOS = [
+  { id:'rec_control48h',  semMin:0,  semMax:1,
+    icon:'🏥', badge:'Control obligatorio',
+    title:'Primer control post-alta',
+    body:'La epicrisis indica el primer control ambulatorio a las 48hs del alta. ¿Ya fue?',
+    tipo:'accionable',
+    opciones:[
+      {label:'✅ Ya fue', valor:'si'},
+      {label:'📅 Agendar turno', valor:'agendar', accion:'goMedicos'},
+      {label:'⏳ Pendiente', valor:'pendiente'}
+    ]
+  },
+  { id:'rec_pesquisa_aud', semMin:2, semMax:11,
+    icon:'👂', badge:'Pesquisa auditiva',
+    title:'Pesquisa auditiva — antes de los 3 meses',
+    body:'Obligatoria antes de los 3 meses. ¿Ya tienen turno en fonoaudiología? Llamar al 11-5401-5030 (solo WhatsApp) o 0800-777-2583.',
+    tipo:'accionable',
+    opciones:[
+      {label:'✅ Ya está hecha', valor:'si'},
+      {label:'📅 Agendada', valor:'agendado'},
+      {label:'⏳ Pendiente', valor:'pendiente'}
+    ]
+  },
+  { id:'rec_control_1m',  semMin:4, semMax:6,
+    icon:'📏', badge:'Control 1 mes',
+    title:'Control del primer mes',
+    body:'El pediatra evalúa peso, talla, reflejo, desarrollo y da el ok para las vacunas de los 2 meses. ¿Lo tienen agendado?',
+    tipo:'accionable',
+    opciones:[
+      {label:'✅ Ya fue', valor:'si'},
+      {label:'📅 Agendar', valor:'agendar', accion:'goMedicos'},
+      {label:'⏳ Lo vemos', valor:'pendiente'}
+    ]
+  },
+  { id:'rec_vac_2m',      semMin:7, semMax:9,
+    icon:'💉', badge:'Vacunas 2 meses',
+    title:'Se acercan las vacunas de los 2 meses',
+    body:'Pentavalente, Salk, Neumococo, Rotavirus y Meningococo B. ¿Ya tienen turno con el pediatra?',
+    tipo:'accionable',
+    opciones:[
+      {label:'✅ Turno confirmado', valor:'si'},
+      {label:'📅 Sacar turno', valor:'agendar', accion:'goVacunas'},
+      {label:'⏳ Lo organizo', valor:'pendiente'}
+    ]
+  },
+  { id:'rec_control_2m',  semMin:9, semMax:11,
+    icon:'📏', badge:'Control 2 meses',
+    title:'Control de los 2 meses',
+    body:'Revisión completa + primera tanda de vacunas. Llevá la curva de peso y anotá tus preguntas antes de ir.',
+    tipo:'accionable',
+    opciones:[
+      {label:'✅ Ya fue', valor:'si'},
+      {label:'📅 Agendar', valor:'agendar', accion:'goMedicos'},
+      {label:'⏳ Pendiente', valor:'pendiente'}
+    ]
+  },
+  { id:'rec_intro_solidos', semMin:24, semMax:28,
+    icon:'🥣', badge:'Alimentación complementaria',
+    title:'Se acerca la incorporación de sólidos',
+    body:'A los 6 meses se incorpora la alimentación complementaria. Buena idea consultar al pediatra qué método prefiere: BLW o papillas.',
+    tipo:'accionable',
+    opciones:[
+      {label:'✅ Ya hablamos con el pediatra', valor:'si'},
+      {label:'📅 Agendar consulta', valor:'agendar', accion:'goMedicos'},
+      {label:'⏳ Lo tenemos en mente', valor:'pendiente'}
+    ]
+  },
+];
+
+// ── Tips semanales ────────────────────────────────────────────
+var TIPS_SEMANALES = [
+  { id:'tip_s0', semMin:0, semMax:0,
+    icon:'🌱', title:'La semana cero',
+    body:'El recién nacido no distingue día de noche todavía — su ciclo es de 90 minutos. La consistencia en la respuesta (no en el horario) es lo que va a ir ordenando el sueño con el tiempo.' },
+  { id:'tip_s1', semMin:1, semMax:1,
+    icon:'👁️', title:'La vista ya trabaja',
+    body:'Esta semana Cefe enfoca mejor a 20-30 cm — exactamente la distancia al pecho. Tu cara es su objeto favorito. Hablale de cerca, que te registra.' },
+  { id:'tip_s2', semMin:2, semMax:3,
+    icon:'⚖️', title:'El peso, en perspectiva',
+    body:'Es normal perder hasta el 10% del peso de nacimiento en los primeros días. La recuperación completa suele ocurrir entre el día 10 y el 14. Los controles del pediatra son el termómetro justo.' },
+  { id:'tip_s3', semMin:4, semMax:5,
+    icon:'😴', title:'El sueño no es lineal',
+    body:'Si Cefe duerme bien una noche y mal la siguiente, es normal — no es regresión ni señal de que algo está mal. Los patrones de sueño tardan meses en estabilizarse. Dormir cuando él duerme sigue siendo el mejor consejo.' },
+  { id:'tip_s4', semMin:6, semMax:7,
+    icon:'😭', title:'El pico del llanto',
+    body:'La semana 6 suele ser el pico del llanto vespertino. Tiene fecha de vencimiento: la mayoría mejora notablemente alrededor de la semana 12. Turnarse con Sari en estos momentos es clave para no agotarse.' },
+  { id:'tip_s5', semMin:8, semMax:11,
+    icon:'🗣️', title:'Empieza el "diálogo"',
+    body:'Esta semana puede empezar a vocalizar en respuesta a tu voz. Respondele como si fuera una conversación — esa "charla" es desarrollo neurológico real. El lenguaje se construye así desde el día uno.' },
+  { id:'tip_s6', semMin:12, semMax:15,
+    icon:'💪', title:'Tummy time, en serio',
+    body:'El tiempo boca abajo (tummy time) fortalece cuello, hombros y prepara el gateo. Empezá con 2-3 minutos supervisados 3 veces por día. Si llora, empezá sobre tu pecho — también cuenta.' },
+  { id:'tip_s7', semMin:16, semMax:19,
+    icon:'😂', title:'La primera carcajada',
+    body:'Alrededor de la semana 16 aparece la risa social — una de las mejores cosas que vas a escuchar en tu vida. Encontrá qué la desencadena y repitilo. Ese intercambio de alegría es apego puro.' },
+  { id:'tip_s8', semMin:20, semMax:23,
+    icon:'🤲', title:'Todo a la boca',
+    body:'Llevarse objetos a la boca es exploración sensorial, no un problema. Asegurate que lo que tenga en la mano sea seguro. La mano-boca es también parte del desarrollo del esquema corporal.' },
+  { id:'tip_s9', semMin:24, semMax:999,
+    icon:'🚀', title:'Cada semana es un mundo',
+    body:'Esta etapa trae cambios rápidos. Seguí registrando los hitos, las fotos, las notas — ese archivo que están construyendo es un regalo para Cefe y para ustedes.' },
+];
+
+// ── Checks de hitos interactivos ─────────────────────────────
+// Solo para hitos de desarrollo con celebracion:true o relevantes
+var HITO_CHECKS = [
+  { hitoId:'h03', semTrigger:7,
+    pregunta:'Esta semana los bebés suelen dar su primera sonrisa social. ¿Ya la vieron?',
+    icon:'😊' },
+  { hitoId:'h06', semTrigger:17,
+    pregunta:'¿Ya se rió a carcajadas? La risa social aparece alrededor de la semana 16.',
+    icon:'😂' },
+  { hitoId:'h10', semTrigger:25,
+    pregunta:'¿Ya se dio vuelta solo de panza a espalda? Suele pasar alrededor de los 6 meses.',
+    icon:'🔄' },
+  { hitoId:'h13', semTrigger:37,
+    pregunta:'¿Ya dice "mamá" o "papá" con intención? El lenguaje aparece alrededor de los 9 meses.',
+    icon:'🗣️' },
+  { hitoId:'h18', semTrigger:53,
+    pregunta:'¿Ya dio sus primeros pasos solo? ¡Es uno de los momentos más emocionantes!',
+    icon:'🚶' },
+];
+
+// ── Funciones principales ─────────────────────────────────────
+function getMomentosPendientes() {
+  if (!D.bebe || !D.bebe.fn) return [];
+  if (!D.momentos) D.momentos = { respondidos:{}, descartados:{} };
+
+  var semsVida = Math.floor(Math.floor((Date.now() - new Date(D.bebe.fn).getTime()) / 86400000) / 7);
+  var pendientes = [];
+
+  // 1. Recordatorios accionables pendientes
+  RECORDATORIOS.forEach(function(rec) {
+    if (semsVida < rec.semMin || semsVida > rec.semMax) return;
+    var resp = D.momentos.respondidos[rec.id];
+    if (resp === 'si' || resp === 'agendado') return; // completado
+    pendientes.push({ tipo:'recordatorio', data:rec, id:rec.id });
+  });
+
+  // 2. Checks de hitos pendientes
+  HITO_CHECKS.forEach(function(chk) {
+    if (semsVida < chk.semTrigger) return;
+    var hitoMarcado = D.hitos && D.hitos.indexOf(chk.hitoId) !== -1;
+    if (hitoMarcado) return;
+    var resp = D.momentos.respondidos['chk_' + chk.hitoId];
+    if (resp === 'no_aun') {
+      // Reaparece 3 semanas después de la última vez que dijo "todavía no"
+      var ultimaVez = D.momentos.descartados['chk_ts_' + chk.hitoId];
+      if (ultimaVez) {
+        var diff = (Date.now() - parseInt(ultimaVez)) / (7*86400000);
+        if (diff < 3) return; // esperar 3 semanas
+      }
+    }
+    if (resp === 'descartado') return;
+    pendientes.push({ tipo:'check_hito', data:chk, id:'chk_' + chk.hitoId });
+  });
+
+  return pendientes;
+}
+
+function responderMomento(id, valor, accion) {
+  if (!D.momentos) D.momentos = { respondidos:{}, descartados:{} };
+  D.momentos.respondidos[id] = valor;
+  if (valor === 'no_aun') {
+    D.momentos.descartados['chk_ts_' + id.replace('chk_','')] = Date.now().toString();
+  }
+  // Si el hito fue respondido como "sí", marcarlo en D.hitos
+  if (id.startsWith('chk_') && valor === 'si') {
+    var hitoId = id.replace('chk_', '');
+    if (!D.hitos) D.hitos = [];
+    if (D.hitos.indexOf(hitoId) === -1) D.hitos.push(hitoId);
+  }
+  saveData();
+  if (accion) { closeCpop(); setStep(accion.replace('go','')); return; }
+  closeCpop();
+  updatePendBadge();
+  render();
+}
+
+function updatePendBadge() {
+  var badge = document.getElementById('pend-badge');
+  if (!badge) return;
+  var n = getMomentosPendientes().length;
+  if (n > 0) {
+    badge.textContent = n;
+    badge.style.display = 'inline-block';
+  } else {
+    badge.style.display = 'none';
+  }
+}
+
+// ── Pantalla Pendientes ───────────────────────────────────────
+function renderPendientes(bd) {
+  var apodo = D.bebe.apodo || D.bebe.nombre || 'Cefe';
+  var pendientes = getMomentosPendientes();
+
+  bd.appendChild(mkTxt('div', null, 'Recordatorios y checks activos para esta etapa de ' + apodo + '.', 'font-size:12px;color:#a89070;margin-bottom:16px;line-height:1.6'));
+
+  if (pendientes.length === 0) {
+    var empty = mkDiv('text-align:center;padding:32px 16px');
+    empty.appendChild(mkTxt('div', null, '✅', 'font-size:40px;margin-bottom:12px'));
+    empty.appendChild(mkTxt('div', null, '¡Todo al día!', 'font-size:16px;font-weight:bold;color:#64c8b4;margin-bottom:8px'));
+    empty.appendChild(mkTxt('div', null, 'No hay checks ni recordatorios pendientes para esta semana.', 'font-size:13px;color:#a89070;line-height:1.5'));
+    bd.appendChild(empty);
+    return;
+  }
+
+  pendientes.forEach(function(p) {
+    var card = mkDiv('background:rgba(255,255,255,.04);border:1px solid rgba(210,175,120,.15);border-radius:14px;padding:16px;margin-bottom:12px');
+
+    // Header de la card
+    var hdr = mkDiv('display:flex;align-items:center;gap:10px;margin-bottom:10px');
+    var icBox = mkTxt('div', null, p.tipo === 'check_hito' ? p.data.icon : p.data.icon, 'font-size:24px;flex-shrink:0');
+    hdr.appendChild(icBox);
+    var hdrTxt = mkDiv('flex:1');
+    if (p.tipo === 'recordatorio') {
+      hdrTxt.appendChild(mkTxt('div', null, p.data.badge, 'font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#e07070;margin-bottom:3px'));
+      hdrTxt.appendChild(mkTxt('div', null, p.data.title, 'font-size:14px;font-weight:bold;color:#f0d9a0'));
+    } else {
+      hdrTxt.appendChild(mkTxt('div', null, 'Check de hito', 'font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#64c88c;margin-bottom:3px'));
+      hdrTxt.appendChild(mkTxt('div', null, p.data.pregunta, 'font-size:13px;color:#c0e0c8;line-height:1.4'));
+    }
+    hdr.appendChild(hdrTxt);
+    card.appendChild(hdr);
+
+    if (p.tipo === 'recordatorio') {
+      card.appendChild(mkTxt('div', null, p.data.body, 'font-size:12px;color:#a89070;line-height:1.6;margin-bottom:12px'));
+    }
+
+    // Botones de respuesta
+    var btnRow = mkDiv('display:flex;flex-direction:column;gap:7px');
+    var opciones = p.tipo === 'recordatorio' ? p.data.opciones : [
+      {label:'✅ Sí, ya lo vimos', valor:'si'},
+      {label:'⏳ Todavía no', valor:'no_aun'},
+      {label:'🙈 No aplica / saltar', valor:'descartado'},
+    ];
+    opciones.forEach(function(op) {
+      var btn = document.createElement('button');
+      var isPositive = op.valor === 'si' || op.valor === 'agendado';
+      var isNeg = op.valor === 'descartado';
+      btn.style.cssText = 'width:100%;padding:10px 14px;border-radius:10px;border:1px solid rgba(210,175,120,.25);font-size:13px;cursor:pointer;text-align:left;font-family:Georgia,serif;color:#e8dcc8;background:' + (isPositive ? 'rgba(100,200,140,.12)' : isNeg ? 'rgba(255,255,255,.03)' : 'rgba(255,255,255,.06)');
+      btn.textContent = op.label;
+      (function(opCopy, pCopy) {
+        btn.onclick = function() {
+          responderMomento(pCopy.id, opCopy.valor, opCopy.accion ? 'go' + opCopy.accion.replace('go','') : null);
+        };
+      })(op, p);
+      btnRow.appendChild(btn);
+    });
+    card.appendChild(btnRow);
+    bd.appendChild(card);
+  });
+
+  // Tip semanal al fondo
+  var semsVida = Math.floor(Math.floor((Date.now() - new Date(D.bebe.fn).getTime()) / 86400000) / 7);
+  var tip = null;
+  for (var i = 0; i < TIPS_SEMANALES.length; i++) {
+    if (semsVida >= TIPS_SEMANALES[i].semMin && semsVida <= TIPS_SEMANALES[i].semMax) { tip = TIPS_SEMANALES[i]; break; }
+  }
+  if (!tip) tip = TIPS_SEMANALES[TIPS_SEMANALES.length - 1];
+  var tipCard = mkDiv('background:rgba(100,130,180,.08);border:1px solid rgba(100,130,200,.2);border-radius:14px;padding:16px;margin-top:8px');
+  tipCard.appendChild(mkTxt('div', null, tip.icon + ' ' + tip.title, 'font-size:13px;font-weight:bold;color:#c0d4f0;margin-bottom:8px'));
+  tipCard.appendChild(mkTxt('div', null, tip.body, 'font-size:12px;color:#a0b8d0;line-height:1.65'));
+  bd.appendChild(tipCard);
+}
+
+// ── Actualización del sistema de popups para incluir Momentos ─
+function buildMomentosQueue() {
+  // Devuelve array ordenado de momentos a mostrar como popups
+  if (!D.bebe || !D.bebe.fn) return [];
+  if (!D.momentos) D.momentos = { respondidos:{}, descartados:{} };
+
+  var today = new Date(); today.setHours(0,0,0,0);
+  var fn = new Date(D.bebe.fn); fn.setHours(0,0,0,0);
+  var diasVida = Math.floor((today - fn) / 86400000);
+  var semsVida = Math.floor(diasVida / 7);
+  var queue = [];
+
+  // 1. Vacunas vencidas o próximas ≤7 días
+  if (typeof VACUNAS_ARG !== 'undefined') {
+    VACUNAS_ARG.forEach(function(v) {
+      var st = getVacunaStatus(v);
+      if (st.done) return;
+      if (!st.fecha) return;
+      var fechaVac = new Date(st.fecha); fechaVac.setHours(0,0,0,0);
+      var diff = Math.floor((fechaVac - today) / 86400000);
+      if (diff <= 7) {
+        queue.push({ prioridad:1, tipo:'vacuna', diff:diff, v:v, st:st });
+      }
+    });
+  }
+
+  // 2. Checks de hitos
+  HITO_CHECKS.forEach(function(chk) {
+    if (semsVida < chk.semTrigger) return;
+    var hitoMarcado = D.hitos && D.hitos.indexOf(chk.hitoId) !== -1;
+    if (hitoMarcado) return;
+    var resp = D.momentos.respondidos['chk_' + chk.hitoId];
+    if (resp === 'descartado') return;
+    if (resp === 'no_aun') {
+      var ultimaVez = D.momentos.descartados['chk_ts_' + chk.hitoId];
+      if (ultimaVez && (Date.now() - parseInt(ultimaVez)) / (7*86400000) < 3) return;
+    }
+    queue.push({ prioridad:2, tipo:'check_hito', chk:chk });
+  });
+
+  // 3. Recordatorios accionables
+  RECORDATORIOS.forEach(function(rec) {
+    if (semsVida < rec.semMin || semsVida > rec.semMax) return;
+    var resp = D.momentos.respondidos[rec.id];
+    if (resp === 'si' || resp === 'agendado') return;
+    queue.push({ prioridad:3, tipo:'recordatorio', rec:rec });
+  });
+
+  // 4. Cumple semanas/meses
+  var esCumpleSemanas = (diasVida > 0 && diasVida % 7 === 0);
+  var mesCumple = 0;
+  for (var m = 1; m <= 24; m++) {
+    var fm = new Date(fn); fm.setMonth(fm.getMonth() + m); fm.setHours(0,0,0,0);
+    if (fm.getTime() === today.getTime()) { mesCumple = m; break; }
+  }
+  var cpopKey = 'cpop_cel_' + today.toISOString().slice(0,10);
+  if ((esCumpleSemanas || mesCumple > 0) && !localStorage.getItem(cpopKey)) {
+    queue.push({ prioridad:4, tipo:'celebracion', diasVida:diasVida, semsVida:semsVida, mesCumple:mesCumple, cpopKey:cpopKey });
+  }
+
+  // 5. Tip semanal (1 por día)
+  var tipKey = 'cpop_tip_' + today.toISOString().slice(0,10);
+  if (!localStorage.getItem(tipKey)) {
+    var tip = null;
+    for (var i = 0; i < TIPS_SEMANALES.length; i++) {
+      if (semsVida >= TIPS_SEMANALES[i].semMin && semsVida <= TIPS_SEMANALES[i].semMax) { tip = TIPS_SEMANALES[i]; break; }
+    }
+    if (!tip) tip = TIPS_SEMANALES[TIPS_SEMANALES.length - 1];
+    queue.push({ prioridad:5, tipo:'tip', tip:tip, tipKey:tipKey });
+  }
+
+  return queue;
+}
+
+var _momentosQueue = [];
+var _momentoActual = 0;
+
+function showNextMomento() {
+  if (_momentoActual >= _momentosQueue.length) { updatePendBadge(); return; }
+  var item = _momentosQueue[_momentoActual];
+  _momentoActual++;
+  var apodo = D.bebe.apodo || D.bebe.nombre || 'Cefe';
+  var hasNext = _momentoActual < _momentosQueue.length;
+  var btnLabel = hasNext ? 'Siguiente →' : 'Entendido';
+  var onNext = hasNext ? showNextMomento : function(){ updatePendBadge(); };
+
+  if (item.tipo === 'vacuna') {
+    var diff = item.diff;
+    var cuandoStr = diff < 0 ? 'Venció hace ' + Math.abs(diff) + ' día' + (Math.abs(diff)===1?'':'s')
+      : diff === 0 ? 'Hoy' : 'En ' + diff + ' día' + (diff===1?'':'s') + ' (' + item.st.fechaStr + ')';
+    showCpop('urgente','💉','Vacuna próxima', item.v.nombre,
+      cuandoStr + '. ' + item.v.desc,
+      hasNext ? 'Siguiente →' : 'Ver vacunas',
+      hasNext ? onNext : function(){ setStep('vacunas'); updatePendBadge(); });
+
+  } else if (item.tipo === 'check_hito') {
+    var chk = item.chk;
+    // Botones inline en el popup
+    var ov = document.getElementById('cpop-overlay');
+    var sh = document.getElementById('cpop-sheet');
+    var ico = document.getElementById('cpop-icon');
+    var bdg = document.getElementById('cpop-badge');
+    var ttl = document.getElementById('cpop-title');
+    var bdy = document.getElementById('cpop-body');
+    var btn = document.getElementById('cpop-btn');
+    sh.className = 'hito';
+    ico.textContent = chk.icon;
+    bdg.textContent = 'Check de desarrollo';
+    ttl.textContent = chk.pregunta;
+    bdy.textContent = '';
+    // Reemplazar btn con 3 botones
+    var btnArea = btn.parentNode;
+    btn.style.display = 'none';
+    // Limpiar botones extra si los hay
+    var extras = btnArea.querySelectorAll('.cpop-extra-btn');
+    extras.forEach(function(b){ b.remove(); });
+    var btns3 = [
+      {l:'✅ Sí, ya lo vimos', v:'si'},
+      {l:'⏳ Todavía no', v:'no_aun'},
+      {l:'🙈 Saltar', v:'descartado'},
+    ];
+    btns3.forEach(function(b) {
+      var el = document.createElement('button');
+      el.className = 'cpop-extra-btn';
+      el.style.cssText = 'width:100%;padding:11px;border-radius:11px;border:1px solid rgba(100,200,140,.3);font-size:13px;font-weight:bold;cursor:pointer;font-family:Georgia,serif;color:#e8dcc8;background:rgba(100,200,140,.1);margin-bottom:7px';
+      el.textContent = b.l;
+      (function(bCopy, chkCopy) {
+        el.onclick = function() {
+          // Limpiar botones extra
+          btnArea.querySelectorAll('.cpop-extra-btn').forEach(function(x){ x.remove(); });
+          btn.style.display = 'block';
+          responderMomento('chk_' + chkCopy.hitoId, bCopy.v, null);
+          if (bCopy.v === 'si') {
+            showCpop('celebracion','🌟','¡Hito alcanzado!','¡Lo lograron!','Registrado en los hitos de Cefe. Cada momento cuenta.', hasNext ? 'Siguiente →' : '¡Genial! 💛', onNext);
+          } else {
+            onNext();
+          }
+        };
+      })(b, chk);
+      btnArea.insertBefore(el, btn);
+    });
+    ov.classList.remove('hidden');
+
+  } else if (item.tipo === 'recordatorio') {
+    var rec = item.rec;
+    showCpop('urgente', rec.icon, rec.badge, rec.title, rec.body,
+      btnLabel,
+      function() {
+        if (rec.opciones && rec.opciones[1] && rec.opciones[1].accion) {
+          closeCpop(); setStep(rec.opciones[1].accion.replace('go','').toLowerCase());
+        } else { onNext(); }
+      });
+    // Agregar botones de respuesta inline
+    setTimeout(function() {
+      var btnEl = document.getElementById('cpop-btn');
+      if (!btnEl) return;
+      var btnArea2 = btnEl.parentNode;
+      var extras2 = btnArea2.querySelectorAll('.cpop-extra-btn');
+      extras2.forEach(function(b){ b.remove(); });
+      btnEl.style.display = 'none';
+      rec.opciones.forEach(function(op) {
+        var el = document.createElement('button');
+        el.className = 'cpop-extra-btn';
+        var isPos = op.valor === 'si' || op.valor === 'agendado';
+        el.style.cssText = 'width:100%;padding:11px;border-radius:11px;border:1px solid rgba(224,112,112,.3);font-size:13px;font-weight:bold;cursor:pointer;font-family:Georgia,serif;color:#e8dcc8;background:' + (isPos ? 'rgba(100,200,140,.15)' : 'rgba(255,255,255,.06)') + ';margin-bottom:7px';
+        el.textContent = op.label;
+        (function(opCopy, recCopy) {
+          el.onclick = function() {
+            btnArea2.querySelectorAll('.cpop-extra-btn').forEach(function(x){ x.remove(); });
+            btnEl.style.display = 'block';
+            D.momentos.respondidos[recCopy.id] = opCopy.valor;
+            saveData();
+            if (opCopy.accion) { closeCpop(); setStep(opCopy.accion.replace('go','').toLowerCase()); }
+            else { onNext(); }
+          };
+        })(op, rec);
+        btnArea2.insertBefore(el, btnEl);
+      });
+    }, 50);
+
+  } else if (item.tipo === 'celebracion') {
+    localStorage.setItem(item.cpopKey, '1');
+    var esUnMes = item.mesCumple > 0;
+    var apod = apodo;
+    showCpop('celebracion', esUnMes ? '🎂' : '🎉',
+      esUnMes ? '¡Cumple mes!' : '¡Cumple semanas!',
+      esUnMes ? '¡' + apod + ' cumple ' + item.mesCumple + (item.mesCumple===1?' mes':' meses') + '!' : '¡' + apod + ' cumple ' + item.semsVida + ' semanas hoy!',
+      esUnMes ? 'Un mes más de aprendizaje y amor. Que lo disfruten mucho.' : 'Cada semana es un mundo nuevo para él. Están haciendo un trabajo increíble.',
+      btnLabel, onNext);
+
+  } else if (item.tipo === 'tip') {
+    localStorage.setItem(item.tipKey, '1');
+    showCpop('info', item.tip.icon, 'Semana ' + Math.floor(Math.floor((Date.now() - new Date(D.bebe.fn).getTime()) / 86400000) / 7),
+      item.tip.title, item.tip.body, btnLabel, onNext);
+  }
+}
+
+
+
+// ─── INIT ─────────────────────────────────────────────────────
+
+// ─── CONTEXTUAL POPUP SYSTEM ──────────────────────────────────
+var _cpopShown = false; // only once per session
+
+function closeCpop() {
+  var ov = document.getElementById('cpop-overlay');
+  if (ov) ov.classList.add('hidden');
+}
+
+function showCpop(type, icon, badge, title, body, btnLabel, onBtn) {
+  var ov   = document.getElementById('cpop-overlay');
+  var sh   = document.getElementById('cpop-sheet');
+  var ico  = document.getElementById('cpop-icon');
+  var bdg  = document.getElementById('cpop-badge');
+  var ttl  = document.getElementById('cpop-title');
+  var bdy  = document.getElementById('cpop-body');
+  var btn  = document.getElementById('cpop-btn');
+  if (!ov || !sh) return;
+  sh.className = type; // urgente | celebracion | hito | info
+  ico.textContent  = icon;
+  bdg.textContent  = badge;
+  ttl.textContent  = title;
+  bdy.textContent  = body;
+  btn.textContent  = btnLabel || 'Entendido';
+  btn.onclick = function() { closeCpop(); if (onBtn) onBtn(); };
+  ov.classList.remove('hidden');
+}
+
+function checkContextualPopup() {
+  if (_cpopShown) return;
+  if (!D.bebe || !D.bebe.fn) return;
+
+  var today   = new Date();
+  today.setHours(0,0,0,0);
+  var fn      = new Date(D.bebe.fn);
+  fn.setHours(0,0,0,0);
+  var diasVida = Math.floor((today - fn) / 86400000);
+  var semsVida = Math.floor(diasVida / 7);
+  var apodo    = (D.bebe.apodo || D.bebe.nombre || 'Cefe');
+
+  // ── PRIORIDAD 1: Vacuna vencida o próxima (≤7 días) ──────────
+  var vacUrgente = null;
+  var diasUrgente = 9999;
+  if (typeof VACUNAS_ARG !== 'undefined') {
+    VACUNAS_ARG.forEach(function(v) {
+      var st = getVacunaStatus(v);
+      if (st.done) return; // ya aplicada
+      if (!st.fecha) return;
+      var fechaVac = new Date(st.fecha);
+      fechaVac.setHours(0,0,0,0);
+      var diff = Math.floor((fechaVac - today) / 86400000);
+      if (diff <= 7 && diff < diasUrgente) {
+        diasUrgente = diff;
+        vacUrgente  = { v: v, diff: diff, fechaStr: st.fechaStr };
+      }
+    });
+  }
+  if (vacUrgente) {
+    _cpopShown = true;
+    var cuandoStr = vacUrgente.diff < 0
+      ? 'Vencida hace ' + Math.abs(vacUrgente.diff) + ' día' + (Math.abs(vacUrgente.diff)===1?'':'s')
+      : vacUrgente.diff === 0
+        ? 'Hoy'
+        : 'En ' + vacUrgente.diff + ' día' + (vacUrgente.diff===1?'':'s') + ' (' + vacUrgente.v.fechaStr + ')';
+    showCpop(
+      'urgente', '💉', 'Vacuna próxima',
+      vacUrgente.v.nombre,
+      cuandoStr + '. ' + vacUrgente.v.desc + ' Coordiná con el pediatra.',
+      'Ver vacunas',
+      function() { setStep('vacunas'); }
+    );
+    return;
+  }
+
+  // ── PRIORIDAD 2: Cumple semanas exactas hoy ───────────────────
+  var esCumpleSemanas = (diasVida > 0 && diasVida % 7 === 0);
+  // También cumple meses exactos (28, 56... días o mes calendar)
+  var mesCumple = 0;
+  for (var m = 1; m <= 24; m++) {
+    var fechaMes = new Date(fn);
+    fechaMes.setMonth(fechaMes.getMonth() + m);
+    fechaMes.setHours(0,0,0,0);
+    if (fechaMes.getTime() === today.getTime()) { mesCumple = m; break; }
+  }
+
+  // Check si ya se mostró este cumpleaños hoy
+  var cpopKey = 'cpop_last_' + today.toISOString().slice(0,10);
+  var yaVisto = localStorage.getItem(cpopKey);
+
+  if ((esCumpleSemanas || mesCumple > 0) && !yaVisto) {
+    _cpopShown = true;
+    localStorage.setItem(cpopKey, '1');
+    var esUnMes = mesCumple > 0;
+    var tituloFeliz = esUnMes
+      ? '¡' + apodo + ' cumple ' + mesCumple + (mesCumple===1?' mes':'  meses') + ' hoy! 🎂'
+      : '¡' + apodo + ' cumple ' + semsVida + ' semanas hoy!';
+    var mensajeFeliz = esUnMes
+      ? 'Un mes más de aprendizaje, amor y crecimiento juntos. Que lo disfruten mucho.'
+      : 'Cada semana es un mundo nuevo para él. Están haciendo un trabajo increíble.';
+    showCpop(
+      'celebracion', esUnMes ? '🎂' : '🎉',
+      esUnMes ? '¡Cumple mes!' : '¡Cumple semanas!',
+      tituloFeliz,
+      mensajeFeliz,
+      '¡Qué lindo! 💛'
+    );
+    return;
+  }
+
+  // ── PRIORIDAD 3: Hito de desarrollo inminente (próximos 7 días) ─
+  if (typeof HITOS_DEF !== 'undefined' && !yaVisto) {
+    var hitoProx = null;
+    var diasHito = 9999;
+    HITOS_DEF.forEach(function(h) {
+      if (!h.semanas || h.semanas === 0) return;
+      var marcado = D.hitos && D.hitos.indexOf(h.id) !== -1;
+      if (marcado) return;
+      var diasAlHito = h.semanas * 7 - diasVida;
+      if (diasAlHito >= 0 && diasAlHito <= 7 && diasAlHito < diasHito) {
+        diasHito = diasAlHito;
+        hitoProx = h;
+      }
+    });
+    if (hitoProx) {
+      _cpopShown = true;
+      var cuandoH = diasHito === 0 ? 'Esta semana' : 'En ' + diasHito + ' día' + (diasHito===1?'':'s');
+      showCpop(
+        'hito', hitoProx.ic || '🌟', 'Hito próximo',
+        hitoProx.label,
+        cuandoH + ' se esperaría este hito. Recordá que cada bebé tiene su propio ritmo. Prestá atención y disfrutalo.',
+        'Ver hitos',
+        function() { setStep('hitos'); }
+      );
+      return;
+    }
+  }
+
+  // ── PRIORIDAD 4: Mensaje semanal de contexto (1 por día máx) ──
+  if (!yaVisto && diasVida >= 0) {
+    _cpopShown = true;
+    localStorage.setItem(cpopKey, '1');
+    var semMsg = semsVida;
+    // Mensajes por etapa
+    var msgs = [
+      // 0-1
+      {min:0, max:1,   icon:'🌱', badge:'Semana ' + semMsg, title:'Bienvenidos a casa',
+       body:'Los primeros días son los más intensos. No hay nada que hacer bien o mal — solo estar presentes y responder a ' + apodo + '.'},
+      {min:2, max:3,   icon:'👁️', badge:'Semana ' + semMsg, title:apodo + ' está despertando',
+       body:'Esta semana puede empezar a seguir tu cara con la vista. Hablale de cerca, que te escucha y te registra.'},
+      {min:4, max:5,   icon:'📈', badge:'Semana ' + semMsg, title:'El peso va en alza',
+       body:'Si todo va bien, ' + apodo + ' ya recuperó el peso de nacimiento. Los controles con el pediatra son el mejor termómetro de esta etapa.'},
+      {min:6, max:7,   icon:'😊', badge:'Semana ' + semMsg, title:'La primera sonrisa se acerca',
+       body:'Entre la semana 6 y 8 suele aparecer la primera sonrisa social. Hablale, hacele caras — ya está aprendiendo a comunicarse.'},
+      {min:8, max:11,  icon:'🗣️', badge:'Semana ' + semMsg, title:'Empieza a "charlar"',
+       body:apodo + ' puede empezar a vocalizar. Respondele como si fuera una conversación — esa "charla" es aprendizaje neurológico real.'},
+      {min:12, max:15, icon:'💪', badge:'Semana ' + semMsg, title:'El cuello se fortalece',
+       body:'El tiempo boca abajo (tummy time) es clave en esta etapa. Empezá de a poco — 2 o 3 minutos supervisados a la vez.'},
+      {min:16, max:19, icon:'😂', badge:'Semana ' + semMsg, title:'Risas en camino',
+       body:'La carcajada social aparece alrededor de la semana 16. Si todavía no llegó, está muy cerca. Es uno de los mejores sonidos del mundo.'},
+      {min:20, max:999, icon:'🚀', badge:'Semana ' + semMsg, title:apodo + ' en semana ' + semMsg,
+       body:'Cada semana trae algo nuevo. Seguí registrando, seguí presente — ese es el trabajo más importante.'},
+    ];
+    var msg = msgs[msgs.length-1];
+    for (var i=0; i<msgs.length; i++) {
+      if (semMsg >= msgs[i].min && semMsg <= msgs[i].max) { msg = msgs[i]; break; }
+    }
+    showCpop('info', msg.icon, msg.badge, msg.title, msg.body, '¡Vamos! 💙');
+  }
+}
+
 loadData();
 applyNightMode();
 render();
@@ -2362,6 +3063,7 @@ onValue(ref(db,'cefe'),function(snap){
   if(data.sintomas&&Array.isArray(data.sintomas))D.sintomas=data.sintomas.map(function(s){if(!s)return null;var t=restoreDate(s.t);if(!t)return null;return Object.assign({},s,{t:t});}).filter(Boolean);
   if(data.hitos&&Array.isArray(data.hitos))D.hitos=data.hitos.filter(Boolean);
   if(data.cartas&&Array.isArray(data.cartas))D.cartas=data.cartas.filter(Boolean);
+  if(data.momentos&&typeof data.momentos==='object')D.momentos=Object.assign({respondidos:{},descartados:{}},data.momentos);
   if(data.sleepLog&&Array.isArray(data.sleepLog))D.sleepLog=data.sleepLog;
   if(data.sleepStart)D.sleepStart=data.sleepStart;
   if(typeof data.nightMode==='boolean')D.nightMode=data.nightMode;
@@ -2369,6 +3071,14 @@ onValue(ref(db,'cefe'),function(snap){
   setDot('#64c8b4','Sincronizado');
   if(typeof applyNightMode==='function')applyNightMode();
   if(typeof render==='function')render();
+  if(typeof buildMomentosQueue==='function'){
+    setTimeout(function(){
+      _momentosQueue = buildMomentosQueue();
+      _momentoActual = 0;
+      if(_momentosQueue.length > 0) showNextMomento();
+      else updatePendBadge();
+    }, 500);
+  }
 },function(err){fbReady=true;setDot('#e07070','Error Firebase');console.error(err);});
 </script>
 </body>
