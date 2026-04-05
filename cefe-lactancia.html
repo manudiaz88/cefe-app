@@ -105,7 +105,7 @@ button{font-family:Georgia,serif;-webkit-appearance:none}
 /* ── CONTEXTUAL POPUP ── */
 #cpop-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:500;display:flex;align-items:flex-end;justify-content:center;padding:0 0 env(safe-area-inset-bottom,0)}
 #cpop-overlay.hidden{display:none}
-#onboard-overlay.hidden{display:none}
+#onboard-overlay{display:flex}#onboard-overlay.hidden{display:none!important}
 #cpop-sheet{width:100%;max-width:480px;border-radius:22px 22px 0 0;padding:24px 20px 32px;animation:slideUp .3s ease}
 @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
 .cpop-icon{font-size:42px;text-align:center;margin-bottom:10px}
@@ -144,7 +144,7 @@ button{font-family:Georgia,serif;-webkit-appearance:none}
 </head>
 <body>
 <!-- ONBOARDING -->
-<div id="onboard-overlay" class="hidden" style="position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:600;display:flex;align-items:center;justify-content:center;padding:20px">
+<div id="onboard-overlay" class="hidden" style="position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:600;align-items:center;justify-content:center;padding:20px">
   <div style="width:100%;max-width:380px;background:linear-gradient(160deg,#0f1923,#1a2d3d);border:1px solid rgba(212,168,67,.3);border-radius:20px;padding:28px 22px;text-align:center">
     <div style="font-size:40px;margin-bottom:12px">👶</div>
     <div style="font-size:18px;font-weight:bold;color:#f0d9a0;margin-bottom:6px">Bienvenido a la app de Cefe</div>
@@ -2367,10 +2367,13 @@ function saveOnboardingName() {
   setDeviceName(name);
   DEVICE_NAME = name;
   var ov = document.getElementById('onboard-overlay');
-  if (ov) ov.classList.add('hidden');
-  // Actualizar nombre en header si hay
+  if (ov) {
+    ov.classList.add('hidden');
+    ov.style.display = 'none'; // belt+suspenders para iOS Safari
+  }
   var dnEl = document.getElementById('device-name-display');
   if (dnEl) dnEl.textContent = name;
+  render(); // refrescar para mostrar el sistema de momentos
 }
 
 // ─── MOMENTOS: LÓGICA POR DEVICE ──────────────────────────────
