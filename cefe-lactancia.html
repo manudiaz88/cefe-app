@@ -5,11 +5,11 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Alba">
+<meta name="apple-mobile-web-app-title" content="Cefe">
 <meta name="theme-color" content="#0f1923">
 <link rel="manifest" href="manifest.json">
-<link rel="apple-touch-icon" href="alba-icon-apple-touch_PNG_180x180.png">
-<title>Alba · Tu hijo, su historia</title>
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<title>Cefe App v2.3</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 body{min-height:100vh;background:linear-gradient(135deg,#0f1923,#1a2d3d,#0f2030);font-family:Georgia,serif;color:#e8dcc8;display:flex;flex-direction:column;align-items:center;padding-bottom:40px;transition:background .3s}
@@ -146,10 +146,9 @@ button{font-family:Georgia,serif;-webkit-appearance:none}
 <!-- ONBOARDING -->
 <div id="onboard-overlay" class="hidden" style="position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:600;align-items:center;justify-content:center;padding:20px">
   <div style="width:100%;max-width:380px;background:linear-gradient(160deg,#0f1923,#1a2d3d);border:1px solid rgba(212,168,67,.3);border-radius:20px;padding:28px 22px;text-align:center">
-    <div style="font-size:40px;margin-bottom:8px">🌅</div>
-    <div style="font-size:22px;font-weight:bold;color:#f0d9a0;margin-bottom:4px">Bienvenido a Alba</div>
-    <div style="font-size:12px;color:#d4a843;margin-bottom:8px;letter-spacing:1px;text-transform:uppercase">La historia de tu hijo, en tus manos</div>
-    <div style="font-size:12px;color:#a89070;margin-bottom:20px;line-height:1.6">¿Cómo te llamás? Así Céfiro, el asistente de Alba, sabe quién registra cada cosa y sincroniza las alertas entre dispositivos.</div>
+    <div style="font-size:40px;margin-bottom:12px">👶</div>
+    <div style="font-size:18px;font-weight:bold;color:#f0d9a0;margin-bottom:6px">Bienvenido a la app de Cefe</div>
+    <div style="font-size:12px;color:#a89070;margin-bottom:20px;line-height:1.6">¿Cómo te llamás? Así podemos saber quién registra cada cosa y sincronizar las alertas entre dispositivos.</div>
     <input id="onboard-name-input" type="text" placeholder="Tu nombre (ej: Manu, Sari…)"
       style="width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(212,168,67,.3);border-radius:10px;padding:12px 14px;color:#f0d9a0;font-family:Georgia,serif;font-size:16px;outline:none;margin-bottom:14px;text-align:center"
       onkeydown="if(event.key==='Enter')saveOnboardingName()">
@@ -192,7 +191,7 @@ button{font-family:Georgia,serif;-webkit-appearance:none}
     <div class="mas-grid">
       <button class="mas-item" data-action="goPendientes" id="mas-pend-btn">
         <span class="mas-item-ic">📋</span>
-        <span style="flex:1"><span class="mas-item-lbl">Pendientes</span><span class="mas-item-sub">Céfiro · alertas y checks</span></span>
+        <span style="flex:1"><span class="mas-item-lbl">Pendientes</span><span class="mas-item-sub">Checks y recordatorios</span></span>
         <span id="pend-badge" style="display:none;background:#e07070;color:#fff;border-radius:10px;font-size:10px;font-weight:bold;padding:2px 7px;min-width:20px;text-align:center"></span>
       </button>
       <button class="mas-item" data-action="goHitos">
@@ -206,6 +205,10 @@ button{font-family:Georgia,serif;-webkit-appearance:none}
       <button class="mas-item" data-action="goVacunas">
         <span class="mas-item-ic">💉</span>
         <span><span class="mas-item-lbl">Vacunas</span><span class="mas-item-sub">Calendario nacional</span></span>
+      </button>
+      <button class="mas-item" data-action="goConsultaMedica">
+        <span class="mas-item-ic">🏥</span>
+        <span><span class="mas-item-lbl">Consulta médica</span><span class="mas-item-sub">Resumen + Historia clínica PDF</span></span>
       </button>
       <button class="mas-item" data-action="goActividades">
         <span class="mas-item-ic">🎯</span>
@@ -238,8 +241,7 @@ button{font-family:Georgia,serif;-webkit-appearance:none}
 </div>
 <script>
 // ═══════════════════════════════════════════════════════════════
-// ALBA · La historia de tu hijo — v3.0
-// Desarrollado por Manu Diaz para Ceferino · Nació al alba, 29/03/2026 · 05:20hs
+// CEFE LACTANCIA APP  —  v2.0
 // ═══════════════════════════════════════════════════════════════
 
 var APP_VERSION = 3;
@@ -338,8 +340,12 @@ var E = {
       lDiv.appendChild(t1); lDiv.appendChild(t2);
       var rDiv = document.createElement('div'); rDiv.className = 'hri';
       var mins = mkTxt('div', null, h.tot + 'm', 'font-size:15px;font-weight:bold;color:#d4a843');
+      var wa = document.createElement('button');
+      wa.textContent = '📤'; wa.title = 'Compartir por WhatsApp';
+      wa.style.cssText = 'background:none;border:none;font-size:18px;cursor:pointer;padding:2px 4px;opacity:.7';
+      (function(hCopy){ wa.onclick = function(e){ e.stopPropagation(); var msg=genMsg(hCopy); window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank'); }; })(h);
       var db = E.btn('dbtn', '\u2715', 'delHist', {idx: idx});
-      rDiv.appendChild(mins); rDiv.appendChild(db);
+      rDiv.appendChild(mins); rDiv.appendChild(wa); rDiv.appendChild(db);
       row.appendChild(lDiv); row.appendChild(rDiv);
     } else {
       row.className = 'hr2 pa';
@@ -350,6 +356,11 @@ var E = {
       if (h.note) { lDiv2.appendChild(mkTxt('div', 'hrs', h.note.substring(0, 25))); }
       var rDiv2 = document.createElement('div'); rDiv2.className = 'hri';
       rDiv2.appendChild(mkTxt('span', null, em, 'font-size:16px'));
+      var wa2 = document.createElement('button');
+      wa2.textContent = '📤'; wa2.title = 'Compartir';
+      wa2.style.cssText = 'background:none;border:none;font-size:16px;cursor:pointer;padding:2px 4px;opacity:.7';
+      (function(hCopy2){ wa2.onclick = function(e){ e.stopPropagation(); var msg=genMsg(hCopy2); window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank'); }; })(h);
+      rDiv2.appendChild(wa2);
       rDiv2.appendChild(E.btn('dbtn', '\u2715', 'delHist', {idx: idx}));
       row.appendChild(lDiv2); row.appendChild(rDiv2);
     }
@@ -429,6 +440,10 @@ var D = {
   hFilter: null, dashDays: 1,
   editMedIdx: -1, editPadreIdx: -1, editPadre: null,
   editCartaIdx: -1,
+  editSintomaIdx: -1,
+  editNotaFecha: null,
+  editVisitaIdx: -1,
+  actividadesHechas: {},  // {fecha: [idx, idx]} actividades del día marcadas
   // alarm
   alarmTimer: null, alarmFired: false, nextToma: null, notifTimer: null,
   // alarm
@@ -522,6 +537,7 @@ function loadData() {
     var hi = ls('hitos'); if (hi) D.hitos = JSON.parse(hi);
     var ca = ls('cartas'); if (ca) D.cartas = JSON.parse(ca);
     var mo = ls('momentos'); if (mo) D.momentos = JSON.parse(mo);
+    var ah = ls('actHechas'); if (ah) D.actividadesHechas = JSON.parse(ah);
     var nm = ls('nightMode'); if (nm) D.nightMode = JSON.parse(nm);
   } catch(e) {}
 
@@ -577,6 +593,7 @@ function saveData() {
   lss('notas', D.notas); lss('sintomas', serSintomas());
   lss('hitos', D.hitos); lss('cartas', D.cartas);
   lss('momentos', D.momentos);
+  lss('actHechas', D.actividadesHechas);
   lss('nightMode', D.nightMode);
   lss('alarmMax', D.alarmMaxInterval||180);
   lss('sleepStart2', D.sleepStart||null);
@@ -698,7 +715,6 @@ var HITOS_DEF = [
   {id:'h21', cat:'desarrollo', semanas:104,ic:'🎨',      label:'Juego simbólico (juega a “hacerse”)'},
 ];
 
-var APP_VERSION = 2;
 var ML_FLOW = {1:2.0, 2:2.8, 3:3.5, 4:4.5, 5:5.5};
 function estimateML(lados,efi,mlProv){
   if(!efi||!lados||lados.length===0)return mlProv||0;
@@ -1045,16 +1061,45 @@ function saveVisita(){
   var dv=gv('vfecha'),hv=gv('vhora');
   if(!dv||!hv){alert('Fecha y hora obligatorias.');return;}
   var rb=document.querySelector('.rb.on');
-  var entry={type:'visita',mi:mi,dt:new Date(dv+'T'+hv),mod:rb?rb.dataset.v:'presencial',desc:gv('vdesc')};
+  var entry={type:'visita',mi:mi,dt:new Date(dv+'T'+hv),mod:rb?rb.dataset.v:'presencial',
+    desc:gv('vdesc'),estado:'pendiente',conclusiones:'',receta:'',proxVisita:'',pesoEnVisita:0};
   D.visits.unshift(entry);saveData();D.msg=genMsg(entry);D.msgType='visita';setStep('summary');
+}
+function savePostVisita(idx){
+  var v=D.visits[idx];if(!v)return;
+  v.estado=gv('pv-estado')||'realizada';
+  v.conclusiones=gv('pv-conclusiones')||'';
+  v.receta=gv('pv-receta')||'';
+  v.proxVisita=gv('pv-prox')||'';
+  var pw=gv('pv-peso');if(pw&&parseFloat(pw)>0){v.pesoEnVisita=Math.round(parseFloat(pw)*1000);}
+  saveData();
+  // Si hay peso registrado, agregarlo a la curva de peso
+  if(v.pesoEnVisita>0){
+    var existePeso=D.pesos.some(function(p){return sameDay(p.t,v.dt)&&p.g===v.pesoEnVisita;});
+    if(!existePeso){D.pesos.unshift({t:v.dt,g:v.pesoEnVisita,n:'Peso en consulta '+((D.meds&&D.meds[v.mi])?D.meds[v.mi].esp:'')});
+    D.pesos.sort(function(a,b){return new Date(b.t)-new Date(a.t);});}
+  }
+  // Si hay próxima visita, agendar automáticamente
+  if(v.proxVisita){
+    var parts=v.proxVisita.split('-');
+    var prxEntry={type:'visita',mi:v.mi,dt:new Date(v.proxVisita+'T09:00'),
+      mod:v.mod,desc:'Seguimiento — '+v.desc,estado:'pendiente',conclusiones:'',receta:'',proxVisita:'',pesoEnVisita:0};
+    D.visits.unshift(prxEntry);
+  }
+  saveData();setStep('medicos');
 }
 function saveNota(){
   var fecha=gv('nota-fecha')||todayStr();
   var texto=gv('nota-texto');
   if(!texto.trim()){alert('Escribe algo.');return;}
+  // Si editamos una nota con fecha original distinta, eliminar la vieja
+  if(D.editNotaFecha&&D.editNotaFecha!==fecha){
+    D.notas=D.notas.filter(function(n){return n.fecha!==D.editNotaFecha;});
+  }
   var existing=D.notas.find(function(n){return n.fecha===fecha;});
   if(existing)existing.texto=texto;else D.notas.unshift({fecha:fecha,texto:texto});
   D.notas.sort(function(a,b){return new Date(b.fecha)-new Date(a.fecha);});
+  D.editNotaFecha=null;
   saveData();setStep('notas');
 }
 function saveSintoma(){
@@ -1063,7 +1108,10 @@ function saveSintoma(){
   var fv=gv('sint-fecha'),hv=gv('sint-hora');
   var t=new Date();
   if(fv){try{t=new Date(fv+'T'+(hv||p2(new Date().getHours())+':'+p2(new Date().getMinutes())));}catch(e){}}
-  D.sintomas.unshift({t:t,tipo:tipo,valor:valor,nota:nota});
+  var entry={t:t,tipo:tipo,valor:valor,nota:nota};
+  if(D.editSintomaIdx>=0){D.sintomas[D.editSintomaIdx]=entry;}
+  else{D.sintomas.unshift(entry);}
+  D.editSintomaIdx=-1;
   saveData();setStep('sintomas');
 }
 function toggleHito(id){
@@ -1182,11 +1230,12 @@ function drawChart(){
   ctx.stroke();ctx.setLineDash([]);
   // Labels en el margen derecho
   ctx.font='7px Georgia';ctx.textAlign='left';
-  ctx.fillStyle='rgba(224,112,112,0.7)';ctx.fillText('P97',pl+cW+2,yP(tbl[Math.min(13,Math.floor(ageW()))][4])+3);
-  ctx.fillStyle='rgba(212,168,67,0.8)';ctx.fillText('P85',pl+cW+2,yP(tbl[Math.min(13,Math.floor(ageW()))][3])+3);
-  ctx.fillStyle='rgba(100,200,180,0.9)';ctx.fillText('P50',pl+cW+2,yP(tbl[Math.min(13,Math.floor(ageW()))][2])+3);
-  ctx.fillStyle='rgba(212,168,67,0.8)';ctx.fillText('P15',pl+cW+2,yP(tbl[Math.min(13,Math.floor(ageW()))][1])+3);
-  ctx.fillStyle='rgba(224,112,112,0.7)';ctx.fillText('P3',pl+cW+2,yP(tbl[Math.min(13,Math.floor(ageW()))][0])+3);
+  var ageWsafe=Math.min(13,Math.max(0,Math.floor(ageW())||0));
+  ctx.fillStyle='rgba(224,112,112,0.7)';ctx.fillText('P97',pl+cW+2,yP(tbl[ageWsafe][4])+3);
+  ctx.fillStyle='rgba(212,168,67,0.8)';ctx.fillText('P85',pl+cW+2,yP(tbl[ageWsafe][3])+3);
+  ctx.fillStyle='rgba(100,200,180,0.9)';ctx.fillText('P50',pl+cW+2,yP(tbl[ageWsafe][2])+3);
+  ctx.fillStyle='rgba(212,168,67,0.8)';ctx.fillText('P15',pl+cW+2,yP(tbl[ageWsafe][1])+3);
+  ctx.fillStyle='rgba(224,112,112,0.7)';ctx.fillText('P3',pl+cW+2,yP(tbl[ageWsafe][0])+3);
   var bw=D.bebe.pn||3365;
   ctx.beginPath();ctx.strokeStyle='rgba(212,168,67,0.4)';ctx.lineWidth=1;ctx.setLineDash([3,3]);
   ctx.moveTo(pl,yP(bw));ctx.lineTo(pl+cW,yP(bw));ctx.stroke();ctx.setLineDash([]);
@@ -1332,7 +1381,9 @@ function handleAction(action,data){
     case 'editNota':setStep('editNota');break;
     case 'saveSintoma':saveSintoma();break;
     case 'delSintoma':if(confirm('Eliminar?'))delSintoma(parseInt(data.idx));break;
-    case 'newSintoma':setStep('editSintoma');break;
+    case 'newSintoma':D.editSintomaIdx=-1;setStep('editSintoma');break;
+    case 'editSintoma':D.editSintomaIdx=parseInt(data.idx||'-1');setStep('editSintoma');break;
+    case 'editNotaByFecha':D.editNotaFecha=data.fecha;setStep('editNota');break;
     case 'toggleHito':toggleHito(data.id);break;
     case 'newCarta':D.editCartaIdx=-1;setStep('editCarta');break;
     case 'editCarta':D.editCartaIdx=parseInt(data.idx);setStep('editCarta');break;
@@ -1438,7 +1489,7 @@ function render(){
   // Update device name display
   var dnEl=document.getElementById('device-name-display');
   if(dnEl)dnEl.textContent=getDeviceName()||'';
-  var MAS_STEPS=['perfil','editBebe','editPadre','medicos','editMed','visitaForm','extras','notas','editNota','sintomas','editSintoma','hitos','cartas','editCarta','astro','actividades','vacunas','memoria','pendientes','historia'];
+  var MAS_STEPS=['perfil','editBebe','editPadre','medicos','editMed','visitaForm','postVisita','consultaMedica','extras','notas','editNota','sintomas','editSintoma','hitos','cartas','editCarta','astro','actividades','vacunas','memoria','pendientes','historia'];
   var TAB_MAP={home:['home'],history:['history'],peso:['peso','pesoEntry'],dash:['dash'],mas:MAS_STEPS};
   Object.keys(TAB_MAP).forEach(function(t){
     var el=document.getElementById('bn-'+t);if(!el)return;
@@ -1447,7 +1498,7 @@ function render(){
   var nb=document.getElementById('night-btn');if(nb)nb.style.color=D.nightMode?'#f0d9a0':'#a89070';
   var htEl=document.getElementById('hdr-title');
   if(typeof updatePendBadge==='function')updatePendBadge();
-  if(htEl){var TITLES={home:'Ceferino',history:'Historial',peso:'Peso',pesoEntry:'Peso',dash:'Dashboard',perfil:'Perfil',editBebe:'Perfil',editPadre:'Perfil',medicos:'M\u00e9dicos',editMed:'M\u00e9dicos',visitaForm:'M\u00e9dicos',extras:'Extras',notas:'Notas',editNota:'Nueva Nota',sintomas:'S\u00edntomas',editSintoma:'S\u00edntoma',hitos:'Hitos',cartas:'Cartas',editCarta:'Carta',astro:'Recreativo',actividades:'Actividades',vacunas:'Vacunas',memoria:'Memoria de Cefe',pendientes:'Pendientes',historia:'Historia de Cefe',toma:'Toma',panal:'Pa\u00f1al',preview:'Confirmar',summary:'Mensaje'};
+  if(htEl){var TITLES={home:'Ceferino',history:'Historial',peso:'Peso',pesoEntry:'Peso',dash:'Dashboard',perfil:'Perfil',editBebe:'Perfil',editPadre:'Perfil',medicos:'M\u00e9dicos',editMed:'M\u00e9dicos',visitaForm:'Médicos',postVisita:'Seguimiento',consultaMedica:'Consulta Médica',extras:'Extras',notas:'Notas',editNota:'Nueva Nota',sintomas:'S\u00edntomas',editSintoma:'S\u00edntoma',hitos:'Hitos',cartas:'Cartas',editCarta:'Carta',astro:'Recreativo',actividades:'Actividades',vacunas:'Vacunas',memoria:'Memoria de Cefe',pendientes:'Pendientes',historia:'Historia de Cefe',toma:'Toma',panal:'Pa\u00f1al',preview:'Confirmar',summary:'Mensaje'};
   htEl.textContent=TITLES[D.step]||'Ceferino';}
 
   var bd=document.getElementById('bd');if(!bd)return;
@@ -1465,12 +1516,42 @@ function render(){
     calBanner.appendChild(mkTxt('span',null,'\uD83D\uDCC5  Ver Calendario de Cefe','font-size:13px;color:#d4a843'));
     calBanner.appendChild(mkTxt('span',null,'\u2192','font-size:16px;color:#d4a843'));
     bd.appendChild(calBanner);
-        if(D.alarmFired&&D.nextToma){
+    // Banner próxima toma — siempre visible si hay nextToma
+    if(D.nextToma){
+      var ahora=Date.now();
+      var msRestantes=new Date(D.nextToma).getTime()-ahora;
+      var minRestantes=Math.round(msRestantes/60000);
       var alb=E.div('albox');
+      if(D.alarmFired||minRestantes<=0){
+        alb.style.background='rgba(224,112,112,.15)';
+        alb.style.borderColor='rgba(224,112,112,.5)';
+      }
       var ald=mkDiv('flex:1');
-      ald.appendChild(mkTxt('div',null,'Hora de la toma de Cefe','font-size:10px;color:#a89070'));
-      ald.appendChild(mkTxt('div',null,'~'+ft(D.nextToma),'font-size:20px;font-weight:bold;color:#f0d9a0'));
-      alb.appendChild(ald);alb.appendChild(E.btn('tb','OK','dismissAlarm'));bd.appendChild(alb);
+      if(D.alarmFired||minRestantes<=0){
+        ald.appendChild(mkTxt('div',null,'🍼 ¡Hora de la toma!','font-size:11px;color:#e07070;font-weight:bold'));
+        ald.appendChild(mkTxt('div',null,'~'+ft(D.nextToma),'font-size:19px;font-weight:bold;color:#f0d9a0'));
+      } else {
+        var hLabel=minRestantes>90?'~'+(Math.floor(minRestantes/60))+'h '+(minRestantes%60)+'min':minRestantes+' min';
+        ald.appendChild(mkTxt('div',null,'🍼 Próxima toma estimada','font-size:10px;color:#a89070'));
+        ald.appendChild(mkTxt('div',null,'~'+ft(D.nextToma)+' · en '+hLabel,'font-size:14px;font-weight:bold;color:#f0d9a0'));
+      }
+      alb.appendChild(ald);
+      if(D.alarmFired){alb.appendChild(E.btn('tb','✓ OK','dismissAlarm'));}
+      else{
+        var regBtn=document.createElement('button');
+        regBtn.style.cssText='background:rgba(212,168,67,.15);border:1px solid rgba(212,168,67,.3);border-radius:9px;padding:7px 12px;color:#d4a843;font-size:11px;cursor:pointer;font-family:Georgia,serif;white-space:nowrap';
+        regBtn.textContent='Registrar';
+        regBtn.dataset.action='startToma';
+        alb.appendChild(regBtn);
+      }
+      bd.appendChild(alb);
+    } else if(D.alarmFired&&D.nextToma){
+      // fallback
+      var alb2=E.div('albox');
+      var ald2=mkDiv('flex:1');
+      ald2.appendChild(mkTxt('div',null,'🍼 ¡Hora de la toma!','font-size:10px;color:#e07070'));
+      ald2.appendChild(mkTxt('div',null,'~'+ft(D.nextToma),'font-size:20px;font-weight:bold;color:#f0d9a0'));
+      alb2.appendChild(ald2);alb2.appendChild(E.btn('tb','OK','dismissAlarm'));bd.appendChild(alb2);
     }
     if(!ls('nb')){
       var ban=E.div('ibanner');
@@ -1553,7 +1634,78 @@ function render(){
     var nmb=E.btn('tb'+(D.nightMode?' on':''),D.nightMode?'\uD83C\uDF19 Modo noche ON':'\uD83C\uDF19 Modo noche','toggleNight');
     nmBtn.appendChild(nmb);bd.appendChild(nmBtn);
 
-    bd.appendChild(E.aBtn('\uD83C\uDF7C','Registrar Toma','Sesion ahora','','startToma'));
+    // ── Plan del día de Cefe ──────────────────────────────────
+    (function(){
+      var act = typeof getActividades==='function' ? getActividades() : null;
+      if(!act||!act.actividades||act.actividades.length===0) return;
+      var hoy = todayStr();
+      if(!D.actividadesHechas) D.actividadesHechas={};
+      var hechasHoy = D.actividadesHechas[hoy]||[];
+      // Elegir 3 actividades del día (rotando por día del mes para variedad)
+      var dayOfMonth = new Date().getDate();
+      var total = act.actividades.length;
+      var idxs = [];
+      for(var ii=0;ii<3&&ii<total;ii++){ idxs.push((dayOfMonth-1+ii)%total); }
+
+      var planCard=mkDiv('background:rgba(100,200,140,.06);border:1px solid rgba(100,200,140,.2);border-radius:16px;padding:14px 16px;margin-bottom:14px');
+      var planHdr=mkDiv('display:flex;align-items:center;justify-content:space-between;margin-bottom:10px');
+      planHdr.appendChild(mkTxt('div',null,'🌱 Plan del día · Semana '+ageW(),'font-size:10px;color:#64c88c;font-weight:bold;letter-spacing:1px;text-transform:uppercase'));
+      var pctHechas=Math.round(hechasHoy.length/3*100);
+      planHdr.appendChild(mkTxt('div',null,hechasHoy.length+'/3 hechas','font-size:10px;color:'+(pctHechas===100?'#64c88c':'#a89070')));
+      planCard.appendChild(planHdr);
+
+      // Barra de progreso
+      var barWrap=mkDiv('background:rgba(255,255,255,.06);border-radius:4px;height:4px;margin-bottom:12px;overflow:hidden');
+      var barFill=mkDiv('background:#64c88c;height:4px;border-radius:4px;transition:width .3s');
+      barFill.style.width=pctHechas+'%';
+      barWrap.appendChild(barFill);planCard.appendChild(barWrap);
+
+      idxs.forEach(function(aIdx){
+        var a=act.actividades[aIdx];
+        if(!a) return;
+        var hecha=hechasHoy.indexOf(aIdx)>=0;
+        var row=mkDiv('display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.04)');
+        // Checkbox
+        var chk=document.createElement('button');
+        chk.style.cssText='width:22px;height:22px;border-radius:50%;border:2px solid '+(hecha?'#64c88c':'rgba(100,200,140,.4)')+';background:'+(hecha?'#64c88c':'transparent')+';flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;margin-top:1px';
+        chk.textContent=hecha?'✓':'';
+        chk.style.color='#fff';
+        (function(aIdxCopy,fechaCopy){
+          chk.onclick=function(){
+            if(!D.actividadesHechas[fechaCopy])D.actividadesHechas[fechaCopy]=[];
+            var pos=D.actividadesHechas[fechaCopy].indexOf(aIdxCopy);
+            if(pos>=0)D.actividadesHechas[fechaCopy].splice(pos,1);
+            else D.actividadesHechas[fechaCopy].push(aIdxCopy);
+            saveData();render();
+          };
+        })(aIdx,hoy);
+        row.appendChild(chk);
+        var txt=mkDiv('flex:1');
+        var ic=mkTxt('span',null,a.ic+' ','');
+        var lbl=mkTxt('span',null,a.label,'font-size:13px;color:'+(hecha?'#a89070':'#f0d9a0'));
+        if(hecha)lbl.style.textDecoration='line-through';
+        var labelRow=document.createElement('div');labelRow.appendChild(ic);labelRow.appendChild(lbl);
+        txt.appendChild(labelRow);
+        txt.appendChild(mkTxt('div',null,a.desc,'font-size:11px;color:#a89070;line-height:1.5;margin-top:2px'));
+        row.appendChild(txt);
+        planCard.appendChild(row);
+      });
+
+      if(pctHechas===100){
+        var celebRow=mkDiv('text-align:center;padding:8px 0 2px');
+        celebRow.appendChild(mkTxt('span',null,'🎉 ¡Plan del día completado! Gran trabajo.','font-size:12px;color:#64c88c;font-weight:bold'));
+        planCard.appendChild(celebRow);
+      }
+
+      var verTodas=document.createElement('button');
+      verTodas.style.cssText='width:100%;margin-top:10px;background:none;border:none;color:#64c88c;font-size:11px;cursor:pointer;font-family:Georgia,serif;opacity:.8';
+      verTodas.textContent='Ver todas las actividades de la semana →';
+      verTodas.dataset.action='goActividades';
+      planCard.appendChild(verTodas);
+      bd.appendChild(planCard);
+    })();
+
+    bd.appendChild(E.aBtn('🍼','Registrar Toma','Sesion ahora','','startToma'));
     bd.appendChild(E.aBtn('\uD83D\uDCDD','Toma Manual','Ingresar datos a mano','','startTomaManual'));
     bd.appendChild(E.aBtn('\uD83E\uDDF7','Registrar Panal','Pis, caca o mixto','bl','startPanal'));
     bd.appendChild(E.aBtn('\u2696\uFE0F','Registrar Peso','Curva de crecimiento','tl','goPeso'));
@@ -1821,7 +1973,7 @@ function render(){
           if(pesoHoy.length>0){lines.push('');lines.push('*⚖️ Peso: '+gkg(pesoHoy[0].g)+'kg*');}
           var gc2=gasC();
           lines.push('');lines.push('_Cap. gástrica est.: '+gc2.mn+'-'+gc2.mx+'ml/toma_');
-          lines.push('_Céfiro · Alba_');
+          lines.push('_Cefe App_');
           window.open('https://wa.me/?text='+encodeURIComponent(lines.join('\n')),'_blank');
         };
         bd.appendChild(shareBtn);
@@ -1919,14 +2071,40 @@ function render(){
     if(D.meds.length>0)bd.appendChild(E.aBtn('\uD83D\uDCC5','Agendar visita','Programar consulta','rs','goVisitaForm'));
     if(D.meds.length>0){bd.appendChild(E.slbl('Profesionales'));D.meds.forEach(function(m,i){bd.appendChild(medCard(m,i));});}
     if(D.visits.length>0){
-      var vsec=mkDiv('margin-top:16px');vsec.appendChild(E.slbl('Proximas visitas'));
-      D.visits.slice(0,5).forEach(function(v,i){
-        var m=D.meds[v.mi]||{},row=E.div('hr2 pa'),left2=E.div('');
-        left2.appendChild(mkTxt('div','hrt',fd(v.dt)+' '+ft(v.dt)));
-        left2.appendChild(mkTxt('div','hrs','Dr/a. '+(m.nom||'')+' '+(m.ape||'')+' | '+v.mod));
-        var db6=E.btn('dbtn','\u2715','delVisita');db6.dataset.idx=i;
-        row.appendChild(left2);row.appendChild(db6);vsec.appendChild(row);
-      });bd.appendChild(vsec);
+      var vsec=mkDiv('margin-top:16px');vsec.appendChild(E.slbl('Visitas'));
+      var hoyMs=Date.now();
+      D.visits.slice(0,8).forEach(function(v,i){
+        var m=D.meds[v.mi]||{};
+        var vt=v.dt instanceof Date?v.dt.getTime():new Date(v.dt).getTime();
+        var pasada=vt<hoyMs;
+        var vEstado=v.estado||'pendiente';
+        var sinSeguimiento=pasada&&vEstado==='pendiente'&&!v.conclusiones;
+        var row=mkDiv('background:rgba(255,255,255,.03);border:1px solid rgba('+(sinSeguimiento?'224,112,112,.3':'180,140,220,.15')+');border-radius:12px;padding:10px 12px;margin-bottom:8px');
+        var top=mkDiv('display:flex;align-items:flex-start;justify-content:space-between');
+        var left2=mkDiv('flex:1');
+        var estadoBadge=vEstado==='realizada'?'✅':vEstado==='cancelada'?'❌':sinSeguimiento?'⚠️':'📅';
+        left2.appendChild(mkTxt('div',null,estadoBadge+' Dr/a. '+(m.nom||'')+' '+(m.ape||'')+' · '+(m.esp||''),'font-size:13px;font-weight:bold;color:'+(sinSeguimiento?'#e07070':'#f0d9a0')));
+        try{left2.appendChild(mkTxt('div',null,new Date(v.dt).toLocaleDateString('es-AR',{weekday:'short',day:'2-digit',month:'short'})+' · '+ft(v.dt)+' · '+v.mod,'font-size:11px;color:#a89070;margin-top:2px'));}catch(e){}
+        if(v.conclusiones)left2.appendChild(mkTxt('div',null,'📋 '+v.conclusiones.substring(0,60)+(v.conclusiones.length>60?'…':''),'font-size:11px;color:#a89070;margin-top:3px;line-height:1.4'));
+        var db6=E.btn('dbtn','✕','delVisita');db6.dataset.idx=i;
+        top.appendChild(left2);top.appendChild(db6);row.appendChild(top);
+        // Botón seguimiento si pasó y no tiene conclusiones
+        if(sinSeguimiento){
+          var segBtn=document.createElement('button');
+          segBtn.style.cssText='width:100%;margin-top:8px;padding:8px;border-radius:9px;border:1px solid rgba(224,112,112,.3);background:rgba(224,112,112,.1);color:#e07070;font-size:12px;cursor:pointer;font-family:Georgia,serif;font-weight:bold';
+          segBtn.textContent='⚠️ Registrar cómo fue la consulta';
+          (function(iCopy){segBtn.onclick=function(){D.editVisitaIdx=iCopy;setStep('postVisita');};})(i);
+          row.appendChild(segBtn);
+        } else if(pasada&&vEstado==='realizada'){
+          var editSegBtn=document.createElement('button');
+          editSegBtn.style.cssText='width:100%;margin-top:6px;padding:6px;border-radius:8px;border:1px solid rgba(180,140,220,.2);background:rgba(180,140,220,.06);color:#b48cdc;font-size:11px;cursor:pointer;font-family:Georgia,serif';
+          editSegBtn.textContent='✏️ Editar seguimiento';
+          (function(iCopy2){editSegBtn.onclick=function(){D.editVisitaIdx=iCopy2;setStep('postVisita');};})(i);
+          row.appendChild(editSegBtn);
+        }
+        vsec.appendChild(row);
+      });
+      bd.appendChild(vsec);
     }
   }
 
@@ -2056,19 +2234,35 @@ function render(){
       var card=E.div('card');
       card.appendChild(mkTxt('div',null,fd(n.fecha),'font-size:10px;color:#a89070;margin-bottom:6px'));
       card.appendChild(mkTxt('div',null,n.texto,'font-size:13px;color:#d4c090;line-height:1.6'));
-      var delBtn=E.btn('gb rd','Eliminar','delNota');delBtn.dataset.fecha=n.fecha;delBtn.style.marginTop='10px';
-      card.appendChild(delBtn);bd.appendChild(card);
+      var btnRow=mkDiv('display:flex;gap:8px;margin-top:10px');
+      var editBtn=E.btn('','✏️ Editar','editNotaByFecha');
+      editBtn.dataset.fecha=n.fecha;
+      editBtn.style.cssText='flex:1;background:rgba(212,168,67,.1);border:1px solid rgba(212,168,67,.25);border-radius:9px;padding:8px;color:#d4a843;font-size:12px;cursor:pointer';
+      var delBtn=E.btn('','🗑 Eliminar','delNota');
+      delBtn.dataset.fecha=n.fecha;
+      delBtn.style.cssText='flex:1;background:rgba(224,112,112,.08);border:1px solid rgba(224,112,112,.2);border-radius:9px;padding:8px;color:#e07070;font-size:12px;cursor:pointer';
+      btnRow.appendChild(editBtn);btnRow.appendChild(delBtn);
+      card.appendChild(btnRow);bd.appendChild(card);
     });
   }
 
   // ── EDIT NOTA ─────────────────────────────────────────────────
   else if(D.step==='editNota'){
-    bd.appendChild(E.btn('bk','\u2190 Volver','goNotas'));
-    bd.appendChild(E.el('div',{cls:'st',txt:'Nueva nota'}));
-    bd.appendChild(E.field('Fecha',E.input('fi','nota-fecha','date',null,todayStr())));
-    var txa=E.textarea('ni fi','nota-texto','Observaciones del dia, como estuvo Cefe, novedades...');txa.style.minHeight='120px';
+    var notaExistente=D.editNotaFecha?D.notas.find(function(n){return n.fecha===D.editNotaFecha;}):null;
+    var esEdicion=!!notaExistente;
+    bd.appendChild(E.btn('bk','← Volver','goNotas'));
+    bd.appendChild(E.el('div',{cls:'st',txt:esEdicion?'Editar nota':'Nueva nota'}));
+    bd.appendChild(E.field('Fecha',E.input('fi','nota-fecha','date',null,notaExistente?notaExistente.fecha:todayStr())));
+    var txa=E.textarea('ni fi','nota-texto','Observaciones del dia, como estuvo Cefe, novedades...');
+    txa.style.minHeight='120px';
+    if(notaExistente)txa.value=notaExistente.texto||'';
     bd.appendChild(E.field('Nota',txa));
     bd.appendChild(E.btn('pb go','Guardar nota','saveNota'));
+    if(esEdicion){
+      var delNtBtn=E.btn('gb rd','Eliminar nota','delNota');
+      delNtBtn.dataset.fecha=notaExistente.fecha;
+      bd.appendChild(delNtBtn);
+    }
     bd.appendChild(E.btn('gb rd','Cancelar','goNotas'));
   }
 
@@ -2080,22 +2274,43 @@ function render(){
     D.sintomas.forEach(function(s,i){
       var card=E.div('card');
       card.appendChild(mkTxt('div',null,fdt(s.t),'font-size:10px;color:#a89070'));
-      card.appendChild(mkTxt('div',null,s.tipo+(s.valor?' \u2014 '+s.valor:''),'font-size:14px;font-weight:bold;color:#f0d9a0;margin:4px 0'));
+      card.appendChild(mkTxt('div',null,s.tipo+(s.valor?'—'+s.valor:''),'font-size:14px;font-weight:bold;color:#f0d9a0;margin:4px 0'));
       if(s.nota)card.appendChild(mkTxt('div',null,s.nota,'font-size:12px;color:#d4c090'));
-      var delBtn=E.btn('gb rd','Eliminar','delSintoma');delBtn.dataset.idx=i;card.appendChild(delBtn);
-      bd.appendChild(card);
+      var btnRow=mkDiv('display:flex;gap:8px;margin-top:10px');
+      var editBtn=E.btn('','✏️ Editar','editSintoma');
+      editBtn.dataset.idx=i;
+      editBtn.style.cssText='flex:1;background:rgba(212,168,67,.1);border:1px solid rgba(212,168,67,.25);border-radius:9px;padding:8px;color:#d4a843;font-size:12px;cursor:pointer';
+      var delBtn=E.btn('','🗑 Eliminar','delSintoma');
+      delBtn.dataset.idx=i;
+      delBtn.style.cssText='flex:1;background:rgba(224,112,112,.08);border:1px solid rgba(224,112,112,.2);border-radius:9px;padding:8px;color:#e07070;font-size:12px;cursor:pointer';
+      btnRow.appendChild(editBtn);btnRow.appendChild(delBtn);
+      card.appendChild(btnRow);bd.appendChild(card);
     });
   }
 
   // ── EDIT SINTOMA ──────────────────────────────────────────────
   else if(D.step==='editSintoma'){
-    bd.appendChild(E.btn('bk','\u2190 Volver','goSintomas'));bd.appendChild(E.el('div',{cls:'st',txt:'Registrar sintoma'}));
-    var tiposOpts=[{v:'Fiebre',l:'Fiebre \uD83C\uDF21\uFE0F'},{v:'Llanto excesivo',l:'Llanto excesivo'},{v:'Regurgitacion',l:'Regurgitacion/vomito'},{v:'Congestion',l:'Congestion nasal'},{v:'Deposicion anormal',l:'Deposicion anormal'},{v:'Irritabilidad',l:'Irritabilidad'},{v:'Somnolencia',l:'Somnolencia inusual'},{v:'Otro',l:'Otro'}];
-    bd.appendChild(E.field('Tipo',E.select('fs','sint-tipo',tiposOpts,'')));
-    bd.appendChild(E.field('Valor (ej: 38.5\u00B0)',E.input('fi','sint-valor','text','Opcional')));
-    bd.appendChild(E.frow([E.field('Fecha',E.input('fi','sint-fecha','date',null,todayStr())),E.field('Hora',E.input('fi','sint-hora','time'))]));
-    bd.appendChild(E.field('Nota',E.textarea('ni fi','sint-nota','Descripcion adicional...')));
-    bd.appendChild(E.btn('pb rs','Guardar','saveSintoma'));bd.appendChild(E.btn('gb rd','Cancelar','goSintomas'));
+    var sEdit=D.editSintomaIdx>=0?D.sintomas[D.editSintomaIdx]:null;
+    var esEditS=!!sEdit;
+    var sEditDate=sEdit?safeDate(sEdit.t):new Date();
+    bd.appendChild(E.btn('bk','← Volver','goSintomas'));
+    bd.appendChild(E.el('div',{cls:'st',txt:esEditS?'Editar síntoma':'Registrar síntoma'}));
+    var tiposOpts=[{v:'Fiebre',l:'Fiebre 🌡️'},{v:'Llanto excesivo',l:'Llanto excesivo'},{v:'Regurgitacion',l:'Regurgitacion/vomito'},{v:'Congestion',l:'Congestion nasal'},{v:'Deposicion anormal',l:'Deposicion anormal'},{v:'Irritabilidad',l:'Irritabilidad'},{v:'Somnolencia',l:'Somnolencia inusual'},{v:'Otro',l:'Otro'}];
+    bd.appendChild(E.field('Tipo',E.select('fs','sint-tipo',tiposOpts,sEdit?sEdit.tipo:'')));
+    bd.appendChild(E.field('Valor (ej: 38.5°)',E.input('fi','sint-valor','text','Opcional',sEdit?sEdit.valor||'':'')));
+    var sDateStr=sEditDate?sEditDate.toISOString().slice(0,10):todayStr();
+    var sTimeStr=sEditDate?(p2(sEditDate.getHours())+':'+p2(sEditDate.getMinutes())):'';
+    bd.appendChild(E.frow([E.field('Fecha',E.input('fi','sint-fecha','date',null,sDateStr)),E.field('Hora',E.input('fi','sint-hora','time',null,sTimeStr))]));
+    var sintTxa=E.textarea('ni fi','sint-nota','Descripcion adicional...');
+    if(sEdit&&sEdit.nota)sintTxa.value=sEdit.nota;
+    bd.appendChild(E.field('Nota',sintTxa));
+    bd.appendChild(E.btn('pb rs','Guardar','saveSintoma'));
+    if(esEditS){
+      var delSBtn=E.btn('gb rd','Eliminar síntoma','delSintoma');
+      delSBtn.dataset.idx=D.editSintomaIdx;
+      bd.appendChild(delSBtn);
+    }
+    bd.appendChild(E.btn('gb rd','Cancelar','goSintomas'));
   }
 
   // ── HITOS ─────────────────────────────────────────────────────
@@ -2207,7 +2422,8 @@ function render(){
     var act=getActividades(),sw=ageW();
     bd.appendChild(mkTxt('div',null,act.titulo,'font-size:14px;font-weight:bold;color:#f0d9a0;margin-bottom:4px'));
     bd.appendChild(mkTxt('div',null,'Semana '+sw+' · Foco: '+act.foco,'font-size:11px;color:#a89070;margin-bottom:16px'));
-    act.actividades.forEach(function(a){
+    (act.actividades||[]).forEach(function(a){
+      if(!a)return;
       var c=E.div('card'),hd=mkDiv('display:flex;align-items:center;gap:10px;margin-bottom:8px');
       hd.appendChild(mkTxt('span',null,a.ic,'font-size:24px;flex-shrink:0'));
       var right=E.div('');right.style.flex='1';
@@ -2242,8 +2458,74 @@ function render(){
 
 
 
+  else if(D.step==='postVisita'){
+    var pvIdx=D.editVisitaIdx>=0?D.editVisitaIdx:0;
+    var pv=(pvIdx>=0&&pvIdx<D.visits.length)?D.visits[pvIdx]:null;
+    if(!pv){D.editVisitaIdx=-1;setStep('medicos');return;}
+    var pvMed=D.meds[pv.mi]||{};
+    bd.appendChild(E.btn('bk','← Volver','goMedicos'));
+    bd.appendChild(E.el('div',{cls:'st',txt:'¿Cómo fue la consulta? 🏥'}));
+    // Info de la visita
+    var pvInfo=mkDiv('background:rgba(180,140,220,.08);border:1px solid rgba(180,140,220,.2);border-radius:12px;padding:12px 14px;margin-bottom:16px');
+    pvInfo.appendChild(mkTxt('div',null,'Dr/a. '+(pvMed.nom||'')+' '+(pvMed.ape||'')+' · '+(pvMed.esp||''),'font-size:13px;font-weight:bold;color:#b48cdc'));
+    try{pvInfo.appendChild(mkTxt('div',null,new Date(pv.dt).toLocaleDateString('es-AR',{weekday:'long',day:'2-digit',month:'long'})+' · '+ft(pv.dt),'font-size:11px;color:#a89070;margin-top:3px'));}catch(e){}
+    if(pv.desc)pvInfo.appendChild(mkTxt('div',null,'Motivo: '+pv.desc,'font-size:11px;color:#a89070;margin-top:3px'));
+    bd.appendChild(pvInfo);
+    // Estado
+    bd.appendChild(E.slbl('¿Se realizó la consulta?'));
+    var estRow=mkDiv('display:flex;gap:8px;margin-bottom:14px');
+    ['realizada','cancelada','reprogramada'].forEach(function(est){
+      var eb=document.createElement('button');
+      var labels={'realizada':'✅ Sí','cancelada':'❌ No/Cancelada','reprogramada':'🔄 Reprogramada'};
+      var current=pv.estado||'pendiente';
+      var active=current===est;
+      eb.style.cssText='flex:1;padding:9px 6px;border-radius:10px;border:1px solid rgba(180,140,220,'+(active?'.5':'.2')+');background:rgba(180,140,220,'+(active?'.15':'.05')+');color:'+(active?'#b48cdc':'#a89070')+';font-size:12px;cursor:pointer;font-family:Georgia,serif';
+      eb.textContent=labels[est];
+      eb.id='pv-est-'+est;
+      eb.onclick=function(){
+        ['realizada','cancelada','reprogramada'].forEach(function(e2){
+          var b=document.getElementById('pv-est-'+e2);
+          if(b){b.style.background='rgba(180,140,220,.05)';b.style.borderColor='rgba(180,140,220,.2)';b.style.color='#a89070';}
+        });
+        this.style.background='rgba(180,140,220,.15)';this.style.borderColor='rgba(180,140,220,.5)';this.style.color='#b48cdc';
+        document.getElementById('pv-estado-hidden').value=est;
+      };
+      estRow.appendChild(eb);
+    });
+    bd.appendChild(estRow);
+    var estadoHidden=E.input('fi','pv-estado','hidden',null,pv.estado||'realizada');estadoHidden.id='pv-estado-hidden';
+    bd.appendChild(estadoHidden);
+    // Conclusiones
+    var concEl=E.textarea('ni fi','pv-conclusiones','Diagnóstico, indicaciones, observaciones del médico...');
+    concEl.style.minHeight='100px';
+    if(pv.conclusiones)concEl.value=pv.conclusiones;
+    bd.appendChild(E.field('Conclusiones / diagnóstico',concEl));
+    // Receta / medicación
+    var recEl=E.textarea('ni fi','pv-receta','Medicamentos, dosis, tratamiento...');
+    recEl.style.minHeight='60px';
+    if(pv.receta)recEl.value=pv.receta;
+    bd.appendChild(E.field('Receta / medicación (opcional)',recEl));
+    // Peso en consulta
+    var pesoEl=E.input('fi','pv-peso','number','Ej: 3.800',pv.pesoEnVisita?(pv.pesoEnVisita/1000).toFixed(3):'');
+    pesoEl.step='0.001';pesoEl.min='0';pesoEl.max='30';
+    bd.appendChild(E.field('Peso en consulta kg (opcional — se agrega a la curva)',pesoEl));
+    // Próxima visita
+    bd.appendChild(E.field('Próxima cita (opcional — se agenda automáticamente)',E.input('fi','pv-prox','date',null,pv.proxVisita||'')));
+    // Guardar
+    var saveBtn=document.createElement('button');
+    saveBtn.style.cssText='width:100%;padding:13px;border-radius:13px;border:none;background:rgba(180,140,220,.7);color:#fff;font-size:14px;font-weight:bold;cursor:pointer;font-family:Georgia,serif;margin-bottom:8px';
+    saveBtn.textContent='Guardar seguimiento ✓';
+    (function(idxCopy){saveBtn.onclick=function(){savePostVisita(idxCopy);};})(pvIdx);
+    bd.appendChild(saveBtn);
+    bd.appendChild(E.btn('gb rd','Cancelar','goMedicos'));
+  }
+
+  else if(D.step==='consultaMedica'){
+    renderConsultaMedica(bd);
+  }
+
   else if(D.step==='historia'){
-    bd.appendChild(mkTxt('div',null,'La historia de Cefe, cronológica y completa. Construida día a día.','font-size:12px;color:#a89070;margin-bottom:4px;line-height:1.5'));
+    bd.appendChild(mkTxt('div',null,'La historia de Cefe, cronológica y completa.','font-size:12px;color:#a89070;margin-bottom:4px;line-height:1.5'));
     renderHistoria(bd);
   }
   else if(D.step==='memoria'){
@@ -2274,12 +2556,34 @@ function render(){
           seen[item.fecha]=true;
           try{bd.appendChild(mkTxt('div',null,new Date(item.fecha+'T12:00').toLocaleDateString('es-AR',{weekday:'short',day:'2-digit',month:'short'}),'font-size:10px;font-weight:bold;color:#d4a843;text-transform:uppercase;letter-spacing:1px;margin:10px 0 6px'));}catch(e){}
         }
-        var row=mkDiv('background:rgba(255,255,255,.03);border-left:3px solid '+item.color+';border-radius:0 12px 12px 0;padding:10px 12px;margin-bottom:6px;display:flex;gap:10px;align-items:flex-start');
-        row.appendChild(mkTxt('span',null,item.ic,'font-size:20px;flex-shrink:0'));
-        var cnt=mkDiv('flex:1');cnt.style.flex='1';
+        var row=mkDiv('background:rgba(255,255,255,.03);border-left:3px solid '+item.color+';border-radius:0 12px 12px 0;padding:10px 12px;margin-bottom:6px');
+        var topRow=mkDiv('display:flex;gap:10px;align-items:flex-start');
+        topRow.appendChild(mkTxt('span',null,item.ic,'font-size:20px;flex-shrink:0'));
+        var cnt=mkDiv('flex:1');
         cnt.appendChild(mkTxt('div',null,item.titulo,'font-size:13px;font-weight:bold;color:#f0d9a0;margin-bottom:2px'));
         if(item.sub)cnt.appendChild(mkTxt('div',null,item.sub,'font-size:11px;color:#a89070;line-height:1.5'));
-        row.appendChild(cnt);bd.appendChild(row);
+        topRow.appendChild(cnt);row.appendChild(topRow);
+        // Botones editar/eliminar según tipo
+        var actRow=mkDiv('display:flex;gap:6px;margin-top:8px');
+        var btnStyle='flex:1;border-radius:8px;padding:6px;font-size:11px;cursor:pointer;border:none';
+        if(item.tipo==='nota'){
+          var eb=document.createElement('button');eb.style.cssText=btnStyle+';background:rgba(212,168,67,.1);color:#d4a843';eb.textContent='✏️ Editar';eb.dataset.action='editNotaByFecha';eb.dataset.fecha=item.fecha;actRow.appendChild(eb);
+          var db=document.createElement('button');db.style.cssText=btnStyle+';background:rgba(224,112,112,.08);color:#e07070';db.textContent='🗑 Eliminar';db.dataset.action='delNota';db.dataset.fecha=item.fecha;actRow.appendChild(db);
+        } else if(item.tipo==='carta'){
+          var cidx=D.cartas.findIndex(function(c){return c.titulo===item.titulo&&(c.fecha||'').slice(0,10)===item.fecha;});
+          if(cidx>=0){
+            var eb2=document.createElement('button');eb2.style.cssText=btnStyle+';background:rgba(180,140,220,.1);color:#b48cdc';eb2.textContent='✏️ Editar';eb2.dataset.action='editCarta';eb2.dataset.idx=cidx;actRow.appendChild(eb2);
+            var db2=document.createElement('button');db2.style.cssText=btnStyle+';background:rgba(224,112,112,.08);color:#e07070';db2.textContent='🗑 Eliminar';db2.dataset.action='delCarta';db2.dataset.idx=cidx;actRow.appendChild(db2);
+          }
+        } else if(item.tipo==='sintoma'){
+          var sidx=D.sintomas.findIndex(function(s){var sd=safeDate(s.t);return sd&&sd.toISOString().slice(0,10)===item.fecha&&s.tipo===item.titulo.split('—')[0].trim();});
+          if(sidx>=0){
+            var eb3=document.createElement('button');eb3.style.cssText=btnStyle+';background:rgba(212,168,67,.1);color:#d4a843';eb3.textContent='✏️ Editar';eb3.dataset.action='editSintoma';eb3.dataset.idx=sidx;actRow.appendChild(eb3);
+            var db3=document.createElement('button');db3.style.cssText=btnStyle+';background:rgba(224,112,112,.08);color:#e07070';db3.textContent='🗑 Eliminar';db3.dataset.action='delSintoma';db3.dataset.idx=sidx;actRow.appendChild(db3);
+          }
+        }
+        if(actRow.children.length>0)row.appendChild(actRow);
+        bd.appendChild(row);
       });
     }
   }
@@ -2302,6 +2606,7 @@ document.addEventListener('click', function(ev) {
         case 'goActividades': closeMasMenu(); setStep('actividades'); return;
         case 'goVacunas': closeMasMenu(); setStep('vacunas'); return;
         case 'goPendientes': closeMasMenu(); setStep('pendientes'); return;
+        case 'goConsultaMedica': closeMasMenu(); setStep('consultaMedica'); return;
         case 'goNotas': closeMasMenu(); setStep('notas'); return;
         case 'goMemoria': closeMasMenu(); setStep('memoria'); return;
         case 'goHistoria': closeMasMenu(); setStep('historia'); return;
@@ -2352,15 +2657,8 @@ var DEVICE_NAME = getDeviceName();
 
 // ── Onboarding: pedir nombre si es la primera vez ─────────────
 function checkOnboarding() {
-  // Limpiar posibles estados corruptos del overlay de versiones anteriores
-  var ov = document.getElementById('onboard-overlay');
-  if (ov) {
-    ov.style.display = 'none'; // asegurar estado inicial oculto
-    ov.classList.add('hidden');
-  }
-  if (getDeviceName()) return; // ya tiene nombre — no mostrar
-  // Pequeño delay adicional para asegurar que el DOM esté listo en iOS
-  setTimeout(showOnboarding, 100);
+  if (getDeviceName()) return; // ya tiene nombre
+  showOnboarding();
 }
 
 function showOnboarding() {
@@ -2375,21 +2673,31 @@ function saveOnboardingName() {
   if (!name) { inp.style.borderColor = '#e07070'; return; }
   setDeviceName(name);
   DEVICE_NAME = name;
-  // Triple seguro para iOS Safari — forzar ocultamiento
   var ov = document.getElementById('onboard-overlay');
   if (ov) {
-    ov.style.cssText = 'display:none!important;visibility:hidden;pointer-events:none;opacity:0';
     ov.classList.add('hidden');
-    // Remover del flujo completamente
-    setTimeout(function(){ if(ov.parentNode) ov.parentNode.removeChild(ov); }, 300);
+    ov.style.display = 'none'; // belt+suspenders para iOS Safari
   }
   var dnEl = document.getElementById('device-name-display');
   if (dnEl) dnEl.textContent = name;
-  // Render después de ocultar overlay
-  setTimeout(function(){ render(); }, 50);
+  render(); // refrescar para mostrar el sistema de momentos
 }
 
 // ─── MOMENTOS: LÓGICA POR DEVICE ──────────────────────────────
+
+function getVisitasPendientesSeguimiento() {
+  // Visitas que ya pasaron y no tienen conclusiones
+  var hoy = Date.now();
+  return (D.visits||[]).filter(function(v,i){
+    if(!v) return false;
+    // Visitas viejas sin campo estado se tratan como pendientes
+    var est = v.estado || 'pendiente';
+    if(est==='cancelada'||est==='realizada') return false;
+    var vt = v.dt instanceof Date ? v.dt.getTime() : new Date(v.dt).getTime();
+    if(isNaN(vt)) return false;
+    return vt < hoy && !v.conclusiones;
+  });
+}
 
 function getMisDescartados() {
   if (!D.momentos) D.momentos = { respondidos:{}, descartados:{} };
@@ -2477,7 +2785,7 @@ function getMomentosPendientes() {
 
   HITO_CHECKS.forEach(function(chk) {
     if (semsVida < chk.semTrigger) return;
-    var hitoMarcado = D.hitos && D.hitos.some(function(h){ return (typeof h==='string'?h:h.id)===chk.hitoId; });
+    var hitoMarcado = D.hitos && D.hitos.some(function(h){ return h && (typeof h==='string'?h:(h.id||''))===chk.hitoId; });
     if (hitoMarcado) return;
     var resp = D.momentos.respondidos['chk_' + chk.hitoId];
     if (resp && (resp.valor === 'si' || resp === 'si')) return; // respondido globalmente
@@ -2502,6 +2810,13 @@ function buildMomentosQueue() {
   var semsVida = Math.floor(diasVida / 7);
   var queue = [];
 
+  // 0. Visitas pasadas sin conclusiones — máxima prioridad
+  var visitasSinCierre = typeof getVisitasPendientesSeguimiento==='function' ? getVisitasPendientesSeguimiento() : [];
+  visitasSinCierre.slice(0,1).forEach(function(v,i){
+    var vIdx = D.visits.indexOf(v);
+    queue.push({ prioridad:0, tipo:'seguimiento_visita', v:v, idx:vIdx });
+  });
+
   // 1. Vacunas urgentes (compartidas — no dependen de device)
   if (typeof VACUNAS_ARG !== 'undefined') {
     VACUNAS_ARG.forEach(function(v) {
@@ -2517,7 +2832,7 @@ function buildMomentosQueue() {
   // 2. Checks de hitos — por device
   HITO_CHECKS.forEach(function(chk) {
     if (semsVida < chk.semTrigger) return;
-    var hitoMarcado = D.hitos && D.hitos.some(function(h){ return (typeof h==='string'?h:h.id)===chk.hitoId; });
+    var hitoMarcado = D.hitos && D.hitos.some(function(h){ return h && (typeof h==='string'?h:(h.id||''))===chk.hitoId; });
     if (hitoMarcado) return;
     var resp = D.momentos.respondidos['chk_' + chk.hitoId];
     if (resp && (resp.valor === 'si' || resp === 'si')) return;
@@ -2593,7 +2908,8 @@ function renderHistoria(bd) {
   // Hitos marcados (con fecha real)
   (D.hitos||[]).forEach(function(h) {
     if (!h) return;
-    var hid = typeof h === 'string' ? h : h.id;
+    var hid = typeof h === 'string' ? h : (h.id||null);
+    if (!hid) return;
     var fecha = typeof h === 'string' ? null : h.fecha;
     var nota = typeof h === 'string' ? '' : (h.nota||'');
     var def = HITOS_DEF.find(function(x){return x.id===hid;}) || {label:'Hito',ic:'⭐',celebracion:false};
@@ -3096,6 +3412,21 @@ function showNextMomento() {
   var btnLabel = hasNext ? 'Siguiente →' : 'Entendido';
   var onNext = hasNext ? showNextMomento : function(){ updatePendBadge(); };
 
+  if (item.tipo === 'seguimiento_visita') {
+    var med = D.meds[item.v.mi]||{};
+    var fechaStr='';try{fechaStr=new Date(item.v.dt).toLocaleDateString('es-AR',{weekday:'short',day:'2-digit',month:'short'});}catch(e){}
+    showCpop('urgente','🏥','¿Cómo fue la consulta?',
+      'Visita con '+(med.esp||'el médico')+' · '+fechaStr,
+      'La consulta ya pasó. ¿Querés registrar cómo estuvo, las conclusiones o una próxima cita?',
+      hasNext ? 'Siguiente →' : 'Registrar ahora',
+      function(){
+        closeCpop();
+        if(item.idx>=0){ D.editVisitaIdx=item.idx; setStep('postVisita'); }
+        else { setStep('medicos'); }
+      });
+    return;
+  }
+
   if (item.tipo === 'vacuna') {
     var diff = item.diff;
     var cuandoStr = diff < 0 ? 'Venció hace ' + Math.abs(diff) + ' día' + (Math.abs(diff)===1?'':'s')
@@ -3202,7 +3533,7 @@ function showNextMomento() {
 
   } else if (item.tipo === 'tip') {
     localStorage.setItem(item.tipKey, '1');
-    showCpop('info', '🌬️', 'Céfiro · Semana ' + Math.floor(Math.floor((Date.now() - new Date(D.bebe.fn).getTime()) / 86400000) / 7),
+    showCpop('info', item.tip.icon, 'Semana ' + Math.floor(Math.floor((Date.now() - new Date(D.bebe.fn).getTime()) / 86400000) / 7),
       item.tip.title, item.tip.body, btnLabel, onNext);
   }
 }
@@ -3379,6 +3710,115 @@ function checkContextualPopup() {
     showCpop('info', msg.icon, msg.badge, msg.title, msg.body, '¡Vamos! 💙');
   }
 }
+
+// ─── MODO CONSULTA MÉDICA ──────────────────────────────────────
+function renderConsultaMedica(bd) {
+  var apodo = D.bebe.apodo||D.bebe.nombre||'Cefe';
+  var hoy = new Date();
+  var desde2w = new Date(hoy.getTime() - 14*86400000);
+  bd.appendChild(mkTxt('div',null,'Resumen para el médico — últimas 2 semanas.','font-size:12px;color:#a89070;margin-bottom:16px'));
+  // PDF button
+  var pdfBtn=mkDiv('background:rgba(212,168,67,.1);border:1px solid rgba(212,168,67,.3);border-radius:12px;padding:12px 14px;margin-bottom:10px;cursor:pointer;display:flex;align-items:center;gap:10px');
+  pdfBtn.appendChild(mkTxt('span',null,'📄','font-size:22px'));
+  var pdfTxt=mkDiv('flex:1');
+  pdfTxt.appendChild(mkTxt('div',null,'Exportar Historia Clínica completa','font-size:13px;font-weight:bold;color:#d4a843'));
+  pdfTxt.appendChild(mkTxt('div',null,'Descarga como HTML imprimible (guardalo como PDF desde el navegador)','font-size:11px;color:#a89070'));
+  pdfBtn.appendChild(pdfTxt);pdfBtn.appendChild(mkTxt('span',null,'↓','font-size:18px;color:#d4a843'));
+  pdfBtn.onclick=function(){generarHistoriaClinicaPDF();};
+  bd.appendChild(pdfBtn);
+  // WA button
+  var waBtn=mkDiv('background:rgba(37,211,102,.06);border:1px solid rgba(37,211,102,.2);border-radius:12px;padding:12px 14px;margin-bottom:16px;cursor:pointer;display:flex;align-items:center;gap:10px');
+  waBtn.appendChild(mkTxt('span',null,'📱','font-size:22px'));
+  var waTxt=mkDiv('flex:1');
+  waTxt.appendChild(mkTxt('div',null,'Enviar resumen al médico por WhatsApp','font-size:13px;font-weight:bold;color:#25d366'));
+  waTxt.appendChild(mkTxt('div',null,'Mensaje estructurado listo para compartir','font-size:11px;color:#a89070'));
+  waBtn.appendChild(waTxt);
+  waBtn.onclick=function(){
+    var lines=['*Resumen médico — '+apodo+'*','Últimas 2 semanas',''];
+    lines.push('Edad: '+ageLabel()+' ('+ageD()+' días)');
+    if(D.pesos.length>0)lines.push('Último peso: '+gkg(D.pesos[0].g)+'kg');
+    var tomasR=D.hist.filter(function(h){return h.type==='toma'&&safeDate(h.s)>=desde2w;});
+    lines.push('Tomas: '+tomasR.length+' ('+Math.round(tomasR.length/14)+'/día aprox)');
+    var sintR=D.sintomas.filter(function(s){return safeDate(s.t)>=desde2w;});
+    if(sintR.length>0){lines.push('');lines.push('Síntomas:');sintR.forEach(function(s){lines.push('· '+s.tipo+(s.valor?' ('+s.valor+')':''));});}
+    lines.push('');lines.push('_Generado con Alba_');
+    window.open('https://wa.me/?text='+encodeURIComponent(lines.join('\n')),'_blank');
+  };
+  bd.appendChild(waBtn);
+  // Stats últimas 2 semanas
+  var tomasR2=D.hist.filter(function(h){return h.type==='toma'&&safeDate(h.s)>=desde2w;});
+  var panalesR=D.hist.filter(function(h){return h.type==='panal'&&safeDate(h.t)>=desde2w;});
+  var sintR2=D.sintomas.filter(function(s){return safeDate(s.t)>=desde2w;});
+  var statsGrid=mkDiv('display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px');
+  [[tomasR2.length,'Tomas','#d4a843'],[panalesR.length,'Pañales','#64c8b4'],[sintR2.length,'Síntomas','#e07070'],[D.pesos.filter(function(p){return safeDate(p.t)>=desde2w;}).length,'Pesos','#b48cdc']].forEach(function(item){
+    var c=mkDiv('background:rgba(255,255,255,.03);border-radius:11px;padding:10px;text-align:center');
+    c.appendChild(mkTxt('div',null,item[0],'font-size:22px;font-weight:bold;color:'+item[2]));
+    c.appendChild(mkTxt('div',null,item[1],'font-size:10px;color:#a89070;text-transform:uppercase;letter-spacing:1px'));
+    statsGrid.appendChild(c);
+  });
+  bd.appendChild(statsGrid);
+  // Síntomas recientes
+  if(sintR2.length>0){
+    var sintCard=mkDiv('background:rgba(224,112,112,.06);border:1px solid rgba(224,112,112,.15);border-radius:12px;padding:12px;margin-bottom:12px');
+    sintCard.appendChild(E.slbl('Síntomas'));
+    sintR2.forEach(function(s){var row=mkDiv('margin-bottom:5px');row.appendChild(mkTxt('div',null,'· '+s.tipo+(s.valor?' — '+s.valor:''),'font-size:13px;color:#f0d9a0'));if(s.nota)row.appendChild(mkTxt('div',null,s.nota,'font-size:11px;color:#a89070'));sintCard.appendChild(row);});
+    bd.appendChild(sintCard);
+  }
+  // Vacunas próximas
+  var vacCard=mkDiv('background:rgba(100,200,140,.06);border:1px solid rgba(100,200,140,.2);border-radius:12px;padding:12px;margin-bottom:12px');
+  vacCard.appendChild(E.slbl('Vacunas próximas (30 días)'));
+  var hayVac=false;
+  if(typeof VACUNAS_ARG!=='undefined'){VACUNAS_ARG.forEach(function(v){var st=getVacunaStatus(v);if(!st.done&&st.fecha&&new Date(st.fecha)<=new Date(hoy.getTime()+30*86400000)){hayVac=true;vacCard.appendChild(mkTxt('div',null,'· '+v.nombre+' — '+st.fechaStr,'font-size:12px;color:#64c88c;margin-bottom:3px'));}});}
+  if(!hayVac)vacCard.appendChild(mkTxt('div',null,'Sin vacunas en los próximos 30 días.','font-size:12px;color:#a89070'));
+  bd.appendChild(vacCard);
+}
+
+function generarHistoriaClinicaPDF() {
+  var apodo=D.bebe.apodo||D.bebe.nombre||'Cefe';
+  var b=D.bebe||{};
+  var hoy=new Date();
+  var css='body{font-family:Georgia,serif;color:#1a1a1a;max-width:800px;margin:0 auto;padding:30px;font-size:13px}h1{font-size:22px;border-bottom:2px solid #d4943a;padding-bottom:8px}h2{font-size:15px;color:#5a3a1a;margin-top:22px;margin-bottom:8px;border-left:3px solid #d4943a;padding-left:10px}table{width:100%;border-collapse:collapse;margin-bottom:12px;font-size:12px}th{background:#f5e6ce;text-align:left;padding:6px 10px;border-bottom:1px solid #ddd}td{padding:5px 10px;border-bottom:1px solid #f0f0f0}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}.card{background:#fdf6ed;border:1px solid #e8d5b0;border-radius:8px;padding:10px}.lbl{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#8a6a40;margin-bottom:2px}.val{font-size:14px;font-weight:bold}.footer{margin-top:28px;padding-top:10px;border-top:1px solid #ddd;font-size:10px;color:#888;text-align:center}@media print{button{display:none}}';
+  var h=['<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Historia Clínica — '+apodo+'</title><style>'+css+'</style></head><body>'];
+  h.push('<h1>Historia Clínica — '+b.nombre+' '+b.apellido+'</h1>');
+  h.push('<p style="color:#888;font-size:11px;margin-top:-8px">Generado por Alba · '+hoy.toLocaleDateString('es-AR',{day:'2-digit',month:'long',year:'numeric'})+'</p>');
+  h.push('<h2>Datos del paciente</h2><div class="grid2">');
+  [['Nacimiento',b.fn+' · '+b.hora+'hs'],['Edad',ageLabel()],['DNI',b.dni||'—'],['Grupo sanguíneo',b.sangre||'—'],['Peso nacimiento',gkg(b.pn||0)+'kg'],['Talla',(b.talla||'—')+'cm'],['Apgar',b.apgar||'—'],['Tipo parto',b.parto||'—']].forEach(function(d){h.push('<div class="card"><div class="lbl">'+d[0]+'</div><div class="val">'+d[1]+'</div></div>');});
+  h.push('</div>');
+  if(b.notas)h.push('<p style="font-size:12px;color:#555">📋 '+b.notas+'</p>');
+  if(D.pesos.length>0){
+    h.push('<h2>Curva de peso</h2><table><tr><th>Fecha</th><th>Peso</th><th>Variación</th><th>Nota</th></tr>');
+    var pesosOrd=D.pesos.slice().sort(function(a,b){return new Date(a.t)-new Date(b.t);});
+    pesosOrd.forEach(function(p,i){var prev=pesosOrd[i-1];var diff=prev?(p.g-prev.g):null;try{h.push('<tr><td>'+new Date(p.t).toLocaleDateString('es-AR')+'</td><td><b>'+gkg(p.g)+'kg</b></td><td style="color:'+(diff===null?'#888':diff>=0?'#2a7a4a':'#c04040')+'">'+(diff===null?'—':(diff>=0?'+':'')+diff+'g')+'</td><td style="color:#888">'+(p.n||'')+'</td></tr>');}catch(e){}});
+    h.push('</table>');
+  }
+  h.push('<h2>Vacunas</h2><table><tr><th>Vacuna</th><th>Edad</th><th>Estado</th></tr>');
+  if(typeof VACUNAS_ARG!=='undefined'){VACUNAS_ARG.forEach(function(v){var st=getVacunaStatus(v);h.push('<tr><td>'+v.nombre+'</td><td>'+(v.dia?'Al nacer':v.mes+' mes')+'</td><td>'+(st.done?'✅ Aplicada':'⏳ '+( st.fechaStr||'Pendiente'))+'</td></tr>');});}
+  h.push('</table>');
+  if(D.visits&&D.visits.length>0){
+    h.push('<h2>Visitas médicas</h2><table><tr><th>Fecha</th><th>Médico</th><th>Motivo</th><th>Estado</th><th>Conclusiones</th></tr>');
+    D.visits.slice().sort(function(a,b){return new Date(b.dt)-new Date(a.dt);}).forEach(function(v){var m=D.meds[v.mi]||{};try{h.push('<tr><td>'+new Date(v.dt).toLocaleDateString('es-AR')+'</td><td>Dr/a. '+(m.nom||'')+' '+(m.ape||'')+'<br><small>'+(m.esp||'')+'</small></td><td>'+(v.desc||'—')+'</td><td>'+(v.estado||'pendiente')+'</td><td>'+(v.conclusiones||'—')+(v.receta?'<br><small>💊 '+v.receta+'</small>':'')+'</td></tr>');}catch(e){}});
+    h.push('</table>');
+  }
+  if(D.sintomas&&D.sintomas.length>0){
+    h.push('<h2>Síntomas registrados</h2><table><tr><th>Fecha</th><th>Tipo</th><th>Valor</th><th>Nota</th></tr>');
+    D.sintomas.slice(0,50).forEach(function(s){try{h.push('<tr><td>'+new Date(s.t).toLocaleDateString('es-AR')+'</td><td>'+s.tipo+'</td><td>'+(s.valor||'—')+'</td><td>'+(s.nota||'—')+'</td></tr>');}catch(e){}});
+    h.push('</table>');
+  }
+  if(D.meds&&D.meds.length>0){
+    h.push('<h2>Equipo médico</h2><div class="grid2">');
+    D.meds.forEach(function(m){h.push('<div class="card"><div class="lbl">'+(m.esp||'Médico')+'</div><div class="val">Dr/a. '+(m.nom||'')+' '+(m.ape||'')+'</div>'+(m.tel?'<div style="font-size:11px;color:#555;margin-top:4px">📱 '+m.tel+'</div>':'')+(m.telcons?'<div style="font-size:11px;color:#555">📞 '+m.telcons+'</div>':'')+'</div>');});
+    h.push('</div>');
+  }
+  h.push('<div class="footer">Historia clínica generada por <b>Alba</b> · La historia de '+apodo+', en tus manos.<br>Este documento es un registro personal. No reemplaza la historia clínica oficial del profesional de salud.</div>');
+  h.push('</body></html>');
+  var blob=new Blob([h.join('\n')],{type:'text/html;charset=utf-8'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=url;a.download='Historia-Clinica-'+apodo+'-'+hoy.toISOString().slice(0,10)+'.html';
+  document.body.appendChild(a);a.click();
+  setTimeout(function(){document.body.removeChild(a);URL.revokeObjectURL(url);},1000);
+}
+
 
 loadData();
 applyNightMode();
