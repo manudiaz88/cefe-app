@@ -5,11 +5,11 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Cefe">
+<meta name="apple-mobile-web-app-title" content="Alba">
 <meta name="theme-color" content="#0f1923">
 <link rel="manifest" href="manifest.json">
-<link rel="apple-touch-icon" href="apple-touch-icon.png">
-<title>Cefe App v2.3</title>
+<link rel="apple-touch-icon" href="alba-icon-apple-touch_PNG_180x180.png">
+<title>Alba · Tu hijo, su historia</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 body{min-height:100vh;background:linear-gradient(135deg,#0f1923,#1a2d3d,#0f2030);font-family:Georgia,serif;color:#e8dcc8;display:flex;flex-direction:column;align-items:center;padding-bottom:40px;transition:background .3s}
@@ -146,9 +146,10 @@ button{font-family:Georgia,serif;-webkit-appearance:none}
 <!-- ONBOARDING -->
 <div id="onboard-overlay" class="hidden" style="position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:600;align-items:center;justify-content:center;padding:20px">
   <div style="width:100%;max-width:380px;background:linear-gradient(160deg,#0f1923,#1a2d3d);border:1px solid rgba(212,168,67,.3);border-radius:20px;padding:28px 22px;text-align:center">
-    <div style="font-size:40px;margin-bottom:12px">👶</div>
-    <div style="font-size:18px;font-weight:bold;color:#f0d9a0;margin-bottom:6px">Bienvenido a la app de Cefe</div>
-    <div style="font-size:12px;color:#a89070;margin-bottom:20px;line-height:1.6">¿Cómo te llamás? Así podemos saber quién registra cada cosa y sincronizar las alertas entre dispositivos.</div>
+    <div style="font-size:40px;margin-bottom:8px">🌅</div>
+    <div style="font-size:22px;font-weight:bold;color:#f0d9a0;margin-bottom:4px">Bienvenido a Alba</div>
+    <div style="font-size:12px;color:#d4a843;margin-bottom:8px;letter-spacing:1px;text-transform:uppercase">La historia de tu hijo, en tus manos</div>
+    <div style="font-size:12px;color:#a89070;margin-bottom:20px;line-height:1.6">¿Cómo te llamás? Así Céfiro, el asistente de Alba, sabe quién registra cada cosa y sincroniza las alertas entre dispositivos.</div>
     <input id="onboard-name-input" type="text" placeholder="Tu nombre (ej: Manu, Sari…)"
       style="width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(212,168,67,.3);border-radius:10px;padding:12px 14px;color:#f0d9a0;font-family:Georgia,serif;font-size:16px;outline:none;margin-bottom:14px;text-align:center"
       onkeydown="if(event.key==='Enter')saveOnboardingName()">
@@ -173,7 +174,7 @@ button{font-family:Georgia,serif;-webkit-appearance:none}
 
 <div id="app">
   <div id="hdr">
-    <div><div class="hl">Registro · v2.2</div><div class="hm" id="hdr-title">Ceferino</div></div>
+    <div><div class="hl">Alba · v3.0</div><div class="hm" id="hdr-title">Ceferino</div></div>
     <div class="hr">
       <span id="sync-dot" style="font-size:9px;color:#d4a843" title="Conectando">●</span>
       <button id="night-btn" class="tb" data-action="toggleNight">🌙</button>
@@ -191,7 +192,7 @@ button{font-family:Georgia,serif;-webkit-appearance:none}
     <div class="mas-grid">
       <button class="mas-item" data-action="goPendientes" id="mas-pend-btn">
         <span class="mas-item-ic">📋</span>
-        <span style="flex:1"><span class="mas-item-lbl">Pendientes</span><span class="mas-item-sub">Checks y recordatorios</span></span>
+        <span style="flex:1"><span class="mas-item-lbl">Pendientes</span><span class="mas-item-sub">Céfiro · alertas y checks</span></span>
         <span id="pend-badge" style="display:none;background:#e07070;color:#fff;border-radius:10px;font-size:10px;font-weight:bold;padding:2px 7px;min-width:20px;text-align:center"></span>
       </button>
       <button class="mas-item" data-action="goHitos">
@@ -237,7 +238,8 @@ button{font-family:Georgia,serif;-webkit-appearance:none}
 </div>
 <script>
 // ═══════════════════════════════════════════════════════════════
-// CEFE LACTANCIA APP  —  v2.0
+// ALBA · La historia de tu hijo — v3.0
+// Desarrollado por Manu Diaz para Ceferino · Nació al alba, 29/03/2026 · 05:20hs
 // ═══════════════════════════════════════════════════════════════
 
 var APP_VERSION = 3;
@@ -1819,7 +1821,7 @@ function render(){
           if(pesoHoy.length>0){lines.push('');lines.push('*⚖️ Peso: '+gkg(pesoHoy[0].g)+'kg*');}
           var gc2=gasC();
           lines.push('');lines.push('_Cap. gástrica est.: '+gc2.mn+'-'+gc2.mx+'ml/toma_');
-          lines.push('_Cefe App_');
+          lines.push('_Céfiro · Alba_');
           window.open('https://wa.me/?text='+encodeURIComponent(lines.join('\n')),'_blank');
         };
         bd.appendChild(shareBtn);
@@ -2241,7 +2243,7 @@ function render(){
 
 
   else if(D.step==='historia'){
-    bd.appendChild(mkTxt('div',null,'La historia de Cefe, cronológica y completa.','font-size:12px;color:#a89070;margin-bottom:4px;line-height:1.5'));
+    bd.appendChild(mkTxt('div',null,'La historia de Cefe, cronológica y completa. Construida día a día.','font-size:12px;color:#a89070;margin-bottom:4px;line-height:1.5'));
     renderHistoria(bd);
   }
   else if(D.step==='memoria'){
@@ -2350,8 +2352,15 @@ var DEVICE_NAME = getDeviceName();
 
 // ── Onboarding: pedir nombre si es la primera vez ─────────────
 function checkOnboarding() {
-  if (getDeviceName()) return; // ya tiene nombre
-  showOnboarding();
+  // Limpiar posibles estados corruptos del overlay de versiones anteriores
+  var ov = document.getElementById('onboard-overlay');
+  if (ov) {
+    ov.style.display = 'none'; // asegurar estado inicial oculto
+    ov.classList.add('hidden');
+  }
+  if (getDeviceName()) return; // ya tiene nombre — no mostrar
+  // Pequeño delay adicional para asegurar que el DOM esté listo en iOS
+  setTimeout(showOnboarding, 100);
 }
 
 function showOnboarding() {
@@ -2366,14 +2375,18 @@ function saveOnboardingName() {
   if (!name) { inp.style.borderColor = '#e07070'; return; }
   setDeviceName(name);
   DEVICE_NAME = name;
+  // Triple seguro para iOS Safari — forzar ocultamiento
   var ov = document.getElementById('onboard-overlay');
   if (ov) {
+    ov.style.cssText = 'display:none!important;visibility:hidden;pointer-events:none;opacity:0';
     ov.classList.add('hidden');
-    ov.style.display = 'none'; // belt+suspenders para iOS Safari
+    // Remover del flujo completamente
+    setTimeout(function(){ if(ov.parentNode) ov.parentNode.removeChild(ov); }, 300);
   }
   var dnEl = document.getElementById('device-name-display');
   if (dnEl) dnEl.textContent = name;
-  render(); // refrescar para mostrar el sistema de momentos
+  // Render después de ocultar overlay
+  setTimeout(function(){ render(); }, 50);
 }
 
 // ─── MOMENTOS: LÓGICA POR DEVICE ──────────────────────────────
@@ -3189,7 +3202,7 @@ function showNextMomento() {
 
   } else if (item.tipo === 'tip') {
     localStorage.setItem(item.tipKey, '1');
-    showCpop('info', item.tip.icon, 'Semana ' + Math.floor(Math.floor((Date.now() - new Date(D.bebe.fn).getTime()) / 86400000) / 7),
+    showCpop('info', '🌬️', 'Céfiro · Semana ' + Math.floor(Math.floor((Date.now() - new Date(D.bebe.fn).getTime()) / 86400000) / 7),
       item.tip.title, item.tip.body, btnLabel, onNext);
   }
 }
