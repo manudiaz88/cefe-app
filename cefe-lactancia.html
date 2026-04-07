@@ -1904,6 +1904,235 @@ function render(){
       bd.appendChild(planCard);
     })();
 
+    // ══════════════════════════════════════════════════════════
+    // FEATURE 1: ANÁLISIS DEL SUEÑO (tramos desde tomas nocturnas)
+    // ══════════════════════════════════════════════════════════
+    (function(){
+      var tomasSorted=D.hist.filter(function(h){return h.type==='toma'&&h.s&&h.e;})
+        .map(function(h){return{s:new Date(h.s).getTime(),e:new Date(h.e).getTime()};})
+        .sort(function(a,b){return a.s-b.s;});
+      if(tomasSorted.length<2) return;
+      // Calcular tramos entre fin de una toma e inicio de la siguiente
+      var tramos=[];
+      for(var i=1;i<tomasSorted.length;i++){
+        var gap=Math.round((tomasSorted[i].s-tomasSorted[i-1].e)/60000);
+        if(gap>0&&gap<480) tramos.push({dur:gap,end:tomasSorted[i].s});
+      }
+      if(tramos.length===0) return;
+      // Tramo más largo
+      var maxTramo=tramos.reduce(function(a,b){return a.dur>b.dur?a:b;});
+      // Tramo más largo de la semana anterior (días -7 a -1)
+      var hace7=Date.now()-7*86400000;
+      var tramosAnt=tramos.filter(function(t){return t.end<Date.now()-86400000&&t.end>hace7;});
+      var maxAnt=tramosAnt.length>0?tramosAnt.reduce(function(a,b){return a.dur>b.dur?a:b;}):null;
+      // Promedio últimas 24h
+      var hace24=Date.now()-86400000;
+      var tramos24=tramos.filter(function(t){return t.end>hace24;});
+      var prom24=tramos24.length>0?Math.round(tramos24.reduce(function(a,b){return a+b.dur;},0)/tramos24.length):0;
+
+      var sBox=mkDiv('background:rgba(100,140,220,.07);border:1px solid rgba(100,140,220,.18);border-radius:14px;padding:13px 15px;margin-bottom:12px');
+      var sHdr=mkDiv('display:flex;align-items:center;justify-content:space-between;margin-bottom:10px');
+      sHdr.appendChild(mkTxt('div',null,'😴 Análisis de descanso','font-size:10px;color:#8ab4dc;font-weight:bold;text-transform:uppercase;letter-spacing:1px'));
+      var maxH=Math.floor(maxTramo.dur/60),maxM=maxTramo.dur%60;
+      var maxLabel=maxH>0?maxH+'h '+maxM+'min':maxM+'min';
+      sHdr.appendChild(mkTxt('div',null,'Tramo más largo: '+maxLabel,'font-size:11px;color:#f0d9a0;font-weight:bold'));
+      sBox.appendChild(sHdr);
+
+      // Mini grid
+      var sGrid=mkDiv('display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px');
+      var c1=mkDiv('background:rgba(100,140,220,.08);border-radius:10px;padding:8px 10px');
+      c1.appendChild(mkTxt('div',null,maxLabel,'font-size:15px;font-weight:bold;color:#8ab4dc'));
+      c1.appendChild(mkTxt('div',null,'máx. reciente','font-size:10px;color:#a89070;margin-top:2px'));
+      sGrid.appendChild(c1);
+      var c2=mkDiv('background:rgba(100,140,220,.08);border-radius:10px;padding:8px 10px');
+      c2.appendChild(mkTxt('div',null,prom24>0?(Math.floor(prom24/60)>0?Math.floor(prom24/60)+'h ':'')+(prom24%60)+'min':'—','font-size:15px;font-weight:bold;color:#8ab4dc'));
+      c2.appendChild(mkTxt('div',null,'prom. entre tomas','font-size:10px;color:#a89070;margin-top:2px'));
+      sGrid.appendChild(c2);
+      sBox.appendChild(sGrid);
+
+      // Narrativa de Céfiro con tendencia
+      var narrativa='';
+      if(maxAnt){
+        var diff=maxTramo.dur-maxAnt.dur;
+        if(diff>15) narrativa='🌬️ El tramo más largo creció '+diff+' min vs la semana pasada — van mejorando.';
+        else if(diff<-15) narrativa='🌬️ El tramo más largo bajó un poco vs la semana pasada. Normal en esta etapa.';
+        else narrativa='🌬️ El tramo de descanso se mantiene estable. Los patrones se irán ordenando solos.';
+      } else {
+        if(maxTramo.dur>=120) narrativa='🌬️ '+maxLabel+' de tramo continuo — excelente para esta etapa.';
+        else if(maxTramo.dur>=60) narrativa='🌬️ Tramos de más de 1 hora son una señal positiva en recién nacidos.';
+        else narrativa='🌬️ Tramos cortos son normales los primeros días. El sueño se va ordenando.';
+      }
+      sBox.appendChild(mkTxt('div',null,narrativa,'font-size:11px;color:#8ab4dc;line-height:1.6'));
+      bd.appendChild(sBox);
+    })();
+
+    // ══════════════════════════════════════════════════════════
+    // FEATURE 2: MOMENTO DEL DÍA — Memoria emocional activa
+    // ══════════════════════════════════════════════════════════
+    (function(){
+      var hoy=todayStr();
+      var notaHoy=D.notas&&D.notas.find(function(n){return n.fecha===hoy;});
+      var momentoBox=mkDiv('background:rgba(212,168,67,.06);border:1px solid rgba(212,168,67,.15);border-radius:14px;padding:13px 15px;margin-bottom:12px');
+      var mHdr=mkDiv('display:flex;align-items:center;gap:8px;margin-bottom:8px');
+      mHdr.appendChild(mkTxt('span',null,'✨','font-size:16px'));
+      mHdr.appendChild(mkTxt('div',null,'Momento del día','font-size:12px;font-weight:bold;color:#d4a843'));
+      momentoBox.appendChild(mHdr);
+      if(notaHoy&&notaHoy.texto&&notaHoy.texto.trim()){
+        // Ya tienen una nota hoy — mostrarla
+        momentoBox.appendChild(mkTxt('div',null,'"'+notaHoy.texto.trim()+'"','font-size:13px;color:#f0d9a0;font-style:italic;line-height:1.6;margin-bottom:10px'));
+        momentoBox.appendChild(mkTxt('div',null,'Guardado en la Historia de Cefe ✓','font-size:10px;color:#a89070'));
+        var editBtn=document.createElement('button');
+        editBtn.style.cssText='margin-top:8px;background:none;border:1px solid rgba(212,168,67,.2);border-radius:8px;padding:5px 10px;color:#d4a843;font-size:11px;cursor:pointer;font-family:Georgia,serif';
+        editBtn.textContent='Editar ✏️';
+        editBtn.onclick=function(){
+          D.editNotaFecha=hoy;
+          setStep('editNota');
+        };
+        momentoBox.appendChild(editBtn);
+      } else {
+        // Prompt con texto rotativo por hora del día
+        var hora=new Date().getHours();
+        var prompts=[
+          '¿Qué momento de hoy con Cefe querés recordar en 10 años?',
+          '¿Algo que te sorprendió de Cefe hoy?',
+          '¿Cómo te sentiste hoy como papá / mamá?',
+          '¿Qué hizo Cefe hoy por primera vez?',
+          '¿Qué momento de hoy te dio calma?',
+        ];
+        var promptIdx=Math.floor(hora/5)%prompts.length;
+        momentoBox.appendChild(mkTxt('div',null,prompts[promptIdx],'font-size:12px;color:#a89070;line-height:1.5;margin-bottom:10px'));
+        var inp=document.createElement('textarea');
+        inp.id='momento-dia-inp';
+        inp.placeholder='Escribí algo, aunque sea una línea...';
+        inp.style.cssText='width:100%;box-sizing:border-box;background:rgba(255,255,255,.04);border:1px solid rgba(212,168,67,.2);border-radius:10px;padding:9px 11px;color:#f0d9a0;font-family:Georgia,serif;font-size:13px;resize:none;min-height:60px;outline:none;line-height:1.5';
+        momentoBox.appendChild(inp);
+        var guardarBtn=document.createElement('button');
+        guardarBtn.style.cssText='width:100%;margin-top:8px;background:rgba(212,168,67,.12);border:1px solid rgba(212,168,67,.25);border-radius:10px;padding:9px;color:#d4a843;font-size:13px;font-weight:bold;cursor:pointer;font-family:Georgia,serif';
+        guardarBtn.textContent='Guardar momento ✨';
+        guardarBtn.onclick=function(){
+          var txt=(document.getElementById('momento-dia-inp')||{}).value||'';
+          if(!txt.trim()){return;}
+          var ex=D.notas&&D.notas.find(function(n){return n.fecha===hoy;});
+          if(ex)ex.texto=txt.trim();
+          else{if(!D.notas)D.notas=[];D.notas.unshift({fecha:hoy,texto:txt.trim()});}
+          D.notas.sort(function(a,b){return new Date(b.fecha)-new Date(a.fecha);});
+          saveData();render();
+        };
+        momentoBox.appendChild(guardarBtn);
+      }
+      bd.appendChild(momentoBox);
+    })();
+
+    // ══════════════════════════════════════════════════════════
+    // FEATURE 3: VENTANA A LOS PRÓXIMOS 7 DÍAS
+    // ══════════════════════════════════════════════════════════
+    (function(){
+      var hoy=new Date();
+      var d=ageD();
+      var items=[];
+
+      // Visitas agendadas en próximos 7 días
+      var proxV=(D.visits||[]).filter(function(v){
+        var vt=new Date(v.dt).getTime();
+        var diff=vt-Date.now();
+        return diff>0&&diff<=7*86400000&&v.estado==='pendiente';
+      }).sort(function(a,b){return new Date(a.dt)-new Date(b.dt);});
+      proxV.forEach(function(v){
+        var med=D.meds[v.mi]||{};
+        var diasFalta=Math.ceil((new Date(v.dt).getTime()-Date.now())/86400000);
+        items.push({
+          ic:'🏥',
+          titulo:(med.esp||'Consulta médica')+' en '+diasFalta+' día'+(diasFalta===1?'':'s'),
+          sub:'Dr/a. '+(med.nom||'')+' '+(med.ape||'')+' · '+ft(v.dt),
+          color:'#b48cdc'
+        });
+      });
+
+      // Vacunas próximas en 14 días (desde VACUNAS_ARG)
+      if(typeof VACUNAS_ARG!=='undefined'){
+        VACUNAS_ARG.forEach(function(v){
+          if(D.bebe&&D.bebe.vacunas&&D.bebe.vacunas[v.id]) return; // ya aplicada
+          var edadDiasVac=v.edad_meses!=null?v.edad_meses*30.4:(v.edad_dias||0);
+          var diasFaltaVac=edadDiasVac-d;
+          if(diasFaltaVac>0&&diasFaltaVac<=14){
+            items.push({
+              ic:'💉',
+              titulo:'Vacuna: '+v.nombre+' en ~'+Math.round(diasFaltaVac)+' días',
+              sub:v.descripcion||'Consultar con el pediatra',
+              color:'#e07070',
+              urgente: diasFaltaVac<=7
+            });
+          }
+        });
+      }
+
+      // Hito esperado próximo
+      if(typeof HITOS_DEF!=='undefined'){
+        var proxHito=null;var minDiff=9999;
+        HITOS_DEF.forEach(function(h){
+          var yaLogrado=D.hitos&&D.hitos.some(function(hi){return hi.id===h.id&&hi.fecha;});
+          if(yaLogrado) return;
+          var semHito=h.semanas||0;
+          var dHito=semHito*7;
+          var diasHito=dHito-d;
+          if(diasHito>=0&&diasHito<minDiff){minDiff=diasHito;proxHito=h;}
+        });
+        if(proxHito&&minDiff<=14){
+          items.push({
+            ic:proxHito.ic||'⭐',
+            titulo:'Hito esperado: '+proxHito.label,
+            sub:minDiff<=3?'¡Podría aparecer pronto!':'En ~'+minDiff+' días aprox.',
+            color:'#64c88c'
+          });
+        }
+      }
+
+      // Brote de crecimiento (semanas 2-3, 6, 12 son las más comunes)
+      var semana=Math.floor(d/7);
+      var brotesComunes=[2,3,6,12];
+      brotesComunes.forEach(function(s){
+        var diasParaBrote=(s*7)-d;
+        if(diasParaBrote>=0&&diasParaBrote<=5){
+          items.push({
+            ic:'📈',
+            titulo:'Posible brote de crecimiento (semana '+s+')',
+            sub:'Más hambre, más tomas, más llanto — dura 2-3 días y es normal.',
+            color:'#d4a843'
+          });
+        }
+      });
+
+      if(items.length===0) return;
+
+      var vBox=mkDiv('background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-radius:14px;padding:13px 15px;margin-bottom:12px');
+      vBox.appendChild(mkTxt('div',null,'🔭 Próximos 7 días','font-size:10px;font-weight:bold;color:#a89070;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px'));
+
+      items.forEach(function(it){
+        var row=mkDiv('display:flex;gap:10px;align-items:flex-start;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.04)');
+        row.appendChild(mkTxt('span',null,it.ic,'font-size:18px;flex-shrink:0;line-height:1.3'));
+        var txt=mkDiv('flex:1');
+        txt.appendChild(mkTxt('div',null,it.titulo,'font-size:12px;font-weight:bold;color:'+(it.color||'#f0d9a0')+';line-height:1.4'));
+        if(it.sub)txt.appendChild(mkTxt('div',null,it.sub,'font-size:11px;color:#a89070;margin-top:2px;line-height:1.4'));
+        row.appendChild(txt);
+        vBox.appendChild(row);
+      });
+
+      // Céfiro cierra con contexto de la etapa
+      var dW=Math.floor(d/7);
+      var etapaMsg='';
+      if(d<14) etapaMsg='🌬️ Estás en la etapa más intensa. La primera semana es supervivencia. La segunda, adaptación. Están haciéndolo muy bien.';
+      else if(d<30) etapaMsg='🌬️ Semana '+dW+': el ritmo empieza a tener pautas propias. El caos de los primeros días va cediendo poco a poco.';
+      else if(d<60) etapaMsg='🌬️ Mes 2: Cefe empieza a reconocerlos. La sonrisa social puede aparecer en cualquier momento.';
+      else etapaMsg='🌬️ Cada semana Cefe cambia. Los registros de hoy son la memoria que van a agradecer en 10 años.';
+
+      if(etapaMsg){
+        var etapaEl=mkDiv('margin-top:10px;padding-top:8px;border-top:1px solid rgba(255,255,255,.04)');
+        etapaEl.appendChild(mkTxt('div',null,etapaMsg,'font-size:11px;color:#b48cdc;line-height:1.6'));
+        vBox.appendChild(etapaEl);
+      }
+      bd.appendChild(vBox);
+    })();
+
     bd.appendChild(E.aBtn('🍼','Registrar Toma','Sesion ahora','','startToma'));
     bd.appendChild(E.aBtn('\uD83D\uDCDD','Toma Manual','Ingresar datos a mano','','startTomaManual'));
     bd.appendChild(E.aBtn('\uD83E\uDDF7','Registrar Panal','Pis, caca o mixto','bl','startPanal'));
