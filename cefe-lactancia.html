@@ -202,8 +202,8 @@ button{font-family:Georgia,serif;-webkit-appearance:none}
     <button class="bnav-btn" data-tab="home" id="bn-home"><span class="bnav-ic">🏠</span><span class="bnav-lbl">Inicio</span></button>
     <button class="bnav-btn" data-tab="history" id="bn-history"><span class="bnav-ic">📋</span><span class="bnav-lbl">Historial</span></button>
     <button class="bnav-btn" data-tab="peso" id="bn-peso"><span class="bnav-ic">⚖️</span><span class="bnav-lbl">Peso</span></button>
-    <button class="bnav-btn" data-tab="dash" id="bn-dash"><span class="bnav-ic">📊</span><span class="bnav-lbl">Dashboard</span></button>
     <button class="bnav-btn" data-tab="mas" id="bn-mas"><span class="bnav-ic">☰</span><span class="bnav-lbl">Más</span></button>
+    <button class="bnav-btn" data-tab="config" id="bn-config"><span class="bnav-ic">⚙️</span><span class="bnav-lbl">Config</span></button>
   </nav>
   <div id="mas-menu" class="mas-menu">
     <div class="mas-grid">
@@ -219,6 +219,10 @@ button{font-family:Georgia,serif;-webkit-appearance:none}
       <button class="mas-item" data-action="goMedicos">
         <span class="mas-item-ic">🏥</span>
         <span><span class="mas-item-lbl">Médicos</span><span class="mas-item-sub">Profesionales y visitas</span></span>
+      </button>
+      <button class="mas-item" data-action="goCalendario">
+        <span class="mas-item-ic">📅</span>
+        <span><span class="mas-item-lbl">Calendario</span><span class="mas-item-sub">Agenda de Cefe</span></span>
       </button>
       <button class="mas-item" data-action="goVacunas">
         <span class="mas-item-ic">💉</span>
@@ -244,9 +248,9 @@ button{font-family:Georgia,serif;-webkit-appearance:none}
         <span class="mas-item-ic">🏆</span>
         <span><span class="mas-item-lbl">Logros</span><span class="mas-item-sub">Tu camino como padres</span></span>
       </button>
-      <button class="mas-item" data-action="goLogros">
-        <span class="mas-item-ic">🏆</span>
-        <span><span class="mas-item-lbl">Logros</span><span class="mas-item-sub">Tu camino como padres</span></span>
+      <button class="mas-item" data-action="goConfig">
+        <span class="mas-item-ic">⚙️</span>
+        <span><span class="mas-item-lbl">Configuración</span><span class="mas-item-sub">Notificaciones y preferencias</span></span>
       </button>
       <button class="mas-item" data-action="toggleNight">
         <span class="mas-item-ic" id="night-ic">🌙</span>
@@ -379,6 +383,8 @@ var E = {
       row.appendChild(lDiv); row.appendChild(rDiv);
     } else {
       row.className = 'hr2 pa';
+      row.style.cursor = 'pointer';
+      (function(hCopy){ row.onclick = function(e){ if(e.target.tagName!=='BUTTON') openPanalSheet(hCopy); }; })(h);
       var em = h.p === 'Pis' ? '\uD83D\uDCDB' : h.p === 'Caca' ? '\uD83D\uDCA9' : '\uD83D\uDD00';
       var lDiv2 = document.createElement('div');
       var t3 = mkTxt('div', 'hrt', '\uD83E\uDDF7 ' + ft(h.t) + ' \u2014 ' + h.p, 'color:#c0d4e4');
@@ -386,11 +392,6 @@ var E = {
       if (h.note) { lDiv2.appendChild(mkTxt('div', 'hrs', h.note.substring(0, 25))); }
       var rDiv2 = document.createElement('div'); rDiv2.className = 'hri';
       rDiv2.appendChild(mkTxt('span', null, em, 'font-size:16px'));
-      var wa2 = document.createElement('button');
-      wa2.textContent = '📤'; wa2.title = 'Compartir';
-      wa2.style.cssText = 'background:none;border:none;font-size:16px;cursor:pointer;padding:2px 4px;opacity:.7';
-      (function(hCopy2){ wa2.onclick = function(e){ e.stopPropagation(); var msg=genMsg(hCopy2); window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank'); }; })(h);
-      rDiv2.appendChild(wa2);
       rDiv2.appendChild(E.btn('dbtn', '\u2715', 'delHist', {idx: idx}));
       row.appendChild(lDiv2); row.appendChild(rDiv2);
     }
@@ -478,6 +479,20 @@ var D = {
   pend: null, efi: 0,
   // UI
   hFilter: null, dashDays: 1,
+  config: {
+    notif: {
+      cefiro_tips: true,       // Tips semanales de Céfiro
+      logros_triviales: false, // Logros de primer registro (primer pañal, etc.)
+      dato_dia: true,          // Dato curioso del día
+      brotes: true,            // Alertas de brotes de crecimiento
+      vacunas: true,           // Recordatorios de vacunas
+      hitos: true,             // Checks de hitos
+      plan_dia: true,          // Plan de actividades del día
+    },
+    historial_expandido: true, // Historial muestra todos los días por default
+    perfil_home: true,         // Mostrar perfil de Cefe en home colapsado
+    modo_madrugada: 'auto',    // 'auto'=23-6hs | 'on'=siempre | 'off'=nunca
+  },
   editMedIdx: -1, editPadreIdx: -1, editPadre: null,
   editCartaIdx: -1,
   editSintomaIdx: -1,
@@ -658,7 +673,9 @@ function saveData() {
     sleepLog: D.sleepLog||[],
     sleepStart: D.sleepStart||null,
     nightMode: D.nightMode,
-    alarmMaxInterval: D.alarmMaxInterval||180
+    alarmMaxInterval: D.alarmMaxInterval||180,
+    config: D.config||{},
+    actividadesHechas: D.actividadesHechas||{}
   });
 }
 
@@ -771,6 +788,165 @@ function estimateMLRange(lados,efi,mlProv){
   var first=Math.min(tot,5),rest=Math.max(0,tot-5),mid=first*flow*1.3+rest*flow;
   var mn=Math.round(mid*0.85)+(mlProv||0),mx=Math.round(mid*1.15)+(mlProv||0);
   return{mn:mn,mx:mx,txt:mn+'-'+mx+'ml'};
+}
+
+
+// ─── AUTO-DETECCIÓN DE HITOS ──────────────────────────────────
+function checkAutoHitos() {
+  if(!D.bebe||!D.hitos)return;
+  var autoChecks = [
+    // Primera visita realizada al médico
+    {
+      id: 'v07',  // primer control externo
+      check: function(){
+        var visitasRealizadas=(D.visits||[]).filter(function(v){return v.estado==='realizada';});
+        if(visitasRealizadas.length===0)return null;
+        var primera=visitasRealizadas[visitasRealizadas.length-1];
+        return {fecha:new Date(primera.dt).toISOString().slice(0,10),nota:'Auto: primera visita al médico realizada'};
+      }
+    },
+    // Peso recuperó nacimiento
+    {
+      id: 'v04',  // "Recuperó peso de nacimiento"
+      check: function(){
+        if(!D.pesos||D.pesos.length===0)return null;
+        var pn=D.bebe.pn||3365;
+        var lp=D.pesos[0];
+        if(lp.g>=pn)return {fecha:new Date(lp.t).toISOString().slice(0,10),nota:'Auto-detectado: peso '+lp.g+'g ≥ nacimiento '+pn+'g'};
+        return null;
+      }
+    },
+    // Primera semana completada (7 días de tomas)
+    {
+      id: 'v05',  // "Primera semana en casa"
+      check: function(){
+        if(ageD()<7)return null;
+        var d7=new Date(D.bebe.fn?new Date(D.bebe.fn).getTime()+7*86400000:0);
+        return {fecha:d7.toISOString().slice(0,10),nota:'Auto-detectado: 7 días de vida'};
+      }
+    },
+    // 100 pañales
+    {
+      id: 'p_100_panales',
+      check: function(){
+        var np=D.hist.filter(function(h){return h.type==='panal';}).length;
+        if(np<100)return null;
+        // Fecha del pañal 100
+        var sorted=D.hist.filter(function(h){return h.type==='panal';})
+          .sort(function(a,b){return new Date(a.t)-new Date(b.t);});
+        var p100=sorted[99];
+        return {fecha:new Date(p100.t).toISOString().slice(0,10),nota:'Auto-detectado: pañal #100'};
+      }
+    },
+    // 7 días de racha de registro
+    {
+      id: 'r_racha_7',
+      check: function(){
+        if(typeof calcRacha==='function'&&calcRacha()>=7){
+          return {fecha:todayStr(),nota:'Auto-detectado: 7 días de racha'};
+        }
+        return null;
+      }
+    },
+  ];
+
+  var nuevosAutoHitos=[];
+  autoChecks.forEach(function(ac){
+    // ¿Ya está marcado?
+    var yaLogrado=D.hitos.some(function(h){return h.id===ac.id;});
+    if(yaLogrado)return;
+    // ¿La condición se cumple?
+    try{
+      var result=ac.check();
+      if(result){nuevosAutoHitos.push({id:ac.id,fecha:result.fecha,nota:result.nota});}
+    }catch(e){}
+  });
+
+  if(nuevosAutoHitos.length===0)return;
+
+  // Procesar el primero — preguntar via Céfiro
+  var ah=nuevosAutoHitos[0];
+  var def=(typeof HITOS_DEF!=='undefined'?HITOS_DEF:[]).find(function(h){return h.id===ah.id;})||{};
+  // Verificar que no hemos preguntado ya sobre este auto-hito
+  var askKey='autohito_asked_'+ah.id;
+  if(ls(askKey))return;
+  lss(askKey,'1');
+
+  setTimeout(function(){
+    showCpop('celebracion',
+      def.ic||'⭐',
+      '¡Detectamos un hito!',
+      def.label||ah.id,
+      ah.nota+'. ¿Lo marcamos con esta fecha?',
+      'Sí, marcar',
+      function(){
+        closeCpop();
+        // Marcar el hito con la fecha real detectada
+        var exists=D.hitos.find(function(h){return h.id===ah.id;});
+        if(!exists){D.hitos.push({id:ah.id,fecha:ah.fecha,nota:ah.nota});}
+        saveData();
+        // Si hay más, procesar el siguiente
+        if(nuevosAutoHitos.length>1){setTimeout(checkAutoHitos,1000);}
+      }
+    );
+    // Agregar botón "No por ahora" — depende de si showCpop lo soporta
+    // La lógica de closeCpop ya existe como fallback
+  },800);
+}
+
+// ─── PESO PREDICTIVO ──────────────────────────────────────────
+function calcPesoPrediccion() {
+  // Necesitamos al menos 2 registros de peso
+  if(!D.pesos||D.pesos.length<2)return null;
+  // Usar los últimos 5 registros máximo para la regresión
+  var sample=D.pesos.slice(0,Math.min(5,D.pesos.length));
+  // Calcular tendencia: gramos por día (regresión lineal simple)
+  var n=sample.length;
+  var sumX=0,sumY=0,sumXY=0,sumX2=0;
+  var t0=new Date(sample[n-1].t).getTime(); // más antiguo como origen
+  sample.forEach(function(p,i){
+    var x=(new Date(p.t).getTime()-t0)/86400000; // días desde el más antiguo
+    var y=p.g;
+    sumX+=x;sumY+=y;sumXY+=x*y;sumX2+=x*x;
+  });
+  var slope=(n*sumXY-sumX*sumY)/(n*sumX2-sumX*sumX); // g/día
+  if(isNaN(slope)||slope<=0)return null; // si no hay tendencia positiva, no predecir
+  // Peso actual y objetivo
+  var pesoActual=D.pesos[0].g;
+  var pesoNac=D.bebe.pn||3365;
+  var diasDesdeUltimo=(Date.now()-new Date(D.pesos[0].t).getTime())/86400000;
+  // Proyectar peso actual (sin registro reciente)
+  var pesoHoy=pesoActual+slope*diasDesdeUltimo;
+  // ¿Cuántos días para recuperar peso de nacimiento?
+  var diasParaNac=pesoActual>=pesoNac?0:Math.ceil((pesoNac-pesoActual)/slope);
+  // Proyección a 7 días
+  var pesoEn7=Math.round(pesoActual+slope*7);
+  return {
+    slope: Math.round(slope*10)/10,   // g/día redondeado
+    pesoHoyEst: Math.round(pesoHoy),
+    diasParaNac: diasParaNac,
+    pesoNac: pesoNac,
+    pesoActual: pesoActual,
+    pesoEn7: pesoEn7,
+    yaRecupero: pesoActual>=pesoNac
+  };
+}
+
+
+// ─── MODO MADRUGADA ────────────────────────────────────────────
+function isMadrugada(){
+  var cfg=D.config||{};
+  var pref=cfg.modo_madrugada||'auto';
+  if(pref==='on')return true;
+  if(pref==='off')return false;
+  var h=new Date().getHours();
+  return h>=23||h<6;
+}
+function getUltimoSeno(){
+  var tomas=D.hist.filter(function(h){return h.type==='toma'&&h.lados&&h.lados.length>0;});
+  if(tomas.length===0)return null;
+  var ul=tomas[0].lados[tomas[0].lados.length-1];
+  return ul?ul.s:null;
 }
 function getDailyML(){
   var now=new Date(),s=new Date(now.getFullYear(),now.getMonth(),now.getDate());
@@ -906,58 +1082,37 @@ function genMsg(entry){
     lines.push('Tipo: '+entry.p);
     if(entry.note&&entry.note.trim())lines.push('Nota: '+entry.note.trim());
   } else if(entry.type==='visita'){
-    var med=D.meds[entry.mi]||{};
-    var b=D.bebe||{};
+    var med=D.meds[entry.mi]||{};var b2=D.bebe||{};
     var dt=new Date(entry.dt);
-    var durMs=(entry.durMin||60)*60000;
     var ds=dt.getFullYear()+p2(dt.getMonth()+1)+p2(dt.getDate())+'T'+p2(dt.getHours())+p2(dt.getMinutes())+'00';
-    var de=new Date(dt.getTime()+durMs);
+    var de=new Date(dt.getTime()+3600000);
     var des=de.getFullYear()+p2(de.getMonth()+1)+p2(de.getDate())+'T'+p2(de.getHours())+p2(de.getMinutes())+'00';
-
-    // Título enriquecido
-    var tipoLabels={consulta:'Consulta',vacuna:'Vacuna',peso:'Control de peso',actividad:'Actividad',otro:'Evento'};
-    var tipoLbl=tipoLabels[entry.tipo||'consulta']||'Consulta';
-    var espPart=med.esp?' '+med.esp:'';
-    var nomPart=(med.nom||med.ape)?' — Dr/a. '+(med.nom||'')+' '+(med.ape||''):'';
-    var eventTitle=tipoLbl+espPart+nomPart+' — Cefe';
-
-    // Descripción enriquecida para GCal
-    var gcDesc='Paciente: '+(b.nombre||'Cefe')+' '+(b.apellido||'Diaz Palacios');
-    if(b.dni)gcDesc+='\nDNI: '+b.dni;
-    if(b.os)gcDesc+='\nObra social: '+b.os+(b.afil?' N° '+b.afil:'');
-    if(b.sangre)gcDesc+='\nGrupo: '+b.sangre;
-    if(entry.desc&&entry.desc.trim())gcDesc+='\nMotivo: '+entry.desc.trim();
-    if(med.tel)gcDesc+='\nTel médico: '+med.tel;
-    if(D.pesos&&D.pesos[0])gcDesc+='\nÚltimo peso: '+gkg(D.pesos[0].g)+'kg ('+fd(D.pesos[0].t)+')';
-
-    // GCal URL
-    var gcParams='action=TEMPLATE';
-    gcParams+='&text='+encodeURIComponent(eventTitle);
-    gcParams+='&dates='+ds+'/'+des;
-    if(entry.mod==='presencial'&&med.dir)gcParams+='&location='+encodeURIComponent(med.dir);
-    gcParams+='&details='+encodeURIComponent(gcDesc);
-    if(entry.notif1d)gcParams+='&add=1440'; // 1 día
-    if(entry.notif2h)gcParams+='&add=120';  // 2 hs (nota: GCal no soporta múltiples &add en URL, se usa el primero)
-    var gcUrl='https://calendar.google.com/calendar/render?'+gcParams;
-
-    // iCal URL (Apple Calendar)
-    var icalUrl='data:text/calendar;charset=utf8,BEGIN:VCALENDAR%0AVERSION:2.0%0ABEGIN:VEVENT%0ASUMMARY:'+encodeURIComponent(eventTitle)+'%0ADTSTART:'+ds+'%0ADTEND:'+des+(med.dir&&entry.mod==='presencial'?'%0ALOCATION:'+encodeURIComponent(med.dir):'')+'%0ADESCRIPTION:'+encodeURIComponent(gcDesc)+'%0AEND:VEVENT%0AEND:VCALENDAR';
-
-    lines.push('*'+eventTitle+'*');
-    lines.push('Médico: Dr/a. '+(med.nom||'')+' '+(med.ape||'')+' ('+(med.esp||'')+')');
-    lines.push('Fecha: '+fdl(entry.dt)+' | Hora: '+ft(entry.dt)+' | Duración: '+(entry.durMin||60)+' min');
+    var durMs2=(entry.durMin||60)*60000;
+    var de2=new Date(dt.getTime()+durMs2);
+    var des2=de2.getFullYear()+p2(de2.getMonth()+1)+p2(de2.getDate())+'T'+p2(de2.getHours())+p2(de2.getMinutes())+'00';
+    var tipoLabels2={consulta:'Consulta',vacuna:'Vacuna',peso:'Control de peso',actividad:'Actividad',otro:'Evento'};
+    var tipoLbl2=tipoLabels2[entry.tipo||'consulta']||'Consulta';
+    var eventTitle2=tipoLbl2+(med.esp?' '+med.esp:'')+(med.nom||med.ape?' — Dr/a. '+(med.nom||'')+' '+(med.ape||''):'')+' — Cefe';
+    var gcDesc2='Paciente: '+(b2.nombre||'Cefe')+' '+(b2.apellido||'');
+    if(b2.dni)gcDesc2+='\nDNI: '+b2.dni;
+    if(b2.os)gcDesc2+='\nObra social: '+b2.os+(b2.afil?' N° '+b2.afil:'');
+    if(b2.sangre)gcDesc2+='\nGrupo: '+b2.sangre;
+    if(entry.desc&&entry.desc.trim())gcDesc2+='\nMotivo: '+entry.desc.trim();
+    if(med.tel)gcDesc2+='\nTel: '+med.tel;
+    if(D.pesos&&D.pesos[0])gcDesc2+='\nÚlt. peso: '+gkg(D.pesos[0].g)+'kg';
+    var gcParams2='action=TEMPLATE&text='+encodeURIComponent(eventTitle2)+'&dates='+ds+'/'+des2;
+    if(entry.mod==='presencial'&&med.dir)gcParams2+='&location='+encodeURIComponent(med.dir);
+    gcParams2+='&details='+encodeURIComponent(gcDesc2);
+    if(entry.notif1d)gcParams2+='&add=1440';
+    var gcUrl='https://calendar.google.com/calendar/render?'+gcParams2;
+    lines.push('*'+eventTitle2+'*');
+    lines.push('Medico: Dr/a. '+(med.nom||'')+' '+(med.ape||'')+' ('+(med.esp||'')+')');
+    lines.push('Fecha: '+fdl(entry.dt)+' | Hora: '+ft(entry.dt));
     lines.push('Modalidad: '+entry.mod);
-    if(entry.mod==='presencial'&&med.dir)lines.push('Dirección: '+med.dir);
-    if(b.os)lines.push('Obra social: '+b.os+(b.afil?' — N° '+b.afil:''));
-    if(entry.desc&&entry.desc.trim())lines.push('Motivo: '+entry.desc.trim());
-    lines.push('');
-    lines.push('\uD83D\uDCC5 Google Calendar:');
-    lines.push(gcUrl);
-    if(med.tel){
-      lines.push('');
-      lines.push('\uD83D\uDC68\u200D\u2695\uFE0F WhatsApp médico:');
-      lines.push('https://wa.me/'+med.tel.replace(/[^0-9]/g,''));
-    }
+    if(entry.mod==='presencial'&&med.dir)lines.push('Direccion: '+med.dir);
+    if(entry.desc&&entry.desc.trim())lines.push('Obs: '+entry.desc.trim());
+    lines.push('Agendar: '+gcUrl);
+    if(med.tel)lines.push('WhatsApp: https://wa.me/'+med.tel.replace(/[^0-9]/g,''));
   }
   return lines.join('\n');
 }
@@ -965,49 +1120,96 @@ function genMsg(entry){
 // ─── WEEKLY SUMMARY GENERATOR ─────────────────────────────────
 function genWeeklySummary(){
   var now=new Date(), desde=new Date(now.getTime()-7*86400000);
+  var apodo=D.bebe.apodo||D.bebe.nombre||'Cefe';
+  var semana=Math.floor(ageD()/7);
   var th=D.hist.filter(function(h){return h.type==='toma'&&new Date(h.s)>=desde;});
   var ph=D.hist.filter(function(h){return h.type==='panal'&&new Date(h.t)>=desde;});
-  var pesos7=D.pesos.filter(function(p){return new Date(p.t)>=desde;});
   var lp=D.pesos[0];
+  var pn=D.bebe.pn||3365;
+  // Calcular tramo de sueño más largo de la semana
+  var tomasSorted=D.hist.filter(function(h){return h.type==='toma'&&h.s&&h.e&&new Date(h.s)>=desde;})
+    .map(function(h){return{s:new Date(h.s).getTime(),e:new Date(h.e).getTime()};})
+    .sort(function(a,b){return a.s-b.s;});
+  var maxTramo=0;
+  for(var ii=1;ii<tomasSorted.length;ii++){
+    var gap=Math.round((tomasSorted[ii].s-tomasSorted[ii-1].e)/60000);
+    if(gap>0&&gap<480)maxTramo=Math.max(maxTramo,gap);
+  }
+  // Hito de la semana
+  var hitoSemana=null;
+  if(D.hitos&&D.hitos.length>0){
+    D.hitos.forEach(function(h){
+      if(h.fecha&&new Date(h.fecha)>=desde){
+        var def=(typeof HITOS_DEF!=='undefined'?HITOS_DEF:[]).find(function(x){return x.id===h.id;});
+        if(def)hitoSemana=def.label;
+      }
+    });
+  }
+  // Tendencia de sueño vs semana anterior
+  var hace14=new Date(now.getTime()-14*86400000);
+  var tomasAnt=D.hist.filter(function(h){return h.type==='toma'&&h.s&&h.e&&new Date(h.s)>=hace14&&new Date(h.s)<desde;})
+    .map(function(h){return{s:new Date(h.s).getTime(),e:new Date(h.e).getTime()};})
+    .sort(function(a,b){return a.s-b.s;});
+  var maxTramoAnt=0;
+  for(var jj=1;jj<tomasAnt.length;jj++){
+    var gapA=Math.round((tomasAnt[jj].s-tomasAnt[jj-1].e)/60000);
+    if(gapA>0&&gapA<480)maxTramoAnt=Math.max(maxTramoAnt,gapA);
+  }
+  var diffTramo=maxTramo-maxTramoAnt;
+  // Predicción de peso
+  var pred=typeof calcPesoPrediccion==='function'?calcPesoPrediccion():null;
+  // ── Construir mensaje narrativo ──
   var lines=[];
-  lines.push('*Resumen semanal de Cefe*');
-  lines.push('Semana: '+fd(desde)+' al '+fd(now));
+  lines.push('?? *Semana '+semana+' de '+apodo+'*');
+  lines.push(desde.toLocaleDateString('es-AR',{day:'2-digit',month:'long'})+' — '+now.toLocaleDateString('es-AR',{day:'2-digit',month:'long'}));
   lines.push('');
-  lines.push('\uD83C\uDF7C *Lactancia*');
-  lines.push('Tomas registradas: '+th.length+' ('+Math.round(th.length/7)+'/dia aprox)');
+  // Párrafo de tomas
   if(th.length>0){
-    var totalMin=th.reduce(function(a,b){return a+b.tot;},0);
-    lines.push('Duracion promedio: '+Math.round(totalMin/th.length)+' min por toma');
-    var efis=th.filter(function(h){return h.efi>0;});
-    if(efis.length>0)lines.push('Eficiencia promedio: '+(efis.reduce(function(a,b){return a+b.efi;},0)/efis.length).toFixed(1)+'/5');
-  }
-  lines.push('');
-  lines.push('\uD83E\uDDF7 *Panales*');
-  lines.push('Total: '+ph.length+' ('+Math.round(ph.length/7)+'/dia aprox)');
-  var nc=ph.filter(function(p){return p.p==='Caca';}).length;
-  var nm=ph.filter(function(p){return p.p==='Mixto';}).length;
-  lines.push('Caca: '+nc+' | Mixto: '+nm+' | Pis: '+(ph.length-nc-nm));
-  lines.push('');
-  lines.push('\u2696\uFE0F *Peso*');
-  if(lp)lines.push('Ultimo peso: '+gkg(lp.g)+'kg ('+fd(lp.t)+') \u2014 Percentil: '+pctLbl(lp.g,ageW()));
-  if(D.pesos.length>=2){
-    var diff=D.pesos[0].g-D.pesos[D.pesos.length-1].g;
-    lines.push('Variacion total: '+(diff>=0?'+':'')+diff+'g vs peso nacimiento');
-  }
-  var si7=D.sintomas.filter(function(s){return new Date(s.t)>=desde;});
-  if(si7.length>0){
+    var tpd=Math.round(th.length/7);
+    var totMin=th.reduce(function(a,b){return a+b.tot;},0);
+    var promMin=Math.round(totMin/th.length);
+    lines.push('?? *Lactancia*');
+    lines.push(th.length+' tomas en la semana (∼'+tpd+' por día), promedio '+promMin+' min por toma.');
+    if(maxTramo>0){
+      var trLbl=Math.floor(maxTramo/60)>0?Math.floor(maxTramo/60)+'h '+(maxTramo%60)+'min':maxTramo+'min';
+      var tendLbl=diffTramo>10?' (+'+diffTramo+' min vs semana anterior ??)':diffTramo<-10?' (−'+Math.abs(diffTramo)+' min vs semana anterior)':'';
+      lines.push('Tramo más largo sin tomar: '+trLbl+tendLbl+'.');
+    }
     lines.push('');
-    lines.push('\uD83C\uDFE5 *Sintomas / alertas*');
-    si7.forEach(function(s){lines.push('\u2022 '+s.tipo+(s.valor?' ('+s.valor+')':'')+(s.nota?' \u2014 '+s.nota:''));});
   }
-  var notas7=D.notas.filter(function(n){return new Date(n.fecha)>=desde&&n.texto.trim();});
-  if(notas7.length>0){
+  // Peso
+  if(lp){
+    var diffNac3=lp.g-pn;
+    lines.push('⚖️ *Peso*');
+    if(diffNac3>=0){lines.push(apodo+' pesa '+gkg(lp.g)+' kg — ya superó el peso de nacimiento. ✅');}
+    else if(pred&&pred.diasParaNac<=14){lines.push(apodo+' pesa '+gkg(lp.g)+' kg — recupera el peso de nac. en ~'+pred.diasParaNac+' días al ritmo actual.');}
+    else{lines.push(apodo+' pesa '+gkg(lp.g)+' kg ('+pctLbl(lp.g,ageW())+'). Faltan '+Math.abs(diffNac3)+'g para el peso de nacimiento.');}
+    if(pred&&pred.slope>0)lines.push('Ganando ~'+pred.slope+'g/día.');
     lines.push('');
-    lines.push('\uD83D\uDCDD *Notas del periodo*');
-    notas7.forEach(function(n){lines.push('\u2022 '+fd(n.fecha)+': '+n.texto.substring(0,80));});
   }
+  // Pañales
+  if(ph.length>0){
+    var nc=ph.filter(function(p){return p.p==='Caca';}).length;
+    var nm=ph.filter(function(p){return p.p==='Mixto';}).length;
+    lines.push('?? '+ph.length+' pañales ('+nc+' cacas, '+(nc+nm)+' con deposición).');
+    lines.push('');
+  }
+  // Hito
+  if(hitoSemana){lines.push('⭐ *Hito de la semana:* '+hitoSemana);lines.push('');}
+  // Etapa y cierre de Céfiro
+  var d3=ageD();
+  var etapa=d3<14?'Los primeros días son los más intensos. Están haciéndolo muy bien.':
+    d3<30?'Semana '+semana+': el caos se va ordenando de a poco. Todo lo que registran hoy es la memoria que van a agradecer.':
+    d3<60?'Mes 2: '+apodo+' los reconoce. La sonrisa social puede aparecer en cualquier momento.':
+    'Cada semana '+apodo+' cambia. Sigan registrando.';
+  lines.push('??️ _'+etapa+'_');
+  lines.push('');
+  lines.push('_Céfiro para Alba · v3.0_');
   return lines.join('\n');
 }
+
+// (genWeeklySummary original reemplazado por versión narrativa)
+
 
 // ─── ACTIONS ──────────────────────────────────────────────────
 function setStep(s){D.step=s;render();}
@@ -1031,7 +1233,9 @@ function finishToma(){
   if(D.manualMode){
     var dv=gv('mdate'),sv=gv('mstart');
     if(!dv||!sv){alert('Ingresa fecha y hora de inicio.');return;}
-    if(D.mLados.length===0){alert('Agrega al menos un lado.');return;}
+    var mlProv=D.mlProvistos||0;
+    if(D.mLados.length===0&&mlProv===0){alert('Agrega al menos un lado o registrá leche extraída.');return;}
+    if(D.mLados.length===0&&mlProv>0){D.mLados=[{s:'Leche extraída',m:Math.max(Math.round(mlProv/3),5)}];}
     sT=new Date(dv+'T'+sv);var ev=gv('mend');
     eT=ev?new Date(dv+'T'+ev):addM(sT,D.mLados.reduce(function(a,b){return a+b.m;},0));
     lados=D.mLados.slice();
@@ -1070,8 +1274,10 @@ function confirmEntry(){
   }
   D.msg=genMsg(D.pend);D.msgType=D.pend.type;
   D.hist.unshift(D.pend);saveData();
-  if(D.pend.type==='toma'){schedAlarm(D.pend.nt);D.mlProvistos=0;}
+  if(D.pend.type==='toma'){D.alarmFired=false;schedAlarm(D.pend.nt);D.mlProvistos=0;}
   D.pend=null;setStep('summary');
+  // Auto-detectar hitos después de registrar
+  setTimeout(function(){if(typeof checkAutoHitos==='function')checkAutoHitos();},1500);
 }
 function discardPending(){D.pend=null;setStep('home');}
 function discardCurrent(){stopTimer();D.cSide=null;D.cStart=null;setStep('home');}
@@ -1092,6 +1298,7 @@ function savePeso(){
   // Sort by date descending
   D.pesos.sort(function(a,b){var da=safeDate(a.t)||new Date(0),db=safeDate(b.t)||new Date(0);return db-da;});
   saveData();setStep('peso');
+  setTimeout(function(){if(typeof checkAutoHitos==='function')checkAutoHitos();},1500);
 }
 function adjustPeso(d){
   D.pg=Math.max(0,D.pg+d);
@@ -1126,16 +1333,12 @@ function savePadre(){
 }
 function saveBebe(){
   var prev=D.bebe||{};
-  var pedEl=document.getElementById('bpediatra');
-  var pedIdx=pedEl&&pedEl.value!==''?parseInt(pedEl.value):null;
   D.bebe={nombre:gv('bnom'),apellido:gv('bape'),apodo:gv('bapodo')||'Bebe',
     fn:(document.getElementById('bfn')||{}).value||'',hora:prev.hora||'',
     sexo:(document.getElementById('bsexo')||{}).value||'M',
     pn:gi('bpn')||3365,talla:gi('btalla'),cc:gi('bcc'),
     sangre:gv('bsangre'),dni:gv('bdni'),eg:gi('beg')||40,
     parto:gv('bparto'),apgar:gv('bapgar'),notas:gv('bnotas'),
-    os:gv('bos')||'',afil:gv('bafil')||'',hc:gv('bhc')||'',osplan:gv('bosplan')||'',
-    pedIdx:pedIdx,alergia:gv('balergia')||'',
     vacHepB:prev.vacHepB||'',vacBCG:prev.vacBCG||false,
     dx:prev.dx||'',pa:prev.pa||0,fa:prev.fa||''};
   saveData();setStep('perfil');
@@ -1176,6 +1379,19 @@ function savePostVisita(idx){
       mod:v.mod,desc:'Seguimiento — '+v.desc,estado:'pendiente',conclusiones:'',receta:'',proxVisita:'',pesoEnVisita:0};
     D.visits.unshift(prxEntry);
   }
+  // Interconexión: si hay receta con vacuna → actualizar vacunas
+  if(v.conclusiones&&v.conclusiones.toLowerCase().indexOf('vacuna')>=0){
+    // Sugerir registrar vacuna aplicada en la pantalla de vacunas
+    setTimeout(function(){
+      showCpop('info','??','Vacuna en la visita',
+        'Parece que se aplicó una vacuna',
+        '¿Querés ir a registrarla en el calendario?',
+        'Ir a vacunas',
+        function(){closeCpop();setStep('vacunas');});
+    },600);
+  }
+  // Interconexión: auto-detectar hitos después de visita
+  setTimeout(function(){if(typeof checkAutoHitos==='function')checkAutoHitos();},1800);
   saveData();setStep('medicos');
 }
 function saveNota(){
@@ -1206,9 +1422,40 @@ function saveSintoma(){
 }
 function toggleHito(id){
   var existing=D.hitos.find(function(h){return h.id===id;});
-  if(existing){D.hitos=D.hitos.filter(function(h){return h.id!==id;});}
-  else{D.hitos.push({id:id,fecha:todayStr(),nota:''});}
-  saveData();render();
+  if(existing){if(confirm('¿Desmarcar este hito?')){D.hitos=D.hitos.filter(function(h){return h.id!==id;});saveData();render();}}
+  else{showHitoDialog(id);}
+}
+function showHitoDialog(id){
+  var def=(typeof HITOS_DEF!=='undefined'?HITOS_DEF:[]).find(function(h){return h.id===id;})||{};
+  var prev=document.getElementById('hito-dialog-overlay');if(prev)prev.remove();
+  var overlay=document.createElement('div');overlay.id='hito-dialog-overlay';
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9100;display:flex;align-items:center;justify-content:center;padding:20px';
+  overlay.onclick=function(e){if(e.target===overlay)overlay.remove();};
+  var box=document.createElement('div');
+  box.style.cssText='background:#1a2d3d;border-radius:18px;padding:24px 20px;width:100%;max-width:360px;box-shadow:0 8px 40px rgba(0,0,0,.6)';
+  box.appendChild(mkTxt('div',null,(def.ic||'⭐')+' '+(def.label||id),'font-size:16px;font-weight:bold;color:#f0d9a0;margin-bottom:6px;line-height:1.4'));
+  box.appendChild(mkTxt('div',null,'¿Cuándo ocurrió?','font-size:12px;color:#a89070;margin-bottom:12px'));
+  var dateInp=document.createElement('input');dateInp.type='date';dateInp.id='hito-fecha-inp';dateInp.value=todayStr();
+  dateInp.style.cssText='width:100%;box-sizing:border-box;background:rgba(255,255,255,.06);border:1px solid rgba(212,168,67,.3);border-radius:10px;padding:11px 12px;color:#f0d9a0;font-size:16px;margin-bottom:10px;font-family:Georgia,serif';
+  box.appendChild(dateInp);
+  var notaInp=document.createElement('textarea');notaInp.placeholder='Nota opcional…';notaInp.id='hito-nota-inp';
+  notaInp.style.cssText='width:100%;box-sizing:border-box;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:10px 12px;color:#f0d9a0;font-size:14px;margin-bottom:14px;font-family:Georgia,serif;resize:none;min-height:52px;line-height:1.5;outline:none';
+  box.appendChild(notaInp);
+  var btnRow=mkDiv('display:flex;gap:8px');
+  var cancelBtn=document.createElement('button');cancelBtn.textContent='Cancelar';
+  cancelBtn.style.cssText='flex:1;padding:12px;border-radius:11px;border:1px solid rgba(255,255,255,.1);background:transparent;color:#a89070;font-size:13px;cursor:pointer;font-family:Georgia,serif';
+  cancelBtn.onclick=function(){overlay.remove();};
+  var guardarBtn=document.createElement('button');guardarBtn.textContent='✓ Marcar hito';
+  guardarBtn.style.cssText='flex:2;padding:12px;border-radius:11px;border:1px solid rgba(100,200,140,.3);background:rgba(100,200,140,.2);color:#64c88c;font-size:13px;font-weight:bold;cursor:pointer;font-family:Georgia,serif';
+  guardarBtn.onclick=function(){
+    var fecha=document.getElementById('hito-fecha-inp').value||todayStr();
+    var nota=document.getElementById('hito-nota-inp').value||'';
+    D.hitos.push({id:id,fecha:fecha,nota:nota});
+    saveData();overlay.remove();render();
+  };
+  btnRow.appendChild(cancelBtn);btnRow.appendChild(guardarBtn);box.appendChild(btnRow);
+  overlay.appendChild(box);document.body.appendChild(overlay);
+  setTimeout(function(){if(dateInp)dateInp.focus();},100);
 }
 function saveCarta(){
   var titulo=gv('carta-titulo')||'Carta sin titulo';
@@ -1461,7 +1708,7 @@ function handleAction(action,data){
     case 'editPadre':D.editPadre=Object.assign({},D.padres[parseInt(data.idx)]);D.editPadreIdx=parseInt(data.idx);setStep('editPadre');break;
     case 'delPadre':delPadre(parseInt(data.idx));break;
     case 'reqNotif':reqNotif();break;
-    case 'dismissAlarm':D.alarmFired=false;render();break;
+    case 'dismissAlarm':D.alarmFired=false;D.nextToma=null;saveData();render();break;
     case 'dismissBanner':lss('nb',1);render();break;
     case 'goToToma':setStep('toma');break;
     case 'cpPesos':copyPesoText();break;
@@ -1570,34 +1817,7 @@ function medCard(m,i){
   var row=mkDiv('display:flex;gap:7px;margin-top:8px');
   var eb=E.btn('','Editar','editMed',{idx:i});eb.style.cssText='flex:1;background:rgba(255,255,255,.05);border:1px solid rgba(210,175,120,.2);border-radius:8px;padding:6px;color:#d4c090;font-size:11px;cursor:pointer';
   var db=E.btn('','Eliminar','delMed',{idx:i});db.style.cssText='flex:1;background:rgba(224,112,112,.1);border:1px solid rgba(224,112,112,.2);border-radius:8px;padding:6px;color:#e07070;font-size:11px;cursor:pointer';
-  row.appendChild(eb);row.appendChild(db);mc.appendChild(row);
-  // Botón "Enviar datos al médico por WA"
-  if(m.tel){
-    var waBtn=document.createElement('button');
-    waBtn.style.cssText='width:100%;margin-top:7px;padding:8px;border-radius:9px;border:1px solid rgba(100,200,180,.25);background:rgba(100,200,180,.08);color:#64c8b4;font-size:12px;cursor:pointer;font-family:Georgia,serif;font-weight:bold';
-    waBtn.textContent='\uD83D\uDC68\u200D\u2695\uFE0F Enviar datos al médico por WA';
-    (function(mCopy){waBtn.onclick=function(){
-      var b=D.bebe||{};
-      var lp=D.pesos&&D.pesos[0];
-      var vacAplicadas=(b.vacHepB?'\n• HepB: '+b.vacHepB:'')+(b.vacBCG?'\n• BCG: '+b.vacBCG:'');
-      var vacunasList=[];
-      if(b.vacunas){Object.keys(b.vacunas).forEach(function(k){if(b.vacunas[k])vacunasList.push('• '+k+': '+b.vacunas[k]);});}
-      var msg='\uD83D\uDC76 *Datos de Cefe para consulta*';
-      msg+='\n\nNombre: '+(b.nombre||'Cefe')+' '+(b.apellido||'');
-      msg+='\nFecha nac: '+(b.fn?new Date(b.fn+'T00:00').toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'}):'');
-      if(b.dni)msg+='\nDNI: '+b.dni;
-      if(b.sangre)msg+='\nGrupo: '+b.sangre;
-      if(b.os)msg+='\n\u2665\uFE0F Obra social: '+b.os+(b.afil?' — N° '+b.afil:'')+(b.osplan?' ('+b.osplan+')':'');
-      if(b.hc)msg+='\nHist. Clínica: '+b.hc;
-      if(lp)msg+='\n\n⚖️ Último peso: '+gkg(lp.g)+'kg ('+fd(lp.t)+')';
-      if(vacAplicadas||vacunasList.length>0)msg+='\n\n💉 Vacunas aplicadas:'+vacAplicadas+(vacunasList.length?'\n'+vacunasList.join('\n'):'');
-      if(b.alergia&&b.alergia.trim())msg+='\n\n⚠️ Alergias/condiciones: '+b.alergia.trim();
-      msg+='\n\nMotivo de consulta: (completar)';
-      window.open('https://wa.me/'+mCopy.tel.replace(/[^0-9]/g,'')+'?text='+encodeURIComponent(msg));
-    };})(m);
-    mc.appendChild(waBtn);
-  }
-  return mc;
+  row.appendChild(eb);row.appendChild(db);mc.appendChild(row);return mc;
 }
 
 // ─── RENDER ───────────────────────────────────────────────────
@@ -1606,8 +1826,8 @@ function render(){
   // Update device name display
   var dnEl=document.getElementById('device-name-display');
   if(dnEl)dnEl.textContent=getDeviceName()||'';
-  var MAS_STEPS=['perfil','editBebe','editPadre','medicos','editMed','visitaForm','postVisita','consultaMedica','extras','notas','editNota','sintomas','editSintoma','hitos','cartas','editCarta','astro','actividades','vacunas','memoria','pendientes','historia','logros'];
-  var TAB_MAP={home:['home'],history:['history'],peso:['peso','pesoEntry'],dash:['dash'],mas:MAS_STEPS};
+  var MAS_STEPS=['perfil','editBebe','editPadre','medicos','editMed','visitaForm','postVisita','consultaMedica','extras','notas','editNota','sintomas','editSintoma','hitos','cartas','editCarta','astro','actividades','vacunas','memoria','pendientes','historia','logros','config'];
+  var TAB_MAP={home:['home'],history:['history'],peso:['peso','pesoEntry'],mas:MAS_STEPS,config:['config']};
   Object.keys(TAB_MAP).forEach(function(t){
     var el=document.getElementById('bn-'+t);if(!el)return;
     el.className='bnav-btn'+(TAB_MAP[t].indexOf(D.step)>=0?' on':'');
@@ -1615,7 +1835,7 @@ function render(){
   var nb=document.getElementById('night-btn');if(nb)nb.style.color=D.nightMode?'#f0d9a0':'#a89070';
   var htEl=document.getElementById('hdr-title');
   if(typeof updatePendBadge==='function')updatePendBadge();
-  if(htEl){var TITLES={home:'Ceferino',history:'Historial',peso:'Peso',pesoEntry:'Peso',dash:'Dashboard',perfil:'Perfil',editBebe:'Perfil',editPadre:'Perfil',medicos:'M\u00e9dicos',editMed:'M\u00e9dicos',visitaForm:'Médicos',postVisita:'Seguimiento',consultaMedica:'Consulta Médica',logros:'Logros',extras:'Extras',notas:'Notas',editNota:'Nueva Nota',sintomas:'S\u00edntomas',editSintoma:'S\u00edntoma',hitos:'Hitos',cartas:'Cartas',editCarta:'Carta',astro:'Recreativo',actividades:'Actividades',vacunas:'Vacunas',memoria:'Memoria de Cefe',pendientes:'Pendientes',historia:'Historia de Cefe',toma:'Toma',panal:'Pa\u00f1al',preview:'Confirmar',summary:'Mensaje'};
+  if(htEl){var TITLES={home:'Ceferino',history:'Historial',peso:'Peso',pesoEntry:'Peso',dash:'Dashboard',perfil:'Perfil',editBebe:'Perfil',editPadre:'Perfil',medicos:'M\u00e9dicos',editMed:'M\u00e9dicos',visitaForm:'Médicos',postVisita:'Seguimiento',consultaMedica:'Consulta Médica',logros:'Logros',config:'Configuración',extras:'Extras',notas:'Notas',editNota:'Nueva Nota',sintomas:'S\u00edntomas',editSintoma:'S\u00edntoma',hitos:'Hitos',cartas:'Cartas',editCarta:'Carta',astro:'Recreativo',actividades:'Actividades',vacunas:'Vacunas',memoria:'Memoria de Cefe',pendientes:'Pendientes',historia:'Historia de Cefe',toma:'Toma',panal:'Pa\u00f1al',preview:'Confirmar',summary:'Mensaje'};
   htEl.textContent=TITLES[D.step]||'Ceferino';}
 
   var bd=document.getElementById('bd');if(!bd)return;
@@ -1627,12 +1847,232 @@ function render(){
 
   // ── HOME ──────────────────────────────────────────────────────
   if(D.step==='home'){
-    // Calendar shortcut banner
-    var calBanner=mkDiv('display:flex;align-items:center;justify-content:space-between;background:rgba(212,168,67,.06);border:1px solid rgba(212,168,67,.12);border-radius:12px;padding:10px 14px;margin-bottom:12px;cursor:pointer');
-    calBanner.onclick=function(){window.location.href='cefe-calendario.html';};
-    calBanner.appendChild(mkTxt('span',null,'\uD83D\uDCC5  Ver Calendario de Cefe','font-size:13px;color:#d4a843'));
-    calBanner.appendChild(mkTxt('span',null,'\u2192','font-size:16px;color:#d4a843'));
-    bd.appendChild(calBanner);
+    // ── Modo Madrugada ──────────────────────────────────────────
+    if(isMadrugada()){
+      var ultSeno=getUltimoSeno();
+      var tNocheCnt=D.hist.filter(function(h){
+        if(h.type!=='toma')return false;
+        var diff=(Date.now()-new Date(h.s).getTime())/3600000;
+        return diff<=8;
+      }).length;
+      var lp2=D.pesos&&D.pesos[0];
+      var mCard=mkDiv('background:rgba(10,18,28,.7);border:1px solid rgba(140,180,220,.15);border-radius:20px;padding:24px 20px;text-align:center;margin-bottom:16px');
+      mCard.appendChild(mkTxt('div',null,'??','font-size:32px;margin-bottom:6px'));
+      mCard.appendChild(mkTxt('div',null,'Modo madrugada','font-size:11px;color:#8ab4dc;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:4px'));
+      mCard.appendChild(mkTxt('div',null,new Date().toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'}),'font-size:30px;font-weight:bold;color:#f0d9a0;font-family:monospace;margin-bottom:14px'));
+      if(tNocheCnt>0||lp2){
+        var infoRow=mkDiv('display:flex;justify-content:center;gap:20px;margin-bottom:20px');
+        if(tNocheCnt>0){var ic=mkDiv('text-align:center');ic.appendChild(mkTxt('div',null,String(tNocheCnt),'font-size:20px;font-weight:bold;color:#8ab4dc'));ic.appendChild(mkTxt('div',null,'tomas','font-size:10px;color:#a89070'));infoRow.appendChild(ic);}
+        if(lp2){var pw=mkDiv('text-align:center');pw.appendChild(mkTxt('div',null,gkg(lp2.g)+' kg','font-size:20px;font-weight:bold;color:#64c8b4'));pw.appendChild(mkTxt('div',null,'peso','font-size:10px;color:#a89070'));infoRow.appendChild(pw);}
+        mCard.appendChild(infoRow);
+      }
+      var tRapBtn=document.createElement('button');
+      tRapBtn.style.cssText='width:100%;padding:20px;border-radius:16px;border:1px solid rgba(212,168,67,.35);background:rgba(212,168,67,.12);color:#f0d9a0;font-size:18px;font-weight:bold;cursor:pointer;font-family:Georgia,serif;margin-bottom:10px';
+      var senoLbl=ultSeno?(' — '+(ultSeno.toLowerCase().indexOf('der')>=0?'Derecho':'Izquierdo')):'';
+      tRapBtn.textContent='?? Iniciar toma'+senoLbl;
+      tRapBtn.onclick=function(){startToma(false);};
+      mCard.appendChild(tRapBtn);
+      var secRow=mkDiv('display:flex;gap:8px');
+      var pBtn=document.createElement('button');pBtn.style.cssText='flex:1;padding:12px;border-radius:12px;border:1px solid rgba(100,200,180,.2);background:rgba(100,200,180,.06);color:#64c8b4;font-size:13px;cursor:pointer;font-family:Georgia,serif';pBtn.textContent='?? Pañal';pBtn.onclick=function(){startPanal();};secRow.appendChild(pBtn);
+      var pBtn2=document.createElement('button');pBtn2.style.cssText='flex:1;padding:12px;border-radius:12px;border:1px solid rgba(210,175,120,.15);background:rgba(255,255,255,.03);color:#a89070;font-size:13px;cursor:pointer;font-family:Georgia,serif';pBtn2.textContent='⚖️ Peso';pBtn2.onclick=function(){setStep('peso');};secRow.appendChild(pBtn2);
+      mCard.appendChild(secRow);
+      var exitBtn=document.createElement('button');exitBtn.style.cssText='width:100%;margin-top:14px;background:none;border:none;color:#a89070;font-size:11px;cursor:pointer;font-family:Georgia,serif;opacity:.6';exitBtn.textContent='Ver pantalla completa →';
+      exitBtn.onclick=function(){if(!D.config)D.config={};D.config.modo_madrugada='off';saveData();render();};
+      mCard.appendChild(exitBtn);
+      bd.appendChild(mCard);
+      if(D.hist.length>0){
+        var recH=mkDiv('margin-top:4px');recH.appendChild(mkTxt('div',null,'Últimos registros','font-size:10px;color:#a89070;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px'));
+        D.hist.slice(0,3).forEach(function(h,i){recH.appendChild(E.histRow(h,i));});
+        bd.appendChild(recH);
+      }
+      return;
+    }
+
+    // ── Céfiro Diario — briefing matutino ────────────────────
+    (function(){
+      var hoy=todayStr();
+      var briefKey='cefiro_brief_'+hoy;
+      var collapsed=ls(briefKey)==='1';
+      var d=ageD(), w=ageW();
+      var lp=D.pesos&&D.pesos[0];
+      var tomasAyer=D.hist.filter(function(h){
+        if(h.type!=='toma')return false;
+        var s=new Date(h.s);
+        var ayer=new Date();ayer.setDate(ayer.getDate()-1);
+        return sameDay(s,ayer);
+      });
+      var tomasNoche=D.hist.filter(function(h){
+        if(h.type!=='toma')return false;
+        var s=new Date(h.s);
+        var hora=s.getHours();
+        var diff=(Date.now()-s.getTime())/3600000;
+        return diff<=10&&(hora>=22||hora<7);
+      });
+
+      // Tramo más largo de la noche
+      var tomasSorted=D.hist.filter(function(h){return h.type==='toma'&&h.s&&h.e;})
+        .map(function(h){return{s:new Date(h.s).getTime(),e:new Date(h.e).getTime()};})
+        .sort(function(a,b){return a.s-b.s;});
+      var maxTramoNoche=0;
+      for(var ii=1;ii<tomasSorted.length;ii++){
+        var gap=Math.round((tomasSorted[ii].s-tomasSorted[ii-1].e)/60000);
+        var hora=new Date(tomasSorted[ii-1].e).getHours();
+        if(gap>0&&gap<300&&(hora>=21||hora<7))maxTramoNoche=Math.max(maxTramoNoche,gap);
+      }
+
+      // Próxima vacuna
+      var proxVacDias=999, proxVacNombre='';
+      if(typeof VACUNAS_ARG!=='undefined'){
+        VACUNAS_ARG.forEach(function(v){
+          if(v.dia)return;
+          if(D.bebe.vacunas&&D.bebe.vacunas[v.id])return;
+          var fn=D.bebe.fn?new Date(D.bebe.fn):new Date('2026-03-29');
+          var fv=new Date(fn);fv.setMonth(fv.getMonth()+v.mes);
+          var dias=Math.round((fv.getTime()-Date.now())/86400000);
+          if(dias>0&&dias<proxVacDias){proxVacDias=dias;proxVacNombre=v.nombre;}
+        });
+      }
+
+      // Capacidad gástrica hoy
+      var gc=gasC();
+
+      // Construir líneas del briefing
+      var lineas=[];
+      var apodo=D.bebe.apodo||D.bebe.nombre||'Cefe';
+
+      // Línea 1: Resumen de la noche / últimas horas
+      if(tomasNoche.length>0){
+        var trLbl=maxTramoNoche>0?(Math.floor(maxTramoNoche/60)>0?Math.floor(maxTramoNoche/60)+'h '+(maxTramoNoche%60)+'min':maxTramoNoche+'min'):'';
+        lineas.push({ic:'🌙',txt:'Esta noche: '+tomasNoche.length+' toma'+(tomasNoche.length!==1?'s':'')+(trLbl?' · tramo más largo '+trLbl:'')+'.'});
+      } else if(tomasAyer.length>0){
+        lineas.push({ic:'📊',txt:'Ayer: '+tomasAyer.length+' tomas registradas.'});
+      }
+
+      // Línea 2: Peso / percentil
+      if(lp){
+        var pn=D.bebe.pn||3365;
+        var diffNac=lp.g-pn;
+        if(diffNac>=0){
+          lineas.push({ic:'⚖️',txt:apodo+' pesa '+gkg(lp.g)+' kg · recuperó el peso de nacimiento ✅'});
+        } else {
+          lineas.push({ic:'⚖️',txt:apodo+' pesa '+gkg(lp.g)+' kg · faltan '+Math.abs(diffNac)+'g para el peso de nacimiento.'});
+        }
+      }
+
+      // Línea 3: Capacidad gástrica contextual
+      lineas.push({ic:'🍼',txt:'Hoy (día '+d+'): capacidad gástrica estimada '+gc.mn+'–'+gc.mx+' ml por toma.'});
+
+      // Línea 4: Próxima vacuna si está cercana
+      if(proxVacDias<30&&proxVacNombre){
+        lineas.push({ic:'💉',txt:proxVacNombre+' en '+proxVacDias+' día'+(proxVacDias!==1?'s':'')+'.'});
+      }
+
+      // Línea 5: hito próximo
+      if(typeof HITOS_DEF!=='undefined'){
+        var proxHito=null,minDiff2=9999;
+        HITOS_DEF.forEach(function(h){
+          var yaLogrado=D.hitos&&D.hitos.some(function(hi){return hi.id===h.id&&hi.fecha;});
+          if(yaLogrado)return;
+          var dH=(h.semanas||0)*7-d;
+          if(dH>=0&&dH<minDiff2){minDiff2=dH;proxHito=h;}
+        });
+        if(proxHito&&minDiff2<=7){
+          lineas.push({ic:proxHito.ic||'⭐',txt:'Hito próximo: '+proxHito.label+(minDiff2<=2?' — ¡puede aparecer cualquier día!':' en ~'+minDiff2+' días.')});
+        }
+      }
+
+      if(lineas.length===0)return;
+
+      var bCard=mkDiv('background:rgba(180,140,220,.07);border:1px solid rgba(180,140,220,.18);border-radius:14px;padding:12px 14px;margin-bottom:12px');
+
+      // Header
+      var bHdr=mkDiv('display:flex;align-items:center;justify-content:space-between;cursor:pointer;margin-bottom:'+(collapsed?'0':'10px'));
+      var bHL=mkDiv('display:flex;align-items:center;gap:8px');
+      bHL.appendChild(mkTxt('span',null,'🌬️','font-size:16px'));
+      var bHTxt=mkDiv('');
+      bHTxt.appendChild(mkTxt('div',null,'Buenos días · Día '+d+' de '+apodo,'font-size:11px;font-weight:bold;color:#b48cdc;letter-spacing:.5px'));
+      bHL.appendChild(bHTxt);
+      bHdr.appendChild(bHL);
+      bHdr.appendChild(mkTxt('span',null,collapsed?'▼':'▲','font-size:11px;color:#a89070'));
+      bCard.appendChild(bHdr);
+
+      bHdr.onclick=function(){
+        lss(briefKey,collapsed?'0':'1');
+        render();
+      };
+
+      if(!collapsed){
+        lineas.forEach(function(l){
+          var row=mkDiv('display:flex;align-items:flex-start;gap:8px;padding:4px 0;border-bottom:1px solid rgba(180,140,220,.08)');
+          row.appendChild(mkTxt('span',null,l.ic,'font-size:14px;flex-shrink:0;line-height:1.5'));
+          row.appendChild(mkTxt('span',null,l.txt,'font-size:12px;color:#d4c090;line-height:1.6'));
+          bCard.appendChild(row);
+        });
+      }
+      bd.appendChild(bCard);
+    })();
+
+    // ── Perfil de Cefe colapsable ──────────────────────────────
+    (function(){
+      var cfg=D.config||{};
+      if(cfg.perfil_home===false)return;
+      var b=D.bebe||{};
+      var lp=D.pesos&&D.pesos[0];
+      var expanded=ls('perfil_home_exp')!=='0';
+
+      var pCard=mkDiv('background:rgba(212,168,67,.05);border:1px solid rgba(212,168,67,.12);border-radius:14px;padding:12px 14px;margin-bottom:12px');
+
+      // Header tapeable
+      var pHdr=mkDiv('display:flex;align-items:center;justify-content:space-between;cursor:pointer');
+      var pLeft=mkDiv('display:flex;align-items:center;gap:10px');
+      pLeft.appendChild(mkTxt('span',null,'👶','font-size:20px'));
+      var pNames=mkDiv('');
+      pNames.appendChild(mkTxt('div',null,(b.apodo||b.nombre||'Cefe')+' · '+ageLabel(),'font-size:13px;font-weight:bold;color:#f0d9a0'));
+      if(lp)pNames.appendChild(mkTxt('div',null,'⚖️ '+gkg(lp.g)+' kg · '+pctLbl(lp.g,ageW()),'font-size:11px;color:#a89070'));
+      pLeft.appendChild(pNames);
+      pHdr.appendChild(pLeft);
+      var chevron=mkTxt('span',null,expanded?'▲':'▼','font-size:11px;color:#a89070');
+      pHdr.appendChild(chevron);
+      pCard.appendChild(pHdr);
+
+      // Contenido expandible
+      var pBody=mkDiv('overflow:hidden;transition:max-height .3s');
+      pBody.style.maxHeight=expanded?'200px':'0';
+      pBody.style.marginTop=expanded?'10px':'0';
+
+      var pGrid=mkDiv('display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:4px');
+      function pChip(label, val){
+        if(!val)return;
+        var c=mkDiv('background:rgba(255,255,255,.04);border-radius:8px;padding:6px 9px');
+        c.appendChild(mkTxt('div',null,label,'font-size:9px;color:#a89070;text-transform:uppercase;letter-spacing:.5px'));
+        c.appendChild(mkTxt('div',null,val,'font-size:12px;color:#f0d9a0;font-weight:bold;margin-top:2px'));
+        pGrid.appendChild(c);
+      }
+      pChip('Sangre',b.sangre);
+      pChip('DNI',b.dni);
+      if(b.os)pChip('Obra social',b.os+(b.afil?' · '+b.afil:''));
+      if(b.hc)pChip('Hist. clínica',b.hc);
+      if(b.alergia&&b.alergia.trim())pChip('Alergias',b.alergia.substring(0,20));
+      pBody.appendChild(pGrid);
+
+      // Botón ir a perfil completo
+      var goPerfilBtn=document.createElement('button');
+      goPerfilBtn.style.cssText='width:100%;margin-top:8px;padding:7px;border-radius:9px;border:1px solid rgba(212,168,67,.15);background:transparent;color:#d4a843;font-size:11px;cursor:pointer;font-family:Georgia,serif';
+      goPerfilBtn.textContent='Ver perfil completo →';
+      goPerfilBtn.onclick=function(e){e.stopPropagation();setStep('perfil');};
+      pBody.appendChild(goPerfilBtn);
+      pCard.appendChild(pBody);
+
+      // Toggle collapse
+      pHdr.onclick=function(){
+        var isExp=pBody.style.maxHeight!=='0px'&&pBody.style.maxHeight!=='0';
+        pBody.style.maxHeight=isExp?'0':'200px';
+        pBody.style.marginTop=isExp?'0':'10px';
+        chevron.textContent=isExp?'▼':'▲';
+        lss('perfil_home_exp',isExp?'0':'1');
+      };
+      bd.appendChild(pCard);
+    })();
     // Banner próxima toma — siempre visible si hay nextToma
     if(D.nextToma){
       var ahora=Date.now();
@@ -1653,7 +2093,7 @@ function render(){
         ald.appendChild(mkTxt('div',null,'~'+ft(D.nextToma)+' · en '+hLabel,'font-size:14px;font-weight:bold;color:#f0d9a0'));
       }
       alb.appendChild(ald);
-      if(D.alarmFired){alb.appendChild(E.btn('tb','✓ OK','dismissAlarm'));}
+      if(D.alarmFired||minRestantes<=0){alb.appendChild(E.btn('tb','✓ Listo','dismissAlarm'));}
       else{
         var regBtn=document.createElement('button');
         regBtn.style.cssText='background:rgba(212,168,67,.15);border:1px solid rgba(212,168,67,.3);border-radius:9px;padding:7px 12px;color:#d4a843;font-size:11px;cursor:pointer;font-family:Georgia,serif;white-space:nowrap';
@@ -1748,15 +2188,28 @@ function render(){
 
       // ── Peso ──
       if(lastP){
-        var pesoHoy=D.pesos.filter(function(p){return sameDay(p.t,new Date());});
-        var pn=D.bebe.pn||3365;
-        var diffNac=lastP.g-pn;
-        var pesoCtx=diffNac>=0?'↑ '+diffNac+'g sobre peso de nacimiento 🎉':
-          Math.abs(diffNac)<200?'Muy cerca del peso de nacimiento 💪':
-          'Recuperando peso · '+Math.abs(diffNac)+'g para el de nacimiento';
+        var pn2=D.bebe.pn||3365;
+        var diffNac2=lastP.g-pn2;
+        var pred=typeof calcPesoPrediccion==='function'?calcPesoPrediccion():null;
+        var pesoCtx2='';
+        if(diffNac2>=0){
+          pesoCtx2='↑ '+diffNac2+'g sobre peso de nacimiento 🎉';
+        } else if(pred&&pred.diasParaNac>0&&pred.diasParaNac<=14){
+          var fechaNac=new Date(Date.now()+pred.diasParaNac*86400000);
+          var diaLabel=fechaNac.toLocaleDateString('es-AR',{weekday:'long'});
+          pesoCtx2='Recupera el peso de nac. el '+diaLabel+' (~'+pred.diasParaNac+' días)';
+        } else {
+          pesoCtx2=Math.abs(diffNac2)+'g para el peso de nacimiento';
+        }
         var wchip=E.div('wchip');wchip.dataset.action='goPesoScreen';
-        wchip.textContent='⚖️ '+gkg(lastP.g)+' kg · '+pesoCtx;
+        wchip.textContent='⚖️ '+gkg(lastP.g)+' kg · '+pesoCtx2;
         card.appendChild(wchip);
+        // Mini predicción de Céfiro si hay tendencia clara
+        if(pred&&!pred.yaRecupero&&pred.slope>0&&pred.diasParaNac<=21){
+          var predRow=mkDiv('background:rgba(100,200,180,.06);border:1px solid rgba(100,200,180,.12);border-radius:9px;padding:7px 11px;margin-top:4px');
+          predRow.appendChild(mkTxt('div',null,'📈 Ganando ~'+pred.slope+'g/día · Proyección a 7 días: '+gkg(pred.pesoEn7)+' kg','font-size:10px;color:#64c8b4;line-height:1.5'));
+          card.appendChild(predRow);
+        }
       }
 
       // ── Tendencia del ritmo (predicción de Céfiro) ──
@@ -1835,302 +2288,93 @@ function render(){
 
     // ── Plan del día de Cefe ──────────────────────────────────
     (function(){
-      var act = typeof getActividades==='function' ? getActividades() : null;
-      if(!act||!act.actividades||act.actividades.length===0) return;
-      var hoy = todayStr();
-      if(!D.actividadesHechas) D.actividadesHechas={};
-      var hechasHoy = D.actividadesHechas[hoy]||[];
-      // Elegir 3 actividades del día (rotando por día del mes para variedad)
-      var dayOfMonth = new Date().getDate();
-      var total = act.actividades.length;
-      var idxs = [];
-      for(var ii=0;ii<3&&ii<total;ii++){ idxs.push((dayOfMonth-1+ii)%total); }
-
-      var planCard=mkDiv('background:rgba(100,200,140,.06);border:1px solid rgba(100,200,140,.2);border-radius:16px;padding:14px 16px;margin-bottom:14px');
-      var planHdr=mkDiv('display:flex;align-items:center;justify-content:space-between;margin-bottom:10px');
-      planHdr.appendChild(mkTxt('div',null,'🌱 Plan del día · Semana '+ageW(),'font-size:10px;color:#64c88c;font-weight:bold;letter-spacing:1px;text-transform:uppercase'));
-      var pctHechas=Math.round(hechasHoy.length/3*100);
-      planHdr.appendChild(mkTxt('div',null,hechasHoy.length+'/3 hechas','font-size:10px;color:'+(pctHechas===100?'#64c88c':'#a89070')));
-      planCard.appendChild(planHdr);
-
-      // Barra de progreso
-      var barWrap=mkDiv('background:rgba(255,255,255,.06);border-radius:4px;height:4px;margin-bottom:12px;overflow:hidden');
-      var barFill=mkDiv('background:#64c88c;height:4px;border-radius:4px;transition:width .3s');
-      barFill.style.width=pctHechas+'%';
-      barWrap.appendChild(barFill);planCard.appendChild(barWrap);
-
-      idxs.forEach(function(aIdx){
-        var a=act.actividades[aIdx];
-        if(!a) return;
-        var hecha=hechasHoy.indexOf(aIdx)>=0;
-        var row=mkDiv('display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.04)');
-        // Checkbox
-        var chk=document.createElement('button');
-        chk.style.cssText='width:22px;height:22px;border-radius:50%;border:2px solid '+(hecha?'#64c88c':'rgba(100,200,140,.4)')+';background:'+(hecha?'#64c88c':'transparent')+';flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;margin-top:1px';
-        chk.textContent=hecha?'✓':'';
-        chk.style.color='#fff';
-        (function(aIdxCopy,fechaCopy){
-          chk.onclick=function(){
-            if(!D.actividadesHechas[fechaCopy])D.actividadesHechas[fechaCopy]=[];
-            var pos=D.actividadesHechas[fechaCopy].indexOf(aIdxCopy);
-            if(pos>=0)D.actividadesHechas[fechaCopy].splice(pos,1);
-            else D.actividadesHechas[fechaCopy].push(aIdxCopy);
-            saveData();render();
-          };
-        })(aIdx,hoy);
-        row.appendChild(chk);
-        var txt=mkDiv('flex:1');
-        var ic=mkTxt('span',null,a.ic+' ','');
-        var lbl=mkTxt('span',null,a.label,'font-size:13px;color:'+(hecha?'#a89070':'#f0d9a0'));
-        if(hecha)lbl.style.textDecoration='line-through';
-        var labelRow=document.createElement('div');labelRow.appendChild(ic);labelRow.appendChild(lbl);
-        txt.appendChild(labelRow);
-        txt.appendChild(mkTxt('div',null,a.desc,'font-size:11px;color:#a89070;line-height:1.5;margin-top:2px'));
-        row.appendChild(txt);
-        planCard.appendChild(row);
-      });
-
-      if(pctHechas===100){
-        var celebRow=mkDiv('text-align:center;padding:8px 0 2px');
-        celebRow.appendChild(mkTxt('span',null,'🎉 ¡Plan del día completado! Gran trabajo.','font-size:12px;color:#64c88c;font-weight:bold'));
-        planCard.appendChild(celebRow);
-      }
-
-      var verTodas=document.createElement('button');
-      verTodas.style.cssText='width:100%;margin-top:10px;background:none;border:none;color:#64c88c;font-size:11px;cursor:pointer;font-family:Georgia,serif;opacity:.8';
-      verTodas.textContent='Ver todas las actividades de la semana →';
-      verTodas.dataset.action='goActividades';
-      planCard.appendChild(verTodas);
-      bd.appendChild(planCard);
-    })();
-
-    // ══════════════════════════════════════════════════════════
-    // FEATURE 1: ANÁLISIS DEL SUEÑO (tramos desde tomas nocturnas)
-    // ══════════════════════════════════════════════════════════
-    (function(){
-      var tomasSorted=D.hist.filter(function(h){return h.type==='toma'&&h.s&&h.e;})
-        .map(function(h){return{s:new Date(h.s).getTime(),e:new Date(h.e).getTime()};})
-        .sort(function(a,b){return a.s-b.s;});
-      if(tomasSorted.length<2) return;
-      // Calcular tramos entre fin de una toma e inicio de la siguiente
-      var tramos=[];
-      for(var i=1;i<tomasSorted.length;i++){
-        var gap=Math.round((tomasSorted[i].s-tomasSorted[i-1].e)/60000);
-        if(gap>0&&gap<480) tramos.push({dur:gap,end:tomasSorted[i].s});
-      }
-      if(tramos.length===0) return;
-      // Tramo más largo
-      var maxTramo=tramos.reduce(function(a,b){return a.dur>b.dur?a:b;});
-      // Tramo más largo de la semana anterior (días -7 a -1)
-      var hace7=Date.now()-7*86400000;
-      var tramosAnt=tramos.filter(function(t){return t.end<Date.now()-86400000&&t.end>hace7;});
-      var maxAnt=tramosAnt.length>0?tramosAnt.reduce(function(a,b){return a.dur>b.dur?a:b;}):null;
-      // Promedio últimas 24h
-      var hace24=Date.now()-86400000;
-      var tramos24=tramos.filter(function(t){return t.end>hace24;});
-      var prom24=tramos24.length>0?Math.round(tramos24.reduce(function(a,b){return a+b.dur;},0)/tramos24.length):0;
-
-      var sBox=mkDiv('background:rgba(100,140,220,.07);border:1px solid rgba(100,140,220,.18);border-radius:14px;padding:13px 15px;margin-bottom:12px');
-      var sHdr=mkDiv('display:flex;align-items:center;justify-content:space-between;margin-bottom:10px');
-      sHdr.appendChild(mkTxt('div',null,'😴 Análisis de descanso','font-size:10px;color:#8ab4dc;font-weight:bold;text-transform:uppercase;letter-spacing:1px'));
-      var maxH=Math.floor(maxTramo.dur/60),maxM=maxTramo.dur%60;
-      var maxLabel=maxH>0?maxH+'h '+maxM+'min':maxM+'min';
-      sHdr.appendChild(mkTxt('div',null,'Tramo más largo: '+maxLabel,'font-size:11px;color:#f0d9a0;font-weight:bold'));
-      sBox.appendChild(sHdr);
-
-      // Mini grid
-      var sGrid=mkDiv('display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px');
-      var c1=mkDiv('background:rgba(100,140,220,.08);border-radius:10px;padding:8px 10px');
-      c1.appendChild(mkTxt('div',null,maxLabel,'font-size:15px;font-weight:bold;color:#8ab4dc'));
-      c1.appendChild(mkTxt('div',null,'máx. reciente','font-size:10px;color:#a89070;margin-top:2px'));
-      sGrid.appendChild(c1);
-      var c2=mkDiv('background:rgba(100,140,220,.08);border-radius:10px;padding:8px 10px');
-      c2.appendChild(mkTxt('div',null,prom24>0?(Math.floor(prom24/60)>0?Math.floor(prom24/60)+'h ':'')+(prom24%60)+'min':'—','font-size:15px;font-weight:bold;color:#8ab4dc'));
-      c2.appendChild(mkTxt('div',null,'prom. entre tomas','font-size:10px;color:#a89070;margin-top:2px'));
-      sGrid.appendChild(c2);
-      sBox.appendChild(sGrid);
-
-      // Narrativa de Céfiro con tendencia
-      var narrativa='';
-      if(maxAnt){
-        var diff=maxTramo.dur-maxAnt.dur;
-        if(diff>15) narrativa='🌬️ El tramo más largo creció '+diff+' min vs la semana pasada — van mejorando.';
-        else if(diff<-15) narrativa='🌬️ El tramo más largo bajó un poco vs la semana pasada. Normal en esta etapa.';
-        else narrativa='🌬️ El tramo de descanso se mantiene estable. Los patrones se irán ordenando solos.';
-      } else {
-        if(maxTramo.dur>=120) narrativa='🌬️ '+maxLabel+' de tramo continuo — excelente para esta etapa.';
-        else if(maxTramo.dur>=60) narrativa='🌬️ Tramos de más de 1 hora son una señal positiva en recién nacidos.';
-        else narrativa='🌬️ Tramos cortos son normales los primeros días. El sueño se va ordenando.';
-      }
-      sBox.appendChild(mkTxt('div',null,narrativa,'font-size:11px;color:#8ab4dc;line-height:1.6'));
-      bd.appendChild(sBox);
-    })();
-
-    // ══════════════════════════════════════════════════════════
-    // FEATURE 2: MOMENTO DEL DÍA — Memoria emocional activa
-    // ══════════════════════════════════════════════════════════
-    (function(){
+      var cfg=D.config||{};var notif=cfg.notif||{};
+      if(notif.plan_dia===false)return;
+      var act=typeof getActividades==='function'?getActividades():null;
+      if(!act||!act.actividades||act.actividades.length===0)return;
       var hoy=todayStr();
-      var notaHoy=D.notas&&D.notas.find(function(n){return n.fecha===hoy;});
-      var momentoBox=mkDiv('background:rgba(212,168,67,.06);border:1px solid rgba(212,168,67,.15);border-radius:14px;padding:13px 15px;margin-bottom:12px');
-      var mHdr=mkDiv('display:flex;align-items:center;gap:8px;margin-bottom:8px');
-      mHdr.appendChild(mkTxt('span',null,'✨','font-size:16px'));
-      mHdr.appendChild(mkTxt('div',null,'Momento del día','font-size:12px;font-weight:bold;color:#d4a843'));
-      momentoBox.appendChild(mHdr);
-      if(notaHoy&&notaHoy.texto&&notaHoy.texto.trim()){
-        // Ya tienen una nota hoy — mostrarla
-        momentoBox.appendChild(mkTxt('div',null,'"'+notaHoy.texto.trim()+'"','font-size:13px;color:#f0d9a0;font-style:italic;line-height:1.6;margin-bottom:10px'));
-        momentoBox.appendChild(mkTxt('div',null,'Guardado en la Historia de Cefe ✓','font-size:10px;color:#a89070'));
-        var editBtn=document.createElement('button');
-        editBtn.style.cssText='margin-top:8px;background:none;border:1px solid rgba(212,168,67,.2);border-radius:8px;padding:5px 10px;color:#d4a843;font-size:11px;cursor:pointer;font-family:Georgia,serif';
-        editBtn.textContent='Editar ✏️';
-        editBtn.onclick=function(){
-          D.editNotaFecha=hoy;
-          setStep('editNota');
-        };
-        momentoBox.appendChild(editBtn);
-      } else {
-        // Prompt con texto rotativo por hora del día
-        var hora=new Date().getHours();
-        var prompts=[
-          '¿Qué momento de hoy con Cefe querés recordar en 10 años?',
-          '¿Algo que te sorprendió de Cefe hoy?',
-          '¿Cómo te sentiste hoy como papá / mamá?',
-          '¿Qué hizo Cefe hoy por primera vez?',
-          '¿Qué momento de hoy te dio calma?',
-        ];
-        var promptIdx=Math.floor(hora/5)%prompts.length;
-        momentoBox.appendChild(mkTxt('div',null,prompts[promptIdx],'font-size:12px;color:#a89070;line-height:1.5;margin-bottom:10px'));
-        var inp=document.createElement('textarea');
-        inp.id='momento-dia-inp';
-        inp.placeholder='Escribí algo, aunque sea una línea...';
-        inp.style.cssText='width:100%;box-sizing:border-box;background:rgba(255,255,255,.04);border:1px solid rgba(212,168,67,.2);border-radius:10px;padding:9px 11px;color:#f0d9a0;font-family:Georgia,serif;font-size:13px;resize:none;min-height:60px;outline:none;line-height:1.5';
-        momentoBox.appendChild(inp);
-        var guardarBtn=document.createElement('button');
-        guardarBtn.style.cssText='width:100%;margin-top:8px;background:rgba(212,168,67,.12);border:1px solid rgba(212,168,67,.25);border-radius:10px;padding:9px;color:#d4a843;font-size:13px;font-weight:bold;cursor:pointer;font-family:Georgia,serif';
-        guardarBtn.textContent='Guardar momento ✨';
-        guardarBtn.onclick=function(){
-          var txt=(document.getElementById('momento-dia-inp')||{}).value||'';
-          if(!txt.trim()){return;}
-          var ex=D.notas&&D.notas.find(function(n){return n.fecha===hoy;});
-          if(ex)ex.texto=txt.trim();
-          else{if(!D.notas)D.notas=[];D.notas.unshift({fecha:hoy,texto:txt.trim()});}
-          D.notas.sort(function(a,b){return new Date(b.fecha)-new Date(a.fecha);});
-          saveData();render();
-        };
-        momentoBox.appendChild(guardarBtn);
-      }
-      bd.appendChild(momentoBox);
-    })();
-
-    // ══════════════════════════════════════════════════════════
-    // FEATURE 3: VENTANA A LOS PRÓXIMOS 7 DÍAS
-    // ══════════════════════════════════════════════════════════
-    (function(){
-      var hoy=new Date();
-      var d=ageD();
-      var items=[];
-
-      // Visitas agendadas en próximos 7 días
-      var proxV=(D.visits||[]).filter(function(v){
-        var vt=new Date(v.dt).getTime();
-        var diff=vt-Date.now();
-        return diff>0&&diff<=7*86400000&&v.estado==='pendiente';
-      }).sort(function(a,b){return new Date(a.dt)-new Date(b.dt);});
-      proxV.forEach(function(v){
-        var med=D.meds[v.mi]||{};
-        var diasFalta=Math.ceil((new Date(v.dt).getTime()-Date.now())/86400000);
-        items.push({
-          ic:'🏥',
-          titulo:(med.esp||'Consulta médica')+' en '+diasFalta+' día'+(diasFalta===1?'':'s'),
-          sub:'Dr/a. '+(med.nom||'')+' '+(med.ape||'')+' · '+ft(v.dt),
-          color:'#b48cdc'
+      if(!D.actividadesHechas)D.actividadesHechas={};
+      if(!D.actividadesHechas[hoy+'_omit'])D.actividadesHechas[hoy+'_omit']=[];
+      var hechasHoy=D.actividadesHechas[hoy]||[];
+      var omitidasHoy=D.actividadesHechas[hoy+'_omit']||[];
+      var dayOfMonth=new Date().getDate();
+      var total=act.actividades.length;
+      var idxs=[];
+      for(var ii=0;ii<3&&ii<total;ii++){idxs.push((dayOfMonth-1+ii)%total);}
+      var resueltasCount=idxs.filter(function(i){return hechasHoy.indexOf(i)>=0||omitidasHoy.indexOf(i)>=0;}).length;
+      var hechasCount=idxs.filter(function(i){return hechasHoy.indexOf(i)>=0;}).length;
+      var todasResueltas=resueltasCount>=idxs.length;
+      var planColKey='plan_col_'+hoy;
+      var userCollapsed=ls(planColKey)==='1';
+      var collapsed=todasResueltas&&ls(planColKey)!=='0'||userCollapsed;
+      var planCard=mkDiv('background:rgba(100,200,140,.06);border:1px solid rgba(100,200,140,.2);border-radius:16px;padding:14px 16px;margin-bottom:14px');
+      var planHdr=mkDiv('display:flex;align-items:center;justify-content:space-between;margin-bottom:'+(collapsed?'0':'10px')+';cursor:pointer');
+      var planHdrLeft=mkDiv('display:flex;align-items:center;gap:8px');
+      planHdrLeft.appendChild(mkTxt('span',null,'🌱','font-size:14px'));
+      var planHdrTxt=mkDiv('');
+      planHdrTxt.appendChild(mkTxt('div',null,'Plan del día · Semana '+ageW(),'font-size:10px;color:#64c88c;font-weight:bold;letter-spacing:1px;text-transform:uppercase'));
+      if(todasResueltas)planHdrTxt.appendChild(mkTxt('div',null,'🎉 Completado — tap para ver','font-size:10px;color:#64c88c'));
+      else planHdrTxt.appendChild(mkTxt('div',null,hechasCount+' hechas · '+(idxs.length-resueltasCount)+' pendientes','font-size:10px;color:#a89070'));
+      planHdrLeft.appendChild(planHdrTxt);
+      planHdr.appendChild(planHdrLeft);
+      planHdr.appendChild(mkTxt('span',null,collapsed?'▼':'▲','font-size:11px;color:#a89070'));
+      planCard.appendChild(planHdr);
+      planHdr.onclick=function(){
+        var isNowCol=collapsed;
+        lss(planColKey,isNowCol?'0':'1');
+        render();
+      };
+      if(!collapsed){
+        var pct=idxs.length>0?Math.round(resueltasCount/idxs.length*100):0;
+        var barWrap=mkDiv('background:rgba(255,255,255,.06);border-radius:4px;height:4px;margin-bottom:12px;overflow:hidden');
+        var barFill=mkDiv('background:linear-gradient(90deg,#64c88c,#d4a843);height:4px;border-radius:4px');
+        barFill.style.width=pct+'%';
+        barWrap.appendChild(barFill);planCard.appendChild(barWrap);
+        idxs.forEach(function(aIdx){
+          var a=act.actividades[aIdx];if(!a)return;
+          var hecha=hechasHoy.indexOf(aIdx)>=0;
+          var omitida=omitidasHoy.indexOf(aIdx)>=0;
+          if(hecha||omitida)return;
+          var row=mkDiv('display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.04)');
+          var chk=document.createElement('button');
+          chk.style.cssText='width:24px;height:24px;border-radius:50%;border:2px solid rgba(100,200,140,.5);background:transparent;flex-shrink:0;cursor:pointer;color:#64c88c;font-size:13px;display:flex;align-items:center;justify-content:center;margin-top:1px';
+          chk.textContent='';
+          (function(i2,f2){chk.onclick=function(e){e.stopPropagation();
+            if(!D.actividadesHechas[f2])D.actividadesHechas[f2]=[];
+            if(D.actividadesHechas[f2].indexOf(i2)<0)D.actividadesHechas[f2].push(i2);
+            saveData();render();
+          };})(aIdx,hoy);
+          row.appendChild(chk);
+          var txt=mkDiv('flex:1');
+          txt.appendChild(mkTxt('div',null,a.ic+' '+a.label,'font-size:13px;color:#f0d9a0;line-height:1.4'));
+          txt.appendChild(mkTxt('div',null,a.desc,'font-size:11px;color:#a89070;line-height:1.5;margin-top:2px'));
+          row.appendChild(txt);
+          var omitBtn=document.createElement('button');
+          omitBtn.style.cssText='flex-shrink:0;background:none;border:none;color:#a89070;font-size:11px;cursor:pointer;padding:4px 2px;font-family:Georgia,serif;margin-top:2px';
+          omitBtn.textContent='Omitir';
+          (function(i3,f3){omitBtn.onclick=function(e){e.stopPropagation();
+            if(!D.actividadesHechas[f3+'_omit'])D.actividadesHechas[f3+'_omit']=[];
+            if(D.actividadesHechas[f3+'_omit'].indexOf(i3)<0)D.actividadesHechas[f3+'_omit'].push(i3);
+            saveData();render();
+          };})(aIdx,hoy);
+          row.appendChild(omitBtn);
+          planCard.appendChild(row);
         });
-      });
-
-      // Vacunas próximas en 14 días (desde VACUNAS_ARG)
-      if(typeof VACUNAS_ARG!=='undefined'){
-        VACUNAS_ARG.forEach(function(v){
-          if(D.bebe&&D.bebe.vacunas&&D.bebe.vacunas[v.id]) return; // ya aplicada
-          var edadDiasVac=v.edad_meses!=null?v.edad_meses*30.4:(v.edad_dias||0);
-          var diasFaltaVac=edadDiasVac-d;
-          if(diasFaltaVac>0&&diasFaltaVac<=14){
-            items.push({
-              ic:'💉',
-              titulo:'Vacuna: '+v.nombre+' en ~'+Math.round(diasFaltaVac)+' días',
-              sub:v.descripcion||'Consultar con el pediatra',
-              color:'#e07070',
-              urgente: diasFaltaVac<=7
-            });
-          }
-        });
-      }
-
-      // Hito esperado próximo
-      if(typeof HITOS_DEF!=='undefined'){
-        var proxHito=null;var minDiff=9999;
-        HITOS_DEF.forEach(function(h){
-          var yaLogrado=D.hitos&&D.hitos.some(function(hi){return hi.id===h.id&&hi.fecha;});
-          if(yaLogrado) return;
-          var semHito=h.semanas||0;
-          var dHito=semHito*7;
-          var diasHito=dHito-d;
-          if(diasHito>=0&&diasHito<minDiff){minDiff=diasHito;proxHito=h;}
-        });
-        if(proxHito&&minDiff<=14){
-          items.push({
-            ic:proxHito.ic||'⭐',
-            titulo:'Hito esperado: '+proxHito.label,
-            sub:minDiff<=3?'¡Podría aparecer pronto!':'En ~'+minDiff+' días aprox.',
-            color:'#64c88c'
+        var hechasIdxs=idxs.filter(function(i){return hechasHoy.indexOf(i)>=0;});
+        if(hechasIdxs.length>0){
+          var hechasRow=mkDiv('padding-top:6px;display:flex;flex-wrap:wrap;gap:4px');
+          hechasIdxs.forEach(function(i){var a=act.actividades[i];if(!a)return;
+            hechasRow.appendChild(mkTxt('span',null,'✓ '+a.label,'font-size:10px;color:#64c88c;background:rgba(100,200,140,.1);border-radius:6px;padding:2px 7px;opacity:.7'));
           });
+          planCard.appendChild(hechasRow);
         }
+        var verTodas=document.createElement('button');
+        verTodas.style.cssText='width:100%;margin-top:10px;background:none;border:none;color:#64c88c;font-size:11px;cursor:pointer;font-family:Georgia,serif;opacity:.8';
+        verTodas.textContent='Ver todas las actividades de la semana →';
+        verTodas.dataset.action='goActividades';
+        planCard.appendChild(verTodas);
       }
-
-      // Brote de crecimiento (semanas 2-3, 6, 12 son las más comunes)
-      var semana=Math.floor(d/7);
-      var brotesComunes=[2,3,6,12];
-      brotesComunes.forEach(function(s){
-        var diasParaBrote=(s*7)-d;
-        if(diasParaBrote>=0&&diasParaBrote<=5){
-          items.push({
-            ic:'📈',
-            titulo:'Posible brote de crecimiento (semana '+s+')',
-            sub:'Más hambre, más tomas, más llanto — dura 2-3 días y es normal.',
-            color:'#d4a843'
-          });
-        }
-      });
-
-      if(items.length===0) return;
-
-      var vBox=mkDiv('background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-radius:14px;padding:13px 15px;margin-bottom:12px');
-      vBox.appendChild(mkTxt('div',null,'🔭 Próximos 7 días','font-size:10px;font-weight:bold;color:#a89070;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px'));
-
-      items.forEach(function(it){
-        var row=mkDiv('display:flex;gap:10px;align-items:flex-start;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.04)');
-        row.appendChild(mkTxt('span',null,it.ic,'font-size:18px;flex-shrink:0;line-height:1.3'));
-        var txt=mkDiv('flex:1');
-        txt.appendChild(mkTxt('div',null,it.titulo,'font-size:12px;font-weight:bold;color:'+(it.color||'#f0d9a0')+';line-height:1.4'));
-        if(it.sub)txt.appendChild(mkTxt('div',null,it.sub,'font-size:11px;color:#a89070;margin-top:2px;line-height:1.4'));
-        row.appendChild(txt);
-        vBox.appendChild(row);
-      });
-
-      // Céfiro cierra con contexto de la etapa
-      var dW=Math.floor(d/7);
-      var etapaMsg='';
-      if(d<14) etapaMsg='🌬️ Estás en la etapa más intensa. La primera semana es supervivencia. La segunda, adaptación. Están haciéndolo muy bien.';
-      else if(d<30) etapaMsg='🌬️ Semana '+dW+': el ritmo empieza a tener pautas propias. El caos de los primeros días va cediendo poco a poco.';
-      else if(d<60) etapaMsg='🌬️ Mes 2: Cefe empieza a reconocerlos. La sonrisa social puede aparecer en cualquier momento.';
-      else etapaMsg='🌬️ Cada semana Cefe cambia. Los registros de hoy son la memoria que van a agradecer en 10 años.';
-
-      if(etapaMsg){
-        var etapaEl=mkDiv('margin-top:10px;padding-top:8px;border-top:1px solid rgba(255,255,255,.04)');
-        etapaEl.appendChild(mkTxt('div',null,etapaMsg,'font-size:11px;color:#b48cdc;line-height:1.6'));
-        vBox.appendChild(etapaEl);
-      }
-      bd.appendChild(vBox);
+      bd.appendChild(planCard);
     })();
 
     bd.appendChild(E.aBtn('🍼','Registrar Toma','Sesion ahora','','startToma'));
@@ -2150,18 +2394,20 @@ function render(){
     bd.appendChild(E.btn('bk','\u2190 Descartar','discardCurrent'));
     if(D.manualMode){
       bd.appendChild(E.el('div',{cls:'st',txt:'Toma Manual'}));
-      bd.appendChild(E.frow([E.field('Fecha',E.input('fi','mdate','date',null,D.mDate)),E.field('Hora inicio',E.input('fi','mstart','time')),E.field('Hora fin (opcional)',E.input('fi','mend','time'))]));
+      bd.appendChild(E.frow([E.field('Fecha',E.input('fi','mdate','date',null,D.mDate)),E.field('Hora inicio',E.input('fi','mstart','time'))]));
+      bd.appendChild(E.field('Hora fin (opcional)',E.input('fi','mend','time')));
       bd.appendChild(E.slbl('Lados'));
       if(D.mLados.length>0){
         var lb=E.div('lbox');
         D.mLados.forEach(function(l,i){var li=E.div('li');li.appendChild(mkTxt('span',null,'\u2713 '+l.s+' \u2014 '+l.m+' min'));li.appendChild(E.btn('dbtn','\u2715','rmManualLado',{idx:i}));lb.appendChild(li);});
         bd.appendChild(lb);
       }
-      var addRow=mkDiv('display:flex;gap:8px;margin-bottom:12px;align-items:flex-end');
-      var sDiv=E.div('ff');sDiv.style.flex='2';sDiv.appendChild(E.label('Posición'));
+      bd.appendChild(E.slbl('Agregar lado (opcional si hay leche extraída)'));
+      var addRow=mkDiv('display:flex;gap:8px;margin-bottom:8px;align-items:flex-end;flex-wrap:wrap');
+      var sDiv=E.div('ff');sDiv.style.cssText='flex:2;min-width:140px';sDiv.appendChild(E.label('Posición'));
       sDiv.appendChild(E.select('fs','mside',SIDES_DATA.map(function(s){return{v:s.label,l:s.emoji+' '+s.label};})));
-      var mDiv=E.div('ff');mDiv.style.flex='1';mDiv.appendChild(E.label('Min'));mDiv.appendChild(E.input('fi','mmins','number','10'));
-      var addBtn=E.btn('pb go','+ Agregar','addManualLado');addBtn.style.cssText='flex:0 0 100px;padding:10px 8px;font-size:12px;margin:0';
+      var mDiv=E.div('ff');mDiv.style.cssText='flex:1;min-width:70px';mDiv.appendChild(E.label('Min'));mDiv.appendChild(E.input('fi','mmins','number','10'));
+      var addBtn=E.btn('pb go','+ Agregar','addManualLado');addBtn.style.cssText='flex:0 0 90px;padding:10px 8px;font-size:12px;margin:0;align-self:flex-end';
       addRow.appendChild(sDiv);addRow.appendChild(mDiv);addRow.appendChild(addBtn);bd.appendChild(addRow);
       bd.appendChild(renderExtBox());bd.appendChild(renderNoteBox('tnote'));
       if(D.mLados.length>0)bd.appendChild(E.btn('pb go','Guardar toma','finishToma'));
@@ -2431,31 +2677,70 @@ function render(){
     else{
       var dKeys=[];var seen={};
       D.hist.forEach(function(h){var d=new Date(h.type==='toma'?h.s:h.t);var k=d.getFullYear()+'-'+d.getMonth()+'-'+d.getDate();if(!seen[k]){seen[k]=true;dKeys.push(k);}});
-      var frow2=mkDiv('margin-bottom:14px');frow2.appendChild(E.slbl('Filtrar'));
-      var fr2=E.div('fr');
+
+      // Filtro por día — compacto, chips horizontales
+      var frow2=mkDiv('margin-bottom:12px');
+      var fr2=E.div('fr');fr2.style.cssText='display:flex;gap:6px;flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch';
       var allBtn=E.btn('fb'+(D.hFilter===null?' on':''),'Todos','hFilter');allBtn.dataset.key='all';fr2.appendChild(allBtn);
       dKeys.forEach(function(k){
         var s=D.hist.find(function(h){var d=new Date(h.type==='toma'?h.s:h.t);return d.getFullYear()+'-'+d.getMonth()+'-'+d.getDate()===k;});
-        var fb2=E.btn('fb'+(D.hFilter===k?' on':''),fd(s.type==='toma'?s.s:s.t),'hFilter');fb2.dataset.key=k;fr2.appendChild(fb2);
+        var dateRef=s.type==='toma'?s.s:s.t;
+        var dt=new Date(dateRef);
+        var lbl=dt.toLocaleDateString('es-AR',{weekday:'short',day:'2-digit',month:'short'});
+        var fb2=E.btn('fb'+(D.hFilter===k?' on':''),lbl,'hFilter');fb2.dataset.key=k;fb2.style.whiteSpace='nowrap';
+        fr2.appendChild(fb2);
       });
       frow2.appendChild(fr2);bd.appendChild(frow2);
+
       var filt=D.hFilter?D.hist.filter(function(h){var d=new Date(h.type==='toma'?h.s:h.t);return(d.getFullYear()+'-'+d.getMonth()+'-'+d.getDate())===D.hFilter;}):D.hist;
       var ft2=filt.filter(function(h){return h.type==='toma';}),fp2=filt.filter(function(h){return h.type==='panal';});
-      var sm3=E.div('sm');sm3.appendChild(E.sbox('Tomas',ft2.length));sm3.appendChild(E.sbox('Min',ft2.reduce(function(a,b){return a+b.tot;},0)));sm3.appendChild(E.sbox('Panales',fp2.length));bd.appendChild(sm3);
+
+      // Estadísticas del período filtrado
+      var sm3=E.div('sm');
+      var totMin2=ft2.reduce(function(a,b){return a+b.tot;},0);
+      sm3.appendChild(E.sbox('Tomas',ft2.length));
+      sm3.appendChild(E.sbox('Min',totMin2));
+      sm3.appendChild(E.sbox('Pañales',fp2.length));
+      if(D.hFilter===null&&dKeys.length>1)sm3.appendChild(E.sbox('Días',dKeys.length));
+      bd.appendChild(sm3);
+
       bd.appendChild(E.btn('pb gy','Copiar historial','copyHist'));
-      filt.forEach(function(h){bd.appendChild(E.histRow(h,D.hist.indexOf(h)));});
+
+      // Agrupar por día si es vista "Todos"
+      if(!D.hFilter&&dKeys.length>1){
+        dKeys.forEach(function(k){
+          var dayItems=D.hist.filter(function(h){var d=new Date(h.type==='toma'?h.s:h.t);return d.getFullYear()+'-'+d.getMonth()+'-'+d.getDate()===k;});
+          if(dayItems.length===0)return;
+          var refDate=dayItems[0].type==='toma'?dayItems[0].s:dayItems[0].t;
+          var dt=new Date(refDate);
+          var dayTomas=dayItems.filter(function(h){return h.type==='toma';});
+          var dayPanel=dayItems.filter(function(h){return h.type==='panal';});
+          // Header del día
+          var dayHdr=mkDiv('display:flex;align-items:center;justify-content:space-between;margin:14px 0 6px');
+          dayHdr.appendChild(mkTxt('span',null,dt.toLocaleDateString('es-AR',{weekday:'long',day:'2-digit',month:'long'}),'font-size:12px;font-weight:bold;color:#d4a843;text-transform:capitalize'));
+          dayHdr.appendChild(mkTxt('span',null,dayTomas.length+'🍼 '+dayPanel.length+'🧷','font-size:11px;color:#a89070'));
+          bd.appendChild(dayHdr);
+          var sep=mkDiv('height:1px;background:rgba(212,168,67,.1);margin-bottom:8px');bd.appendChild(sep);
+          dayItems.forEach(function(h){bd.appendChild(E.histRow(h,D.hist.indexOf(h)));});
+        });
+      } else {
+        filt.forEach(function(h){bd.appendChild(E.histRow(h,D.hist.indexOf(h)));});
+      }
     }
-    // H: Botón compartir resumen diario
+    // H: Botón compartir resumen diario (usa día del filtro, no siempre hoy)
     (function(){
-      var hoy=new Date();
+      var hoy;
+      if(D.hFilter){var pts=D.hFilter.split('-');hoy=new Date(parseInt(pts[0]),parseInt(pts[1]),parseInt(pts[2]));}
+      else{hoy=new Date();}
       var tomHoy=tomas.filter(function(h){return h.type==='toma'&&sameDay(h.s,hoy);});
       var panHoy=panales.filter(function(h){return sameDay(h.t,hoy);});
       var pesoHoy=D.pesos.filter(function(p){return sameDay(p.t,hoy);});
       if(tomHoy.length>0||panHoy.length>0){
+        var esHoy=sameDay(hoy,new Date());
         var shareBtn=mkDiv('background:rgba(37,211,102,.08);border:1px solid rgba(37,211,102,.25);border-radius:13px;padding:12px 16px;margin-bottom:12px;cursor:pointer;display:flex;align-items:center;gap:10px');
         shareBtn.appendChild(mkTxt('span',null,'📊','font-size:20px'));
         var stxt=mkDiv('flex:1');
-        stxt.appendChild(mkTxt('div',null,'Compartir resumen del día','font-size:13px;font-weight:bold;color:#25d366'));
+        stxt.appendChild(mkTxt('div',null,esHoy?'Compartir resumen de hoy':'Compartir resumen del '+fd(hoy),'font-size:13px;font-weight:bold;color:#25d366'));
         stxt.appendChild(mkTxt('div',null,tomHoy.length+' tomas · '+panHoy.length+' pañales'+(pesoHoy.length?' · Peso registrado':''),'font-size:11px;color:#a89070'));
         shareBtn.appendChild(stxt);
         shareBtn.appendChild(mkTxt('span',null,'→','font-size:16px;color:#25d366'));
@@ -2551,14 +2836,6 @@ function render(){
     bd.appendChild(E.frow([E.field('Tipo parto',E.input('fi','bparto','text',null,b3.parto||'')),E.field('Apgar',E.input('fi','bapgar','text','9/10',b3.apgar||''))]));
     var notasEl=E.textarea('ni fi','bnotas','Notas medicas...',b3.notas||'');notasEl.style.minHeight='50px';
     bd.appendChild(E.field('Notas',notasEl));
-    bd.appendChild(E.slbl('Cobertura médica'));
-    bd.appendChild(E.frow([E.field('Obra social / Prepaga',E.input('fi','bos','text','OSDE, Swiss Medical...',b3.os||'')),E.field('N° de afiliado',E.input('fi','bafil','text',null,b3.afil||''))]));
-    bd.appendChild(E.frow([E.field('N° Historia clínica',E.input('fi','bhc','text',null,b3.hc||'')),E.field('Plan',E.input('fi','bosplan','text',null,b3.osplan||''))]));
-    bd.appendChild(E.slbl('Pediatra y condiciones'));
-    var pedSel=E.select('fs','bpediatra',([{v:'',l:'(ninguno seleccionado)'}]).concat(D.meds.map(function(m,i){return{v:i,l:'Dr/a. '+m.nom+' '+m.ape+' ('+m.esp+')'}})),b3.pedIdx!=null?b3.pedIdx:'');
-    bd.appendChild(E.field('Pediatra principal',pedSel));
-    var alergEl=E.textarea('ni fi','balergia','Alergias, condiciones conocidas...',b3.alergia||'');alergEl.style.minHeight='46px';
-    bd.appendChild(E.field('Alergias / condiciones',alergEl));
     bd.appendChild(E.btn('pb go','Guardar','saveBebe'));bd.appendChild(E.btn('gb rd','Cancelar','goPerfil'));
   }
 
@@ -2638,86 +2915,150 @@ function render(){
   else if(D.step==='visitaForm'){
     if(D.meds.length===0){bd.appendChild(mkTxt('div','mu','Primero agrega un medico.'));bd.appendChild(E.btn('pb go','Agregar medico','newMed'));return;}
     bd.appendChild(E.btn('bk','\u2190 Volver','goMedicos'));bd.appendChild(E.el('div',{cls:'st',txt:'Agendar Visita'}));
-
-    // Tipo de evento
-    bd.appendChild(E.field('Tipo de evento',E.select('fs','vtipo',[
-      {v:'consulta',l:'\uD83D\uDC68\u200D\u2695\uFE0F Consulta m\u00e9dica'},
-      {v:'vacuna',l:'\uD83D\uDC89 Vacuna'},
-      {v:'peso',l:'\u2696\uFE0F Control de peso'},
-      {v:'actividad',l:'\uD83C\uDFCB Actividad'},
-      {v:'otro',l:'\uD83D\uDCC5 Otro'}
+    bd.appendChild(E.field('Tipo',E.select('fs','vtipo',[
+      {v:'consulta',l:'Consulta m\u00E9dica'},{v:'vacuna',l:'Vacuna'},
+      {v:'peso',l:'Control de peso'},{v:'actividad',l:'Actividad'},{v:'otro',l:'Otro'}
     ],'consulta')));
-
-    // Selector de médico
-    bd.appendChild(E.field('M\u00e9dico',E.select('fs','vmed',D.meds.map(function(m,i){return{v:i,l:'Dr/a. '+m.nom+' '+m.ape+' ('+m.esp+')'};}),-1)));
-
-    // Fecha y hora
+    bd.appendChild(E.field('M\u00E9dico',E.select('fs','vmed',D.meds.map(function(m,i){return{v:i,l:'Dr/a. '+m.nom+' '+m.ape+' ('+m.esp+')'};}),-1)));
     bd.appendChild(E.frow([E.field('Fecha',E.input('fi','vfecha','date')),E.field('Hora',E.input('fi','vhora','time'))]));
-
-    // Duración del evento
-    bd.appendChild(E.field('Duraci\u00f3n',E.select('fs','vdur',[
-      {v:'30',l:'30 minutos'},
-      {v:'60',l:'1 hora'},
-      {v:'90',l:'1 hora 30 min'},
-      {v:'120',l:'2 horas'}
+    bd.appendChild(E.field('Duraci\u00F3n',E.select('fs','vdur',[
+      {v:'30',l:'30 min'},{v:'60',l:'1 hora'},{v:'90',l:'1h 30 min'},{v:'120',l:'2 horas'}
     ],'60')));
-
-    // Modalidad
     bd.appendChild(E.slbl('Modalidad'));
     var modRow=mkDiv('display:flex;gap:8px;margin-bottom:12px');
     var rbP=E.btn('rb on','Presencial');rbP.dataset.v='presencial';
     var rbV=E.btn('rb','Virtual');rbV.dataset.v='virtual';
     modRow.appendChild(rbP);modRow.appendChild(rbV);bd.appendChild(modRow);
-
-    // Recordatorios
     bd.appendChild(E.slbl('Recordatorios'));
     var notifRow=mkDiv('display:flex;gap:16px;margin-bottom:14px;flex-wrap:wrap');
     var cb1=document.createElement('label');cb1.style.cssText='display:flex;align-items:center;gap:6px;font-size:13px;color:#d4c090;cursor:pointer';
     var chk1=document.createElement('input');chk1.type='checkbox';chk1.id='vnotif1d';chk1.checked=true;chk1.style.cssText='width:16px;height:16px;accent-color:#d4a843';
-    cb1.appendChild(chk1);cb1.appendChild(document.createTextNode('1 d\u00eda antes'));
+    cb1.appendChild(chk1);cb1.appendChild(document.createTextNode('1 d\u00EDa antes'));
     var cb2=document.createElement('label');cb2.style.cssText='display:flex;align-items:center;gap:6px;font-size:13px;color:#d4c090;cursor:pointer';
     var chk2=document.createElement('input');chk2.type='checkbox';chk2.id='vnotif2h';chk2.checked=true;chk2.style.cssText='width:16px;height:16px;accent-color:#d4a843';
     cb2.appendChild(chk2);cb2.appendChild(document.createTextNode('2 horas antes'));
     notifRow.appendChild(cb1);notifRow.appendChild(cb2);bd.appendChild(notifRow);
-
-    // Motivo
     var descEl=E.textarea('ni fi','vdesc','Motivo de la consulta...');descEl.style.minHeight='46px';
     bd.appendChild(E.field('Motivo',descEl));
-
-    // Preview del título del evento
     var titlePrevBox=mkDiv('background:rgba(212,168,67,.08);border:1px solid rgba(212,168,67,.2);border-radius:10px;padding:10px 12px;margin-bottom:14px');
     titlePrevBox.id='visita-title-preview';
-    titlePrevBox.appendChild(mkTxt('div',null,'T\u00edtulo del evento','font-size:10px;color:#a89070;margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px'));
+    titlePrevBox.appendChild(mkTxt('div',null,'T\u00EDtulo del evento','font-size:10px;color:#a89070;margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px'));
     titlePrevBox.appendChild(mkTxt('span','vtitle-txt','','font-size:13px;color:#f0d9a0;font-weight:bold'));
     bd.appendChild(titlePrevBox);
-
     bd.appendChild(E.btn('pb rs','Guardar y generar Google Calendar','saveVisita'));
     bd.appendChild(E.btn('gb rd','Cancelar','goMedicos'));
-
-    // JS dinámico: actualizar preview del título
     setTimeout(function(){
-      function updateTitlePreview(){
-        var tipoEl=document.getElementById('vtipo');
-        var medEl=document.getElementById('vmed');
+      function updateTitle(){
+        var tipoEl=document.getElementById('vtipo'),medEl=document.getElementById('vmed');
         var tipo=tipoEl?tipoEl.value:'consulta';
         var mi=medEl?parseInt(medEl.value):-1;
         var med=(mi>=0&&D.meds[mi])||{};
-        var tipoLabels={consulta:'Consulta',vacuna:'Vacuna',peso:'Control de peso',actividad:'Actividad',otro:'Evento'};
-        var lbl=tipoLabels[tipo]||'Evento';
-        var espPart=med.esp?' '+med.esp:'';
-        var nomPart=(med.nom||med.ape)?' \u2014 Dr/a. '+(med.nom||'')+' '+(med.ape||''):'';
-        var title=lbl+espPart+nomPart+' \u2014 Cefe';
-        var sp=document.querySelector('#visita-title-preview .vtitle-txt');
-        if(sp)sp.textContent=title;
+        var labels={consulta:'Consulta',vacuna:'Vacuna',peso:'Control de peso',actividad:'Actividad',otro:'Evento'};
+        var t=(labels[tipo]||'Evento')+(med.esp?' '+med.esp:'')+(med.nom||med.ape?' — Dr/a. '+(med.nom||'')+' '+(med.ape||''):'')+' — Cefe';
+        var sp=document.querySelector('#visita-title-preview .vtitle-txt');if(sp)sp.textContent=t;
       }
-      var tipoEl2=document.getElementById('vtipo');
-      var medEl2=document.getElementById('vmed');
-      if(tipoEl2)tipoEl2.addEventListener('change',updateTitlePreview);
-      if(medEl2)medEl2.addEventListener('change',updateTitlePreview);
-      updateTitlePreview();
+      var t2=document.getElementById('vtipo'),m2=document.getElementById('vmed');
+      if(t2)t2.addEventListener('change',updateTitle);
+      if(m2)m2.addEventListener('change',updateTitle);
+      updateTitle();
     },100);
   }
 
+
+  // ── CONFIG ────────────────────────────────────────────────────
+  else if(D.step==='config'){
+    if(!D.config)D.config={notif:{cefiro_tips:true,logros_triviales:false,dato_dia:true,brotes:true,vacunas:true,hitos:true,plan_dia:true},historial_expandido:true,perfil_home:true};
+    if(!D.config.notif)D.config.notif={cefiro_tips:true,logros_triviales:false,dato_dia:true,brotes:true,vacunas:true,hitos:true,plan_dia:true};
+    var cfg=D.config, notif=cfg.notif||{};
+
+    bd.appendChild(E.el('div',{cls:'st',txt:'Configuración'}));
+
+    // ── Sección: Notificaciones de Céfiro ──
+    bd.appendChild(E.slbl('Notificaciones de Céfiro'));
+
+    function cfgToggle(label, sub, key, isNotif){
+      var val=isNotif?notif[key]:cfg[key];
+      var row=mkDiv('display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,.03);border:1px solid rgba(210,175,120,.1);border-radius:12px;padding:12px 14px;margin-bottom:8px');
+      var left=mkDiv('flex:1;padding-right:12px');
+      left.appendChild(mkTxt('div',null,label,'font-size:13px;color:#f0d9a0;font-weight:bold'));
+      if(sub)left.appendChild(mkTxt('div',null,sub,'font-size:11px;color:#a89070;margin-top:2px;line-height:1.4'));
+      row.appendChild(left);
+      // Toggle switch
+      var tog=document.createElement('button');
+      tog.style.cssText='width:44px;height:26px;border-radius:13px;border:none;cursor:pointer;position:relative;transition:background .2s;flex-shrink:0;background:'+(val?'#d4a843':'rgba(255,255,255,.12)');
+      var knob=document.createElement('span');
+      knob.style.cssText='position:absolute;top:3px;left:'+(val?'21px':'3px')+';width:20px;height:20px;border-radius:50%;background:#fff;transition:left .2s';
+      tog.appendChild(knob);
+      (function(k, n){tog.onclick=function(){
+        if(n){D.config.notif[k]=!D.config.notif[k];}else{D.config[k]=!D.config[k];}
+        saveData();render();
+      };})(key, isNotif);
+      row.appendChild(tog);
+      return row;
+    }
+
+    bd.appendChild(cfgToggle('Tips de Céfiro','Consejos semanales contextuales según la edad de Cefe','cefiro_tips',true));
+    bd.appendChild(cfgToggle('Vacunas y recordatorios','Alertas de vacunas próximas y recordatorios médicos','vacunas',true));
+    bd.appendChild(cfgToggle('Chequeos de hitos','Preguntas sobre el desarrollo de Cefe','hitos',true));
+    bd.appendChild(cfgToggle('Brotes de crecimiento','Aviso cuando se acerca una semana de mayor demanda','brotes',true));
+    bd.appendChild(cfgToggle('Plan de actividades','Actividades de estimulación del día en home','plan_dia',true));
+    bd.appendChild(cfgToggle('Logros básicos','Notificar primer pañal, primer toma, etc. (logros de un solo registro)','logros_triviales',true));
+
+    // ── Sección: Visualización ──
+    bd.appendChild(mkDiv('margin-top:8px'));
+    bd.appendChild(E.slbl('Visualización'));
+    bd.appendChild(cfgToggle('Perfil de Cefe en inicio','Mostrar card del perfil en la pantalla principal','perfil_home',false));
+    bd.appendChild(cfgToggle('Historial expandido','Mostrar todos los días por defecto en historial','historial_expandido',false));
+    bd.appendChild(mkDiv('margin-top:8px'));
+    bd.appendChild(E.slbl('Modo madrugada'));
+    var madRow=mkDiv('background:rgba(255,255,255,.03);border:1px solid rgba(210,175,120,.1);border-radius:12px;padding:12px 14px;margin-bottom:8px');
+    madRow.appendChild(mkTxt('div',null,'Home simplificado (1 tap) para tomas nocturnas','font-size:11px;color:#a89070;margin-bottom:8px'));
+    madRow.appendChild(E.select('fs','cfg-madrugada',[{v:'auto',l:'?? Auto (23hs–6hs)'},{v:'on',l:'✔ Siempre'},{v:'off',l:'✖ Desactivado'}],(D.config&&D.config.modo_madrugada)||'auto'));
+    var madSave=document.createElement('button');madSave.style.cssText='width:100%;margin-top:8px;padding:10px;border-radius:10px;border:1px solid rgba(212,168,67,.3);background:rgba(212,168,67,.1);color:#f0d9a0;font-size:13px;cursor:pointer;font-family:Georgia,serif';madSave.textContent='Guardar';
+    madSave.onclick=function(){var v=document.getElementById('cfg-madrugada');if(v){if(!D.config)D.config={};D.config.modo_madrugada=v.value;saveData();render();}};
+    madRow.appendChild(madSave);bd.appendChild(madRow);
+
+    // ── Sección: Dispositivo ──
+    bd.appendChild(mkDiv('margin-top:8px'));
+    bd.appendChild(E.slbl('Este dispositivo'));
+    var devRow=mkDiv('background:rgba(255,255,255,.03);border:1px solid rgba(210,175,120,.1);border-radius:12px;padding:12px 14px;margin-bottom:8px');
+    devRow.appendChild(mkTxt('div',null,'Nombre del dispositivo','font-size:12px;color:#a89070;margin-bottom:8px'));
+    var devInp2=E.input('fi','cfg-device-name','text','Tu nombre (Manu, Sari…)',getDeviceName());
+    devRow.appendChild(devInp2);
+    var devSaveBtn=document.createElement('button');
+    devSaveBtn.style.cssText='width:100%;margin-top:8px;padding:10px;border-radius:10px;border:1px solid rgba(212,168,67,.3);background:rgba(212,168,67,.1);color:#f0d9a0;font-size:13px;cursor:pointer;font-family:Georgia,serif';
+    devSaveBtn.textContent='Guardar nombre';
+    devSaveBtn.onclick=function(){var v=document.getElementById('cfg-device-name');if(v&&v.value.trim()){setDeviceName(v.value.trim());DEVICE_NAME=v.value.trim();render();}};
+    devRow.appendChild(devSaveBtn);
+    bd.appendChild(devRow);
+
+    // ── Sección: Alarmas ──
+    bd.appendChild(mkDiv('margin-top:8px'));
+    bd.appendChild(E.slbl('Alarma de toma'));
+    var alarmRow=mkDiv('background:rgba(255,255,255,.03);border:1px solid rgba(210,175,120,.1);border-radius:12px;padding:12px 14px;margin-bottom:8px');
+    alarmRow.appendChild(mkTxt('div',null,'Intervalo máximo entre tomas','font-size:12px;color:#a89070;margin-bottom:8px'));
+    var alarmSel=E.select('fs','cfg-alarm-interval',[
+      {v:'120',l:'2 horas'},
+      {v:'150',l:'2.5 horas'},
+      {v:'180',l:'3 horas (recomendado)'},
+      {v:'240',l:'4 horas'},
+      {v:'0',l:'Sin alarma'}
+    ],String(D.alarmMaxInterval||180));
+    alarmRow.appendChild(alarmSel);
+    var alarmSaveBtn=document.createElement('button');
+    alarmSaveBtn.style.cssText='width:100%;margin-top:8px;padding:10px;border-radius:10px;border:1px solid rgba(212,168,67,.3);background:rgba(212,168,67,.1);color:#f0d9a0;font-size:13px;cursor:pointer;font-family:Georgia,serif';
+    alarmSaveBtn.textContent='Guardar';
+    alarmSaveBtn.onclick=function(){var v=document.getElementById('cfg-alarm-interval');D.alarmMaxInterval=parseInt(v?v.value:'180')||180;saveData();render();};
+    alarmRow.appendChild(alarmSaveBtn);
+    bd.appendChild(alarmRow);
+
+    // ── Info versión ──
+    bd.appendChild(mkDiv('margin-top:16px'));
+    var verBox=mkDiv('text-align:center;padding:12px');
+    verBox.appendChild(mkTxt('div',null,'Alba · v3.0','font-size:12px;color:#a89070'));
+    verBox.appendChild(mkTxt('div',null,'Céfiro — sistema de momentos inteligente','font-size:10px;color:#6a7080;margin-top:4px'));
+    bd.appendChild(verBox);
+  }
 
   // ── DASHBOARD ─────────────────────────────────────────────────
   else if(D.step==='dash'){
@@ -3196,6 +3537,8 @@ document.addEventListener('click', function(ev) {
         case 'goNotas': closeMasMenu(); setStep('notas'); return;
         case 'goMemoria': closeMasMenu(); setStep('memoria'); return;
         case 'goHistoria': closeMasMenu(); setStep('historia'); return;
+        case 'goConfig': closeMasMenu(); setStep('config'); return;
+        case 'goCalendario': closeMasMenu(); window.location.href='cefe-calendario.html'; return;
         case 'goSintomas': closeMasMenu(); setStep('sintomas'); return;
         case 'goHitos': closeMasMenu(); setStep('hitos'); return;
         case 'goCartas': closeMasMenu(); setStep('cartas'); return;
@@ -4421,6 +4764,31 @@ function showPosInfo(sd) {
 }
 
 // ─── MINI SHEET — detalle de toma ────────────────────────────
+function openPanalSheet(h){
+  var ov=document.getElementById('panal-sheet-overlay');if(ov){ov.remove();return;}
+  var overlay=document.createElement('div');overlay.id='panal-sheet-overlay';
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9000;display:flex;align-items:flex-end;justify-content:center';
+  overlay.onclick=function(e){if(e.target===overlay)overlay.remove();};
+  var sheet=document.createElement('div');
+  sheet.style.cssText='background:#1a2d3d;border-radius:20px 20px 0 0;padding:20px 16px 32px;width:100%;max-width:480px;box-shadow:0 -4px 32px rgba(0,0,0,.5)';
+  var handle=document.createElement('div');handle.style.cssText='width:36px;height:4px;background:rgba(255,255,255,.2);border-radius:2px;margin:0 auto 18px';sheet.appendChild(handle);
+  var em=h.p==='Pis'?'💙':h.p==='Caca'?'💩':'🔀';
+  sheet.appendChild(mkTxt('div',null,em,'font-size:32px;text-align:center;margin-bottom:4px'));
+  sheet.appendChild(mkTxt('div',null,'🧷 Pañal — '+h.p,'font-size:18px;font-weight:bold;color:#f0d9a0;text-align:center;margin-bottom:4px'));
+  var dt=new Date(h.t);
+  sheet.appendChild(mkTxt('div',null,dt.toLocaleDateString('es-AR',{weekday:'long',day:'2-digit',month:'long'})+' · '+ft(h.t),'font-size:13px;color:#a89070;text-align:center;margin-bottom:14px'));
+  if(h.note&&h.note.trim()){var notaEl=mkDiv('background:rgba(255,255,255,.04);border-radius:10px;padding:10px 12px;margin-bottom:12px;font-size:13px;color:#d4c090;font-style:italic;line-height:1.5');notaEl.textContent='"'+h.note.trim()+'"';sheet.appendChild(notaEl);}
+  var eseD=D.hist.filter(function(x){return x.type==='panal'&&sameDay(x.t,h.t);});
+  sheet.appendChild(mkTxt('div',null,'Total ese día: '+eseD.length+' pañales','font-size:11px;color:#a89070;text-align:center;margin-bottom:14px'));
+  var waBtn=document.createElement('button');waBtn.style.cssText='width:100%;padding:13px;border-radius:13px;border:none;background:rgba(37,211,102,.15);color:#25d366;font-size:14px;font-weight:bold;cursor:pointer;font-family:Georgia,serif;margin-bottom:8px';
+  waBtn.textContent='📤 Compartir por WhatsApp';
+  (function(hc){waBtn.onclick=function(){var msg=genMsg(hc);window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');};})(h);
+  sheet.appendChild(waBtn);
+  var closeBtn=document.createElement('button');closeBtn.style.cssText='width:100%;padding:11px;border-radius:13px;border:1px solid rgba(255,255,255,.1);background:transparent;color:#a89070;font-size:13px;cursor:pointer;font-family:Georgia,serif';
+  closeBtn.textContent='Cerrar';closeBtn.onclick=function(){overlay.remove();};sheet.appendChild(closeBtn);
+  overlay.appendChild(sheet);document.body.appendChild(overlay);
+}
+
 function openTomaSheet(h) {
   var ov=document.getElementById('msheet-overlay');
   var cont=document.getElementById('msheet-content');
@@ -4715,14 +5083,6 @@ function getVacunaStatus(v) {
   };
 }
 
-function markVacuna(id, done) {
-  if (!D.bebe.vacunas) D.bebe.vacunas = {};
-  if (done) D.bebe.vacunas[id] = new Date().toISOString();
-  else delete D.bebe.vacunas[id];
-  saveData();
-  render();
-}
-
 
 // ENTREGA B SCREENS
 // ═══════════════════════════════════════════════════════════════
@@ -4873,6 +5233,42 @@ var LOGROS_DEF = [
   }},
 ];
 
+
+// ─── DETECCIÓN CONTEXTUAL DE SÍNTOMAS ───────────────────────
+function checkSintomasContextuales(){
+  var hoy=todayStr();
+  var askKey='sint_asked_'+hoy;
+  if(ls(askKey))return; // ya preguntamos hoy
+  var alertas=[];
+  // 1. Muchos días sin caca (>3 días)
+  var cacas=D.hist.filter(function(h){return h.type==='panal'&&(h.p==='Caca'||h.p==='Mixto');});
+  if(cacas.length>0){
+    var ultimaCaca=new Date(cacas[0].t);
+    var diasSinCaca=Math.floor((Date.now()-ultimaCaca.getTime())/86400000);
+    if(diasSinCaca>=3&&ageD()>7)alertas.push({tipo:'sin deposición',msg:'No hay deposición hace '+diasSinCaca+' días.'});
+  }
+  // 2. Tomas muy cortas repetidas (posible rechazo / molestia)
+  var tomasHoy=D.hist.filter(function(h){
+    return h.type==='toma'&&sameDay(h.s,new Date());
+  });
+  if(tomasHoy.length>=3){
+    var cortasHoy=tomasHoy.filter(function(h){return h.tot<5;});
+    if(cortasHoy.length>=3)alertas.push({tipo:'tomas cortas',msg:'3 o más tomas de menos de 5 minutos hoy.'});
+  }
+  // 3. Muchos más pañales de lo habitual (>12 en el día)
+  var panalesHoy=D.hist.filter(function(h){return h.type==='panal'&&sameDay(h.t,new Date());});
+  if(panalesHoy.length>12)alertas.push({tipo:'muchos pañales',msg:panalesHoy.length+' pañales hoy (inusualmente alto).'});
+  if(alertas.length===0)return;
+  lss(askKey,'1');
+  var alerta=alertas[0];
+  setTimeout(function(){
+    showCpop('info','??','Céfiro detectó algo',
+      'Patrón inusual',
+      alerta.msg+' ¿Querés registrar un síntoma?',
+      'Registrar síntoma',
+      function(){closeCpop();setStep('sintomas');});
+  },2500);
+}
 function calcRacha() {
   var racha=0,d=new Date();
   for(var i=0;i<60;i++){
@@ -4889,19 +5285,29 @@ function getLogrosDesbloqueados() {
   });
 }
 
+// IDs de logros triviales (primer registro — el usuario ya lo sabe)
+var LOGROS_TRIVIALES=['p_primer_panal','t_primer_toma','t_primera_semana'];
+
 function checkNuevosLogros() {
-  // Chequear si hay logros nuevos para celebrar con Céfiro
   if(!D.logrosVistos)D.logrosVistos={};
+  var cfg=D.config||{};var notif=cfg.notif||{};
+  var mostrarTriviales=notif.logros_triviales!==false;
   var desbloqueados=getLogrosDesbloqueados();
-  var nuevos=desbloqueados.filter(function(l){return !D.logrosVistos[l.id];});
+  var nuevos=desbloqueados.filter(function(l){
+    if(D.logrosVistos[l.id])return false;
+    // Filtrar triviales si config lo dice
+    if(!mostrarTriviales&&LOGROS_TRIVIALES.indexOf(l.id)>=0){
+      D.logrosVistos[l.id]=true; // marcar como visto sin celebrar
+      return false;
+    }
+    return true;
+  });
   if(nuevos.length===0)return;
-  // Celebrar el primero nuevo
   var logro=nuevos[0];
   D.logrosVistos[logro.id]=true;
   saveData();
   showCpop('celebracion',logro.ic,'🏆 Nuevo logro desbloqueado',logro.titulo,logro.desc,'¡Genial!',function(){
     closeCpop();
-    // Si hay más nuevos, encolar
     if(nuevos.length>1){setTimeout(checkNuevosLogros,400);}
   });
 }
@@ -5017,7 +5423,7 @@ onValue(ref(db,'cefe'),function(snap){
   if(data.pesos&&Array.isArray(data.pesos))D.pesos=data.pesos.map(function(p){if(!p)return null;var t=restoreDate(p.t);if(!t)return null;return{t:t,g:p.g,n:p.n||''};}).filter(Boolean);
   if(data.meds&&Array.isArray(data.meds))D.meds=data.meds.filter(Boolean);
   if(data.visits&&Array.isArray(data.visits))D.visits=data.visits.map(function(v){if(!v)return null;var dt=restoreDate(v.dt);if(!dt)return null;return Object.assign({},v,{dt:dt});}).filter(Boolean);
-  if(data.bebe&&typeof data.bebe==='object')D.bebe=Object.assign({},D.bebe,data.bebe);
+  if(data.bebe&&typeof data.bebe==='object'){D.bebe=Object.assign({},D.bebe,data.bebe);if(!D.bebe.vacunas)D.bebe.vacunas={};}
   if(data.padres&&Array.isArray(data.padres))D.padres=data.padres.filter(Boolean);
   if(data.notas&&Array.isArray(data.notas))D.notas=data.notas.filter(Boolean);
   if(data.sintomas&&Array.isArray(data.sintomas))D.sintomas=data.sintomas.map(function(s){if(!s)return null;var t=restoreDate(s.t);if(!t)return null;return Object.assign({},s,{t:t});}).filter(Boolean);
@@ -5028,6 +5434,8 @@ onValue(ref(db,'cefe'),function(snap){
   if(data.sleepStart)D.sleepStart=data.sleepStart;
   if(typeof data.nightMode==='boolean')D.nightMode=data.nightMode;
   if(typeof data.alarmMaxInterval==='number')D.alarmMaxInterval=data.alarmMaxInterval;
+  if(data.actividadesHechas&&typeof data.actividadesHechas==='object')D.actividadesHechas=data.actividadesHechas;
+  if(data.config&&typeof data.config==='object')D.config=Object.assign({notif:{cefiro_tips:true,logros_triviales:false,dato_dia:true,brotes:true,vacunas:true,hitos:true,plan_dia:true},historial_expandido:true,perfil_home:true},data.config,{notif:Object.assign({cefiro_tips:true,logros_triviales:false,dato_dia:true,brotes:true,vacunas:true,hitos:true,plan_dia:true},(data.config.notif||{}))});
   setDot('#64c8b4','Sincronizado');
   if(typeof applyNightMode==='function')applyNightMode();
   if(typeof render==='function')render();
@@ -5043,6 +5451,12 @@ onValue(ref(db,'cefe'),function(snap){
   setTimeout(function(){
     if(typeof checkNuevosLogros==='function') checkNuevosLogros();
   }, 1200);
+  setTimeout(function(){
+    if(typeof checkAutoHitos==='function') checkAutoHitos();
+  }, 2000);
+  setTimeout(function(){
+    if(typeof checkSintomasContextuales==='function') checkSintomasContextuales();
+  }, 3500);
 },function(err){fbReady=true;setDot('#e07070','Error Firebase');console.error(err);});
 </script>
 
