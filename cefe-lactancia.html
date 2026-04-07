@@ -240,6 +240,14 @@ button{font-family:Georgia,serif;-webkit-appearance:none}
         <span class="mas-item-ic">📖</span>
         <span><span class="mas-item-lbl">Memoria</span><span class="mas-item-sub">Notas, cartas, síntomas</span></span>
       </button>
+      <button class="mas-item" data-action="goLogros">
+        <span class="mas-item-ic">🏆</span>
+        <span><span class="mas-item-lbl">Logros</span><span class="mas-item-sub">Tu camino como padres</span></span>
+      </button>
+      <button class="mas-item" data-action="goLogros">
+        <span class="mas-item-ic">🏆</span>
+        <span><span class="mas-item-lbl">Logros</span><span class="mas-item-sub">Tu camino como padres</span></span>
+      </button>
       <button class="mas-item" data-action="toggleNight">
         <span class="mas-item-ic" id="night-ic">🌙</span>
         <span><span class="mas-item-lbl" id="night-lbl">Modo noche</span><span class="mas-item-sub">Tomas nocturnas</span></span>
@@ -360,7 +368,8 @@ var E = {
       var t2 = document.createElement('div'); t2.className = 'hrs'; t2.textContent = lt + (h.note ? ' | ' + h.note.substring(0, 20) : '');
       lDiv.appendChild(t1); lDiv.appendChild(t2);
       var rDiv = document.createElement('div'); rDiv.className = 'hri';
-      var mins = mkTxt('div', null, h.tot + 'm', 'font-size:15px;font-weight:bold;color:#d4a843');
+      var minCtx=h.tot>=15?'✅':h.tot>=7?'👍':'⏱';
+      var mins = mkTxt('div', null, minCtx+' '+h.tot+'m', 'font-size:14px;font-weight:bold;color:#d4a843');
       var wa = document.createElement('button');
       wa.textContent = '📤'; wa.title = 'Compartir por WhatsApp';
       wa.style.cssText = 'background:none;border:none;font-size:18px;cursor:pointer;padding:2px 4px;opacity:.7';
@@ -475,6 +484,7 @@ var D = {
   editNotaFecha: null,
   editVisitaIdx: -1,
   actividadesHechas: {},  // {fecha: [idx, idx]} actividades del día marcadas
+  logrosVistos: {},       // {id: true} logros ya celebrados con popup
   // alarm
   alarmTimer: null, alarmFired: false, nextToma: null, notifTimer: null,
   // alarm
@@ -569,6 +579,7 @@ function loadData() {
     var ca = ls('cartas'); if (ca) D.cartas = JSON.parse(ca);
     var mo = ls('momentos'); if (mo) D.momentos = JSON.parse(mo);
     var ah = ls('actHechas'); if (ah) D.actividadesHechas = JSON.parse(ah);
+    var lv = ls('logrosVistos'); if (lv) D.logrosVistos = JSON.parse(lv);
     var nm = ls('nightMode'); if (nm) D.nightMode = JSON.parse(nm);
   } catch(e) {}
 
@@ -625,6 +636,7 @@ function saveData() {
   lss('hitos', D.hitos); lss('cartas', D.cartas);
   lss('momentos', D.momentos);
   lss('actHechas', D.actividadesHechas);
+  lss('logrosVistos', D.logrosVistos);
   lss('nightMode', D.nightMode);
   lss('alarmMax', D.alarmMaxInterval||180);
   lss('sleepStart2', D.sleepStart||null);
@@ -895,19 +907,57 @@ function genMsg(entry){
     if(entry.note&&entry.note.trim())lines.push('Nota: '+entry.note.trim());
   } else if(entry.type==='visita'){
     var med=D.meds[entry.mi]||{};
+    var b=D.bebe||{};
     var dt=new Date(entry.dt);
+    var durMs=(entry.durMin||60)*60000;
     var ds=dt.getFullYear()+p2(dt.getMonth()+1)+p2(dt.getDate())+'T'+p2(dt.getHours())+p2(dt.getMinutes())+'00';
-    var de=new Date(dt.getTime()+3600000);
+    var de=new Date(dt.getTime()+durMs);
     var des=de.getFullYear()+p2(de.getMonth()+1)+p2(de.getDate())+'T'+p2(de.getHours())+p2(de.getMinutes())+'00';
-    var gcUrl='https://calendar.google.com/calendar/render?action=TEMPLATE&text='+encodeURIComponent('Visita '+(med.esp||'')+' - Cefe')+'&dates='+ds+'/'+des;
-    lines.push('*Visita Medica - Cefe*');
-    lines.push('Medico: Dr/a. '+(med.nom||'')+' '+(med.ape||'')+' ('+(med.esp||'')+')');
-    lines.push('Fecha: '+fdl(entry.dt)+' | Hora: '+ft(entry.dt));
+
+    // Título enriquecido
+    var tipoLabels={consulta:'Consulta',vacuna:'Vacuna',peso:'Control de peso',actividad:'Actividad',otro:'Evento'};
+    var tipoLbl=tipoLabels[entry.tipo||'consulta']||'Consulta';
+    var espPart=med.esp?' '+med.esp:'';
+    var nomPart=(med.nom||med.ape)?' — Dr/a. '+(med.nom||'')+' '+(med.ape||''):'';
+    var eventTitle=tipoLbl+espPart+nomPart+' — Cefe';
+
+    // Descripción enriquecida para GCal
+    var gcDesc='Paciente: '+(b.nombre||'Cefe')+' '+(b.apellido||'Diaz Palacios');
+    if(b.dni)gcDesc+='\nDNI: '+b.dni;
+    if(b.os)gcDesc+='\nObra social: '+b.os+(b.afil?' N° '+b.afil:'');
+    if(b.sangre)gcDesc+='\nGrupo: '+b.sangre;
+    if(entry.desc&&entry.desc.trim())gcDesc+='\nMotivo: '+entry.desc.trim();
+    if(med.tel)gcDesc+='\nTel médico: '+med.tel;
+    if(D.pesos&&D.pesos[0])gcDesc+='\nÚltimo peso: '+gkg(D.pesos[0].g)+'kg ('+fd(D.pesos[0].t)+')';
+
+    // GCal URL
+    var gcParams='action=TEMPLATE';
+    gcParams+='&text='+encodeURIComponent(eventTitle);
+    gcParams+='&dates='+ds+'/'+des;
+    if(entry.mod==='presencial'&&med.dir)gcParams+='&location='+encodeURIComponent(med.dir);
+    gcParams+='&details='+encodeURIComponent(gcDesc);
+    if(entry.notif1d)gcParams+='&add=1440'; // 1 día
+    if(entry.notif2h)gcParams+='&add=120';  // 2 hs (nota: GCal no soporta múltiples &add en URL, se usa el primero)
+    var gcUrl='https://calendar.google.com/calendar/render?'+gcParams;
+
+    // iCal URL (Apple Calendar)
+    var icalUrl='data:text/calendar;charset=utf8,BEGIN:VCALENDAR%0AVERSION:2.0%0ABEGIN:VEVENT%0ASUMMARY:'+encodeURIComponent(eventTitle)+'%0ADTSTART:'+ds+'%0ADTEND:'+des+(med.dir&&entry.mod==='presencial'?'%0ALOCATION:'+encodeURIComponent(med.dir):'')+'%0ADESCRIPTION:'+encodeURIComponent(gcDesc)+'%0AEND:VEVENT%0AEND:VCALENDAR';
+
+    lines.push('*'+eventTitle+'*');
+    lines.push('Médico: Dr/a. '+(med.nom||'')+' '+(med.ape||'')+' ('+(med.esp||'')+')');
+    lines.push('Fecha: '+fdl(entry.dt)+' | Hora: '+ft(entry.dt)+' | Duración: '+(entry.durMin||60)+' min');
     lines.push('Modalidad: '+entry.mod);
-    if(entry.mod==='presencial'&&med.dir)lines.push('Direccion: '+med.dir);
-    if(entry.desc&&entry.desc.trim())lines.push('Obs: '+entry.desc.trim());
-    lines.push('Agendar: '+gcUrl);
-    if(med.tel)lines.push('WhatsApp: https://wa.me/'+med.tel.replace(/[^0-9]/g,''));
+    if(entry.mod==='presencial'&&med.dir)lines.push('Dirección: '+med.dir);
+    if(b.os)lines.push('Obra social: '+b.os+(b.afil?' — N° '+b.afil:''));
+    if(entry.desc&&entry.desc.trim())lines.push('Motivo: '+entry.desc.trim());
+    lines.push('');
+    lines.push('\uD83D\uDCC5 Google Calendar:');
+    lines.push(gcUrl);
+    if(med.tel){
+      lines.push('');
+      lines.push('\uD83D\uDC68\u200D\u2695\uFE0F WhatsApp médico:');
+      lines.push('https://wa.me/'+med.tel.replace(/[^0-9]/g,''));
+    }
   }
   return lines.join('\n');
 }
@@ -1076,12 +1126,16 @@ function savePadre(){
 }
 function saveBebe(){
   var prev=D.bebe||{};
+  var pedEl=document.getElementById('bpediatra');
+  var pedIdx=pedEl&&pedEl.value!==''?parseInt(pedEl.value):null;
   D.bebe={nombre:gv('bnom'),apellido:gv('bape'),apodo:gv('bapodo')||'Bebe',
     fn:(document.getElementById('bfn')||{}).value||'',hora:prev.hora||'',
     sexo:(document.getElementById('bsexo')||{}).value||'M',
     pn:gi('bpn')||3365,talla:gi('btalla'),cc:gi('bcc'),
     sangre:gv('bsangre'),dni:gv('bdni'),eg:gi('beg')||40,
     parto:gv('bparto'),apgar:gv('bapgar'),notas:gv('bnotas'),
+    os:gv('bos')||'',afil:gv('bafil')||'',hc:gv('bhc')||'',osplan:gv('bosplan')||'',
+    pedIdx:pedIdx,alergia:gv('balergia')||'',
     vacHepB:prev.vacHepB||'',vacBCG:prev.vacBCG||false,
     dx:prev.dx||'',pa:prev.pa||0,fa:prev.fa||''};
   saveData();setStep('perfil');
@@ -1092,8 +1146,13 @@ function saveVisita(){
   var dv=gv('vfecha'),hv=gv('vhora');
   if(!dv||!hv){alert('Fecha y hora obligatorias.');return;}
   var rb=document.querySelector('.rb.on');
+  var durMin=parseInt((document.getElementById('vdur')||{}).value||'60');
+  var tipo=(document.getElementById('vtipo')||{}).value||'consulta';
+  var notif1d=(document.getElementById('vnotif1d')||{}).checked!==false;
+  var notif2h=(document.getElementById('vnotif2h')||{}).checked!==false;
   var entry={type:'visita',mi:mi,dt:new Date(dv+'T'+hv),mod:rb?rb.dataset.v:'presencial',
-    desc:gv('vdesc'),estado:'pendiente',conclusiones:'',receta:'',proxVisita:'',pesoEnVisita:0};
+    desc:gv('vdesc'),estado:'pendiente',conclusiones:'',receta:'',proxVisita:'',pesoEnVisita:0,
+    tipo:tipo,durMin:durMin,notif1d:notif1d,notif2h:notif2h};
   D.visits.unshift(entry);saveData();D.msg=genMsg(entry);D.msgType='visita';setStep('summary');
 }
 function savePostVisita(idx){
@@ -1511,7 +1570,34 @@ function medCard(m,i){
   var row=mkDiv('display:flex;gap:7px;margin-top:8px');
   var eb=E.btn('','Editar','editMed',{idx:i});eb.style.cssText='flex:1;background:rgba(255,255,255,.05);border:1px solid rgba(210,175,120,.2);border-radius:8px;padding:6px;color:#d4c090;font-size:11px;cursor:pointer';
   var db=E.btn('','Eliminar','delMed',{idx:i});db.style.cssText='flex:1;background:rgba(224,112,112,.1);border:1px solid rgba(224,112,112,.2);border-radius:8px;padding:6px;color:#e07070;font-size:11px;cursor:pointer';
-  row.appendChild(eb);row.appendChild(db);mc.appendChild(row);return mc;
+  row.appendChild(eb);row.appendChild(db);mc.appendChild(row);
+  // Botón "Enviar datos al médico por WA"
+  if(m.tel){
+    var waBtn=document.createElement('button');
+    waBtn.style.cssText='width:100%;margin-top:7px;padding:8px;border-radius:9px;border:1px solid rgba(100,200,180,.25);background:rgba(100,200,180,.08);color:#64c8b4;font-size:12px;cursor:pointer;font-family:Georgia,serif;font-weight:bold';
+    waBtn.textContent='\uD83D\uDC68\u200D\u2695\uFE0F Enviar datos al médico por WA';
+    (function(mCopy){waBtn.onclick=function(){
+      var b=D.bebe||{};
+      var lp=D.pesos&&D.pesos[0];
+      var vacAplicadas=(b.vacHepB?'\n• HepB: '+b.vacHepB:'')+(b.vacBCG?'\n• BCG: '+b.vacBCG:'');
+      var vacunasList=[];
+      if(b.vacunas){Object.keys(b.vacunas).forEach(function(k){if(b.vacunas[k])vacunasList.push('• '+k+': '+b.vacunas[k]);});}
+      var msg='\uD83D\uDC76 *Datos de Cefe para consulta*';
+      msg+='\n\nNombre: '+(b.nombre||'Cefe')+' '+(b.apellido||'');
+      msg+='\nFecha nac: '+(b.fn?new Date(b.fn+'T00:00').toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'}):'');
+      if(b.dni)msg+='\nDNI: '+b.dni;
+      if(b.sangre)msg+='\nGrupo: '+b.sangre;
+      if(b.os)msg+='\n\u2665\uFE0F Obra social: '+b.os+(b.afil?' — N° '+b.afil:'')+(b.osplan?' ('+b.osplan+')':'');
+      if(b.hc)msg+='\nHist. Clínica: '+b.hc;
+      if(lp)msg+='\n\n⚖️ Último peso: '+gkg(lp.g)+'kg ('+fd(lp.t)+')';
+      if(vacAplicadas||vacunasList.length>0)msg+='\n\n💉 Vacunas aplicadas:'+vacAplicadas+(vacunasList.length?'\n'+vacunasList.join('\n'):'');
+      if(b.alergia&&b.alergia.trim())msg+='\n\n⚠️ Alergias/condiciones: '+b.alergia.trim();
+      msg+='\n\nMotivo de consulta: (completar)';
+      window.open('https://wa.me/'+mCopy.tel.replace(/[^0-9]/g,'')+'?text='+encodeURIComponent(msg));
+    };})(m);
+    mc.appendChild(waBtn);
+  }
+  return mc;
 }
 
 // ─── RENDER ───────────────────────────────────────────────────
@@ -1520,7 +1606,7 @@ function render(){
   // Update device name display
   var dnEl=document.getElementById('device-name-display');
   if(dnEl)dnEl.textContent=getDeviceName()||'';
-  var MAS_STEPS=['perfil','editBebe','editPadre','medicos','editMed','visitaForm','postVisita','consultaMedica','extras','notas','editNota','sintomas','editSintoma','hitos','cartas','editCarta','astro','actividades','vacunas','memoria','pendientes','historia'];
+  var MAS_STEPS=['perfil','editBebe','editPadre','medicos','editMed','visitaForm','postVisita','consultaMedica','extras','notas','editNota','sintomas','editSintoma','hitos','cartas','editCarta','astro','actividades','vacunas','memoria','pendientes','historia','logros'];
   var TAB_MAP={home:['home'],history:['history'],peso:['peso','pesoEntry'],dash:['dash'],mas:MAS_STEPS};
   Object.keys(TAB_MAP).forEach(function(t){
     var el=document.getElementById('bn-'+t);if(!el)return;
@@ -1529,7 +1615,7 @@ function render(){
   var nb=document.getElementById('night-btn');if(nb)nb.style.color=D.nightMode?'#f0d9a0':'#a89070';
   var htEl=document.getElementById('hdr-title');
   if(typeof updatePendBadge==='function')updatePendBadge();
-  if(htEl){var TITLES={home:'Ceferino',history:'Historial',peso:'Peso',pesoEntry:'Peso',dash:'Dashboard',perfil:'Perfil',editBebe:'Perfil',editPadre:'Perfil',medicos:'M\u00e9dicos',editMed:'M\u00e9dicos',visitaForm:'Médicos',postVisita:'Seguimiento',consultaMedica:'Consulta Médica',extras:'Extras',notas:'Notas',editNota:'Nueva Nota',sintomas:'S\u00edntomas',editSintoma:'S\u00edntoma',hitos:'Hitos',cartas:'Cartas',editCarta:'Carta',astro:'Recreativo',actividades:'Actividades',vacunas:'Vacunas',memoria:'Memoria de Cefe',pendientes:'Pendientes',historia:'Historia de Cefe',toma:'Toma',panal:'Pa\u00f1al',preview:'Confirmar',summary:'Mensaje'};
+  if(htEl){var TITLES={home:'Ceferino',history:'Historial',peso:'Peso',pesoEntry:'Peso',dash:'Dashboard',perfil:'Perfil',editBebe:'Perfil',editPadre:'Perfil',medicos:'M\u00e9dicos',editMed:'M\u00e9dicos',visitaForm:'Médicos',postVisita:'Seguimiento',consultaMedica:'Consulta Médica',logros:'Logros',extras:'Extras',notas:'Notas',editNota:'Nueva Nota',sintomas:'S\u00edntomas',editSintoma:'S\u00edntoma',hitos:'Hitos',cartas:'Cartas',editCarta:'Carta',astro:'Recreativo',actividades:'Actividades',vacunas:'Vacunas',memoria:'Memoria de Cefe',pendientes:'Pendientes',historia:'Historia de Cefe',toma:'Toma',panal:'Pa\u00f1al',preview:'Confirmar',summary:'Mensaje'};
   htEl.textContent=TITLES[D.step]||'Ceferino';}
 
   var bd=document.getElementById('bd');if(!bd)return;
@@ -1602,40 +1688,122 @@ function render(){
       bgt.appendChild(bgl);bgt.appendChild(E.btn('tb','Volver a toma','goToToma'));bd.appendChild(bgt);
     }
     if(D.hist.length>0||lastP){
-      var card=E.div('card');card.appendChild(E.slbl('Resumen sesion'));
-      var sr=E.div('srow');
-      sr.appendChild(E.sbox('Tomas',tomas.length));
-      sr.appendChild(E.sbox('Panales',panales.length));
-      sr.appendChild(E.sbox('Caca/Mix',panales.filter(function(p){return p.p!=='Pis';}).length));
-      card.appendChild(sr);
-      if(lastT){
-        var nxt=mkTxt('div',null,(function(){var sd=safeDate(lastT.s);var mins=sd?Math.round((Date.now()-sd.getTime())/60000):0;return 'Ultima toma: hace '+mins+' min | Proxima: '+ft(lastT.nt);})(),'margin-top:8px;font-size:12px;color:#c4b090');
-        card.appendChild(nxt);
+      var card=E.div('card');
+      // ── Título dinámico según hora del día ──
+      var hora=new Date().getHours();
+      var saludoHora=hora<12?'Buenos días':hora<18?'Buenas tardes':'Buenas noches';
+      var tituloCard='☀️ Resumen del día';
+      if(hora>=21||hora<6)tituloCard='🌙 Noche de Cefe';
+      else if(hora<12)tituloCard='☀️ Mañana de Cefe';
+      card.appendChild(E.slbl(tituloCard));
+
+      // ── ML totales del día ──
+      var dm=typeof getDailyML==='function'?getDailyML():{total:0,objMin:300,objMax:400,pct:0,ntomas:tomas.length};
+      var tomasHoy=D.hist.filter(function(h){var sd=safeDate(h.type==='toma'?h.s:h.t);return h.type==='toma'&&sd&&sameDay(sd,new Date());});
+      var panalesHoy=D.hist.filter(function(h){var sd=safeDate(h.t);return h.type==='panal'&&sd&&sameDay(sd,new Date());});
+      var mlHoy=dm.total;
+      var mlMin=dm.objMin,mlMax=dm.objMax;
+      var mlPct=mlMax>0?Math.min(100,Math.round(mlHoy/mlMax*100)):0;
+
+      // ── Grid 2x2 con contexto ──
+      var grid=mkDiv('display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px');
+
+      // Tomas con contexto
+      var tomasIdeal='6-12 tomas/día es normal';
+      var tomasCtx=tomasHoy.length>=6?'✅ ritmo ideal':tomasHoy.length>=4?'👍 buen ritmo':'aún temprano';
+      var cTomas=mkDiv('background:rgba(212,168,67,.07);border-radius:12px;padding:10px 12px');
+      cTomas.appendChild(mkTxt('div',null,'🍼 '+tomasHoy.length+' tomas','font-size:16px;font-weight:bold;color:#f0d9a0'));
+      cTomas.appendChild(mkTxt('div',null,tomasCtx,'font-size:10px;color:#a89070;margin-top:2px'));
+      grid.appendChild(cTomas);
+
+      // Pañales con contexto
+      var pCtx=panalesHoy.length>=4?'✅ muy bien':panalesHoy.length>=2?'👍 bien':'';
+      var cPanel=mkDiv('background:rgba(100,200,180,.06);border-radius:12px;padding:10px 12px');
+      cPanel.appendChild(mkTxt('div',null,'🧷 '+panalesHoy.length+' pañales','font-size:16px;font-weight:bold;color:#f0d9a0'));
+      if(pCtx)cPanel.appendChild(mkTxt('div',null,pCtx,'font-size:10px;color:#a89070;margin-top:2px'));
+      var cacaHoy=panalesHoy.filter(function(p){return p.p!=='Pis';}).length;
+      if(cacaHoy>0)cPanel.appendChild(mkTxt('div',null,cacaHoy+' deposición'+(cacaHoy>1?'es':''),'font-size:10px;color:#64c8b4;margin-top:1px'));
+      grid.appendChild(cPanel);
+      card.appendChild(grid);
+
+      // ── ML del día con mini barra contextual ──
+      if(mlHoy>0){
+        var mlCard=mkDiv('background:rgba(100,200,180,.06);border:1px solid rgba(100,200,180,.15);border-radius:12px;padding:11px 13px;margin-bottom:10px');
+        var mlHdr=mkDiv('display:flex;align-items:center;justify-content:space-between;margin-bottom:6px');
+        mlHdr.appendChild(mkTxt('div',null,'≈ '+mlHoy+'ml ingeridos hoy','font-size:14px;font-weight:bold;color:#64c8b4'));
+        var mlOk=mlHoy>=mlMin;
+        mlHdr.appendChild(mkTxt('span',null,mlOk?'✅':'','font-size:14px'));
+        mlCard.appendChild(mlHdr);
+        // Barra de progreso suave
+        var barW2=mkDiv('background:rgba(255,255,255,.06);border-radius:4px;height:5px;margin-bottom:5px;overflow:hidden');
+        var barF2=mkDiv('background:linear-gradient(90deg,#64c8b4,#d4a843);height:5px;border-radius:4px');
+        barF2.style.width=mlPct+'%';
+        barW2.appendChild(barF2);mlCard.appendChild(barW2);
+        // Contexto debajo de la barra
+        var mlCtx=mlOk?'Dentro del rango esperado para Cefe 🎯':
+          mlHoy>mlMin*0.7?'Va muy bien, sigue así':'Aún temprano en el día';
+        mlCard.appendChild(mkTxt('div',null,mlCtx+' · Objetivo: '+mlMin+'–'+mlMax+'ml','font-size:10px;color:#a89070'));
+        card.appendChild(mlCard);
       }
+
+      // ── Peso ──
       if(lastP){
-        var chip=E.div('wchip');chip.dataset.action='goPesoScreen';
-        chip.textContent=gkg(lastP.g)+' kg | '+fd(lastP.t);card.appendChild(chip);
+        var pesoHoy=D.pesos.filter(function(p){return sameDay(p.t,new Date());});
+        var pn=D.bebe.pn||3365;
+        var diffNac=lastP.g-pn;
+        var pesoCtx=diffNac>=0?'↑ '+diffNac+'g sobre peso de nacimiento 🎉':
+          Math.abs(diffNac)<200?'Muy cerca del peso de nacimiento 💪':
+          'Recuperando peso · '+Math.abs(diffNac)+'g para el de nacimiento';
+        var wchip=E.div('wchip');wchip.dataset.action='goPesoScreen';
+        wchip.textContent='⚖️ '+gkg(lastP.g)+' kg · '+pesoCtx;
+        card.appendChild(wchip);
       }
-      // C: Pañales de hoy
-      var pHoy=panales.filter(function(p){return sameDay(p.t,new Date());});
-      if(pHoy.length>0){
-        var pChip=mkTxt('div',null,'🧷 Hoy: '+pHoy.length+' pañal'+(pHoy.length!==1?'es':'')+' · '+pHoy.filter(function(p){return p.p!=='Pis';}).length+' caca/mixto','font-size:11px;color:#a89070;margin-top:6px');
-        card.appendChild(pChip);
-      }
+
+      // ── Tendencia del ritmo (predicción de Céfiro) ──
+      (function(){
+        if(tomasHoy.length<2)return;
+        var ahora=new Date();
+        var inicioHoy=new Date(ahora.getFullYear(),ahora.getMonth(),ahora.getDate());
+        var minTranscurridos=(ahora-inicioHoy)/60000;
+        if(minTranscurridos<60)return;
+        var ritmoActual=tomasHoy.length/(minTranscurridos/60); // tomas/hora
+        var proyectado=Math.round(ritmoActual*24);
+        var proy=mkDiv('background:rgba(180,140,220,.06);border:1px solid rgba(180,140,220,.12);border-radius:10px;padding:8px 12px;margin-top:6px');
+        var proyMsg='';
+        if(proyectado>=8&&proyectado<=12){
+          proyMsg='🌬️ Al ritmo de hoy, Cefe tendría ~'+proyectado+' tomas — ¡dentro del rango ideal!';
+        } else if(proyectado>12){
+          proyMsg='🌬️ Ritmo intenso hoy: ~'+proyectado+' tomas proyectadas. Puede ser un día de mayor demanda, es normal.';
+        } else if(proyectado>=6){
+          proyMsg='🌬️ Buen ritmo: ~'+proyectado+' tomas proyectadas para el día.';
+        } else {
+          proyMsg='🌬️ Ritmo tranquilo hasta ahora: ~'+proyectado+' tomas proyectadas.';
+        }
+        if(mlHoy>0){
+          var mlProyectado=Math.round(mlHoy/(minTranscurridos/60/24));
+          proyMsg+=' · ~'+mlProyectado+'ml/día al ritmo actual';
+        }
+        proy.appendChild(mkTxt('div',null,proyMsg,'font-size:11px;color:#b48cdc;line-height:1.5'));
+        card.appendChild(proy);
+      })();
+
       bd.appendChild(card);
     }
-    // D: Racha de registro
+    // D: Racha de registro + mini logros
     (function(){
-      var racha=0,d=new Date();
-      for(var i=0;i<30;i++){
-        var dd=new Date(d);dd.setDate(dd.getDate()-i);
-        var tieneReg=D.hist.some(function(h){return sameDay(h.type==='toma'?h.s:h.t,dd);})||D.pesos.some(function(p){return sameDay(p.t,dd);});
-        if(tieneReg)racha++;else break;
-      }
+      var racha=typeof calcRacha==='function'?calcRacha():0;
       if(racha>=2){
-        var rachaEl=mkDiv('display:flex;align-items:center;gap:8px;background:rgba(212,168,67,.07);border:1px solid rgba(212,168,67,.15);border-radius:11px;padding:8px 12px;margin-bottom:10px');
-        rachaEl.appendChild(mkTxt('span',null,'🔥','font-size:18px'));
-        rachaEl.appendChild(mkTxt('span',null,racha+' días de registro consecutivo','font-size:12px;color:#d4a843;font-weight:bold'));
+        var rachaEl=mkDiv('display:flex;align-items:center;gap:8px;background:rgba(212,168,67,.07);border:1px solid rgba(212,168,67,.15);border-radius:11px;padding:8px 12px;margin-bottom:10px;cursor:pointer');
+        rachaEl.onclick=function(){closeMasMenu&&closeMasMenu();setStep('logros');};
+        var rachaIc=racha>=30?'🌟':racha>=7?'🔥':'🔥';
+        rachaEl.appendChild(mkTxt('span',null,rachaIc,'font-size:18px'));
+        var rachaR=mkDiv('flex:1');
+        rachaR.appendChild(mkTxt('div',null,racha+' días de racha','font-size:12px;color:#d4a843;font-weight:bold'));
+        if(typeof getLogrosDesbloqueados==='function'){
+          var nDes=getLogrosDesbloqueados().length;
+          rachaR.appendChild(mkTxt('div',null,nDes+' logros desbloqueados · Ver todos →','font-size:10px;color:#a89070'));
+        }
+        rachaEl.appendChild(rachaR);
         bd.appendChild(rachaEl);
       }
     })();
@@ -2154,6 +2322,14 @@ function render(){
     bd.appendChild(E.frow([E.field('Tipo parto',E.input('fi','bparto','text',null,b3.parto||'')),E.field('Apgar',E.input('fi','bapgar','text','9/10',b3.apgar||''))]));
     var notasEl=E.textarea('ni fi','bnotas','Notas medicas...',b3.notas||'');notasEl.style.minHeight='50px';
     bd.appendChild(E.field('Notas',notasEl));
+    bd.appendChild(E.slbl('Cobertura médica'));
+    bd.appendChild(E.frow([E.field('Obra social / Prepaga',E.input('fi','bos','text','OSDE, Swiss Medical...',b3.os||'')),E.field('N° de afiliado',E.input('fi','bafil','text',null,b3.afil||''))]));
+    bd.appendChild(E.frow([E.field('N° Historia clínica',E.input('fi','bhc','text',null,b3.hc||'')),E.field('Plan',E.input('fi','bosplan','text',null,b3.osplan||''))]));
+    bd.appendChild(E.slbl('Pediatra y condiciones'));
+    var pedSel=E.select('fs','bpediatra',([{v:'',l:'(ninguno seleccionado)'}]).concat(D.meds.map(function(m,i){return{v:i,l:'Dr/a. '+m.nom+' '+m.ape+' ('+m.esp+')'}})),b3.pedIdx!=null?b3.pedIdx:'');
+    bd.appendChild(E.field('Pediatra principal',pedSel));
+    var alergEl=E.textarea('ni fi','balergia','Alergias, condiciones conocidas...',b3.alergia||'');alergEl.style.minHeight='46px';
+    bd.appendChild(E.field('Alergias / condiciones',alergEl));
     bd.appendChild(E.btn('pb go','Guardar','saveBebe'));bd.appendChild(E.btn('gb rd','Cancelar','goPerfil'));
   }
 
@@ -2233,17 +2409,86 @@ function render(){
   else if(D.step==='visitaForm'){
     if(D.meds.length===0){bd.appendChild(mkTxt('div','mu','Primero agrega un medico.'));bd.appendChild(E.btn('pb go','Agregar medico','newMed'));return;}
     bd.appendChild(E.btn('bk','\u2190 Volver','goMedicos'));bd.appendChild(E.el('div',{cls:'st',txt:'Agendar Visita'}));
-    bd.appendChild(E.field('Medico',E.select('fs','vmed',D.meds.map(function(m,i){return{v:i,l:'Dr/a. '+m.nom+' '+m.ape+' ('+m.esp+')'};}),-1)));
+
+    // Tipo de evento
+    bd.appendChild(E.field('Tipo de evento',E.select('fs','vtipo',[
+      {v:'consulta',l:'\uD83D\uDC68\u200D\u2695\uFE0F Consulta m\u00e9dica'},
+      {v:'vacuna',l:'\uD83D\uDC89 Vacuna'},
+      {v:'peso',l:'\u2696\uFE0F Control de peso'},
+      {v:'actividad',l:'\uD83C\uDFCB Actividad'},
+      {v:'otro',l:'\uD83D\uDCC5 Otro'}
+    ],'consulta')));
+
+    // Selector de médico
+    bd.appendChild(E.field('M\u00e9dico',E.select('fs','vmed',D.meds.map(function(m,i){return{v:i,l:'Dr/a. '+m.nom+' '+m.ape+' ('+m.esp+')'};}),-1)));
+
+    // Fecha y hora
     bd.appendChild(E.frow([E.field('Fecha',E.input('fi','vfecha','date')),E.field('Hora',E.input('fi','vhora','time'))]));
+
+    // Duración del evento
+    bd.appendChild(E.field('Duraci\u00f3n',E.select('fs','vdur',[
+      {v:'30',l:'30 minutos'},
+      {v:'60',l:'1 hora'},
+      {v:'90',l:'1 hora 30 min'},
+      {v:'120',l:'2 horas'}
+    ],'60')));
+
+    // Modalidad
     bd.appendChild(E.slbl('Modalidad'));
     var modRow=mkDiv('display:flex;gap:8px;margin-bottom:12px');
     var rbP=E.btn('rb on','Presencial');rbP.dataset.v='presencial';
     var rbV=E.btn('rb','Virtual');rbV.dataset.v='virtual';
     modRow.appendChild(rbP);modRow.appendChild(rbV);bd.appendChild(modRow);
+
+    // Recordatorios
+    bd.appendChild(E.slbl('Recordatorios'));
+    var notifRow=mkDiv('display:flex;gap:16px;margin-bottom:14px;flex-wrap:wrap');
+    var cb1=document.createElement('label');cb1.style.cssText='display:flex;align-items:center;gap:6px;font-size:13px;color:#d4c090;cursor:pointer';
+    var chk1=document.createElement('input');chk1.type='checkbox';chk1.id='vnotif1d';chk1.checked=true;chk1.style.cssText='width:16px;height:16px;accent-color:#d4a843';
+    cb1.appendChild(chk1);cb1.appendChild(document.createTextNode('1 d\u00eda antes'));
+    var cb2=document.createElement('label');cb2.style.cssText='display:flex;align-items:center;gap:6px;font-size:13px;color:#d4c090;cursor:pointer';
+    var chk2=document.createElement('input');chk2.type='checkbox';chk2.id='vnotif2h';chk2.checked=true;chk2.style.cssText='width:16px;height:16px;accent-color:#d4a843';
+    cb2.appendChild(chk2);cb2.appendChild(document.createTextNode('2 horas antes'));
+    notifRow.appendChild(cb1);notifRow.appendChild(cb2);bd.appendChild(notifRow);
+
+    // Motivo
     var descEl=E.textarea('ni fi','vdesc','Motivo de la consulta...');descEl.style.minHeight='46px';
-    bd.appendChild(E.field('Descripcion',descEl));
-    bd.appendChild(E.btn('pb rs','Guardar y generar mensaje','saveVisita'));bd.appendChild(E.btn('gb rd','Cancelar','goMedicos'));
+    bd.appendChild(E.field('Motivo',descEl));
+
+    // Preview del título del evento
+    var titlePrevBox=mkDiv('background:rgba(212,168,67,.08);border:1px solid rgba(212,168,67,.2);border-radius:10px;padding:10px 12px;margin-bottom:14px');
+    titlePrevBox.id='visita-title-preview';
+    titlePrevBox.appendChild(mkTxt('div',null,'T\u00edtulo del evento','font-size:10px;color:#a89070;margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px'));
+    titlePrevBox.appendChild(mkTxt('span','vtitle-txt','','font-size:13px;color:#f0d9a0;font-weight:bold'));
+    bd.appendChild(titlePrevBox);
+
+    bd.appendChild(E.btn('pb rs','Guardar y generar Google Calendar','saveVisita'));
+    bd.appendChild(E.btn('gb rd','Cancelar','goMedicos'));
+
+    // JS dinámico: actualizar preview del título
+    setTimeout(function(){
+      function updateTitlePreview(){
+        var tipoEl=document.getElementById('vtipo');
+        var medEl=document.getElementById('vmed');
+        var tipo=tipoEl?tipoEl.value:'consulta';
+        var mi=medEl?parseInt(medEl.value):-1;
+        var med=(mi>=0&&D.meds[mi])||{};
+        var tipoLabels={consulta:'Consulta',vacuna:'Vacuna',peso:'Control de peso',actividad:'Actividad',otro:'Evento'};
+        var lbl=tipoLabels[tipo]||'Evento';
+        var espPart=med.esp?' '+med.esp:'';
+        var nomPart=(med.nom||med.ape)?' \u2014 Dr/a. '+(med.nom||'')+' '+(med.ape||''):'';
+        var title=lbl+espPart+nomPart+' \u2014 Cefe';
+        var sp=document.querySelector('#visita-title-preview .vtitle-txt');
+        if(sp)sp.textContent=title;
+      }
+      var tipoEl2=document.getElementById('vtipo');
+      var medEl2=document.getElementById('vmed');
+      if(tipoEl2)tipoEl2.addEventListener('change',updateTitlePreview);
+      if(medEl2)medEl2.addEventListener('change',updateTitlePreview);
+      updateTitlePreview();
+    },100);
   }
+
 
   // ── DASHBOARD ─────────────────────────────────────────────────
   else if(D.step==='dash'){
@@ -2631,6 +2876,10 @@ function render(){
     renderConsultaMedica(bd);
   }
 
+  else if(D.step==='logros'){
+    renderLogros(bd);
+  }
+
   else if(D.step==='historia'){
     bd.appendChild(mkTxt('div',null,'La historia de Cefe, cronológica y completa.','font-size:12px;color:#a89070;margin-bottom:4px;line-height:1.5'));
     renderHistoria(bd);
@@ -2714,6 +2963,7 @@ document.addEventListener('click', function(ev) {
         case 'goVacunas': closeMasMenu(); setStep('vacunas'); return;
         case 'goPendientes': closeMasMenu(); setStep('pendientes'); return;
         case 'goConsultaMedica': closeMasMenu(); setStep('consultaMedica'); return;
+        case 'goLogros': closeMasMenu(); setStep('logros'); return;
         case 'goNotas': closeMasMenu(); setStep('notas'); return;
         case 'goMemoria': closeMasMenu(); setStep('memoria'); return;
         case 'goHistoria': closeMasMenu(); setStep('historia'); return;
@@ -3971,7 +4221,8 @@ function openTomaSheet(h) {
   // ML vs capacidad gástrica
   var mlCard=mkDiv('background:rgba(212,168,67,.08);border:1px solid rgba(212,168,67,.2);border-radius:11px;padding:11px 13px;margin-bottom:10px');
   mlCard.appendChild(mkTxt('div',null,'≈ '+mlEst+'ml estimados en esta toma','font-size:15px;font-weight:bold;color:#d4a843;margin-bottom:3px'));
-  mlCard.appendChild(mkTxt('div',null,'Cap. gástrica: '+gc.mn+'-'+gc.mx+'ml · '+pctGC+'% de la capacidad','font-size:11px;color:#a89070'));
+  var gcCtx=pctGC>=80?'✅ Toma completa':pctGC>=50?'👍 Buena toma':'Toma parcial — normal si es frecuente';
+  mlCard.appendChild(mkTxt('div',null,'Cap. gástrica: '+gc.mn+'–'+gc.mx+'ml · '+pctGC+'% · '+gcCtx,'font-size:11px;color:#a89070'));
   if(h.mlProvistos)mlCard.appendChild(mkTxt('div',null,'+ '+h.mlProvistos+'ml de leche extraída','font-size:11px;color:#a89070'));
   if(h.ext&&(h.ext.l||h.ext.r))mlCard.appendChild(mkTxt('div',null,'Sacaleches: izq '+(h.ext.l||0)+'ml / der '+(h.ext.r||0)+'ml','font-size:11px;color:#a89070'));
   cont.appendChild(mlCard);
@@ -4356,6 +4607,152 @@ function setAstroTab(k) {
   render();
 }
 
+// ─── SISTEMA DE LOGROS ────────────────────────────────────────
+var LOGROS_DEF = [
+  // 🍼 Lactancia
+  { id:'l_primera_toma',  cat:'lactancia', ic:'🍼', titulo:'Primera toma registrada',   desc:'El comienzo de todo. Registraste la primera toma de Cefe.',          check:function(){return D.hist.filter(function(h){return h.type==='toma';}).length>=1;} },
+  { id:'l_10_tomas',      cat:'lactancia', ic:'🍼', titulo:'10 tomas',                  desc:'Diez tomas registradas. Ya le agarraron el ritmo.',                  check:function(){return D.hist.filter(function(h){return h.type==='toma';}).length>=10;} },
+  { id:'l_50_tomas',      cat:'lactancia', ic:'🌟', titulo:'50 tomas',                  desc:'Cincuenta tomas. Eso es mucha dedicación.',                          check:function(){return D.hist.filter(function(h){return h.type==='toma';}).length>=50;} },
+  { id:'l_100_tomas',     cat:'lactancia', ic:'💫', titulo:'100 tomas',                 desc:'¡Cien tomas! Sari y Manu, son unos cracks.',                         check:function(){return D.hist.filter(function(h){return h.type==='toma';}).length>=100;} },
+  { id:'l_500_tomas',     cat:'lactancia', ic:'🏆', titulo:'500 tomas',                 desc:'Quinientas tomas registradas. Legado puro.',                         check:function(){return D.hist.filter(function(h){return h.type==='toma';}).length>=500;} },
+  // 🧷 Pañales
+  { id:'p_primer_panal',  cat:'pañales',  ic:'🧷', titulo:'Primer pañal registrado',   desc:'El primero de muchos. Bienvenidos al club.',                         check:function(){return D.hist.filter(function(h){return h.type==='panal';}).length>=1;} },
+  { id:'p_10_panales',    cat:'pañales',  ic:'🧷', titulo:'10 pañales',                desc:'Diez pañales. Ya lo hacen dormidos.',                                check:function(){return D.hist.filter(function(h){return h.type==='panal';}).length>=10;} },
+  { id:'p_100_panales',   cat:'pañales',  ic:'🌊', titulo:'100 pañales',               desc:'Cien pañales. Merecen una medalla (y un buen jabón).',               check:function(){return D.hist.filter(function(h){return h.type==='panal';}).length>=100;} },
+  // ⚖️ Peso
+  { id:'w_primer_peso',   cat:'peso',     ic:'⚖️', titulo:'Primer peso registrado',    desc:'Empezaron a seguir la curva de crecimiento de Cefe.',                check:function(){return D.pesos.length>=1;} },
+  { id:'w_recupero',      cat:'peso',     ic:'📈', titulo:'Recuperó peso de nacimiento',desc:'Cefe recuperó su peso de nacimiento. ¡Misión cumplida!',             check:function(){var pn=D.bebe.pn||3365;return D.pesos.some(function(p){return p.g>=pn;});} },
+  { id:'w_supero',        cat:'peso',     ic:'💪', titulo:'Superó peso de nacimiento', desc:'Cefe ya pesa más que al nacer. ¡Está creciendo!',                    check:function(){var pn=D.bebe.pn||3365;return D.pesos.some(function(p){return p.g>pn+100;});} },
+  { id:'w_5_pesos',       cat:'peso',     ic:'📊', titulo:'5 pesajes registrados',      desc:'Curva de crecimiento tomando forma. Dato es poder.',                 check:function(){return D.pesos.length>=5;} },
+  // 🏥 Salud
+  { id:'v_primera_visita',cat:'salud',    ic:'🏥', titulo:'Primera visita médica',      desc:'La primera consulta registrada. Cefe tiene su equipo de salud.',     check:function(){return D.visits.length>=1;} },
+  { id:'v_seguimiento',   cat:'salud',    ic:'✅', titulo:'Primera consulta completada',desc:'Registraron el seguimiento de una consulta. Así se hace.',           check:function(){return D.visits.some(function(v){return v.estado==='realizada'&&v.conclusiones;});} },
+  { id:'v_3_visitas',     cat:'salud',    ic:'🩺', titulo:'3 visitas médicas',          desc:'Tres consultas registradas. Cefe tiene un seguimiento excelente.',   check:function(){return D.visits.length>=3;} },
+  // 📖 Memoria
+  { id:'m_primera_nota',  cat:'memoria',  ic:'📝', titulo:'Primera nota',              desc:'Empezaron a escribir la historia de Cefe.',                          check:function(){return D.notas.length>=1;} },
+  { id:'m_primera_carta', cat:'memoria',  ic:'💌', titulo:'Primera carta para Cefe',   desc:'Una carta que Cefe va a leer algún día. Qué regalo.',                check:function(){return D.cartas.length>=1;} },
+  { id:'m_primer_hito',   cat:'memoria',  ic:'⭐', titulo:'Primer hito marcado',       desc:'Empezaron a registrar el desarrollo de Cefe.',                       check:function(){return D.hitos.length>=1;} },
+  { id:'m_5_notas',       cat:'memoria',  ic:'📖', titulo:'5 notas escritas',          desc:'Cinco observaciones del día. La memoria de Cefe crece.',             check:function(){return D.notas.length>=5;} },
+  // 🔥 Constancia
+  { id:'r_racha_3',       cat:'constancia',ic:'🔥',titulo:'3 días de racha',           desc:'Tres días consecutivos registrando. El hábito se forma.',            check:function(){return calcRacha()>=3;} },
+  { id:'r_racha_7',       cat:'constancia',ic:'🔥',titulo:'7 días de racha',           desc:'Una semana entera. Sari y Manu, ¡son una máquina!',                  check:function(){return calcRacha()>=7;} },
+  { id:'r_racha_30',      cat:'constancia',ic:'🌟',titulo:'30 días de racha',          desc:'Un mes completo sin saltarse un día. Esto ya es parte de la familia.',check:function(){return calcRacha()>=30;} },
+  { id:'r_primer_mes',    cat:'constancia',ic:'🗓️',titulo:'Un mes usando Alba',        desc:'Un mes desde el primer registro. Gracias por confiar en Alba.',      check:function(){
+    var first=D.hist[D.hist.length-1];if(!first)return false;
+    var fd=first.type==='toma'?first.s:first.t;
+    return fd&&(Date.now()-new Date(fd).getTime())>=30*86400000;
+  }},
+];
+
+function calcRacha() {
+  var racha=0,d=new Date();
+  for(var i=0;i<60;i++){
+    var dd=new Date(d);dd.setDate(dd.getDate()-i);
+    var tiene=D.hist.some(function(h){return sameDay(h.type==='toma'?h.s:h.t,dd);})||D.pesos.some(function(p){return sameDay(p.t,dd);});
+    if(tiene)racha++;else break;
+  }
+  return racha;
+}
+
+function getLogrosDesbloqueados() {
+  return LOGROS_DEF.filter(function(l){
+    try{return l.check();}catch(e){return false;}
+  });
+}
+
+function checkNuevosLogros() {
+  // Chequear si hay logros nuevos para celebrar con Céfiro
+  if(!D.logrosVistos)D.logrosVistos={};
+  var desbloqueados=getLogrosDesbloqueados();
+  var nuevos=desbloqueados.filter(function(l){return !D.logrosVistos[l.id];});
+  if(nuevos.length===0)return;
+  // Celebrar el primero nuevo
+  var logro=nuevos[0];
+  D.logrosVistos[logro.id]=true;
+  saveData();
+  showCpop('celebracion',logro.ic,'🏆 Nuevo logro desbloqueado',logro.titulo,logro.desc,'¡Genial!',function(){
+    closeCpop();
+    // Si hay más nuevos, encolar
+    if(nuevos.length>1){setTimeout(checkNuevosLogros,400);}
+  });
+}
+
+function renderLogros(bd) {
+  var desbloqueados=getLogrosDesbloqueados();
+  var totalDes=desbloqueados.length;
+
+  // ── Header — celebra lo conseguido, no muestra lo que falta ──
+  var hdr=mkDiv('text-align:center;margin-bottom:20px');
+  if(totalDes===0){
+    hdr.appendChild(mkTxt('div',null,'🌱','font-size:36px;margin-bottom:8px'));
+    hdr.appendChild(mkTxt('div',null,'El camino empieza ahora','font-size:17px;font-weight:bold;color:#f0d9a0'));
+    hdr.appendChild(mkTxt('div',null,'Cada registro es un paso. Los logros aparecen solos.','font-size:12px;color:#a89070;margin-top:5px;line-height:1.5'));
+  } else {
+    hdr.appendChild(mkTxt('div',null,'🏆','font-size:36px;margin-bottom:6px'));
+    hdr.appendChild(mkTxt('div',null,totalDes+' logro'+(totalDes!==1?'s':'')+' conseguido'+(totalDes!==1?'s':''),'font-size:18px;font-weight:bold;color:#f0d9a0'));
+    hdr.appendChild(mkTxt('div',null,'El camino de Sari y Manu como padres de Cefe','font-size:11px;color:#a89070;margin-top:3px'));
+  }
+  bd.appendChild(hdr);
+
+  if(totalDes===0){
+    var emp=mkDiv('background:rgba(255,255,255,.03);border-radius:14px;padding:20px;text-align:center');
+    emp.appendChild(mkTxt('div',null,'Registrá la primera toma o el primer pañal y aparecerá tu primer logro.','font-size:12px;color:#a89070;line-height:1.6'));
+    bd.appendChild(emp);
+    return;
+  }
+
+  // ── Solo mostrar los desbloqueados, agrupados por categoría ──
+  var cats={
+    'lactancia': {label:'🍼 Lactancia',  color:'#d4a843'},
+    'pañales':   {label:'🧷 Pañales',    color:'#64c8b4'},
+    'peso':      {label:'⚖️ Peso',       color:'#b48cdc'},
+    'salud':     {label:'🏥 Salud',      color:'#e07070'},
+    'memoria':   {label:'📖 Memoria',    color:'#64c88c'},
+    'constancia':{label:'🔥 Constancia', color:'#F28B66'},
+  };
+
+  var hayAlgo=false;
+  Object.keys(cats).forEach(function(catKey){
+    var cat=cats[catKey];
+    var descat=desbloqueados.filter(function(l){return l.cat===catKey;});
+    if(descat.length===0)return; // No mostrar categorías vacías
+    hayAlgo=true;
+
+    var sec=mkDiv('margin-bottom:16px');
+    sec.appendChild(mkTxt('div',null,cat.label,'font-size:11px;font-weight:bold;color:'+cat.color+';text-transform:uppercase;letter-spacing:1px;margin-bottom:8px'));
+
+    descat.forEach(function(logro){
+      var card=mkDiv('display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:13px;margin-bottom:7px;background:rgba(212,168,67,.06);border:1px solid rgba(212,168,67,.2)');
+      // Ícono
+      var icWrap=mkDiv('width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:rgba(212,168,67,.15);font-size:22px');
+      icWrap.appendChild(mkTxt('span',null,logro.ic,''));
+      card.appendChild(icWrap);
+      // Texto
+      var txt=mkDiv('flex:1');
+      txt.appendChild(mkTxt('div',null,logro.titulo,'font-size:13px;font-weight:bold;color:#f0d9a0'));
+      txt.appendChild(mkTxt('div',null,logro.desc,'font-size:11px;color:#a89070;margin-top:3px;line-height:1.4'));
+      card.appendChild(txt);
+      card.appendChild(mkTxt('span',null,'✓','font-size:18px;color:#64c88c;font-weight:bold;flex-shrink:0'));
+      sec.appendChild(card);
+    });
+    bd.appendChild(sec);
+  });
+
+  // ── Mensaje de aliento al pie ──
+  var pie=mkDiv('text-align:center;padding:16px 0 8px');
+  var pieMsgs=[
+    'Cada toma, cada pañal, cada nota — todo queda. Todo importa.',
+    'Cefe no podría estar mejor acompañado.',
+    'Lo más importante no está en ninguna pantalla — está en el vínculo.',
+    'Ya ganaron el logro más importante: estar presentes.',
+  ];
+  var pieMsg=pieMsgs[Math.floor(new Date().getDate()%pieMsgs.length)];
+  pie.appendChild(mkTxt('div',null,'🌬️ Céfiro dice:','font-size:10px;color:#a89070;margin-bottom:4px'));
+  pie.appendChild(mkTxt('div',null,'"'+pieMsg+'"','font-size:12px;color:#b48cdc;font-style:italic;line-height:1.5'));
+  bd.appendChild(pie);
+}
+
+
 // ─── INIT — después de todos los datos ──────────────────────
 loadData();
 applyNightMode();
@@ -4413,6 +4810,10 @@ onValue(ref(db,'cefe'),function(snap){
       else updatePendBadge();
     }, 500);
   }
+  // Chequear logros nuevos tras sincronización
+  setTimeout(function(){
+    if(typeof checkNuevosLogros==='function') checkNuevosLogros();
+  }, 1200);
 },function(err){fbReady=true;setDot('#e07070','Error Firebase');console.error(err);});
 </script>
 
