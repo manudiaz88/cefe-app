@@ -102,6 +102,19 @@ button{font-family:Georgia,serif;-webkit-appearance:none}
 .gcbox{background:rgba(212,168,67,.08);border:1px solid rgba(212,168,67,.15);border-radius:11px;padding:10px;margin-bottom:12px}
 .albox{background:rgba(212,168,67,.12);border:1px solid rgba(212,168,67,.4);border-radius:13px;padding:12px 14px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between}
 .ibanner{background:rgba(212,168,67,.1);border:1px solid rgba(212,168,67,.3);border-radius:13px;padding:12px 14px;margin-bottom:16px;font-size:12px;color:#d4c090;line-height:1.6}
+/* ── MINI SHEET (detalle toma) ── */
+#msheet-overlay{position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.5);display:flex;align-items:flex-end;justify-content:center}
+#msheet-overlay.hidden{display:none}
+#msheet-content{width:100%;max-width:480px;background:linear-gradient(160deg,#0f1923,#1a2d3d);border-radius:22px 22px 0 0;padding:20px 20px calc(env(safe-area-inset-bottom,0px)+24px);max-height:85vh;overflow-y:auto;-webkit-overflow-scrolling:touch;animation:slideUp .3s ease}@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.msheet-stat{background:rgba(255,255,255,.04);border-radius:11px;padding:10px 12px;margin-bottom:8px}
+/* ── BOTONES SENO GRANDES ── */
+.seno-btn{width:100%;padding:22px 16px;border-radius:16px;border:2px solid rgba(212,168,67,.3);background:rgba(212,168,67,.08);color:#f0d9a0;font-size:20px;font-weight:bold;cursor:pointer;font-family:Georgia,serif;display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:12px;transition:background .15s}
+.seno-btn:active{background:rgba(212,168,67,.2)}
+.seno-btn.izq{border-color:rgba(100,200,180,.4);background:rgba(100,200,180,.08)}
+.seno-btn.der{border-color:rgba(212,168,67,.4);background:rgba(212,168,67,.08)}
+/* ── POSICION OPCIONAL ── */
+.pos-btn{padding:10px 12px;border-radius:11px;border:1px solid rgba(210,175,120,.2);background:rgba(255,255,255,.04);color:#d4c090;font-size:13px;cursor:pointer;font-family:Georgia,serif;display:flex;align-items:center;gap:8px;width:100%;text-align:left;margin-bottom:7px}
+.pos-btn.active{border-color:rgba(212,168,67,.5);background:rgba(212,168,67,.12);color:#f0d9a0}
 /* ── CONTEXTUAL POPUP ── */
 #cpop-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:500;display:flex;align-items:flex-end;justify-content:center;padding:0 0 env(safe-area-inset-bottom,0)}
 #cpop-overlay.hidden{display:none}
@@ -158,6 +171,11 @@ button{font-family:Georgia,serif;-webkit-appearance:none}
     </button>
     <div style="font-size:10px;color:#a89070;margin-top:10px">Tu nombre se guarda solo en este dispositivo</div>
   </div>
+</div>
+
+<!-- MINI SHEET DETALLE TOMA -->
+<div id="msheet-overlay" class="hidden">
+  <div id="msheet-content"></div>
 </div>
 
 <!-- CONTEXTUAL POPUP -->
@@ -332,7 +350,10 @@ var E = {
     var row = document.createElement('div');
     if (h.type === 'toma') {
       row.className = 'hr2 to';
-      var senoHR={izq:0,der:0};h.lados.forEach(function(l){var seno=l.s.toLowerCase().indexOf('der')>=0?'der':'izq';senoHR[seno]+=l.m;});
+      // Tapear la card abre el mini-sheet
+      row.style.cursor = 'pointer';
+      (function(hCopy){ row.onclick = function(e){ if(e.target.tagName!=='BUTTON')openTomaSheet(hCopy); }; })(h);
+      var senoHR={izq:0,der:0};(h.lados||[]).forEach(function(l){var seno=(l.s||'').toLowerCase().indexOf('der')>=0?'der':'izq';senoHR[seno]+=l.m;});
       var lt='🤱 Izq:'+senoHR.izq+'m | Der:'+senoHR.der+'m';
       var lDiv = document.createElement('div');
       var t1 = document.createElement('div'); t1.className = 'hrt'; t1.textContent = '\uD83C\uDF7C ' + ft(h.s);
@@ -408,7 +429,17 @@ function mkDiv(style, children) {
 }
 
 // ─── SIDES ────────────────────────────────────────────────────
-var SIDES = ['Izquierdo','Derecho','Der. invertido','Izq. invertido','Acostado Izq.','Acostado Der.'];
+// Posiciones de lactancia — nomenclatura académica (AEP/OMS/UNICEF)
+var SIDES_DATA = [
+  { id:'cuna-izq',    seno:'izq', label:'Cuna izquierda',     emoji:'🤱', desc:'Posición de cuna — Bebé frente a vos, cabeza en el antebrazo izquierdo. La más clásica para aprender a amamantar.' },
+  { id:'cuna-der',    seno:'der', label:'Cuna derecha',        emoji:'🤱', desc:'Posición de cuna — Bebé frente a vos, cabeza en el antebrazo derecho. La más clásica para aprender a amamantar.' },
+  { id:'rugby-izq',   seno:'izq', label:'Rugby izquierda',     emoji:'🏈', desc:'Posición de rugby / balón — Bebé bajo el brazo izquierdo, cuerpo hacia atrás. Ideal en cesáreas y pechos grandes.' },
+  { id:'rugby-der',   seno:'der', label:'Rugby derecha',       emoji:'🏈', desc:'Posición de rugby / balón — Bebé bajo el brazo derecho, cuerpo hacia atrás. Ideal en cesáreas y pechos grandes.' },
+  { id:'acostada-izq',seno:'izq', label:'Acostada izquierda',  emoji:'🛏️', desc:'Posición recostada — Ambos de lado, el bebé frente a mamá. Perfecta para tomas nocturnas y descanso.' },
+  { id:'acostada-der',seno:'der', label:'Acostada derecha',    emoji:'🛏️', desc:'Posición recostada — Ambos de lado, el bebé frente a mamá. Perfecta para tomas nocturnas y descanso.' },
+];
+// Compatibilidad con código anterior
+var SIDES = SIDES_DATA.map(function(s){ return s.label; });
 
 // ─── STATE ────────────────────────────────────────────────────
 var D = {
@@ -1730,7 +1761,8 @@ function render(){
         bd.appendChild(lb);
       }
       var addRow=mkDiv('display:flex;gap:8px;margin-bottom:12px;align-items:flex-end');
-      var sDiv=E.div('ff');sDiv.style.flex='2';sDiv.appendChild(E.label('Lado'));sDiv.appendChild(E.select('fs','mside',SIDES.map(function(s){return{v:s,l:s};})));
+      var sDiv=E.div('ff');sDiv.style.flex='2';sDiv.appendChild(E.label('Posición'));
+      sDiv.appendChild(E.select('fs','mside',SIDES_DATA.map(function(s){return{v:s.label,l:s.emoji+' '+s.label};})));
       var mDiv=E.div('ff');mDiv.style.flex='1';mDiv.appendChild(E.label('Min'));mDiv.appendChild(E.input('fi','mmins','number','10'));
       var addBtn=E.btn('pb go','+ Agregar','addManualLado');addBtn.style.cssText='flex:0 0 100px;padding:10px 8px;font-size:12px;margin:0';
       addRow.appendChild(sDiv);addRow.appendChild(mDiv);addRow.appendChild(addBtn);bd.appendChild(addRow);
@@ -1738,32 +1770,107 @@ function render(){
       if(D.mLados.length>0)bd.appendChild(E.btn('pb go','Guardar toma','finishToma'));
       bd.appendChild(E.btn('gb rd','Cancelar','discardCurrent'));
     } else {
-      bd.appendChild(E.el('div',{cls:'st',txt:'Nueva Toma \uD83C\uDF7C'}));
-      bd.appendChild(E.el('div',{cls:'ss',txt:'Inicio: '+ft(D.ts)}));
-      if(D.lados.length>0){var lb2=E.div('lbox');D.lados.forEach(function(l){lb2.appendChild(mkTxt('div','li','\u2713 '+l.s+' \u2014 '+l.m+' min'));});bd.appendChild(lb2);}
-      if(D.cSide){
-        var tb2=E.div('tbox');tb2.appendChild(mkTxt('div','td',D.cSide));
-        var tt2=mkTxt('div','tt',Math.floor(D.elapsed/60)+':'+p2(D.elapsed%60));tt2.id='tmr';tb2.appendChild(tt2);
-        var fb2=E.btn('pb go','Terminar lado','finishSide');fb2.style.cssText='margin-top:12px;width:auto;padding:10px 22px';tb2.appendChild(fb2);bd.appendChild(tb2);
+      // Header con tiempo transcurrido total
+      var tomaHdr=mkDiv('text-align:center;margin-bottom:16px');
+      tomaHdr.appendChild(mkTxt('div',null,'Nueva toma 🍼','font-size:17px;font-weight:bold;color:#f0d9a0'));
+      tomaHdr.appendChild(mkTxt('div',null,'Inicio: '+ft(D.ts),'font-size:11px;color:#a89070;margin-top:2px'));
+      bd.appendChild(tomaHdr);
+
+      // Lados registrados hasta ahora
+      if(D.lados.length>0){
+        var lb2=E.div('lbox');
+        D.lados.forEach(function(l){
+          var sd=SIDES_DATA.find(function(x){return x.label===l.s;})||{emoji:'🤱'};
+          lb2.appendChild(mkTxt('div','li',sd.emoji+' '+l.s+' — '+l.m+' min'));
+        });
+        bd.appendChild(lb2);
       }
-      // ── Mini resumen en tiempo real ──
+
+      // Timer activo
+      if(D.cSide){
+        var sd2=SIDES_DATA.find(function(x){return x.label===D.cSide;})||{emoji:'🤱',seno:'izq'};
+        var tb2=E.div('tbox');
+        tb2.appendChild(mkTxt('div',null,sd2.emoji+' '+D.cSide,'font-size:14px;font-weight:bold;color:#f0d9a0;margin-bottom:6px'));
+        var tt2=mkTxt('div','tt',Math.floor(D.elapsed/60)+':'+p2(D.elapsed%60));tt2.id='tmr';tb2.appendChild(tt2);
+        var fb2=E.btn('pb go','✓ Terminar este lado','finishSide');
+        fb2.style.cssText='margin-top:14px;width:100%;padding:16px;font-size:16px;border-radius:14px';
+        tb2.appendChild(fb2);bd.appendChild(tb2);
+      }
+
+      // Mini resumen en tiempo real
       if(D.lados.length>0 || D.cSide){
-        var rt=mkDiv('background:rgba(100,200,180,.08);border:1px solid rgba(100,200,180,.2);border-radius:11px;padding:10px 12px;margin-bottom:10px');
+        var rt=mkDiv('background:rgba(100,200,180,.08);border:1px solid rgba(100,200,180,.2);border-radius:11px;padding:10px 14px;margin-bottom:12px');
         var senos=calcSenoTotals(D.lados,D.cSide,D.cStart,D.elapsed);
         var totMin=(D.lados.reduce(function(a,b){return a+b.m;},0))+(D.cSide?Math.floor(D.elapsed/60):0);
-        rt.appendChild(mkTxt('div',null,'⏱ Total: '+totMin+'min  ·  🤱 Izq: '+senos.izq+'min  |  Der: '+senos.der+'min','font-size:12px;color:#64c8b4;font-weight:bold'));
-        if(D.efi){
-          var mlEst=calcMLEstimate(D.lados,D.cSide,D.cStart,D.efi,D.mlProvistos||0);
-          rt.appendChild(mkTxt('div',null,'≈ '+mlEst.txt+' estimados','font-size:11px;color:#a89070;margin-top:3px'));
-        }
+        rt.appendChild(mkTxt('div',null,'⏱ '+totMin+'min total  ·  🤱 Izq: '+senos.izq+'m | Der: '+senos.der+'m','font-size:13px;color:#64c8b4;font-weight:bold'));
         bd.appendChild(rt);
       }
+
+      // Botones principales — IZQUIERDO / DERECHO grandes
       if(!D.cSide){
-        bd.appendChild(mkTxt('div','mu',D.lados.length===0?'¿Por qué lado empieza?':'¿Continúa en otro lado?'));
-        var sg=E.div('sg');SIDES.forEach(function(s){var sb3=E.btn('sbn',s,'startSide');sb3.dataset.side=s;sg.appendChild(sb3);});bd.appendChild(sg);
+        var muLabel=D.lados.length===0?'¿Por qué seno empieza?':'¿Continúa en otro seno?';
+        bd.appendChild(mkTxt('div',null,muLabel,'font-size:12px;color:#a89070;text-align:center;margin-bottom:12px'));
+
+        // Los 2 botones grandes principales
+        var senoRow=mkDiv('');
+        (function(){
+          var senoOpts=[
+            {seno:'izq',label:'← Seno izquierdo',icon:'⬅️'},
+            {seno:'der',label:'Seno derecho →',  icon:'➡️'}
+          ];
+          senoOpts.forEach(function(opt){
+            var btn=document.createElement('button');
+            btn.className='seno-btn '+opt.seno;
+            btn.innerHTML='<span style="font-size:28px">'+opt.icon+'</span><span style="font-size:17px">'+opt.label+'</span>';
+            (function(senoCopy){
+              btn.onclick=function(){
+                var defaultSide=null;
+                if(typeof SIDES_DATA!=='undefined'){
+                  defaultSide=SIDES_DATA.find(function(x){return x.seno===senoCopy&&x.id.indexOf('cuna')>=0;});
+                  if(!defaultSide)defaultSide=SIDES_DATA.find(function(x){return x.seno===senoCopy;});
+                }
+                if(defaultSide){startSide(defaultSide.label);}
+                else{startSide(senoCopy==='izq'?'Cuna izquierda':'Cuna derecha');}
+              };
+            })(opt.seno);
+            senoRow.appendChild(btn);
+          });
+        })();
+        bd.appendChild(senoRow);
+
+        // Posición opcional — expandible
+        var posToggle=mkDiv('text-align:center;margin-bottom:10px');
+        var posBtn=document.createElement('button');
+        posBtn.style.cssText='background:none;border:none;color:#a89070;font-size:11px;cursor:pointer;font-family:Georgia,serif;padding:4px 12px;border-radius:20px;border:1px solid rgba(210,175,120,.15)';
+        posBtn.textContent='+ Elegir posición específica (opcional)';
+        posBtn.id='pos-toggle-btn';
+        var posPanel=mkDiv('');posPanel.id='pos-panel';posPanel.style.display='none';
+        (typeof SIDES_DATA!=='undefined'?SIDES_DATA:[]).forEach(function(sd){
+          var pb=document.createElement('button');
+          pb.className='pos-btn';
+          pb.innerHTML='<span style="font-size:18px">'+sd.emoji+'</span><div style="flex:1"><div style="font-size:13px;font-weight:bold">'+sd.label+'</div><div style="font-size:10px;color:#a89070;margin-top:2px">'+sd.desc.split('—')[0].trim()+'</div></div>';
+          pb.onclick=function(){startSide(sd.label);};
+          // Info button
+          var infoBtn=document.createElement('button');
+          infoBtn.style.cssText='background:none;border:none;color:#a89070;font-size:14px;cursor:pointer;padding:4px;flex-shrink:0';
+          infoBtn.textContent='ℹ️';
+          infoBtn.onclick=function(e){
+            e.stopPropagation();
+            showPosInfo(sd);
+          };
+          pb.appendChild(infoBtn);
+          posPanel.appendChild(pb);
+        });
+        posBtn.onclick=function(){
+          var p=document.getElementById('pos-panel');
+          if(p){p.style.display=p.style.display==='none'?'block':'none';}
+          this.style.display='none';
+        };
+        posToggle.appendChild(posBtn);bd.appendChild(posToggle);bd.appendChild(posPanel);
       }
+
       bd.appendChild(renderExtBox());bd.appendChild(renderNoteBox('tnote'));
-      if(D.lados.length>0&&!D.cSide)bd.appendChild(E.btn('pb go','Finalizar y revisar','finishToma'));
+      if(D.lados.length>0&&!D.cSide)bd.appendChild(E.btn('pb go','Finalizar y revisar →','finishToma'));
       bd.appendChild(E.btn('gb rd','Descartar','discardCurrent'));
     }
   }
@@ -3819,11 +3926,89 @@ function generarHistoriaClinicaPDF() {
   setTimeout(function(){document.body.removeChild(a);URL.revokeObjectURL(url);},1000);
 }
 
+// ─── INFO POSICIÓN ───────────────────────────────────────────
+function showPosInfo(sd) {
+  var svgs={
+    'cuna':'<svg viewBox="0 0 120 70" xmlns="http://www.w3.org/2000/svg"><ellipse cx="80" cy="35" rx="32" ry="12" fill="#F28B66" opacity=".5"/><circle cx="52" cy="35" r="9" fill="#d4943a" opacity=".8"/><ellipse cx="25" cy="42" rx="14" ry="10" fill="#7DBF8E" opacity=".6"/><circle cx="25" cy="30" r="10" fill="#d4943a" opacity=".7"/><text x="60" y="65" font-size="9" fill="#a89070" text-anchor="middle">Cuna clásica</text></svg>',
+    'rugby':'<svg viewBox="0 0 120 70" xmlns="http://www.w3.org/2000/svg"><ellipse cx="35" cy="30" rx="14" ry="28" fill="#F28B66" opacity=".5"/><circle cx="48" cy="22" r="9" fill="#d4943a" opacity=".8"/><ellipse cx="25" cy="55" rx="18" ry="10" fill="#7DBF8E" opacity=".6"/><circle cx="20" cy="44" r="10" fill="#d4943a" opacity=".7"/><text x="60" y="65" font-size="9" fill="#a89070" text-anchor="middle">Rugby / Balón</text></svg>',
+    'acostada':'<svg viewBox="0 0 120 70" xmlns="http://www.w3.org/2000/svg"><ellipse cx="60" cy="25" rx="52" ry="12" fill="#F28B66" opacity=".5"/><circle cx="12" cy="25" r="10" fill="#d4943a" opacity=".8"/><ellipse cx="60" cy="50" rx="48" ry="10" fill="#7DBF8E" opacity=".6"/><circle cx="18" cy="47" r="8" fill="#d4943a" opacity=".7"/><text x="60" y="67" font-size="9" fill="#a89070" text-anchor="middle">Recostada de lado</text></svg>',
+  };
+  var svgKey=sd.id.indexOf('rugby')>=0?'rugby':sd.id.indexOf('acostada')>=0?'acostada':'cuna';
+  showCpop('info',sd.emoji,'Posición de lactancia',sd.label,sd.desc,'Usar esta posición',function(){startSide(sd.label);});
+  setTimeout(function(){
+    var bdy=document.getElementById('cpop-body');
+    if(bdy){var d=document.createElement('div');d.style.cssText='margin:10px 0;text-align:center';d.innerHTML=svgs[svgKey];bdy.parentNode.insertBefore(d,bdy.nextSibling);}
+  },50);
+}
 
-loadData();
-applyNightMode();
-render();
-setTimeout(checkOnboarding, 800);
+// ─── MINI SHEET — detalle de toma ────────────────────────────
+function openTomaSheet(h) {
+  var ov=document.getElementById('msheet-overlay');
+  var cont=document.getElementById('msheet-content');
+  if(!ov||!cont)return;
+  while(cont.firstChild)cont.removeChild(cont.firstChild);
+  // Handle bar
+  cont.appendChild(mkDiv('width:36px;height:4px;background:rgba(255,255,255,.2);border-radius:2px;margin:0 auto 16px'));
+  cont.appendChild(mkTxt('div',null,'🍼 Detalle de toma','font-size:16px;font-weight:bold;color:#f0d9a0;margin-bottom:4px'));
+  try{cont.appendChild(mkTxt('div',null,fdt(h.s)+' → '+ft(h.e),'font-size:12px;color:#a89070;margin-bottom:14px'));}catch(e){}
+  // Senos
+  var senos={izq:0,der:0};
+  (h.lados||[]).forEach(function(l){if(!l||!l.s)return;var s=l.s.toLowerCase().indexOf('der')>=0?'der':'izq';senos[s]+=l.m;});
+  var gc=(typeof gasC==='function')?gasC():{mn:60,mx:90};
+  var mlEst=0;
+  try{mlEst=h.mlEst||estimateML(h.lados||[],h.efi||0,h.mlProvistos||0);}catch(e){mlEst=0;}
+  var gcMid=(gc.mn+gc.mx)/2;
+  var pctGC=gcMid>0?Math.round(mlEst/gcMid*100):0;
+  // Stats grid
+  var sg2=mkDiv('display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px');
+  [['Duración',h.tot+'min','#d4a843'],['Seno izq',senos.izq+'min','#64c8b4'],['Seno der',senos.der+'min','#64c8b4'],['Eficiencia',(h.efi||'—')+'/5','#b48cdc']].forEach(function(it){
+    var c=mkDiv('background:rgba(255,255,255,.04);border-radius:10px;padding:9px 11px');
+    c.appendChild(mkTxt('div',null,it[0],'font-size:10px;color:#a89070;text-transform:uppercase;letter-spacing:1px;margin-bottom:3px'));
+    c.appendChild(mkTxt('div',null,it[1],'font-size:18px;font-weight:bold;color:'+it[2]));
+    sg2.appendChild(c);
+  });
+  cont.appendChild(sg2);
+  // ML vs capacidad gástrica
+  var mlCard=mkDiv('background:rgba(212,168,67,.08);border:1px solid rgba(212,168,67,.2);border-radius:11px;padding:11px 13px;margin-bottom:10px');
+  mlCard.appendChild(mkTxt('div',null,'≈ '+mlEst+'ml estimados en esta toma','font-size:15px;font-weight:bold;color:#d4a843;margin-bottom:3px'));
+  mlCard.appendChild(mkTxt('div',null,'Cap. gástrica: '+gc.mn+'-'+gc.mx+'ml · '+pctGC+'% de la capacidad','font-size:11px;color:#a89070'));
+  if(h.mlProvistos)mlCard.appendChild(mkTxt('div',null,'+ '+h.mlProvistos+'ml de leche extraída','font-size:11px;color:#a89070'));
+  if(h.ext&&(h.ext.l||h.ext.r))mlCard.appendChild(mkTxt('div',null,'Sacaleches: izq '+(h.ext.l||0)+'ml / der '+(h.ext.r||0)+'ml','font-size:11px;color:#a89070'));
+  cont.appendChild(mlCard);
+  // Posiciones
+  if(h.lados&&h.lados.length>0){
+    var pc=mkDiv('background:rgba(255,255,255,.03);border-radius:10px;padding:9px 11px;margin-bottom:10px');
+    pc.appendChild(mkTxt('div',null,'Posiciones usadas','font-size:10px;color:#a89070;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px'));
+    h.lados.forEach(function(l){
+      var sd3=(typeof SIDES_DATA!=='undefined'?SIDES_DATA:[]).find(function(x){return x.label===l.s;})||{emoji:'🤱'};
+      pc.appendChild(mkTxt('div',null,sd3.emoji+' '+l.s+' — '+l.m+' min','font-size:12px;color:#d4c090;margin-bottom:3px'));
+    });
+    cont.appendChild(pc);
+  }
+  if(h.note&&h.note.trim()){
+    var nc=mkDiv('background:rgba(255,255,255,.03);border-radius:10px;padding:9px 11px;margin-bottom:10px');
+    nc.appendChild(mkTxt('div',null,'📝 '+h.note,'font-size:12px;color:#d4c090;line-height:1.5'));
+    cont.appendChild(nc);
+  }
+  // WA button
+  var waB=document.createElement('button');
+  waB.style.cssText='width:100%;padding:14px;border-radius:13px;border:none;background:rgba(37,211,102,.7);color:#fff;font-size:15px;font-weight:bold;cursor:pointer;font-family:Georgia,serif;margin-bottom:8px';
+  waB.textContent='📤 Compartir por WhatsApp';
+  waB.onclick=function(){window.open('https://wa.me/?text='+encodeURIComponent(genMsg(h)),'_blank');};
+  cont.appendChild(waB);
+  var closeB=document.createElement('button');
+  closeB.style.cssText='width:100%;padding:12px;border-radius:12px;border:1px solid rgba(210,175,120,.2);background:rgba(255,255,255,.04);color:#a89070;font-size:13px;cursor:pointer;font-family:Georgia,serif';
+  closeB.textContent='Cerrar';
+  closeB.onclick=function(){closeMiniSheet();};
+  cont.appendChild(closeB);
+  ov.classList.remove('hidden');
+  ov.onclick=function(e){if(e.target===ov)closeMiniSheet();};
+}
+
+function closeMiniSheet(){
+  var ov=document.getElementById('msheet-overlay');
+  if(ov)ov.classList.add('hidden');
+}
 
 
 // ENTREGA B DATA
@@ -4170,6 +4355,12 @@ function setAstroTab(k) {
   D.astroTab = k;
   render();
 }
+
+// ─── INIT — después de todos los datos ──────────────────────
+loadData();
+applyNightMode();
+render();
+setTimeout(checkOnboarding, 800);
 
 </script>
 <script type="module">
