@@ -239,11 +239,11 @@ button{font-family:Georgia,serif;-webkit-appearance:none}
       </button>
       <button class="mas-item" data-action="goHistoria">
         <span class="mas-item-ic">📜</span>
-        <span><span class="mas-item-lbl">Historia de Cefe</span><span class="mas-item-sub">Línea de tiempo completa</span></span>
+        <span><span class="mas-item-lbl">Historia de Cefe</span><span class="mas-item-sub">Línea de tiempo, notas, cartas</span></span>
       </button>
-      <button class="mas-item" data-action="goMemoria">
-        <span class="mas-item-ic">📖</span>
-        <span><span class="mas-item-lbl">Memoria</span><span class="mas-item-sub">Notas, cartas, síntomas</span></span>
+      <button class="mas-item" data-action="goEstudios">
+        <span class="mas-item-ic">🔬</span>
+        <span><span class="mas-item-lbl">Estudios y medicación</span><span class="mas-item-sub">FEI, OEA, fondo de ojo y más</span></span>
       </button>
       <button class="mas-item" data-action="goLogros">
         <span class="mas-item-ic">🏆</span>
@@ -455,7 +455,7 @@ var SIDES = SIDES_DATA.map(function(s){ return s.label; });
 // ─── STATE ────────────────────────────────────────────────────
 var D = {
   step: 'home',
-  hist: [], pesos: [], meds: [], visits: [], padres: [],
+  hist: [], pesos: [], tallas: [], pcs: [], meds: [], visits: [], padres: [],
   notas: [],      // {fecha:'2026-04-01', texto:'...'}
   sintomas: [],   // {t:Date, tipo:'fiebre', valor:'38.2', nota:''}
   hitos: [],      // {id:'sonrisa', fecha:'2026-05-10', nota:''}
@@ -592,6 +592,8 @@ function loadData() {
     var b = ls('bebe'); if (b) D.bebe = JSON.parse(b);
     var pa = ls('padres'); if (pa) D.padres = JSON.parse(pa).filter(Boolean);
     var no = ls('notas'); if (no) D.notas = JSON.parse(no);
+    var tl = ls('tallas'); if (tl) D.tallas = JSON.parse(tl).map(function(e){ if(e) e.t=new Date(e.t); return e; }).filter(Boolean);
+    var pc = ls('pcs'); if (pc) D.pcs = JSON.parse(pc).map(function(e){ if(e) e.t=new Date(e.t); return e; }).filter(Boolean);
     var si = ls('sintomas'); if (si) D.sintomas = JSON.parse(si).map(function(e){ if(e) e.t=new Date(e.t); return e; }).filter(Boolean);
     var hi = ls('hitos'); if (hi) D.hitos = JSON.parse(hi);
     var ca = ls('cartas'); if (ca) D.cartas = JSON.parse(ca);
@@ -653,6 +655,7 @@ function saveData() {
   // localStorage: JSON.stringify handles Date objects natively
   lss('version', APP_VERSION);
   lss('hist', serHist()); lss('pesos', serPesos()); lss('meds', D.meds);
+  lss('tallas', D.tallas||[]); lss('pcs', D.pcs||[]);
   lss('visits', serVisits()); lss('bebe', D.bebe); lss('padres', D.padres);
   lss('notas', D.notas); lss('sintomas', serSintomas());
   lss('hitos', D.hitos); lss('cartas', D.cartas);
@@ -670,6 +673,8 @@ function saveData() {
     version: APP_VERSION,
     hist: serHist(),
     pesos: serPesos(),
+    tallas: D.tallas||[],
+    pcs: D.pcs||[],
     meds: D.meds,
     visits: serVisits(),
     bebe: D.bebe,
@@ -695,6 +700,21 @@ function ageLabel() {
   var d=ageD(),w=ageW();
   if(d<14) return d+' dias'; if(w<8) return w+' semanas'; return Math.floor(d/30.4)+' meses';
 }
+
+
+// Talla OMS niños (cm) P3,P15,P50,P85,P97 por semana 0-52
+// Fuente: OMS Child Growth Standards 2006
+var WHO_TALLA_B={0:[46.1,47.9,49.9,51.8,53.4],4:[50.6,52.5,54.7,56.8,58.5],8:[53.8,55.8,58.1,60.4,62.2],13:[57.5,59.6,62.1,64.5,66.5],17:[60.2,62.4,65.0,67.5,69.7],26:[64.8,67.0,69.8,72.5,74.9],39:[70.4,72.8,75.7,78.6,81.2],52:[73.5,76.0,79.1,82.2,85.0]};
+var WHO_TALLA_G={0:[45.4,47.3,49.1,51.0,52.7],4:[49.9,51.9,54.0,56.2,58.0],8:[53.2,55.3,57.6,60.0,61.8],13:[56.9,59.1,61.5,63.9,65.9],17:[59.6,61.9,64.3,66.8,68.9],26:[64.4,66.7,69.4,72.1,74.5],39:[69.9,72.4,75.2,78.0,80.6],52:[73.3,75.8,78.9,81.9,84.7]};
+// PC OMS (cm) P3,P15,P50,P85,P97 por semana 0-52
+// Fuente: OMS Child Growth Standards 2006
+var WHO_PC_B={0:[31.7,32.9,34.5,36.0,37.0],4:[35.1,36.3,37.9,39.5,40.5],8:[37.4,38.5,40.1,41.7,42.7],13:[39.0,40.2,41.7,43.3,44.3],17:[40.6,41.8,43.3,44.9,45.9],26:[42.4,43.6,45.1,46.6,47.7],39:[44.0,45.2,46.7,48.2,49.3],52:[44.9,46.2,47.7,49.3,50.5]};
+var WHO_PC_G={0:[31.1,32.3,33.9,35.4,36.4],4:[34.6,35.7,37.2,38.7,39.7],8:[36.9,38.0,39.5,41.0,42.0],13:[38.5,39.6,41.1,42.6,43.6],17:[40.0,41.1,42.6,44.1,45.1],26:[41.8,42.9,44.3,45.9,46.9],39:[43.3,44.5,45.9,47.4,48.5],52:[44.2,45.4,46.9,48.3,49.4]};
+
+function getWhoTallaRow(w){var T=D.bebe.sexo==='F'?WHO_TALLA_G:WHO_TALLA_B;var keys=Object.keys(T).map(Number).sort(function(a,b){return a-b;});var k=keys[0];for(var i=0;i<keys.length;i++){if(w>=keys[i])k=keys[i];}return T[k];}
+function getWhoPCRow(w){var T=D.bebe.sexo==='F'?WHO_PC_G:WHO_PC_B;var keys=Object.keys(T).map(Number).sort(function(a,b){return a-b;});var k=keys[0];for(var i=0;i<keys.length;i++){if(w>=keys[i])k=keys[i];}return T[k];}
+function pctLblTalla(cm,w){var p=getWhoTallaRow(w);if(!p)return '—';if(cm<=p[0])return '<P3';if(cm<=p[1])return 'P3-P15';if(cm<=p[2])return 'P15-P50';if(cm<=p[3])return 'P50-P85';if(cm<=p[4])return 'P85-P97';return '>P97';}
+function pctLblPC(cm,w){var p=getWhoPCRow(w);if(!p)return '—';if(cm<=p[0])return '<P3';if(cm<=p[1])return 'P3-P15';if(cm<=p[2])return 'P15-P50';if(cm<=p[3])return 'P50-P85';if(cm<=p[4])return 'P85-P97';return '>P97';}
 
 var WHO_B={0:[2500,2800,3300,3900,4300],1:[2700,3000,3500,4100,4600],2:[2900,3300,3800,4400,4900],3:[3200,3600,4200,4800,5400],4:[3500,3900,4500,5200,5800],5:[3700,4200,4800,5500,6100],6:[4000,4500,5100,5900,6500],7:[4200,4700,5400,6200,6900],8:[4500,5000,5700,6500,7200],9:[4700,5200,5900,6800,7500],10:[4900,5500,6200,7100,7800],11:[5100,5700,6400,7300,8100],12:[5300,5900,6600,7500,8300],13:[5500,6100,6800,7800,8600]};
 var WHO_G={0:[2300,2600,3200,3700,4200],1:[2500,2800,3300,3900,4400],2:[2700,3100,3600,4200,4700],3:[3000,3400,4000,4600,5100],4:[3300,3700,4300,5000,5500],5:[3500,4000,4600,5300,5900],6:[3700,4200,4900,5600,6200],7:[3900,4400,5100,5900,6500],8:[4100,4600,5400,6100,6800],9:[4300,4800,5600,6400,7100],10:[4500,5000,5800,6600,7300],11:[4700,5200,6000,6900,7600],12:[4900,5400,6200,7100,7800],13:[5100,5600,6400,7300,8000]};
@@ -946,6 +966,113 @@ function calcPesoPrediccion() {
 }
 
 
+// ─── BASE DE CONOCIMIENTO MÉDICO ─────────────────────────────
+// Fuente: ANMAT Argentina, AAP, SAP, Ministerio de Salud Argentina
+// AVISO: Esta información es orientativa y NO reemplaza al médico.
+// Siempre consultar al pediatra antes de administrar cualquier medicación.
+
+var MEDICACION_RN = [
+  {
+    nombre: 'Paracetamol',
+    uso: 'Fiebre y dolor leve',
+    dosis: '10-15 mg/kg cada 4-6hs. Máximo 4 dosis/día.',
+    desde: 'Desde el nacimiento (según indicación médica)',
+    nota: 'Primera linea para fiebre en RN. No administrar sin prescripción en menores de 3 meses.',
+    fuente: 'AAP, ANMAT'
+  },
+  {
+    nombre: 'Ibuprofeno',
+    uso: 'Fiebre y dolor (segundo linea)',
+    dosis: '5-10 mg/kg cada 6-8hs.',
+    desde: 'A partir de los 6 meses',
+    nota: 'Contraindicado en menores de 6 meses. No usar con varicela ni sospecha de dengue.',
+    fuente: 'AAP, SAP'
+  },
+  {
+    nombre: 'Vitamina D',
+    uso: 'Prevención de raquitismo',
+    dosis: '400 UI/día en lactados exclusivos.',
+    desde: 'Desde los primeros días de vida',
+    nota: 'Recomendada a todos los bebes amamantados. La leche de formula ya la incluye.',
+    fuente: 'AAP 2022, SAP'
+  },
+  {
+    nombre: 'Hierro',
+    uso: 'Prevención de anemia ferropénica',
+    dosis: '1 mg/kg/día desde los 4 meses en lactados exclusivos.',
+    desde: 'A partir de los 4 meses si lactancia exclusiva',
+    nota: 'RN prematuros: desde las 4-6 semanas. Consultar al pediatra.',
+    fuente: 'SAP, AAP'
+  },
+  {
+    nombre: 'Probióticos',
+    uso: 'Cólicos del lactante (evidencia moderada)',
+    dosis: 'Lactobacillus reuteri: 10^8 UFC/día',
+    desde: 'Desde el nacimiento',
+    nota: 'Evidencia moderada para reducción de llanto. No reemplaza otras estrategias. Consultar al pediatra.',
+    fuente: 'Cochrane 2019, SAP'
+  },
+];
+
+var ESTUDIOS_RN = [
+  {
+    nombre: 'Pesquisa Neonatal (FEI)',
+    cuando: 'Entre el 2do y 5to día de vida',
+    que: 'Detección de hipotiroidismo, fenilcetonuria, galactosemia, fibrosis quística, HSC, déficit de biotinidasa.',
+    donde: 'Se toma en el sanatorio. Resultado en www.fei.org.ar',
+    obligatorio: true,
+    fuente: 'Ley 23.413 Argentina, Ministerio de Salud'
+  },
+  {
+    nombre: 'Otoemisiones Acústicas (OEA)',
+    cuando: 'Antes del alta del sanatorio o antes de los 3 meses',
+    que: 'Detección de hipoacusia neonatal. Se mide la respuesta del oído interno a sonidos.',
+    donde: 'Sanatorio o fonoaudiología infantil. En Trinidad San Isidro: 0800-777-2583',
+    obligatorio: true,
+    fuente: 'Ministerio de Salud Argentina, AAP'
+  },
+  {
+    nombre: 'Reflejo Rojo (Fondo de ojo)',
+    cuando: 'Al nacer y en cada control hasta los 3 meses',
+    que: 'Descarte de catarata congénita, glaucoma y retinoblastoma. Lo hace el pediatra.',
+    donde: 'Consultorio pediátrico',
+    obligatorio: true,
+    fuente: 'AAP, SAP'
+  },
+  {
+    nombre: 'Eco cerebral (RN pretérmino)',
+    cuando: 'En RN menores de 32 semanas o bajo peso',
+    que: 'Detección de hemorragia intraventricular y leucomalacia periventricular.',
+    donde: 'Centro de diagnóstico por imágenes',
+    obligatorio: false,
+    fuente: 'AAP, SAP'
+  },
+  {
+    nombre: 'Laboratorio neonatal',
+    cuando: 'Según indicación médica en internación',
+    que: 'Grupo sanguíneo, Coombs, bilirrubina (ictericia), hemograma si sospecha de infección.',
+    donde: 'Laboratorio del sanatorio',
+    obligatorio: false,
+    fuente: 'SAP'
+  },
+  {
+    nombre: 'Ecografía de caderas',
+    cuando: 'Entre la 4ta y 6ta semana de vida',
+    que: 'Detección de displasia del desarrollo de la cadera (DDC). Más frecuente en niñas y parto pelviano.',
+    donde: 'Centro de diagnóstico por imágenes con transductor lineal',
+    obligatorio: false,
+    fuente: 'SAP, AAP'
+  },
+  {
+    nombre: 'Control oftalmológico',
+    cuando: 'Primer año de vida (6 meses recomendado)',
+    que: 'Evaluación de agudeza visual, alineación ocular y fondo de ojo completo.',
+    donde: 'Oftalmólogo pediátrico',
+    obligatorio: false,
+    fuente: 'AAP, SAP'
+  },
+];
+
 // ─── AGENDA — helpers ─────────────────────────────────────────
 
 // Tipos de evento con identidad visual
@@ -1176,7 +1303,7 @@ function showAgendaActionSheet(item) {
       if(confirm('¿Eliminar esta visita?')){D.visits.splice(item.idx,1);saveData();render();}
     }));
   } else if(item.fuente==='vacuna'){
-    sheet.appendChild(mkSBtn('??','Marcar como aplicada hoy','Actualiza el calendario de vacunas','#64c8b4',function(){markVacuna(item.data.id,true);}));
+    sheet.appendChild(mkSBtn('Ok','Marcar como aplicada hoy','Actualiza el calendario de vacunas','#64c8b4',function(){markVacuna(item.data.id,true);}));
     sheet.appendChild(mkSBtn('??','Ver calendario de vacunas','Calendario Nacional Argentina 2024','#e07070',function(){setStep('vacunas');}));
   } else if(item.fuente==='hito'){
     sheet.appendChild(mkSBtn('⭐','Ya ocurrió — marcar con fecha real','Se guarda en la historia de Cefe','#d4a843',function(){showHitoDialog(item.data.id);}));
@@ -1292,44 +1419,127 @@ function getDataToma(){
   return cands[d%cands.length];
 }
 
+
+// Personajes célebres nacidos el 29 de marzo (dia de nacimiento de Cefe)
+// Fuente: registros históricos públicos
+var CELEBRES_29_MAR = [
+  {nombre:'Cy Young', desc:'Pitcher de béisbol, el premio más importante del béisbol lleva su nombre. (1867)', emoji:'⚾'},
+  {nombre:'John Tyler', desc:'10mo presidente de Estados Unidos. (1790)', emoji:'🇺🇸'},
+  {nombre:'Sam Walton', desc:'Fundador de Walmart, revolucionó el comercio minorista global. (1918)', emoji:'🛒'},
+  {nombre:'Pearl Bailey', desc:'Cantante y actriz de jazz, Medalla de Honor presidencial. (1918)', emoji:'🎵'},
+  {nombre:'Eric Idle', desc:'Comediante y actor, miembro de Monty Python. (1943)', emoji:'😄'},
+  {nombre:'Elle Macpherson', desc:'Modelo y empresaria australiana, apodada "The Body". (1964)', emoji:'📸'},
+  {nombre:'Lucy Lawless', desc:'Actriz conocida por Xena: Warrior Princess. (1968)', emoji:'⚔️'},
+  {nombre:'Brendan Gleeson', desc:'Actor irlandés, nominado al Oscar por The Banshees of Inisherin. (1955)', emoji:'🎬'},
+];
+
+function getCelebreDia(){
+  var d=ageD();
+  return CELEBRES_29_MAR[d%CELEBRES_29_MAR.length];
+}
+
 function renderTomaEntretenimiento(bd){
+  var cfg=D.config||{};
   var tab=ls('toma_entret_tab')||'dato';
   var box=mkDiv('background:rgba(180,140,220,.06);border:1px solid rgba(180,140,220,.15);border-radius:14px;padding:14px 15px;margin-bottom:12px');
-  var tabR=mkDiv('display:flex;gap:6px;margin-bottom:12px');
-  [['dato','Dato del momento'],['quiz','Quiz rapido']].forEach(function(t){
+  // 3 tabs: Dato / Quiz (con limite) / Personas / Respiración
+  var tabDefs=[['dato','Dato'],['quiz','Quiz'],['celeb','Personas'],['respira','Respirar']];
+  var tabR=mkDiv('display:flex;gap:4px;margin-bottom:12px;overflow-x:auto');
+  tabDefs.forEach(function(t){
     var on=tab===t[0];
     var b=document.createElement('button');
-    b.style.cssText='flex:1;padding:7px;border-radius:10px;border:1px solid rgba(180,140,220,'+(on?'.4':'.15')+');background:rgba(180,140,220,'+(on?'.15':'.04')+');color:'+(on?'#b48cdc':'#a89070')+';font-size:12px;cursor:pointer;font-family:Georgia,serif';
+    b.style.cssText='padding:5px 10px;border-radius:9px;border:1px solid rgba(180,140,220,'+(on?'.4':'.15')+');background:rgba(180,140,220,'+(on?'.15':'.04')+');color:'+(on?'#b48cdc':'#a89070')+';font-size:11px;cursor:pointer;font-family:Georgia,serif;white-space:nowrap;flex-shrink:0';
     b.textContent=t[1];(function(k){b.onclick=function(){lss('toma_entret_tab',k);render();};})(t[0]);
     tabR.appendChild(b);
   });
   box.appendChild(tabR);
+
   if(tab==='dato'){
     var dat=getDataToma();
     box.appendChild(mkTxt('div',null,'Sabias que...','font-size:10px;color:#b48cdc;font-weight:bold;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px'));
     box.appendChild(mkTxt('div',null,dat.dato,'font-size:13px;color:#d4c090;line-height:1.7'));
-  } else {
-    var q=QUIZ_TOMA[ageD()%QUIZ_TOMA.length];
-    var yaResp=ls('quiz_resp_'+ageD());
-    box.appendChild(mkTxt('div',null,q.p,'font-size:13px;font-weight:bold;color:#d4c090;line-height:1.5;margin-bottom:10px'));
-    if(yaResp!==null){
-      var correcta=parseInt(yaResp)===q.ok;
-      box.appendChild(mkTxt('div',null,(correcta?'Correcto! ':'Casi! ')+q.exp,'font-size:12px;color:'+(correcta?'#64c8b4':'#e07070')+';line-height:1.6'));
+
+  } else if(tab==='quiz'){
+    // Quiz limitado: 7 preguntas con progreso
+    var TOTAL_Q=QUIZ_TOMA.length;
+    var qIdx=parseInt(ls('quiz_toma_idx')||'0');
+    var completado=qIdx>=TOTAL_Q;
+    if(completado){
+      box.appendChild(mkTxt('div',null,'Quiz completo!','font-size:15px;font-weight:bold;color:#64c8b4;text-align:center;margin-bottom:8px'));
+      box.appendChild(mkTxt('div',null,'Terminaste las '+TOTAL_Q+' preguntas. Vuelve mañana para nuevas preguntas.','font-size:12px;color:#a89070;text-align:center;line-height:1.5;margin-bottom:10px'));
+      var resetQBtn=document.createElement('button');
+      resetQBtn.style.cssText='width:100%;padding:9px;border-radius:10px;border:1px solid rgba(180,140,220,.2);background:transparent;color:#b48cdc;font-size:12px;cursor:pointer;font-family:Georgia,serif';
+      resetQBtn.textContent='Reiniciar quiz';
+      resetQBtn.onclick=function(){lss('quiz_toma_idx','0');render();};
+      box.appendChild(resetQBtn);
     } else {
-      var optsRow=mkDiv('display:flex;flex-direction:column;gap:6px');
-      q.ops.forEach(function(op,oi){
-        var ob=document.createElement('button');
-        ob.style.cssText='padding:9px 12px;border-radius:10px;border:1px solid rgba(180,140,220,.2);background:rgba(180,140,220,.06);color:#d4c090;font-size:13px;cursor:pointer;font-family:Georgia,serif;text-align:left';
-        ob.textContent=op;(function(idx2){ob.onclick=function(){lss('quiz_resp_'+ageD(),String(idx2));render();};})(oi);
-        optsRow.appendChild(ob);
-      });
-      box.appendChild(optsRow);
+      // Barra de progreso
+      var pctQ=Math.round(qIdx/TOTAL_Q*100);
+      var progRow=mkDiv('display:flex;align-items:center;gap:8px;margin-bottom:10px');
+      var progBar=mkDiv('flex:1;height:4px;background:rgba(180,140,220,.15);border-radius:2px');
+      var progFill=mkDiv('height:4px;background:#b48cdc;border-radius:2px;width:'+pctQ+'%');
+      progBar.appendChild(progFill);progRow.appendChild(progBar);
+      progRow.appendChild(mkTxt('span',null,qIdx+'/'+TOTAL_Q,'font-size:10px;color:#a89070'));
+      box.appendChild(progRow);
+      var q=QUIZ_TOMA[qIdx];
+      var rKey='qtoma_'+qIdx;var yaR=ls(rKey);
+      box.appendChild(mkTxt('div',null,q.p,'font-size:13px;font-weight:bold;color:#d4c090;line-height:1.5;margin-bottom:10px'));
+      if(yaR!==null){
+        var ok=parseInt(yaR)===q.ok;
+        box.appendChild(mkTxt('div',null,(ok?'Correcto! ':'Casi! ')+q.exp,'font-size:12px;color:'+(ok?'#64c8b4':'#e07070')+';line-height:1.6;margin-bottom:10px'));
+        var nBtn=document.createElement('button');
+        nBtn.style.cssText='width:100%;padding:9px;border-radius:10px;border:1px solid rgba(180,140,220,.25);background:rgba(180,140,220,.08);color:#b48cdc;font-size:13px;cursor:pointer;font-family:Georgia,serif';
+        nBtn.textContent='Siguiente ('+(qIdx+2<=TOTAL_Q?qIdx+2:'Final')+'/'+TOTAL_Q+')';
+        nBtn.onclick=function(){lss('quiz_toma_idx',String(qIdx+1));render();};
+        box.appendChild(nBtn);
+      } else {
+        var ops=mkDiv('display:flex;flex-direction:column;gap:6px');
+        q.ops.forEach(function(op,oi){
+          var ob=document.createElement('button');
+          ob.style.cssText='padding:9px 12px;border-radius:10px;border:1px solid rgba(180,140,220,.2);background:rgba(180,140,220,.06);color:#d4c090;font-size:13px;cursor:pointer;font-family:Georgia,serif;text-align:left';
+          ob.textContent=op;(function(i){ob.onclick=function(){lss(rKey,String(i));render();};})(oi);
+          ops.appendChild(ob);
+        });
+        box.appendChild(ops);
+      }
     }
+
+  } else if(tab==='celeb'){
+    var cel=getCelebreDia();
+    box.appendChild(mkTxt('div',null,'Nacidos el 29 de Marzo...','font-size:10px;color:#d4a843;font-weight:bold;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px'));
+    var celCard=mkDiv('text-align:center;padding:8px 0');
+    celCard.appendChild(mkTxt('div',null,cel.emoji,'font-size:36px;margin-bottom:8px'));
+    celCard.appendChild(mkTxt('div',null,cel.nombre,'font-size:16px;font-weight:bold;color:#f0d9a0;margin-bottom:6px'));
+    celCard.appendChild(mkTxt('div',null,cel.desc,'font-size:12px;color:#a89070;line-height:1.6'));
+    box.appendChild(celCard);
+    var nextCelBtn=document.createElement('button');
+    nextCelBtn.style.cssText='width:100%;margin-top:10px;padding:8px;border-radius:10px;border:1px solid rgba(212,168,67,.2);background:transparent;color:#a89070;font-size:12px;cursor:pointer;font-family:Georgia,serif';
+    nextCelBtn.textContent='Ver otra persona';
+    nextCelBtn.onclick=function(){var cur=parseInt(ls('celeb_idx')||'0');lss('celeb_idx',String((cur+1)%CELEBRES_29_MAR.length));render();};
+    box.appendChild(nextCelBtn);
+
+  } else if(tab==='respira'){
+    // Animacion de respiracion — CSS puro, sin JS complejo
+    var respDiv=mkDiv('text-align:center;padding:10px 0');
+    respDiv.appendChild(mkTxt('div',null,'Respiración 4-7-8','font-size:11px;color:#8ab4dc;letter-spacing:1px;text-transform:uppercase;margin-bottom:12px'));
+    var circle=mkDiv('width:100px;height:100px;border-radius:50%;background:radial-gradient(circle,rgba(100,200,180,.4),rgba(100,200,180,.1));border:2px solid rgba(100,200,180,.4);margin:0 auto 12px;animation:breathe 19s ease-in-out infinite');
+    respDiv.appendChild(circle);
+    var style=document.createElement('style');
+    style.textContent='@keyframes breathe{0%{transform:scale(1);opacity:.5}21%{transform:scale(1.5);opacity:1}58%{transform:scale(1.5);opacity:1}79%{transform:scale(1);opacity:.5}100%{transform:scale(1);opacity:.5}}';
+    document.head.appendChild(style);
+    var phases=mkDiv('display:flex;justify-content:center;gap:16px;margin-bottom:8px');
+    [{lbl:'Inhalar',t:'4s',clr:'#64c8b4'},{lbl:'Retener',t:'7s',clr:'#d4a843'},{lbl:'Exhalar',t:'8s',clr:'#8ab4dc'}].forEach(function(p){
+      var ph=mkDiv('text-align:center');
+      ph.appendChild(mkTxt('div',null,p.lbl,'font-size:11px;color:'+p.clr+';font-weight:bold'));
+      ph.appendChild(mkTxt('div',null,p.t,'font-size:10px;color:#a89070'));
+      phases.appendChild(ph);
+    });
+    respDiv.appendChild(phases);
+    respDiv.appendChild(mkTxt('div',null,'Seguí el pulso del círculo. Ideal para calmar la ansiedad nocturna.','font-size:11px;color:#a89070;line-height:1.5'));
+    box.appendChild(respDiv);
   }
   bd.appendChild(box);
 }
-
-
 // ─── MODO MADRUGADA ────────────────────────────────────────────
 function isMadrugada(){
   var cfg=D.config||{};
@@ -1519,6 +1729,7 @@ function genWeeklySummary(){
   var now=new Date(), desde=new Date(now.getTime()-7*86400000);
   var apodo=D.bebe.apodo||D.bebe.nombre||'Cefe';
   var semana=Math.floor(ageD()/7);
+  var semsVida=ageW();
   var th=D.hist.filter(function(h){return h.type==='toma'&&new Date(h.s)>=desde;});
   var ph=D.hist.filter(function(h){return h.type==='panal'&&new Date(h.t)>=desde;});
   var lp=D.pesos[0];
@@ -1588,8 +1799,24 @@ function genWeeklySummary(){
   if(ph.length>0){
     var nc=ph.filter(function(p){return p.p==='Caca';}).length;
     var nm=ph.filter(function(p){return p.p==='Mixto';}).length;
-    lines.push('?? '+ph.length+' pañales ('+nc+' cacas, '+(nc+nm)+' con deposición).');
+    lines.push('🧷 '+ph.length+' pañales ('+nc+' cacas, '+(nc+nm)+' con deposición).');
     lines.push('');
+  }
+  // Talla y PC recientes
+  var lTallaWS=D.tallas&&D.tallas.length>0?D.tallas[0]:null;
+  var lPCWS=D.pcs&&D.pcs.length>0?D.pcs[0]:null;
+  if(lTallaWS||lPCWS){
+    lines.push('📏 *Medidas*');
+    if(lTallaWS)lines.push('Talla: '+lTallaWS.cm+'cm ('+pctLblTalla(lTallaWS.cm,semsVida)+')');
+    if(lPCWS)lines.push('PC: '+lPCWS.cm+'cm ('+pctLblPC(lPCWS.cm,semsVida)+')');
+    lines.push('');
+  }
+  // Tipo de alimentación (fórmula)
+  var tipoAlimWS=(D.config&&D.config.tipoAlimentacion)||'pecho';
+  if(tipoAlimWS==='formula'||tipoAlimWS==='mixta'){
+    var tomasF=th.filter(function(h){return h.tipoToma==='formula'||h.tipoToma==='mixta';});
+    var mlF=tomasF.reduce(function(a,h){return a+(h.mlProvistos||0);},0);
+    if(mlF>0){lines.push('🍼 Fórmula: '+mlF+'ml esta semana.');lines.push('');}
   }
   // Hito
   if(hitoSemana){lines.push('⭐ *Hito de la semana:* '+hitoSemana);lines.push('');}
@@ -1762,12 +1989,31 @@ function savePostVisita(idx){
   v.receta=gv('pv-receta')||'';
   v.proxVisita=gv('pv-prox')||'';
   var pw=gv('pv-peso');if(pw&&parseFloat(pw)>0){v.pesoEnVisita=Math.round(parseFloat(pw)*1000);}
+  var pvTalla=gv('pv-talla');if(pvTalla&&parseFloat(pvTalla)>0){v.tallaEnVisita=parseFloat(pvTalla);}
+  var pvPC=gv('pv-pc');if(pvPC&&parseFloat(pvPC)>0){v.pcEnVisita=parseFloat(pvPC);}
   saveData();
-  // Si hay peso registrado, agregarlo a la curva de peso
+  // Peso → curva de peso
   if(v.pesoEnVisita>0){
     var existePeso=D.pesos.some(function(p){return sameDay(p.t,v.dt)&&p.g===v.pesoEnVisita;});
-    if(!existePeso){D.pesos.unshift({t:v.dt,g:v.pesoEnVisita,n:'Peso en consulta '+((D.meds&&D.meds[v.mi])?D.meds[v.mi].esp:'')});
+    var notaPeso='Consulta '+((D.meds&&D.meds[v.mi])?D.meds[v.mi].esp:'medica');
+    if(!existePeso){D.pesos.unshift({t:v.dt,g:v.pesoEnVisita,n:notaPeso});
     D.pesos.sort(function(a,b){return new Date(b.t)-new Date(a.t);});}
+  }
+  // Talla → curva de talla
+  if(v.tallaEnVisita>0){
+    var notaTalla='Consulta '+((D.meds&&D.meds[v.mi])?D.meds[v.mi].esp:'medica');
+    if(!D.tallas)D.tallas=[];
+    var existeTalla=D.tallas.some(function(t){return sameDay(t.t,v.dt)&&t.cm===v.tallaEnVisita;});
+    if(!existeTalla){D.tallas.unshift({t:v.dt,cm:v.tallaEnVisita,n:notaTalla});
+    D.tallas.sort(function(a,b){return new Date(b.t)-new Date(a.t);}); }
+  }
+  // PC → curva de PC
+  if(v.pcEnVisita>0){
+    var notaPC='Consulta '+((D.meds&&D.meds[v.mi])?D.meds[v.mi].esp:'medica');
+    if(!D.pcs)D.pcs=[];
+    var existePC=D.pcs.some(function(p){return sameDay(p.t,v.dt)&&p.cm===v.pcEnVisita;});
+    if(!existePC){D.pcs.unshift({t:v.dt,cm:v.pcEnVisita,n:notaPC});
+    D.pcs.sort(function(a,b){return new Date(b.t)-new Date(a.t);}); }
   }
   // Si hay próxima visita, agendar automáticamente
   if(v.proxVisita){
@@ -2085,6 +2331,8 @@ function handleAction(action,data){
     case 'savePeso':savePeso();break;
     case 'delHist':if(confirm('Eliminar?'))delHist(parseInt(data.idx));break;
     case 'delPeso':if(confirm('Eliminar peso?'))delPeso(parseInt(data.idx));break;
+    case 'delTalla':if(D.tallas)D.tallas.splice(parseInt(data.idx),1);saveData();render();break;
+    case 'delPC':if(D.pcs)D.pcs.splice(parseInt(data.idx),1);saveData();render();break;
     case 'copyMsg':copyText(D.msg);break;
     case 'shareMsg':shareText(D.msg);break;
     case 'discardMsg':D.hist.shift();saveData();setStep('home');break;
@@ -2224,7 +2472,7 @@ function render(){
   // Update device name display
   var dnEl=document.getElementById('device-name-display');
   if(dnEl)dnEl.textContent=getDeviceName()||'';
-  var MAS_STEPS=['perfil','editBebe','editPadre','medicos','editMed','visitaForm','postVisita','consultaMedica','extras','notas','editNota','sintomas','editSintoma','hitos','cartas','editCarta','astro','actividades','vacunas','memoria','pendientes','historia','logros','config','agenda','nuevoEvento'];
+  var MAS_STEPS=['perfil','editBebe','editPadre','medicos','editMed','visitaForm','postVisita','consultaMedica','extras','notas','editNota','sintomas','editSintoma','hitos','cartas','editCarta','astro','actividades','vacunas','memoria','pendientes','historia','logros','config','agenda','nuevoEvento','tallaEntry','pcEntry','estudios'];
   var TAB_MAP={home:['home'],history:['history'],agenda:['agenda','nuevoEvento'],mas:MAS_STEPS,config:['config']};
   Object.keys(TAB_MAP).forEach(function(t){
     var el=document.getElementById('bn-'+t);if(!el)return;
@@ -2233,7 +2481,7 @@ function render(){
   var nb=document.getElementById('night-btn');if(nb)nb.style.color=D.nightMode?'#f0d9a0':'#a89070';
   var htEl=document.getElementById('hdr-title');
   if(typeof updatePendBadge==='function')updatePendBadge();
-  if(htEl){var TITLES={home:'Ceferino',history:'Historial',peso:'Peso',pesoEntry:'Peso',dash:'Dashboard',perfil:'Perfil',editBebe:'Perfil',editPadre:'Perfil',medicos:'M\u00e9dicos',editMed:'M\u00e9dicos',visitaForm:'Médicos',postVisita:'Seguimiento',consultaMedica:'Consulta Médica',logros:'Logros',config:'Configuración',agenda:'Agenda',nuevoEvento:'Nuevo evento',extras:'Extras',notas:'Notas',editNota:'Nueva Nota',sintomas:'S\u00edntomas',editSintoma:'S\u00edntoma',hitos:'Hitos',cartas:'Cartas',editCarta:'Carta',astro:'Recreativo',actividades:'Actividades',vacunas:'Vacunas',memoria:'Memoria de Cefe',pendientes:'Pendientes',historia:'Historia de Cefe',toma:'Toma',panal:'Pa\u00f1al',preview:'Confirmar',summary:'Mensaje'};
+  if(htEl){var TITLES={home:'Ceferino',history:'Historial',peso:'Medidas',pesoEntry:'Peso',tallaEntry:'Talla',pcEntry:'Perimetro Cefalico',dash:'Dashboard',perfil:'Perfil',editBebe:'Perfil',editPadre:'Perfil',medicos:'M\u00e9dicos',editMed:'M\u00e9dicos',visitaForm:'Médicos',postVisita:'Seguimiento',consultaMedica:'Consulta Médica',logros:'Logros',config:'Configuración',agenda:'Agenda',nuevoEvento:'Nuevo evento',estudios:'Estudios y Medicación',extras:'Extras',notas:'Notas',editNota:'Nueva Nota',sintomas:'S\u00edntomas',editSintoma:'S\u00edntoma',hitos:'Hitos',cartas:'Cartas',editCarta:'Carta',astro:'Recreativo',actividades:'Actividades',vacunas:'Vacunas',memoria:'Memoria de Cefe',pendientes:'Pendientes',historia:'Historia de Cefe',toma:'Toma',panal:'Pa\u00f1al',preview:'Confirmar',summary:'Mensaje'};
   htEl.textContent=TITLES[D.step]||'Ceferino';}
 
   var bd=document.getElementById('bd');if(!bd)return;
@@ -2332,7 +2580,7 @@ function render(){
       var hoy=todayStr();
       var briefKey='cefiro_brief_'+hoy;
       var collapsed=ls(briefKey)==='1';
-      var d=ageD(), w=ageW();
+      var d=ageD(), w=ageW(), semsVida=w;
       var lp=D.pesos&&D.pesos[0];
       var tomasAyer=D.hist.filter(function(h){
         if(h.type!=='toma')return false;
@@ -2401,7 +2649,22 @@ function render(){
       // Línea 3: Capacidad gástrica contextual
       lineas.push({ic:'🍼',txt:'Hoy (día '+d+'): capacidad gástrica estimada '+gc.mn+'–'+gc.mx+' ml por toma.'});
 
-      // Línea 4: Próxima vacuna si está cercana
+      // Línea 4: Próxima visita médica
+      var proxVisitaBrief=null,proxVBDiff=9999999999;
+      (D.visits||[]).forEach(function(v){
+        if(v.estado!=='pendiente')return;
+        var vt=new Date(v.dt).getTime();
+        var diff=vt-Date.now();
+        if(diff>0&&diff<7*86400000&&diff<proxVBDiff){proxVBDiff=diff;proxVisitaBrief=v;}
+      });
+      if(proxVisitaBrief){
+        var medB=D.meds[proxVisitaBrief.mi]||{};
+        var diasV=Math.ceil(proxVBDiff/86400000);
+        var cuandoV=diasV<=0?'Hoy':diasV===1?'Mañana':'En '+diasV+' días';
+        var tituloV=(medB.esp||'Consulta')+(medB.nom?' — Dr/a. '+medB.nom+' '+medB.ape:'');
+        lineas.push({ic:'🏥',txt:cuandoV+': '+tituloV+(medB.dir?' ('+medB.dir+')':'')+'.'});
+      }
+      // Línea 4b: Próxima vacuna si está cercana
       if(proxVacDias<30&&proxVacNombre){
         lineas.push({ic:'💉',txt:proxVacNombre+' en '+proxVacDias+' día'+(proxVacDias!==1?'s':'')+'.'});
       }
@@ -2418,6 +2681,13 @@ function render(){
         if(proxHito&&minDiff2<=7){
           lineas.push({ic:proxHito.ic||'⭐',txt:'Hito próximo: '+proxHito.label+(minDiff2<=2?' — ¡puede aparecer cualquier día!':' en ~'+minDiff2+' días.')});
         }
+      }
+
+      // Línea 6: Guía de fórmula si aplica
+      var tipoAlimB=(D.config&&D.config.tipoAlimentacion)||'pecho';
+      if((tipoAlimB==='formula'||tipoAlimB==='mixta')&&typeof getGuiaFormula==='function'){
+        var guia=getGuiaFormula();
+        lineas.push({ic:'\uD83C\uDF7C',txt:'Semana '+semsVida+': '+guia.ml_min+'-'+guia.ml_max+'ml '+guia.frec+'. (Fuente: OMS/AAP)'});
       }
 
       if(lineas.length===0)return;
@@ -3050,7 +3320,23 @@ function render(){
 
   // ── PESO SCREEN ───────────────────────────────────────────────
   else if(D.step==='peso'){
-    bd.appendChild(E.el('div',{cls:'st',txt:'Curva de Peso'}));
+    // Sub-tabs: Peso / Talla / PC
+    if(!D._medidasTab)D._medidasTab='peso';
+    bd.appendChild(E.el('div',{cls:'st',txt:'Medidas de Cefe'}));
+    var mtabs=[{k:'peso',lbl:'Peso',ic:'KG'},{k:'talla',lbl:'Talla',ic:'CM'},{k:'pc',lbl:'Perim. Cef.',ic:'PC'}];
+    var mtRow=mkDiv('display:flex;gap:6px;margin-bottom:14px');
+    mtabs.forEach(function(t){
+      var on=D._medidasTab===t.k;
+      var b=document.createElement('button');
+      b.style.cssText='flex:1;padding:8px 4px;border-radius:12px;border:1px solid rgba(100,200,180,'+(on?'.5':'.2')+');background:rgba(100,200,180,'+(on?'.15':'.04')+');color:'+(on?'#64c8b4':'#a89070')+';font-size:12px;cursor:pointer;font-family:Georgia,serif;font-weight:'+(on?'bold':'normal');
+      b.innerHTML='<div style="font-size:10px;opacity:.7">'+t.ic+'</div><div>'+t.lbl+'</div>';
+      (function(k){b.onclick=function(){D._medidasTab=k;render();};})(t.k);
+      mtRow.appendChild(b);
+    });
+    bd.appendChild(mtRow);
+
+    // ── TAB PESO ──────────────────────────────────────────────
+    if(D._medidasTab==='peso'){
     var pNac=D.bebe.pn||3365,lp4=D.pesos[0];
     var pctL=lp4?pctLbl(lp4.g,ageW()):'\u2014';
     var gcv3=gasC();
@@ -3089,6 +3375,126 @@ function render(){
       var db3=E.btn('dbtn','\u2715','delPeso');db3.dataset.idx=i;right.appendChild(db3);
       row.appendChild(left);row.appendChild(right);bd.appendChild(row);
     });
+    } // end tab peso
+
+    else if(D._medidasTab==='talla'){
+      var tNac=D.bebe.talla||49;
+      var lTalla=(D.tallas&&D.tallas.length>0)?D.tallas[0]:null;
+      var miniRowT=mkDiv('display:flex;gap:8px;margin-bottom:12px');
+      miniRowT.appendChild(miniCard('Nac.',tNac+'cm',''));
+      if(lTalla){var pctT=pctLblTalla(lTalla.cm,ageW());miniRowT.appendChild(miniCard('Actual',lTalla.cm+'cm',pctClr(pctT)));}
+      bd.appendChild(miniRowT);
+      // Grafi simple de talla
+      if((D.tallas||[]).length>=2){
+        var tcT=document.createElement('canvas');tcT.id='talla-chart';tcT.width=420;tcT.height=140;
+        tcT.style.cssText='width:100%;border-radius:12px;background:rgba(255,255,255,.02);border:1px solid rgba(180,140,220,.2);margin-bottom:12px;display:block';
+        bd.appendChild(tcT);
+        setTimeout(function(){
+          var c=document.getElementById('talla-chart');if(!c)return;
+          var ctx=c.getContext('2d');if(!ctx)return;
+          var W=c.width,H=c.height,pad=28;
+          var sorted=(D.tallas||[]).slice().sort(function(a,b){return new Date(a.t)-new Date(b.t);});
+          var vals=sorted.map(function(p){return p.cm;});
+          var mn=Math.min.apply(null,vals)-2,mx=Math.max.apply(null,vals)+2;
+          var xS=function(i){return pad+(W-pad*2)*i/(vals.length-1);};
+          var yS=function(v){return H-pad-(H-pad*2)*(v-mn)/(mx-mn);};
+          ctx.clearRect(0,0,W,H);
+          ctx.strokeStyle='rgba(180,140,220,.6)';ctx.lineWidth=2;ctx.beginPath();
+          vals.forEach(function(v,i){i===0?ctx.moveTo(xS(i),yS(v)):ctx.lineTo(xS(i),yS(v));});
+          ctx.stroke();
+          vals.forEach(function(v,i){
+            ctx.fillStyle='#b48cdc';ctx.beginPath();ctx.arc(xS(i),yS(v),4,0,Math.PI*2);ctx.fill();
+            ctx.fillStyle='#a89070';ctx.font='9px sans-serif';ctx.fillText(v+'cm',xS(i)-10,yS(v)-8);
+          });
+        },60);
+      }
+      // Boton registrar
+      var regTallaBtn=document.createElement('button');
+      regTallaBtn.style.cssText='width:100%;padding:12px;border-radius:12px;border:1px solid rgba(180,140,220,.3);background:rgba(180,140,220,.08);color:#b48cdc;font-size:14px;font-weight:bold;cursor:pointer;font-family:Georgia,serif;margin-bottom:12px';
+      regTallaBtn.textContent='+ Registrar talla';
+      regTallaBtn.onclick=function(){setStep('tallaEntry');};
+      bd.appendChild(regTallaBtn);
+      // Historial talla
+      (D.tallas||[]).forEach(function(p,i){
+        var row2=E.div('hr2 pe'),left2=E.div('');
+        left2.appendChild(mkTxt('div','hrt',fdt(p.t)));
+        if(p.n)left2.appendChild(mkTxt('div','hrs',p.n));
+        var prev4=(D.tallas||[])[i+1];
+        if(prev4){var df4=((p.cm-prev4.cm)*10)/10;left2.appendChild(mkTxt('div','dup','+'+df4.toFixed(1)+'cm vs anterior'));}
+        left2.appendChild(mkTxt('div',null,'Percentil: '+pctLblTalla(p.cm,Math.floor((new Date(p.t)-new Date(D.bebe.fn||Date.now()))/604800000)),'font-size:10px;color:#b48cdc'));
+        var right2=E.div('hri');
+        right2.appendChild(mkTxt('div',null,p.cm+'cm','font-size:15px;font-weight:bold;color:#b48cdc'));
+        var dbT=E.btn('dbtn','\u2715','delTalla');dbT.dataset.idx=i;right2.appendChild(dbT);
+        row2.appendChild(left2);row2.appendChild(right2);bd.appendChild(row2);
+      });
+    } // end tab talla
+
+    else if(D._medidasTab==='pc'){
+      var pcNac=D.bebe.cc||32;
+      var lPC=(D.pcs&&D.pcs.length>0)?D.pcs[0]:null;
+      var miniRowP=mkDiv('display:flex;gap:8px;margin-bottom:12px');
+      miniRowP.appendChild(miniCard('Nac.',pcNac+'cm',''));
+      if(lPC){var pctPC=pctLblPC(lPC.cm,ageW());miniRowP.appendChild(miniCard('Actual',lPC.cm+'cm','#d4a843'));}
+      bd.appendChild(miniRowP);
+      bd.appendChild(mkTxt('div',null,'El perimetro cefalico refleja el crecimiento del cerebro. Fuente: OMS Child Growth Standards 2006','font-size:11px;color:#a89070;line-height:1.5;margin-bottom:10px'));
+      var regPCBtn=document.createElement('button');
+      regPCBtn.style.cssText='width:100%;padding:12px;border-radius:12px;border:1px solid rgba(212,168,67,.3);background:rgba(212,168,67,.08);color:#d4a843;font-size:14px;font-weight:bold;cursor:pointer;font-family:Georgia,serif;margin-bottom:12px';
+      regPCBtn.textContent='+ Registrar perimetro cefalico';
+      regPCBtn.onclick=function(){setStep('pcEntry');};
+      bd.appendChild(regPCBtn);
+      (D.pcs||[]).forEach(function(p,i){
+        var rowP=E.div('hr2 pe'),leftP=E.div('');
+        leftP.appendChild(mkTxt('div','hrt',fdt(p.t)));
+        if(p.n)leftP.appendChild(mkTxt('div','hrs',p.n));
+        var prevP=(D.pcs||[])[i+1];
+        if(prevP){var dfP=((p.cm-prevP.cm)*10)/10;leftP.appendChild(mkTxt('div','dup','+'+dfP.toFixed(1)+'cm'));}
+        leftP.appendChild(mkTxt('div',null,'Percentil: '+pctLblPC(p.cm,Math.floor((new Date(p.t)-new Date(D.bebe.fn||Date.now()))/604800000)),'font-size:10px;color:#d4a843'));
+        var rightP=E.div('hri');
+        rightP.appendChild(mkTxt('div',null,p.cm+'cm','font-size:15px;font-weight:bold;color:#d4a843'));
+        var dbP=E.btn('dbtn','\u2715','delPC');dbP.dataset.idx=i;rightP.appendChild(dbP);
+        rowP.appendChild(leftP);rowP.appendChild(rightP);bd.appendChild(rowP);
+      });
+    } // end tab pc
+  }
+
+  // ── TALLA ENTRY
+  else if(D.step==='tallaEntry'){
+    bd.appendChild(E.btn('bk','\u2190 Medidas','goPesoScreen'));
+    bd.appendChild(E.el('div',{cls:'st',txt:'Registrar Talla'}));
+    bd.appendChild(E.frow([E.field('Fecha',E.input('fi','te-fecha','date',null,todayStr())),E.field('Talla cm',E.input('fi','te-cm','number','Ej: 52.5',''))]));
+    bd.appendChild(E.field('Nota (opcional)',E.input('fi','te-nota','text','Ej: Control pediatra','')));
+    var saveTallaBtn=document.createElement('button');saveTallaBtn.style.cssText='width:100%;padding:13px;border-radius:13px;border:none;background:rgba(180,140,220,.7);color:#fff;font-size:14px;font-weight:bold;cursor:pointer;font-family:Georgia,serif;margin-top:8px';
+    saveTallaBtn.textContent='Guardar talla';saveTallaBtn.onclick=function(){
+      var fecha=gv('te-fecha'),cm=parseFloat(gv('te-cm'));
+      if(!fecha||!cm||cm<30||cm>130){alert('Talla invalida (30-130 cm).');return;}
+      var nota=gv('te-nota')||'';
+      if(!D.tallas)D.tallas=[];
+      D.tallas.unshift({t:new Date(fecha+'T12:00'),cm:cm,n:nota});
+      D.tallas.sort(function(a,b){return new Date(b.t)-new Date(a.t);});
+      saveData();D._medidasTab='talla';setStep('peso');
+    };
+    bd.appendChild(saveTallaBtn);
+    bd.appendChild(E.btn('gb rd','Cancelar','goPesoScreen'));
+  }
+
+  // ── PC ENTRY
+  else if(D.step==='pcEntry'){
+    bd.appendChild(E.btn('bk','\u2190 Medidas','goPesoScreen'));
+    bd.appendChild(E.el('div',{cls:'st',txt:'Perimetro Cefalico'}));
+    bd.appendChild(E.frow([E.field('Fecha',E.input('fi','pe-fecha','date',null,todayStr())),E.field('PC cm',E.input('fi','pe-cm','number','Ej: 35.5',''))]));
+    bd.appendChild(E.field('Nota (opcional)',E.input('fi','pe-nota','text','Ej: Control pediatra','')));
+    var savePCBtn=document.createElement('button');savePCBtn.style.cssText='width:100%;padding:13px;border-radius:13px;border:none;background:rgba(212,168,67,.7);color:#fff;font-size:14px;font-weight:bold;cursor:pointer;font-family:Georgia,serif;margin-top:8px';
+    savePCBtn.textContent='Guardar PC';savePCBtn.onclick=function(){
+      var fecha=gv('pe-fecha'),cm=parseFloat(gv('pe-cm'));
+      if(!fecha||!cm||cm<25||cm>60){alert('PC invalido (25-60 cm).');return;}
+      var nota=gv('pe-nota')||'';
+      if(!D.pcs)D.pcs=[];
+      D.pcs.unshift({t:new Date(fecha+'T12:00'),cm:cm,n:nota});
+      D.pcs.sort(function(a,b){return new Date(b.t)-new Date(a.t);});
+      saveData();D._medidasTab='pc';setStep('peso');
+    };
+    bd.appendChild(savePCBtn);
+    bd.appendChild(E.btn('gb rd','Cancelar','goPesoScreen'));
   }
 
   // ── SUMMARY ───────────────────────────────────────────────────
@@ -3405,6 +3811,53 @@ function render(){
   }
 
 
+  // ── ESTUDIOS Y MEDICACIÓN ─────────────────────────────────────
+  else if(D.step==='estudios'){
+    bd.appendChild(E.el('div',{cls:'st',txt:'Estudios y Medicación'}));
+    // Disclaimer
+    var discE=mkDiv('background:rgba(224,112,112,.08);border:1px solid rgba(224,112,112,.2);border-radius:12px;padding:10px 13px;margin-bottom:14px');
+    discE.appendChild(mkTxt('div',null,'AVISO IMPORTANTE','font-size:10px;color:#e07070;font-weight:bold;letter-spacing:1px;margin-bottom:3px'));
+    discE.appendChild(mkTxt('div',null,'Esta información es orientativa y NO reemplaza la consulta médica. Siempre consultar al pediatra antes de administrar cualquier medicación o solicitar estudios.','font-size:11px;color:#a89070;line-height:1.5'));
+    bd.appendChild(discE);
+    // Tabs
+    if(!D._estudiosTab)D._estudiosTab='estudios';
+    var etabs=[{k:'estudios',lbl:'Estudios'},{k:'meds',lbl:'Medicación'}];
+    var etabRow=mkDiv('display:flex;gap:6px;margin-bottom:14px');
+    etabs.forEach(function(t){
+      var on=D._estudiosTab===t.k;
+      var b=document.createElement('button');
+      b.style.cssText='flex:1;padding:9px;border-radius:12px;border:1px solid rgba(100,180,200,'+(on?'.4':'.15')+');background:rgba(100,180,200,'+(on?'.12':'.04')+');color:'+(on?'#64c8b4':'#a89070')+';font-size:13px;cursor:pointer;font-family:Georgia,serif;font-weight:'+(on?'bold':'normal');
+      b.textContent=t.lbl;(function(k){b.onclick=function(){D._estudiosTab=k;render();};})(t.k);
+      etabRow.appendChild(b);
+    });
+    bd.appendChild(etabRow);
+    if(D._estudiosTab==='estudios'){
+      ESTUDIOS_RN.forEach(function(e){
+        var card=mkDiv('background:rgba(255,255,255,.03);border:1px solid rgba(100,180,200,'+(e.obligatorio?'.25':'.12')+');border-radius:13px;padding:13px 14px;margin-bottom:10px');
+        var hdr=mkDiv('display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:6px');
+        hdr.appendChild(mkTxt('div',null,e.nombre,'font-size:13px;font-weight:bold;color:#f0d9a0;flex:1;line-height:1.3'));
+        if(e.obligatorio)hdr.appendChild(mkTxt('span',null,'Obligatorio','font-size:9px;font-weight:bold;color:#e07070;background:rgba(224,112,112,.12);border-radius:6px;padding:2px 7px;flex-shrink:0;margin-left:8px'));
+        card.appendChild(hdr);
+        card.appendChild(mkTxt('div',null,'Cuándo: '+e.cuando,'font-size:11px;color:#8ab4dc;margin-bottom:4px'));
+        card.appendChild(mkTxt('div',null,e.que,'font-size:12px;color:#a89070;line-height:1.5;margin-bottom:4px'));
+        if(e.donde)card.appendChild(mkTxt('div',null,'Dónde: '+e.donde,'font-size:11px;color:#a89070;line-height:1.4;margin-bottom:4px'));
+        card.appendChild(mkTxt('div',null,'Fuente: '+e.fuente,'font-size:10px;color:#4a5060;margin-top:4px'));
+        bd.appendChild(card);
+      });
+    } else {
+      MEDICACION_RN.forEach(function(m){
+        var card2=mkDiv('background:rgba(255,255,255,.03);border:1px solid rgba(212,168,67,.12);border-radius:13px;padding:13px 14px;margin-bottom:10px');
+        card2.appendChild(mkTxt('div',null,m.nombre,'font-size:13px;font-weight:bold;color:#f0d9a0;margin-bottom:4px'));
+        card2.appendChild(mkTxt('div',null,'Uso: '+m.uso,'font-size:11px;color:#d4a843;margin-bottom:4px'));
+        card2.appendChild(mkTxt('div',null,'Dosis ref.: '+m.dosis,'font-size:12px;color:#a89070;line-height:1.5;margin-bottom:4px'));
+        card2.appendChild(mkTxt('div',null,'Desde: '+m.desde,'font-size:11px;color:#a89070;margin-bottom:4px'));
+        if(m.nota)card2.appendChild(mkTxt('div',null,m.nota,'font-size:11px;color:#c8a060;line-height:1.5;font-style:italic;margin-bottom:4px'));
+        card2.appendChild(mkTxt('div',null,'Fuente: '+m.fuente,'font-size:10px;color:#4a5060;margin-top:2px'));
+        bd.appendChild(card2);
+      });
+    }
+  }
+
   // ── NUEVO EVENTO ──────────────────────────────────────────────
   else if(D.step==='nuevoEvento'){
     bd.appendChild(E.btn('bk','← Agenda','agenda'));
@@ -3607,12 +4060,12 @@ function render(){
           // Distinción visual REAL vs ESPERADO
           var esEsp=item.estado==='esperado'||item.estado==='estimado';
           var esReal=item.estado==='realizada';
-          var cardBg=esEsp?'rgba(255,255,255,.015)':isPasado?'rgba(255,255,255,.03)':'rgba(255,255,255,.05)';
-          var cardBorder=esEsp?'1px solid rgba(120,120,150,.15)':'1px solid rgba('+hexToRgb(item.color)+','+(isPasado?'.15':'.3')+')';
-          var cardOp=esEsp?'.5':isPasado&&!esReal?'.72':'1';
-          var icBg=esEsp?'rgba(120,120,150,.08)':'rgba('+hexToRgb(item.color)+',.15)';
-          var titleClr=esEsp?'#5a6070':isPasado?'#a89070':'#f0d9a0';
-          var icFilt=esEsp?'grayscale(90%) opacity(.5)':'none';
+          var cardBg=esEsp?'rgba(255,255,255,.03)':isPasado?'rgba(255,255,255,.03)':'rgba(255,255,255,.05)';
+          var cardBorder=esEsp?'1px solid rgba(160,160,180,.2)':'1px solid rgba('+hexToRgb(item.color)+','+(isPasado?'.15':'.3')+')';
+          var cardOp=esEsp?'.78':isPasado&&!esReal?'.75':'1';
+          var icBg=esEsp?'rgba(160,160,180,.1)':'rgba('+hexToRgb(item.color)+',.15)';
+          var titleClr=esEsp?'#8090a8':isPasado?'#a89070':'#f0d9a0';
+          var icFilt=esEsp?'grayscale(60%) opacity(.7)':'none';
           var card=mkDiv('border-radius:14px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:flex-start;gap:12px;cursor:pointer;background:'+cardBg+';border:'+cardBorder+';opacity:'+cardOp);
           // Ícono
           var icBox=mkDiv('width:36px;height:36px;border-radius:10px;background:'+icBg+';display:flex;align-items:center;justify-content:center;flex-shrink:0');
@@ -3626,8 +4079,23 @@ function render(){
           var badge=badgeMap[item.estado]||{txt:'',clr:'#a89070'};
           if(badge.txt)titleRow.appendChild(mkTxt('span',null,badge.txt,'font-size:9px;font-weight:bold;color:'+badge.clr+';background:rgba('+hexToRgb(badge.clr)+',.12);border-radius:6px;padding:2px 7px;white-space:nowrap;flex-shrink:0'));
           content.appendChild(titleRow);
-          content.appendChild(mkTxt('div',null,item.sub,'font-size:11px;color:'+(esEsp?'#4a5060':'#a89070')+';margin-top:3px;line-height:1.4'));
+          content.appendChild(mkTxt('div',null,item.sub,'font-size:11px;color:'+(esEsp?'#707888':'#a89070')+';margin-top:3px;line-height:1.4'));
+          // Chip accionable para esperados
+          if(esEsp&&(item.fuente==='vacuna'||item.fuente==='hito')){
+            var convBtn=document.createElement('button');
+            convBtn.style.cssText='margin-top:7px;padding:5px 10px;border-radius:8px;border:1px solid rgba(160,160,180,.3);background:rgba(160,160,180,.08);color:#8090a8;font-size:11px;cursor:pointer;font-family:Georgia,serif';
+            convBtn.textContent=item.fuente==='vacuna'?'Convertir en real (marcar aplicada) →':'Convertir en real (ya ocurrió) →';
+            (function(it3){convBtn.onclick=function(e){e.stopPropagation();showAgendaActionSheet(it3);};})(item);
+            content.appendChild(convBtn);
+          }
           // Hint de tap
+          if(esEsp&&(item.fuente==='vacuna'||item.fuente==='hito')){
+            var convBtn=document.createElement('button');
+            convBtn.style.cssText='margin-top:7px;padding:5px 10px;border-radius:8px;border:1px solid rgba(160,160,180,.3);background:rgba(160,160,180,.08);color:#8090a8;font-size:11px;cursor:pointer;font-family:Georgia,serif';
+            convBtn.textContent=item.fuente==='vacuna'?'Convertir en real (marcar aplicada) →':'Convertir en real (ya ocurrió) →';
+            (function(it3){convBtn.onclick=function(e){e.stopPropagation();showAgendaActionSheet(it3);};})(item);
+            content.appendChild(convBtn);
+          }
           if(!esEsp){
             var hintTxt=item.fuente==='visita'?(isPasado&&item.data&&item.data.estado==='pendiente'?'Tap para registrar cómo fue':'Tap para acciones'):item.fuente==='vacuna'?'Tap para marcar o ver':item.fuente==='hito'?'Tap para marcar':'';
             if(hintTxt)content.appendChild(mkTxt('div',null,hintTxt,'font-size:10px;color:#6a7480;margin-top:5px;font-style:italic'));
@@ -4129,8 +4597,14 @@ function render(){
     var pesoEl=E.input('fi','pv-peso','number','Ej: 3.800',pv.pesoEnVisita?(pv.pesoEnVisita/1000).toFixed(3):'');
     pesoEl.step='0.001';pesoEl.min='0';pesoEl.max='30';
     bd.appendChild(E.field('Peso en consulta kg (opcional — se agrega a la curva)',pesoEl));
+    bd.appendChild(E.frow([
+      E.field('Talla cm (opcional)',E.input('fi','pv-talla','number','Ej: 52',(pv.tallaEnVisita||'').toString())),
+      E.field('PC cm (opcional)',E.input('fi','pv-pc','number','Ej: 35',(pv.pcEnVisita||'').toString()))
+    ]));
+    bd.appendChild(mkTxt('div',null,'Si registrás talla o PC se agregan automáticamente a las curvas.','font-size:11px;color:#a89070;margin-bottom:10px;line-height:1.5'));
     // Próxima visita
-    bd.appendChild(E.field('Próxima cita (opcional — se agenda automáticamente)',E.input('fi','pv-prox','date',null,pv.proxVisita||'')));
+    bd.appendChild(E.frow([E.field('Próxima cita',E.input('fi','pv-prox','date',null,pv.proxVisita||'')),E.field('Hora',E.input('fi','pv-hora','time',null,pv.proxHora||'09:00'))]));
+    bd.appendChild(mkTxt('div',null,'Si ingresás fecha se agenda y podés agregarlo a Google Calendar.','font-size:11px;color:#a89070;margin-bottom:10px;line-height:1.5'));
     // Guardar
     var saveBtn=document.createElement('button');
     saveBtn.style.cssText='width:100%;padding:13px;border-radius:13px;border:none;background:rgba(180,140,220,.7);color:#fff;font-size:14px;font-weight:bold;cursor:pointer;font-family:Georgia,serif;margin-bottom:8px';
@@ -4227,6 +4701,7 @@ document.addEventListener('click', function(ev) {
         case 'goHitos': setStep('hitos'); return;
         case 'goCartas': setStep('cartas'); return;
         case 'goAstro': closeMasMenu(); setStep('astro'); return;
+        case 'goEstudios': closeMasMenu(); setStep('estudios'); return;
         case 'goActividades': closeMasMenu(); setStep('actividades'); return;
         case 'goVacunas': closeMasMenu(); setStep('vacunas'); return;
         case 'goPendientes': closeMasMenu(); setStep('pendientes'); return;
@@ -4514,10 +4989,11 @@ function renderHistoria(bd) {
   var filtros = [
     { id:'todo',    ic:'📋', label:'Todo' },
     { id:'hito',    ic:'🌟', label:'Hitos' },
-    { id:'carta',   ic:'💌', label:'Cartas' },
     { id:'salud',   ic:'🏥', label:'Salud' },
-    { id:'nota',    ic:'📝', label:'Notas' },
+    { id:'medidas', ic:'📏', label:'Medidas' },
     { id:'peso',    ic:'⚖️', label:'Peso' },
+    { id:'nota',    ic:'📝', label:'Notas' },
+    { id:'carta',   ic:'💌', label:'Cartas' },
   ];
   var filtRow = mkDiv('display:flex;gap:6px;margin-bottom:16px;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch');
   filtros.forEach(function(f) {
@@ -4594,6 +5070,38 @@ function renderHistoria(bd) {
     items.push({ tipo:'peso', fecha:pd.toISOString().slice(0,10), ic:'⚖️', titulo:gkg(p.g)+' kg', sub:diffStr+(p.n?' · '+p.n:''), color: diff===null?'#a89070':diff>=0?'#64c8b4':'#d4a843' });
   });
 
+  // Tallas
+  (D.tallas||[]).forEach(function(p) {
+    var pd = safeDate(p.t);
+    if (!pd) return;
+    items.push({ tipo:'medidas', fecha:pd.toISOString().slice(0,10),
+      ic:'\u2195\uFE0F', titulo:p.cm+' cm de talla',
+      sub:(p.n?p.n+' · ':'')+pctLblTalla(p.cm, Math.floor((pd-new Date(D.bebe.fn||Date.now()))/604800000)),
+      color:'#b48cdc' });
+  });
+
+  // Perimetro cefalico
+  (D.pcs||[]).forEach(function(p) {
+    var pd = safeDate(p.t);
+    if (!pd) return;
+    items.push({ tipo:'medidas', fecha:pd.toISOString().slice(0,10),
+      ic:'\uD83E\uDDE0', titulo:p.cm+' cm de PC',
+      sub:(p.n?p.n+' · ':'')+pctLblPC(p.cm, Math.floor((pd-new Date(D.bebe.fn||Date.now()))/604800000)),
+      color:'#d4a843' });
+  });
+
+  // Visitas medicas realizadas
+  (D.visits||[]).forEach(function(v) {
+    if (!v||v.estado!=='realizada') return;
+    var vd = safeDate(v.dt);
+    if (!vd) return;
+    var med = D.meds[v.mi]||{};
+    var titulo = (med.esp||'Visita medica')+(med.nom?' — Dr/a. '+med.nom+' '+med.ape:'');
+    var sub = v.conclusiones?(v.conclusiones.slice(0,100)+(v.conclusiones.length>100?'…':'')):'';
+    items.push({ tipo:'salud', fecha:vd.toISOString().slice(0,10),
+      ic:'\uD83C\uDFE5', titulo:titulo, sub:sub, color:'#b48cdc' });
+  });
+
   // Cumpleaños automáticos (semanas y meses)
   if (fn) {
     var hoy = new Date();
@@ -4612,6 +5120,7 @@ function renderHistoria(bd) {
   if (filtro !== 'todo') {
     items = items.filter(function(it) {
       if (filtro === 'salud') return it.tipo === 'salud';
+      if (filtro === 'medidas') return it.tipo === 'medidas' || it.tipo === 'peso';
       return it.tipo === filtro;
     });
   }
@@ -5220,6 +5729,35 @@ function checkContextualPopup() {
   var diasVida = Math.floor((today - fn) / 86400000);
   var semsVida = Math.floor(diasVida / 7);
   var apodo    = (D.bebe.apodo || D.bebe.nombre || 'Cefe');
+
+  // ── PRIORIDAD 0: BCG pendiente (no recibida al nacer) ─────────
+  if(D.bebe.vacBCG===false&&!_cpopShown){
+    var bcgKey='bcg_recordado';
+    if(!ls(bcgKey)){
+      _cpopShown=true;
+      var dV=ageD();
+      showCpop(
+        'urgente','\uD83D\uDC89','Vacuna pendiente',
+        'BCG no recibida al nacer',
+        apodo+' a\u00FAn no recibi\u00F3 la BCG. Pod\u00E9s ir al Sanatorio Trinidad (1\u00B0 piso) lunes, mi\u00E9rcoles o viernes de 9 a 11hs. Sin turno previo.',
+        'Marcar como aplicada',
+        function(){
+          closeCpop();
+          D.bebe.vacBCG=todayStr();
+          saveData();
+          lss(bcgKey,'1');
+        },
+        'Recordarme ma\u00F1ana',
+        function(){
+          closeCpop();
+          var tmrw=new Date();tmrw.setDate(tmrw.getDate()+1);
+          lss(bcgKey+'_retry',tmrw.toISOString().slice(0,10));
+        }
+      );
+    } else if(ls(bcgKey+'_retry')&&ls(bcgKey+'_retry')<=todayStr()){
+      lss(bcgKey,null);lss(bcgKey+'_retry',null); // resetear para volver a mostrar
+    }
+  }
 
   // ── PRIORIDAD 1: Vacuna vencida o próxima (≤7 días) ──────────
   var vacUrgente = null;
@@ -6253,6 +6791,8 @@ onValue(ref(db,'cefe'),function(snap){
 
   var fbSi=data.sintomas&&Array.isArray(data.sintomas)?data.sintomas.map(function(s){if(!s)return null;var t=restoreDate(s.t);if(!t)return null;return Object.assign({},s,{t:t});}).filter(Boolean):null;
   if(fbSi!==null&&fbSi.length>=D.sintomas.length)D.sintomas=fbSi;
+  if(data.tallas&&Array.isArray(data.tallas)){var fbTl=data.tallas.map(function(e){if(!e)return null;var t=restoreDate(e.t);if(!t)return null;return{t:t,cm:e.cm,n:e.n||''};}).filter(Boolean);if(fbTl.length>=(D.tallas||[]).length)D.tallas=fbTl;}
+  if(data.pcs&&Array.isArray(data.pcs)){var fbPc=data.pcs.map(function(e){if(!e)return null;var t=restoreDate(e.t);if(!t)return null;return{t:t,cm:e.cm,n:e.n||''};}).filter(Boolean);if(fbPc.length>=(D.pcs||[]).length)D.pcs=fbPc;}
 
   // hitos: merge — nunca perder hitos locales, agregar los de Firebase
   if(data.hitos&&Array.isArray(data.hitos)){
@@ -6293,7 +6833,7 @@ onValue(ref(db,'cefe'),function(snap){
 
   // Guardar el estado actualizado en localStorage inmediatamente
   // para que si Firebase llega tarde en la próxima carga, tengamos los datos correctos
-  try{lss('hist',serHist());lss('pesos',serPesos());lss('hitos',D.hitos);lss('meds',D.meds);lss('visits',serVisits());lss('notas',D.notas);lss('cartas',D.cartas);}catch(ex){}
+  try{lss('hist',serHist());lss('pesos',serPesos());lss('tallas',D.tallas||[]);lss('pcs',D.pcs||[]);lss('hitos',D.hitos);lss('meds',D.meds);lss('visits',serVisits());lss('notas',D.notas);lss('cartas',D.cartas);}catch(ex){}
   setDot('#64c8b4','Sincronizado');
   if(typeof applyNightMode==='function')applyNightMode();
   if(typeof render==='function')render();
