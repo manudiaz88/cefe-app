@@ -278,6 +278,10 @@ button{font-family:Georgia,serif;-webkit-appearance:none}
 var APP_VERSION = 3;
 
 // ─── ELEMENT BUILDER ──────────────────────────────────────────
+
+// ══════════════════════════════════════════════════════════════════════════
+// ══  HELPERS UI
+// ══════════════════════════════════════════════════════════════════════════
 var E = {
   el: function(tag, opts, children) {
     var el = document.createElement(tag);
@@ -453,6 +457,10 @@ var SIDES_DATA = [
 var SIDES = SIDES_DATA.map(function(s){ return s.label; });
 
 // ─── STATE ────────────────────────────────────────────────────
+
+// ══════════════════════════════════════════════════════════════════════════
+// ══  ESTADO GLOBAL (D)
+// ══════════════════════════════════════════════════════════════════════════
 var D = {
   step: 'home',
   hist: [], pesos: [], tallas: [], pcs: [], meds: [], visits: [], padres: [],
@@ -582,6 +590,10 @@ function migrate(savedVersion) {
   }
 }
 
+
+// ══════════════════════════════════════════════════════════════════════════
+// ══  STORAGE — loadData / saveData
+// ══════════════════════════════════════════════════════════════════════════
 function loadData() {
   var savedVersion = parseInt(ls('version') || '1');
   try {
@@ -694,6 +706,10 @@ function saveData() {
 }
 
 // ─── AGE / GASTRIC / PERCENTILES ──────────────────────────────
+
+// ══════════════════════════════════════════════════════════════════════════
+// ══  EDAD / CAPACIDAD GÁSTRICA
+// ══════════════════════════════════════════════════════════════════════════
 function ageD() { if (!D.bebe.fn) return 0; return Math.floor((Date.now()-new Date(D.bebe.fn).getTime())/86400000); }
 function ageW() { return Math.floor(ageD()/7); }
 function ageLabel() {
@@ -756,6 +772,10 @@ function gasC() {
 }
 
 // ─── HITOS DEL DESARROLLO ─────────────────────────────────────
+
+// ══════════════════════════════════════════════════════════════════════════
+// ══  HITOS DEF
+// ══════════════════════════════════════════════════════════════════════════
 var HITOS_DEF = [
   // ── HITOS DE VIDA ─────────────────────────────────────────
   // (momentos que los padres eligen recordar)
@@ -804,6 +824,10 @@ var HITOS_DEF = [
   {id:'h21', cat:'desarrollo', semanas:104,ic:'🎨',      label:'Juego simbólico (juega a “hacerse”)'},
 ];
 
+
+// ══════════════════════════════════════════════════════════════════════════
+// ══  ML FLOW / ESTIMACIÓN DE ML
+// ══════════════════════════════════════════════════════════════════════════
 var ML_FLOW = {1:2.0, 2:2.8, 3:3.5, 4:4.5, 5:5.5};
 function estimateML(lados,efi,mlProv){
   if(!efi||!lados||lados.length===0)return mlProv||0;
@@ -1299,7 +1323,7 @@ function showAgendaActionSheet(item) {
         window.open('https://wa.me/'+m.tel.replace(/[^0-9]/g,'')+'?text='+encodeURIComponent(msg),'_blank');
       }));
     }
-    sheet.appendChild(mkSBtn('??️','Eliminar evento','No se puede deshacer','#e07070',function(){
+    sheet.appendChild(mkSBtn('\uD83D\uDDD1\uFE0F','Eliminar evento','No se puede deshacer','#e07070',function(){
       if(confirm('¿Eliminar esta visita?')){D.visits.splice(item.idx,1);saveData();render();}
     }));
   } else if(item.fuente==='vacuna'){
@@ -1323,6 +1347,10 @@ function showAgendaActionSheet(item) {
 }
 
 // ─── TOMA RAPIDA MAMADERA ─────────────────────────────────────
+
+// ══════════════════════════════════════════════════════════════════════════
+// ══  ACCIONES: TOMA
+// ══════════════════════════════════════════════════════════════════════════
 function startTomaRapidaMamadera(){
   var prev=document.getElementById('mam-overlay');if(prev)prev.remove();
   var overlay=document.createElement('div');overlay.id='mam-overlay';
@@ -1665,6 +1693,10 @@ function schedAlarm(nt){
 }
 
 // ─── MESSAGE GENERATOR ────────────────────────────────────────
+
+// ══════════════════════════════════════════════════════════════════════════
+// ══  GENERAR MENSAJE (WhatsApp)
+// ══════════════════════════════════════════════════════════════════════════
 function genMsg(entry){
   var lines=[];
   if(entry.type==='toma'){
@@ -1681,6 +1713,14 @@ function genMsg(entry){
     if(entry.ext&&(entry.ext.l||entry.ext.r))lines.push('Extraccion sacaleches: izq '+(entry.ext.l||0)+'ml / der '+(entry.ext.r||0)+'ml');
     lines.push('Proxima toma: ~'+ft(entry.nt));
     if(entry.efi)lines.push('Eficiencia: '+entry.efi+'/5');
+    // ml estimados por Céfiro
+    if(entry.mlEst&&entry.mlEst>0){
+      var mlRange=estimateMLRange(entry.lados,entry.efi,entry.mlProvistos||0);
+      var mlTxt=mlRange.mn!==mlRange.mx?(mlRange.mn+'-'+mlRange.mx+'ml'):mlRange.mn+'ml';
+      lines.push('\u25B8 Estimado C\u00e9firo: ~'+mlTxt);
+    } else if(entry.mlProvistos&&entry.mlProvistos>0){
+      lines.push('\u25B8 Leche dada: '+entry.mlProvistos+'ml');
+    }
     if(entry.note&&entry.note.trim())lines.push('Nota: '+entry.note.trim());
   } else if(entry.type==='panal'){
     var pH=D.hist.filter(function(h){return h.type==='panal'&&sameDay(h.t,entry.t);});
@@ -1768,7 +1808,7 @@ function genWeeklySummary(){
   var pred=typeof calcPesoPrediccion==='function'?calcPesoPrediccion():null;
   // ── Construir mensaje narrativo ──
   var lines=[];
-  lines.push('?? *Semana '+semana+' de '+apodo+'*');
+  lines.push('\uD83D\uDCC6 *Semana '+semana+' de '+apodo+'*');
   lines.push(desde.toLocaleDateString('es-AR',{day:'2-digit',month:'long'})+' — '+now.toLocaleDateString('es-AR',{day:'2-digit',month:'long'}));
   lines.push('');
   // Párrafo de tomas
@@ -1776,11 +1816,11 @@ function genWeeklySummary(){
     var tpd=Math.round(th.length/7);
     var totMin=th.reduce(function(a,b){return a+b.tot;},0);
     var promMin=Math.round(totMin/th.length);
-    lines.push('?? *Lactancia*');
+    lines.push('\uD83E\uDD50 *Lactancia*');
     lines.push(th.length+' tomas en la semana (∼'+tpd+' por día), promedio '+promMin+' min por toma.');
     if(maxTramo>0){
       var trLbl=Math.floor(maxTramo/60)>0?Math.floor(maxTramo/60)+'h '+(maxTramo%60)+'min':maxTramo+'min';
-      var tendLbl=diffTramo>10?' (+'+diffTramo+' min vs semana anterior ??)':diffTramo<-10?' (−'+Math.abs(diffTramo)+' min vs semana anterior)':'';
+      var tendLbl=diffTramo>10?' (+'+diffTramo+' min vs semana anterior \u2197)':diffTramo<-10?' (−'+Math.abs(diffTramo)+' min vs semana anterior)':'';
       lines.push('Tramo más largo sin tomar: '+trLbl+tendLbl+'.');
     }
     lines.push('');
@@ -1788,8 +1828,8 @@ function genWeeklySummary(){
   // Peso
   if(lp){
     var diffNac3=lp.g-pn;
-    lines.push('⚖️ *Peso*');
-    if(diffNac3>=0){lines.push(apodo+' pesa '+gkg(lp.g)+' kg — ya superó el peso de nacimiento. ✅');}
+    lines.push('\u2696\uFE0F *Peso*');
+    if(diffNac3>=0){lines.push(apodo+' pesa '+gkg(lp.g)+' kg — ya super\u00f3 el peso de nacimiento. \u2705');}
     else if(pred&&pred.diasParaNac<=14){lines.push(apodo+' pesa '+gkg(lp.g)+' kg — recupera el peso de nac. en ~'+pred.diasParaNac+' días al ritmo actual.');}
     else{lines.push(apodo+' pesa '+gkg(lp.g)+' kg ('+pctLbl(lp.g,ageW())+'). Faltan '+Math.abs(diffNac3)+'g para el peso de nacimiento.');}
     if(pred&&pred.slope>0)lines.push('Ganando ~'+pred.slope+'g/día.');
@@ -1799,14 +1839,14 @@ function genWeeklySummary(){
   if(ph.length>0){
     var nc=ph.filter(function(p){return p.p==='Caca';}).length;
     var nm=ph.filter(function(p){return p.p==='Mixto';}).length;
-    lines.push('🧷 '+ph.length+' pañales ('+nc+' cacas, '+(nc+nm)+' con deposición).');
+    lines.push('\uD83E\uDDF7 '+ph.length+' pa\u00f1ales ('+nc+' cacas, '+(nc+nm)+' con deposición).');
     lines.push('');
   }
   // Talla y PC recientes
   var lTallaWS=D.tallas&&D.tallas.length>0?D.tallas[0]:null;
   var lPCWS=D.pcs&&D.pcs.length>0?D.pcs[0]:null;
   if(lTallaWS||lPCWS){
-    lines.push('📏 *Medidas*');
+    lines.push('\uD83D\uDCCF *Medidas*');
     if(lTallaWS)lines.push('Talla: '+lTallaWS.cm+'cm ('+pctLblTalla(lTallaWS.cm,semsVida)+')');
     if(lPCWS)lines.push('PC: '+lPCWS.cm+'cm ('+pctLblPC(lPCWS.cm,semsVida)+')');
     lines.push('');
@@ -1816,17 +1856,17 @@ function genWeeklySummary(){
   if(tipoAlimWS==='formula'||tipoAlimWS==='mixta'){
     var tomasF=th.filter(function(h){return h.tipoToma==='formula'||h.tipoToma==='mixta';});
     var mlF=tomasF.reduce(function(a,h){return a+(h.mlProvistos||0);},0);
-    if(mlF>0){lines.push('🍼 Fórmula: '+mlF+'ml esta semana.');lines.push('');}
+    if(mlF>0){lines.push('\uD83C\uDF7C F\u00f3rmula: '+mlF+'ml esta semana.');lines.push('');}
   }
   // Hito
-  if(hitoSemana){lines.push('⭐ *Hito de la semana:* '+hitoSemana);lines.push('');}
+  if(hitoSemana){lines.push('\u2B50 *Hito de la semana:* '+hitoSemana);lines.push('');}
   // Etapa y cierre de Céfiro
   var d3=ageD();
   var etapa=d3<14?'Los primeros días son los más intensos. Están haciéndolo muy bien.':
     d3<30?'Semana '+semana+': el caos se va ordenando de a poco. Todo lo que registran hoy es la memoria que van a agradecer.':
     d3<60?'Mes 2: '+apodo+' los reconoce. La sonrisa social puede aparecer en cualquier momento.':
     'Cada semana '+apodo+' cambia. Sigan registrando.';
-  lines.push('??️ _'+etapa+'_');
+  lines.push('\uD83D\uDCCB _'+etapa+'_');
   lines.push('');
   lines.push('_Céfiro para Alba · v3.0_');
   return lines.join('\n');
@@ -1906,6 +1946,10 @@ function confirmEntry(){
 function discardPending(){D.pend=null;setStep('home');}
 function discardCurrent(){stopTimer();D.cSide=null;D.cStart=null;setStep('home');}
 
+
+// ══════════════════════════════════════════════════════════════════════════
+// ══  ACCIONES: PANAL / PESO / MED
+// ══════════════════════════════════════════════════════════════════════════
 function savePeso(){
   if(!D.pg){alert('Ingresa un peso.');return;}
   if(D.pg < 1000){alert('Peso muy bajo ('+D.pg+'g). ¿Ingresaste kg en lugar de gramos? Usá el campo de kg.');return;}
@@ -2130,6 +2174,10 @@ function reqNotif(){
   if(typeof Notification==='undefined')return;
   Notification.requestPermission().then(function(p){if(p==='granted')alert('Notificaciones activadas.');render();});
 }
+
+// ══════════════════════════════════════════════════════════════════════════
+// ══  EXPORTAR CSV
+// ══════════════════════════════════════════════════════════════════════════
 function exportCSV(){
   var rows=[['Tipo','Fecha','Inicio','Fin','Duracion','Lados','ExtIzq','ExtDer','Panal','Efic','Nota']];
   D.hist.forEach(function(h){
@@ -2467,6 +2515,10 @@ function medCard(m,i){
 }
 
 // ─── RENDER ───────────────────────────────────────────────────
+
+// ══════════════════════════════════════════════════════════════════════════
+// ══  RENDER PRINCIPAL
+// ══════════════════════════════════════════════════════════════════════════
 function render(){
   applyNightMode();
   // Update device name display
@@ -2861,8 +2913,25 @@ function render(){
       var tomasIdeal='6-12 tomas/día es normal';
       var tomasCtx=tomasHoy.length>=6?'✅ ritmo ideal':tomasHoy.length>=4?'👍 buen ritmo':'aún temprano';
       var cTomas=mkDiv('background:rgba(212,168,67,.07);border-radius:12px;padding:10px 12px');
-      cTomas.appendChild(mkTxt('div',null,'🍼 '+tomasHoy.length+' tomas','font-size:16px;font-weight:bold;color:#f0d9a0'));
+      cTomas.appendChild(mkTxt('div',null,'\uD83C\uDF7C '+tomasHoy.length+' tomas','font-size:16px;font-weight:bold;color:#f0d9a0'));
       cTomas.appendChild(mkTxt('div',null,tomasCtx,'font-size:10px;color:#a89070;margin-top:2px'));
+      // ── Breakdown por tipo de toma (solo si hay mezcla) ──
+      var tPecho=tomasHoy.filter(function(h){return h.lados&&h.lados.length>0&&(!h.mlProvistos||h.mlProvistos===0)&&(!h.formula);}).length;
+      var tExtr=tomasHoy.filter(function(h){return h.mlProvistos&&h.mlProvistos>0&&h.lados&&h.lados.length===0;}).length
+        +tomasHoy.filter(function(h){return h.mlProvistos&&h.mlProvistos>0&&h.lados&&h.lados.length>0;}).length;
+      var tForm=tomasHoy.filter(function(h){return h.formula&&h.formula>0;}).length;
+      var tipoAlimHoy=(D.config&&D.config.tipoAlimentacion)||'pecho';
+      var hayMezcla=tipoAlimHoy!=='pecho'||(tExtr>0||tForm>0);
+      if(hayMezcla&&tomasHoy.length>0){
+        var parts=[];
+        if(tPecho>0)parts.push('\uD83E\uDD31 '+tPecho+' pecho');
+        if(tExtr>0)parts.push('\uD83C\uDF7C '+tExtr+' extra\u00edda');
+        if(tForm>0)parts.push('\uD83E\uDD5B '+tForm+' f\u00f3rmula');
+        // fallback si la clasificación no es exacta
+        var clasificadas=tPecho+tExtr+tForm;
+        if(clasificadas===0&&tomasHoy.length>0)parts.push('\uD83E\uDD31 '+tomasHoy.length+' pecho');
+        if(parts.length>0)cTomas.appendChild(mkTxt('div',null,parts.join('  \u00b7  '),'font-size:10px;color:#64c8b4;margin-top:3px;line-height:1.3'));
+      }
       grid.appendChild(cTomas);
 
       // Pañales con contexto
@@ -3321,7 +3390,7 @@ function render(){
   // ── PESO SCREEN ───────────────────────────────────────────────
   else if(D.step==='peso'){
     // Sub-tabs: Peso / Talla / PC
-    if(!D._medidasTab)D._medidasTab='peso';
+    if(!D._medidasTab)D._medidasTab=ls('medidasTab')||'peso';
     bd.appendChild(E.el('div',{cls:'st',txt:'Medidas de Cefe'}));
     var mtabs=[{k:'peso',lbl:'Peso',ic:'KG'},{k:'talla',lbl:'Talla',ic:'CM'},{k:'pc',lbl:'Perim. Cef.',ic:'PC'}];
     var mtRow=mkDiv('display:flex;gap:6px;margin-bottom:14px');
@@ -3330,7 +3399,7 @@ function render(){
       var b=document.createElement('button');
       b.style.cssText='flex:1;padding:8px 4px;border-radius:12px;border:1px solid rgba(100,200,180,'+(on?'.5':'.2')+');background:rgba(100,200,180,'+(on?'.15':'.04')+');color:'+(on?'#64c8b4':'#a89070')+';font-size:12px;cursor:pointer;font-family:Georgia,serif;font-weight:'+(on?'bold':'normal');
       b.innerHTML='<div style="font-size:10px;opacity:.7">'+t.ic+'</div><div>'+t.lbl+'</div>';
-      (function(k){b.onclick=function(){D._medidasTab=k;render();};})(t.k);
+      (function(k){b.onclick=function(){D._medidasTab=k;lss('medidasTab',k);render();};})(t.k);
       mtRow.appendChild(b);
     });
     bd.appendChild(mtRow);
@@ -3593,19 +3662,19 @@ function render(){
         shareBtn.onclick=function(){
           var apodo=D.bebe.apodo||D.bebe.nombre||'Cefe';
           var lines=['*📊 Resumen del día — '+apodo+'*','📅 '+hoy.toLocaleDateString('es-AR',{weekday:'long',day:'numeric',month:'long'}),''];
-          lines.push('*🍼 Tomas: '+tomHoy.length+'*');
+          lines.push('*\uD83C\uDF7C Tomas: '+tomHoy.length+'*');
           var totMin=tomHoy.reduce(function(a,h){return a+h.tot;},0);
           lines.push('Tiempo total: '+totMin+'min');
           tomHoy.forEach(function(h){
             var sm={izq:0,der:0};h.lados.forEach(function(l){var s=l.s.toLowerCase().indexOf('der')>=0?'der':'izq';sm[s]+=l.m;});
             lines.push('· '+ft(h.s)+' — izq:'+sm.izq+'m der:'+sm.der+'m ('+h.tot+'min)');
           });
-          lines.push('');lines.push('*🧷 Pañales: '+panHoy.length+'*');
+          lines.push('');lines.push('*\uD83E\uDDF7 Pa\u00f1ales: '+panHoy.length+'*');
           var cc2=panHoy.filter(function(p){return p.p==='Caca';}).length;
           var mx2=panHoy.filter(function(p){return p.p==='Mixto';}).length;
           var pi2=panHoy.filter(function(p){return p.p==='Pis';}).length;
           lines.push('Pis: '+pi2+' · Caca: '+cc2+' · Mixto: '+mx2);
-          if(pesoHoy.length>0){lines.push('');lines.push('*⚖️ Peso: '+gkg(pesoHoy[0].g)+'kg*');}
+          if(pesoHoy.length>0){lines.push('');lines.push('*\u2696\uFE0F Peso: '+gkg(pesoHoy[0].g)+'kg*');}
           var gc2=gasC();
           lines.push('');lines.push('_Cap. gástrica est.: '+gc2.mn+'-'+gc2.mx+'ml/toma_');
           lines.push('_Cefe App_');
@@ -3820,14 +3889,14 @@ function render(){
     discE.appendChild(mkTxt('div',null,'Esta información es orientativa y NO reemplaza la consulta médica. Siempre consultar al pediatra antes de administrar cualquier medicación o solicitar estudios.','font-size:11px;color:#a89070;line-height:1.5'));
     bd.appendChild(discE);
     // Tabs
-    if(!D._estudiosTab)D._estudiosTab='estudios';
+    if(!D._estudiosTab)D._estudiosTab=ls('estudiosTab')||'estudios';
     var etabs=[{k:'estudios',lbl:'Estudios'},{k:'meds',lbl:'Medicación'}];
     var etabRow=mkDiv('display:flex;gap:6px;margin-bottom:14px');
     etabs.forEach(function(t){
       var on=D._estudiosTab===t.k;
       var b=document.createElement('button');
       b.style.cssText='flex:1;padding:9px;border-radius:12px;border:1px solid rgba(100,180,200,'+(on?'.4':'.15')+');background:rgba(100,180,200,'+(on?'.12':'.04')+');color:'+(on?'#64c8b4':'#a89070')+';font-size:13px;cursor:pointer;font-family:Georgia,serif;font-weight:'+(on?'bold':'normal');
-      b.textContent=t.lbl;(function(k){b.onclick=function(){D._estudiosTab=k;render();};})(t.k);
+      b.textContent=t.lbl;(function(k){b.onclick=function(){D._estudiosTab=k;lss('estudiosTab',k);render();};})(t.k);
       etabRow.appendChild(b);
     });
     bd.appendChild(etabRow);
@@ -4075,7 +4144,8 @@ function render(){
           var content=mkDiv('flex:1;min-width:0');
           var titleRow=mkDiv('display:flex;align-items:flex-start;justify-content:space-between;gap:8px');
           titleRow.appendChild(mkTxt('div',null,item.titulo,'font-size:13px;font-weight:bold;color:'+titleClr+';line-height:1.3'));
-          var badgeMap={pendiente:{txt:'Pendiente',clr:'#d4a843'},realizada:{txt:'Realizada',clr:'#64c8b4'},cancelada:{txt:'Cancelada',clr:'#e07070'},estimado:{txt:'Estimado',clr:'#555e70'},esperado:{txt:'Esperado',clr:'#555e70'}};
+          var esPendientePasada=isPasado&&item.estado==='pendiente'&&item.fuente==='visita';
+          var badgeMap={pendiente:{txt:esPendientePasada?'\u26A0\uFE0F Sin registrar':'Pendiente',clr:esPendientePasada?'#e07070':'#d4a843'},realizada:{txt:'Realizada',clr:'#64c8b4'},cancelada:{txt:'Cancelada',clr:'#e07070'},estimado:{txt:'Estimado',clr:'#555e70'},esperado:{txt:'Esperado',clr:'#555e70'}};
           var badge=badgeMap[item.estado]||{txt:'',clr:'#a89070'};
           if(badge.txt)titleRow.appendChild(mkTxt('span',null,badge.txt,'font-size:9px;font-weight:bold;color:'+badge.clr+';background:rgba('+hexToRgb(badge.clr)+',.12);border-radius:6px;padding:2px 7px;white-space:nowrap;flex-shrink:0'));
           content.appendChild(titleRow);
@@ -4802,6 +4872,10 @@ function getVisitasPendientesSeguimiento() {
   });
 }
 
+
+// ══════════════════════════════════════════════════════════════════════════
+// ══  SISTEMA MOMENTOS — CÉFIRO
+// ══════════════════════════════════════════════════════════════════════════
 function getMisDescartados() {
   if (!D.momentos) D.momentos = { respondidos:{}, descartados:{} };
   var desc = D.momentos.descartados;
@@ -6273,6 +6347,10 @@ function getActividades() {
 }
 
 // ─── VACUNAS ARGENTINA (Calendario Nacional 2024) ─────────────
+
+// ══════════════════════════════════════════════════════════════════════════
+// ══  DATOS ESTÁTICOS (VACUNAS, HITOS, TIPS...)
+// ══════════════════════════════════════════════════════════════════════════
 var VACUNAS_ARG = [
   // RN
   {id:'v01', nombre:'Hepatitis B (1° dosis)',       mes:0,  dia:true,  desc:'Al nacer. Protege contra hepatitis B.'},
@@ -6721,6 +6799,10 @@ function renderLogros(bd) {
 
 
 // ─── INIT — después de todos los datos ──────────────────────
+
+// ══════════════════════════════════════════════════════════════════════════
+// ══  INIT
+// ══════════════════════════════════════════════════════════════════════════
 loadData();
 applyNightMode();
 render();
@@ -6728,6 +6810,10 @@ setTimeout(checkOnboarding, 800);
 
 </script>
 <script type="module">
+
+// ══════════════════════════════════════════════════════════════════════════
+// ══  FIREBASE INIT
+// ══════════════════════════════════════════════════════════════════════════
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 var cfg={apiKey:"AIzaSyC5iVBZbLlD0a7yVRx4eDg6pOjRKNO28kA",authDomain:"cefe-app.firebaseapp.com",databaseURL:"https://cefe-app-default-rtdb.firebaseio.com",projectId:"cefe-app",storageBucket:"cefe-app.firebasestorage.app",messagingSenderId:"40391677831",appId:"1:40391677831:web:3640958b4450f2cd5ae522"};
@@ -6859,7 +6945,11 @@ onValue(ref(db,'cefe'),function(snap){
 </script>
 
 <script>
-if ('serviceWorker' in navigator) {
+if ('
+// ══════════════════════════════════════════════════════════════════════════
+// ══  SERVICE WORKER
+// ══════════════════════════════════════════════════════════════════════════
+serviceWorker' in navigator) {
   window.addEventListener('load', function() {
     // iOS Safari en modo web (no instalada) puede rechazar el SW — es inofensivo
     navigator.serviceWorker.register('/cefe-app/sw.js', { scope: '/cefe-app/' })
