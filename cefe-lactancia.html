@@ -154,6 +154,7 @@ button{font-family:Georgia,serif;-webkit-appearance:none}
 .rb.on{background:rgba(212,168,67,.2);border-color:rgba(212,168,67,.5);color:#f0d9a0}
 .ntbox{background:rgba(212,168,67,.08);border:1px solid rgba(212,168,67,.2);border-radius:11px;padding:10px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between}
 </style>
+<script src="alba-cuentos.js"></script>
 </head>
 <body>
 <!-- ONBOARDING -->
@@ -236,6 +237,10 @@ button{font-family:Georgia,serif;-webkit-appearance:none}
       <button class="mas-item" data-action="goActividades">
         <span class="mas-item-ic">🎯</span>
         <span><span class="mas-item-lbl">Actividades</span><span class="mas-item-sub">Semana 0 de Cefe</span></span>
+      </button>
+      <button class="mas-item" data-action="goCuentos">
+        <span class="mas-item-ic">&#128218;</span>
+        <span><span class="mas-item-lbl">Cuentos</span><span class="mas-item-sub">Biblioteca de Cefe</span></span>
       </button>
       <button class="mas-item" data-action="goHistoria">
         <span class="mas-item-ic">📜</span>
@@ -1899,9 +1904,9 @@ function finishToma(){
     if(!dv||!sv){alert('Ingresa fecha y hora de inicio.');return;}
     var mlProv=D.mlProvistos||0;
     if(D.mLados.length===0&&mlProv===0){alert('Agrega al menos un lado o registrá leche extraída.');return;}
-    if(D.mLados.length===0&&mlProv>0){D.mLados=[{s:'Leche extraída',m:Math.max(Math.round(mlProv/3),5)}];}
+    // Si solo hay leche extraída (sin pecho), aceptar sin lados de pecho
     sT=new Date(dv+'T'+sv);var ev=gv('mend');
-    eT=ev?new Date(dv+'T'+ev):addM(sT,D.mLados.reduce(function(a,b){return a+b.m;},0));
+    eT=ev?new Date(dv+'T'+ev):addM(sT,D.mLados.length>0?D.mLados.reduce(function(a,b){return a+b.m;},0):0);
     lados=D.mLados.slice();
   } else {
     lados=D.lados.slice();
@@ -2524,7 +2529,7 @@ function render(){
   // Update device name display
   var dnEl=document.getElementById('device-name-display');
   if(dnEl)dnEl.textContent=getDeviceName()||'';
-  var MAS_STEPS=['perfil','editBebe','editPadre','medicos','editMed','visitaForm','postVisita','consultaMedica','extras','notas','editNota','sintomas','editSintoma','hitos','cartas','editCarta','astro','actividades','vacunas','memoria','pendientes','historia','logros','config','agenda','nuevoEvento','tallaEntry','pcEntry','estudios'];
+  var MAS_STEPS=['cuentos','perfil','editBebe','editPadre','medicos','editMed','visitaForm','postVisita','consultaMedica','extras','notas','editNota','sintomas','editSintoma','hitos','cartas','editCarta','astro','actividades','vacunas','memoria','pendientes','historia','logros','config','agenda','nuevoEvento','tallaEntry','pcEntry','estudios'];
   var TAB_MAP={home:['home'],history:['history'],agenda:['agenda','nuevoEvento'],mas:MAS_STEPS,config:['config']};
   Object.keys(TAB_MAP).forEach(function(t){
     var el=document.getElementById('bn-'+t);if(!el)return;
@@ -3064,7 +3069,7 @@ function render(){
     var nmb=E.btn('tb'+(D.nightMode?' on':''),D.nightMode?'\uD83C\uDF19 Modo noche ON':'\uD83C\uDF19 Modo noche','toggleNight');
     nmBtn.appendChild(nmb);bd.appendChild(nmBtn);
 
-    // ── Plan del día de Cefe ──────────────────────────────────
+    // ── Plan del día de Cefe (mini-card compacta) ───────────────
     (function(){
       var cfg=D.config||{};var notif=cfg.notif||{};
       if(notif.plan_dia===false)return;
@@ -3072,87 +3077,37 @@ function render(){
       if(!act||!act.actividades||act.actividades.length===0)return;
       var hoy=todayStr();
       if(!D.actividadesHechas)D.actividadesHechas={};
-      if(!D.actividadesHechas[hoy+'_omit'])D.actividadesHechas[hoy+'_omit']=[];
       var hechasHoy=D.actividadesHechas[hoy]||[];
       var omitidasHoy=D.actividadesHechas[hoy+'_omit']||[];
       var dayOfMonth=new Date().getDate();
       var total=act.actividades.length;
       var idxs=[];
       for(var ii=0;ii<3&&ii<total;ii++){idxs.push((dayOfMonth-1+ii)%total);}
-      var resueltasCount=idxs.filter(function(i){return hechasHoy.indexOf(i)>=0||omitidasHoy.indexOf(i)>=0;}).length;
       var hechasCount=idxs.filter(function(i){return hechasHoy.indexOf(i)>=0;}).length;
-      var todasResueltas=resueltasCount>=idxs.length;
-      var planColKey='plan_col_'+hoy;
-      var userCollapsed=ls(planColKey)==='1';
-      var collapsed=todasResueltas&&ls(planColKey)!=='0'||userCollapsed;
-      var planCard=mkDiv('background:rgba(100,200,140,.06);border:1px solid rgba(100,200,140,.2);border-radius:16px;padding:14px 16px;margin-bottom:14px');
-      var planHdr=mkDiv('display:flex;align-items:center;justify-content:space-between;margin-bottom:'+(collapsed?'0':'10px')+';cursor:pointer');
-      var planHdrLeft=mkDiv('display:flex;align-items:center;gap:8px');
-      planHdrLeft.appendChild(mkTxt('span',null,'🌱','font-size:14px'));
-      var planHdrTxt=mkDiv('');
-      planHdrTxt.appendChild(mkTxt('div',null,'Plan del día · Semana '+ageW(),'font-size:10px;color:#64c88c;font-weight:bold;letter-spacing:1px;text-transform:uppercase'));
-      if(todasResueltas)planHdrTxt.appendChild(mkTxt('div',null,'🎉 Completado — tap para ver','font-size:10px;color:#64c88c'));
-      else planHdrTxt.appendChild(mkTxt('div',null,hechasCount+' hechas · '+(idxs.length-resueltasCount)+' pendientes','font-size:10px;color:#a89070'));
-      planHdrLeft.appendChild(planHdrTxt);
-      planHdr.appendChild(planHdrLeft);
-      planHdr.appendChild(mkTxt('span',null,collapsed?'▼':'▲','font-size:11px;color:#a89070'));
-      planCard.appendChild(planHdr);
-      planHdr.onclick=function(){
-        var isNowCol=collapsed;
-        lss(planColKey,isNowCol?'0':'1');
-        render();
-      };
-      if(!collapsed){
-        var pct=idxs.length>0?Math.round(resueltasCount/idxs.length*100):0;
-        var barWrap=mkDiv('background:rgba(255,255,255,.06);border-radius:4px;height:4px;margin-bottom:12px;overflow:hidden');
-        var barFill=mkDiv('background:linear-gradient(90deg,#64c88c,#d4a843);height:4px;border-radius:4px');
-        barFill.style.width=pct+'%';
-        barWrap.appendChild(barFill);planCard.appendChild(barWrap);
-        idxs.forEach(function(aIdx){
-          var a=act.actividades[aIdx];if(!a)return;
-          var hecha=hechasHoy.indexOf(aIdx)>=0;
-          var omitida=omitidasHoy.indexOf(aIdx)>=0;
-          if(hecha||omitida)return;
-          var row=mkDiv('display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.04)');
-          var chk=document.createElement('button');
-          chk.style.cssText='width:24px;height:24px;border-radius:50%;border:2px solid rgba(100,200,140,.5);background:transparent;flex-shrink:0;cursor:pointer;color:#64c88c;font-size:13px;display:flex;align-items:center;justify-content:center;margin-top:1px';
-          chk.textContent='';
-          (function(i2,f2){chk.onclick=function(e){e.stopPropagation();
-            if(!D.actividadesHechas[f2])D.actividadesHechas[f2]=[];
-            if(D.actividadesHechas[f2].indexOf(i2)<0)D.actividadesHechas[f2].push(i2);
-            saveData();render();
-          };})(aIdx,hoy);
-          row.appendChild(chk);
-          var txt=mkDiv('flex:1');
-          txt.appendChild(mkTxt('div',null,a.ic+' '+a.label,'font-size:13px;color:#f0d9a0;line-height:1.4'));
-          txt.appendChild(mkTxt('div',null,a.desc,'font-size:11px;color:#a89070;line-height:1.5;margin-top:2px'));
-          row.appendChild(txt);
-          var omitBtn=document.createElement('button');
-          omitBtn.style.cssText='flex-shrink:0;background:none;border:none;color:#a89070;font-size:11px;cursor:pointer;padding:4px 2px;font-family:Georgia,serif;margin-top:2px';
-          omitBtn.textContent='Omitir';
-          (function(i3,f3){omitBtn.onclick=function(e){e.stopPropagation();
-            if(!D.actividadesHechas[f3+'_omit'])D.actividadesHechas[f3+'_omit']=[];
-            if(D.actividadesHechas[f3+'_omit'].indexOf(i3)<0)D.actividadesHechas[f3+'_omit'].push(i3);
-            saveData();render();
-          };})(aIdx,hoy);
-          row.appendChild(omitBtn);
-          planCard.appendChild(row);
-        });
-        var hechasIdxs=idxs.filter(function(i){return hechasHoy.indexOf(i)>=0;});
-        if(hechasIdxs.length>0){
-          var hechasRow=mkDiv('padding-top:6px;display:flex;flex-wrap:wrap;gap:4px');
-          hechasIdxs.forEach(function(i){var a=act.actividades[i];if(!a)return;
-            hechasRow.appendChild(mkTxt('span',null,'✓ '+a.label,'font-size:10px;color:#64c88c;background:rgba(100,200,140,.1);border-radius:6px;padding:2px 7px;opacity:.7'));
-          });
-          planCard.appendChild(hechasRow);
-        }
-        var verTodas=document.createElement('button');
-        verTodas.style.cssText='width:100%;margin-top:10px;background:none;border:none;color:#64c88c;font-size:11px;cursor:pointer;font-family:Georgia,serif;opacity:.8';
-        verTodas.textContent='Ver todas las actividades de la semana →';
-        verTodas.dataset.action='goActividades';
-        planCard.appendChild(verTodas);
+      var todasHechas=hechasCount>=idxs.length;
+      // Solo mostrar si hay algo pendiente (no ocupar espacio si todo hecho)
+      if(todasHechas)return;
+      // Mini-card compacta — solo muestra el nombre de la primera actividad pendiente
+      // y un acceso rápido. Sin checkboxes inline.
+      var pendientes=idxs.filter(function(i){
+        return hechasHoy.indexOf(i)<0&&omitidasHoy.indexOf(i)<0;
+      });
+      if(pendientes.length===0)return;
+      var primerAct=act.actividades[pendientes[0]];
+      if(!primerAct)return;
+      var miniPlan=mkDiv('background:rgba(100,200,140,.05);border:1px solid rgba(100,200,140,.15);border-radius:13px;padding:11px 14px;margin-bottom:12px;display:flex;align-items:center;gap:10px;cursor:pointer');
+      var icSpan=mkTxt('span',null,primerAct.ic||'\uD83C\uDF31','font-size:18px;flex-shrink:0');
+      miniPlan.appendChild(icSpan);
+      var infoDiv=mkDiv('flex:1;min-width:0');
+      infoDiv.appendChild(mkTxt('div',null,'Plan del día · Semana '+ageW(),'font-size:9px;color:#64c88c;text-transform:uppercase;letter-spacing:1px;font-weight:bold;margin-bottom:2px'));
+      infoDiv.appendChild(mkTxt('div',null,primerAct.label,'font-size:13px;color:#f0d9a0;line-height:1.3'));
+      if(pendientes.length>1){
+        infoDiv.appendChild(mkTxt('div',null,'+ '+(pendientes.length-1)+' más pendiente'+(pendientes.length>2?'s':''),'font-size:10px;color:#a89070;margin-top:2px'));
       }
-      bd.appendChild(planCard);
+      miniPlan.appendChild(infoDiv);
+      miniPlan.appendChild(mkTxt('span',null,'\u203A','font-size:18px;color:#a89070;flex-shrink:0'));
+      miniPlan.onclick=function(){setStep('actividades');};
+      bd.appendChild(miniPlan);
     })();
 
     bd.appendChild(E.aBtn('🍼','Registrar Toma','Sesion ahora','','startToma'));
@@ -4692,7 +4647,262 @@ function render(){
     renderLogros(bd);
   }
 
-  else if(D.step==='historia'){
+  
+  else if(D.step==='cuentos'){
+    // ── Pantalla principal de Cuentos ──────────────────────────────────────
+    var apodoCto = D.bebe.apodo||D.bebe.nombre||'Cefe';
+    var cuentosMod = (typeof AlbaCuentos !== 'undefined');
+    bd.appendChild(E.el('div',{cls:'st',txt:'\uD83D\uDCDA Cuentos de '+apodoCto}));
+    bd.appendChild(mkTxt('div',null,'La biblioteca crece con '+apodoCto+'.','font-size:12px;color:#a89070;margin-bottom:16px;line-height:1.5'));
+    if(!cuentosMod){
+      var errBox=mkDiv('text-align:center;padding:32px 16px');
+      errBox.appendChild(mkTxt('div',null,'\uD83D\uDCF5','font-size:36px;margin-bottom:10px'));
+      errBox.appendChild(mkTxt('div',null,'El m\u00f3dulo de cuentos no est\u00e1 cargado.','font-size:14px;color:#e07070;margin-bottom:6px'));
+      errBox.appendChild(mkTxt('div',null,'Asegur\u00e1te de que alba-cuentos.js est\u00e9 en el mismo directorio.','font-size:12px;color:#a89070;line-height:1.6'));
+      bd.appendChild(errBox);
+    } else {
+      var grupos = AlbaCuentos.getCuentosPorGrupo();
+      // Mensaje Céfiro si es de noche
+      var msgCto = AlbaCuentos.getMensajeCefiro();
+      if(msgCto){
+        var cBox=mkDiv('background:rgba(180,140,220,.1);border:1px solid rgba(180,140,220,.25);border-radius:12px;padding:11px 14px;margin-bottom:14px;display:flex;align-items:center;gap:10px');
+        cBox.appendChild(mkTxt('div',null,'\uD83C\uDF00','font-size:20px;flex-shrink:0'));
+        cBox.appendChild(mkTxt('div',null,msgCto,'font-size:12px;color:#d4c0f0;line-height:1.5'));
+        bd.appendChild(cBox);
+      }
+      // Botón generador
+      var genBtn=document.createElement('button');
+      genBtn.style.cssText='width:100%;padding:13px;border-radius:13px;border:1px solid rgba(212,168,67,.4);background:rgba(212,168,67,.12);color:#f0d9a0;font-size:14px;font-weight:bold;cursor:pointer;font-family:Georgia,serif;margin-bottom:16px;display:flex;align-items:center;justify-content:center;gap:8px';
+      genBtn.innerHTML='<span style="font-size:18px">&#127922;</span> Crear un cuento \u00fanico';
+      genBtn.onclick=function(){setStep('cuentosGenerador');};
+      bd.appendChild(genBtn);
+      // Grupos
+      ['cuna','cortos','fabulas','parabolas','clasicos','aventura','latinoamerica','mitologia','mayores'].forEach(function(gid){
+        var g=grupos[gid];
+        if(!g||g.cuentos.length===0)return;
+        // Header del grupo
+        var ghdr=mkDiv('display:flex;align-items:center;justify-content:space-between;margin:14px 0 8px');
+        var gleft=mkDiv('display:flex;align-items:center;gap:8px');
+        gleft.appendChild(mkTxt('span',null,g.emoji,'font-size:18px'));
+        gleft.appendChild(mkTxt('span',null,g.label,'font-size:13px;font-weight:bold;color:'+(g.disponible?'#f0d9a0':'#a89070')));
+        ghdr.appendChild(gleft);
+        if(!g.disponible){
+          var daysLeft=g.diasRestantes;
+          var mes=Math.ceil(daysLeft/30);
+          ghdr.appendChild(mkTxt('span',null,'\uD83D\uDD12 en ~'+mes+(mes===1?' mes':' meses'),'font-size:10px;color:#a89070;background:rgba(255,255,255,.05);border-radius:8px;padding:3px 8px'));
+        }
+        bd.appendChild(ghdr);
+        // Cards del grupo
+        g.cuentos.forEach(function(cuento){
+          var card=mkDiv('border-radius:13px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:12px;cursor:'+(g.disponible?'pointer':'default')+';background:rgba(255,255,255,'+(g.disponible?'.04':'.02')+');border:1px solid rgba(212,168,67,'+(g.disponible?'.2':'.08')+');opacity:'+(g.disponible?'1':'.5'));
+          // Ícono
+          var icBox=mkDiv('width:40px;height:40px;border-radius:10px;background:rgba(212,168,67,'+(g.disponible?'.12':'.05')+');display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:20px');
+          icBox.textContent=cuento.ic;
+          card.appendChild(icBox);
+          // Info
+          var info=mkDiv('flex:1;min-width:0');
+          info.appendChild(mkTxt('div',null,cuento.titulo,'font-size:13px;font-weight:bold;color:'+(g.disponible?'#f0d9a0':'#a89070')+';line-height:1.3;margin-bottom:2px'));
+          var tagsTxt=cuento.tags.slice(0,2).join(' \u00b7 ');
+          info.appendChild(mkTxt('div',null,tagsTxt,'font-size:10px;color:#a89070'));
+          card.appendChild(info);
+          if(!g.disponible){
+            card.appendChild(mkTxt('span',null,'\uD83D\uDD12','font-size:16px;flex-shrink:0;opacity:.5'));
+          } else {
+            var arr=mkTxt('span',null,'\u203A','font-size:20px;color:#a89070;flex-shrink:0');
+            card.appendChild(arr);
+          }
+          if(g.disponible){
+            card.onclick=(function(cid){return function(){D._cuentoActual=cid;D._cuentoVersion='corto';D._cuentoIdioma='es';setStep('cuentosLeer');};})(cuento.id);
+          }
+          bd.appendChild(card);
+        });
+      });
+    }
+  }
+  else if(D.step==='cuentosLeer'){
+    // ── Pantalla de lectura de un cuento ───────────────────────────────────
+    if(typeof AlbaCuentos==='undefined'||!D._cuentoActual){setStep('cuentos');return;}
+    var cuento=AlbaCuentos.getCuentoById(D._cuentoActual);
+    if(!cuento){setStep('cuentos');return;}
+    var version=D._cuentoVersion||'corto';
+    var apodoCL=D.bebe.apodo||D.bebe.nombre||'Cefe';
+    var prot=D._cuentoProtagonista||null;
+    var texto=AlbaCuentos.reemplazarProtagonista(cuento,version,prot);
+    // Header
+    var hdr2=mkDiv('display:flex;align-items:center;gap:12px;margin-bottom:16px');
+    var backBtn=document.createElement('button');
+    backBtn.style.cssText='padding:6px 12px;border-radius:10px;border:1px solid rgba(212,168,67,.3);background:rgba(212,168,67,.08);color:#d4a843;font-size:13px;cursor:pointer';
+    backBtn.textContent='\u2190 Volver';backBtn.onclick=function(){setStep('cuentos');};
+    hdr2.appendChild(backBtn);
+    var tit2=mkDiv('flex:1');
+    tit2.appendChild(mkTxt('div',null,cuento.ic+' '+cuento.titulo,'font-size:15px;font-weight:bold;color:#f0d9a0;line-height:1.3'));
+    hdr2.appendChild(tit2);
+    bd.appendChild(hdr2);
+    // Toggle corto/largo
+    var togRow=mkDiv('display:flex;gap:6px;margin-bottom:16px');
+    ['corto','largo'].forEach(function(v){
+      var tb=document.createElement('button');
+      var isOn=version===v;
+      tb.style.cssText='padding:6px 14px;border-radius:20px;border:1px solid rgba(212,168,67,'+(isOn?'.5':'.2')+');background:rgba(212,168,67,'+(isOn?'.15':'.04')+');color:'+(isOn?'#f0d9a0':'#a89070')+';font-size:12px;cursor:pointer;font-family:Georgia,serif';
+      tb.textContent=v==='corto'?'\uD83D\uDC4C Versi\u00f3n corta':'\uD83D\uDCD6 Versi\u00f3n larga';
+      (function(ver){tb.onclick=function(){D._cuentoVersion=ver;render();};})(v);
+      togRow.appendChild(tb);
+    });
+    bd.appendChild(togRow);
+    // ── Toggle de idioma (solo si el cuento tiene version EN) ──
+    var idiomaActual=D._cuentoIdioma||'es';
+    var tieneEN=(cuento.cortoEN||cuento.largoEN)?true:false;
+    if(tieneEN){
+      var idiomRow=mkDiv('display:flex;gap:6px;margin-bottom:12px;align-items:center');
+      idiomRow.appendChild(mkTxt('span',null,'\uD83C\uDF10','font-size:13px'));
+      ['es','en'].forEach(function(lng){
+        var ib=document.createElement('button');
+        var isOnL=idiomaActual===lng;
+        ib.style.cssText='padding:5px 12px;border-radius:20px;border:1px solid rgba(100,200,180,'+(isOnL?'.5':'.2')+');background:rgba(100,200,180,'+(isOnL?'.15':'.04')+');color:'+(isOnL?'#64c8b4':'#a89070')+';font-size:12px;cursor:pointer;font-family:Georgia,serif';
+        ib.textContent=lng==='es'?'\uD83C\uDDE6\uD83C\uDDF7 Espa\u00f1ol':'\uD83C\uDDEC\uD83C\uDDE7 English';
+        (function(l){ib.onclick=function(){D._cuentoIdioma=l;render();};})(lng);
+        idiomRow.appendChild(ib);
+      });
+      bd.appendChild(idiomRow);
+    }
+    // ── Obtener texto según idioma ──
+    if(typeof AlbaCuentos.getTexto==='function'){
+      texto=AlbaCuentos.getTexto(cuento,version,idiomaActual);
+      if(prot)texto=AlbaCuentos.reemplazarProtagonista({corto:texto,largo:texto,protagonista:cuento.protagonista},version,prot);
+    }
+    // Personalización si hay protagonista reemplazable
+    if(cuento.protagonista){
+      var persRow=mkDiv('background:rgba(100,200,180,.08);border:1px solid rgba(100,200,180,.2);border-radius:11px;padding:10px 13px;margin-bottom:14px;display:flex;align-items:center;gap:10px');
+      persRow.appendChild(mkTxt('span',null,'\u2728','font-size:16px'));
+      var persInfo=mkDiv('flex:1');
+      persInfo.appendChild(mkTxt('div',null,prot?'Protagonista: '+prot:'El protagonista es \u00ab'+cuento.protagonista+'\u00bb','font-size:12px;color:#64c8b4;margin-bottom:4px'));
+      var persBtn=document.createElement('button');
+      persBtn.style.cssText='padding:4px 10px;border-radius:8px;border:1px solid rgba(100,200,180,.4);background:rgba(100,200,180,.1);color:#64c8b4;font-size:11px;cursor:pointer';
+      persBtn.textContent=prot?'Cambiar':'Poner a '+apodoCL;
+      (function(cp){persBtn.onclick=function(){
+        D._cuentoProtagonista=cp?null:apodoCL;render();
+      };})(prot);
+      persInfo.appendChild(persBtn);
+      persRow.appendChild(persInfo);
+      bd.appendChild(persRow);
+    }
+    // Ilustración SVG
+    if(cuento.ilustracion){
+      var svgBox=mkDiv('margin-bottom:16px;border-radius:12px;overflow:hidden;background:rgba(255,255,255,.03);border:1px solid rgba(212,168,67,.1)');
+      svgBox.innerHTML=cuento.ilustracion;
+      var svgEl=svgBox.querySelector('svg');
+      if(svgEl)svgEl.style.cssText='width:100%;height:auto;display:block;max-height:140px';
+      bd.appendChild(svgBox);
+    }
+    // Texto del cuento
+    var isNight=D.nightMode||(new Date().getHours()>=20||new Date().getHours()<6);
+    var textBox=mkDiv('background:rgba('+(isNight?'0,0,0,.4':'255,255,255,.03')+');border-radius:13px;padding:18px;line-height:1.85;font-size:'+(isNight?'19':'16')+'px;color:'+(isNight?'#f5efd8':'#e8dcc8')+';font-family:Georgia,serif;white-space:pre-line;letter-spacing:.01em');
+    textBox.textContent=texto;
+    bd.appendChild(textBox);
+    // Botón compartir
+    var shareBtnC=document.createElement('button');
+    shareBtnC.style.cssText='width:100%;margin-top:14px;padding:12px;border-radius:13px;border:1px solid rgba(100,200,180,.3);background:rgba(100,200,180,.1);color:#64c8b4;font-size:13px;cursor:pointer;font-family:Georgia,serif';
+    shareBtnC.textContent='\u25B8 Compartir por WhatsApp';
+    shareBtnC.onclick=function(){
+      var msg='*'+cuento.titulo+'*\n\n'+texto.slice(0,600)+(texto.length>600?'\n\n_(ver m\u00e1s en Alba)_':'');
+      window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');
+    };
+    bd.appendChild(shareBtnC);
+  }
+  else if(D.step==='cuentosGenerador'){
+    // ── Generador de cuentos (Dado Mágico) ─────────────────────────────────
+    if(typeof AlbaCuentos==='undefined'){setStep('cuentos');return;}
+    if(!D._generadorOpts)D._generadorOpts=AlbaCuentos.tirarDado();
+    var opts=D._generadorOpts;
+    var apodoCG=D.bebe.apodo||D.bebe.nombre||'Cefe';
+    var plantillas=ALBA_PLANTILLAS;
+    // Header
+    var hdrG=mkDiv('display:flex;align-items:center;gap:10px;margin-bottom:16px');
+    var backBtnG=document.createElement('button');
+    backBtnG.style.cssText='padding:6px 12px;border-radius:10px;border:1px solid rgba(212,168,67,.3);background:rgba(212,168,67,.08);color:#d4a843;font-size:13px;cursor:pointer';
+    backBtnG.textContent='\u2190 Volver';backBtnG.onclick=function(){setStep('cuentos');};
+    hdrG.appendChild(backBtnG);
+    hdrG.appendChild(mkTxt('div',null,'\uD83C\uDFB2 Crear un cuento \u00fanico','font-size:15px;font-weight:bold;color:#f0d9a0'));
+    bd.appendChild(hdrG);
+    bd.appendChild(mkTxt('div',null,'Elige los ingredientes o tir\u00e1 el dado m\u00e1gico para elegir al azar.','font-size:12px;color:#a89070;margin-bottom:14px;line-height:1.5'));
+    // Botón dado mágico
+    var dadoBtn=document.createElement('button');
+    dadoBtn.style.cssText='width:100%;padding:13px;border-radius:13px;border:2px solid rgba(212,168,67,.5);background:rgba(212,168,67,.15);color:#f0d9a0;font-size:15px;font-weight:bold;cursor:pointer;font-family:Georgia,serif;margin-bottom:16px';
+    dadoBtn.textContent='\uD83C\uDFB2  Tirar el dado m\u00e1gico';
+    dadoBtn.onclick=function(){D._generadorOpts=AlbaCuentos.tirarDado();render();};
+    bd.appendChild(dadoBtn);
+    // Variables seleccionables
+    var varsConfig=[
+      {key:'protagonistaId',label:'Protagonista',arr:plantillas.protagonistas,txtKey:'desc'},
+      {key:'escenarioId',label:'Escenario',arr:plantillas.escenarios,txtKey:'txt'},
+      {key:'desafioId',label:'Desaf\u00edo',arr:plantillas.desafios,txtKey:'txt'},
+      {key:'aliadoId',label:'Aliado',arr:plantillas.aliados,txtKey:'txt'},
+    ];
+    varsConfig.forEach(function(vc){
+      var sel=E.div('');
+      sel.style.marginBottom='10px';
+      sel.appendChild(mkTxt('div',null,vc.label,'font-size:11px;font-weight:bold;color:#a89070;text-transform:uppercase;letter-spacing:1px;margin-bottom:5px'));
+      var selEl=document.createElement('select');
+      selEl.style.cssText='width:100%;padding:9px 12px;border-radius:10px;border:1px solid rgba(212,168,67,.25);background:rgba(255,255,255,.04);color:#e8dcc8;font-size:13px;font-family:Georgia,serif';
+      vc.arr.forEach(function(item){
+        var opt=document.createElement('option');
+        opt.value=item.id;
+        opt.textContent=(item.emoji?item.emoji+' ':'')+item[vc.txtKey];
+        if(opts[vc.key]===item.id)opt.selected=true;
+        selEl.appendChild(opt);
+      });
+      (function(k){selEl.onchange=function(){D._generadorOpts[k]=this.value;};})(vc.key);
+      sel.appendChild(selEl);
+      bd.appendChild(sel);
+    });
+    // Botón generar
+    var genFinal=document.createElement('button');
+    genFinal.style.cssText='width:100%;padding:14px;border-radius:13px;border:none;background:linear-gradient(135deg,rgba(212,168,67,.4),rgba(180,140,220,.3));color:#f0d9a0;font-size:15px;font-weight:bold;cursor:pointer;font-family:Georgia,serif;margin-top:8px';
+    genFinal.textContent='\u2728 Crear el cuento';
+    genFinal.onclick=function(){
+      var resultado=AlbaCuentos.generarCuento(D._generadorOpts);
+      D._cuentoGenerado=resultado;
+      setStep('cuentosGenerado');
+    };
+    bd.appendChild(genFinal);
+  }
+  else if(D.step==='cuentosGenerado'){
+    // ── Cuento generado — pantalla de lectura ──────────────────────────────
+    if(!D._cuentoGenerado){setStep('cuentosGenerador');return;}
+    var gen=D._cuentoGenerado;
+    var hdrGen=mkDiv('display:flex;align-items:center;gap:10px;margin-bottom:16px');
+    var backBtnGen=document.createElement('button');
+    backBtnGen.style.cssText='padding:6px 12px;border-radius:10px;border:1px solid rgba(212,168,67,.3);background:rgba(212,168,67,.08);color:#d4a843;font-size:13px;cursor:pointer';
+    backBtnGen.textContent='\u2190 Otro cuento';backBtnGen.onclick=function(){setStep('cuentosGenerador');};
+    hdrGen.appendChild(backBtnGen);
+    bd.appendChild(hdrGen);
+    bd.appendChild(mkTxt('div',null,'\uD83C\uDFB2 Cuento \u00fanico','font-size:10px;font-weight:bold;color:#a89070;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px'));
+    bd.appendChild(mkTxt('div',null,gen.titulo,'font-size:16px;font-weight:bold;color:#f0d9a0;margin-bottom:14px;line-height:1.4'));
+    var isNightG=D.nightMode||(new Date().getHours()>=20||new Date().getHours()<6);
+    var genTextBox=mkDiv('background:rgba(0,0,0,.3);border-radius:13px;padding:18px;line-height:1.9;font-size:'+(isNightG?'19':'16')+'px;color:'+(isNightG?'#f5efd8':'#e8dcc8')+';font-family:Georgia,serif;white-space:pre-line;letter-spacing:.01em;margin-bottom:14px');
+    genTextBox.textContent=gen.texto;
+    bd.appendChild(genTextBox);
+    // Ingredientes del cuento
+    var ingBox=mkDiv('background:rgba(255,255,255,.03);border-radius:11px;padding:10px 13px;margin-bottom:10px');
+    ingBox.appendChild(mkTxt('div',null,'Ingredientes de este cuento','font-size:10px;color:#a89070;text-transform:uppercase;letter-spacing:1px;margin-bottom:7px'));
+    var vrs=gen.variables;
+    [['\uD83E\uDDB8',vrs.prot.desc],['\uD83C\uDF0D',vrs.escen.emoji+' '+vrs.escen.txt.split(' ').slice(0,3).join(' ')+'...'],['\u2694\uFE0F',vrs.desaf.txt.slice(0,40)+'...'],['\uD83D\uDC65',vrs.alia.txt]].forEach(function(item){
+      var row=mkDiv('display:flex;gap:6px;align-items:flex-start;margin-bottom:3px');
+      row.appendChild(mkTxt('span',null,item[0],'font-size:12px;flex-shrink:0;width:18px'));
+      row.appendChild(mkTxt('span',null,item[1],'font-size:11px;color:#a89070;line-height:1.4'));
+      ingBox.appendChild(row);
+    });
+    bd.appendChild(ingBox);
+    var shareGenBtn=document.createElement('button');
+    shareGenBtn.style.cssText='width:100%;padding:12px;border-radius:13px;border:1px solid rgba(100,200,180,.3);background:rgba(100,200,180,.1);color:#64c8b4;font-size:13px;cursor:pointer;font-family:Georgia,serif';
+    shareGenBtn.textContent='\u25B8 Compartir por WhatsApp';
+    shareGenBtn.onclick=function(){
+      var msg='*'+gen.titulo+'*\n\n'+gen.texto;
+      window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');
+    };
+    bd.appendChild(shareGenBtn);
+  }
+else if(D.step==='historia'){
     bd.appendChild(mkTxt('div',null,'La historia de Cefe, cronológica y completa.','font-size:12px;color:#a89070;margin-bottom:4px;line-height:1.5'));
     renderHistoria(bd);
   }
@@ -4779,6 +4989,7 @@ document.addEventListener('click', function(ev) {
         case 'goLogros': closeMasMenu(); setStep('logros'); return;
         case 'goNotas': closeMasMenu(); setStep('notas'); return;
         case 'goMemoria': closeMasMenu(); setStep('memoria'); return;
+        case 'goCuentos': closeMasMenu(); setStep('cuentos'); return;
         case 'goHistoria': closeMasMenu(); setStep('historia'); return;
         case 'goConfig': closeMasMenu(); setStep('config'); return;
         case 'goCalendario': closeMasMenu(); setStep('agenda'); return;
@@ -5043,11 +5254,51 @@ function buildMomentosQueue() {
   // 5. Tip semanal — por device
   var tipKey = 'cpop_tip_' + DEVICE_ID + '_' + today.toISOString().slice(0,10);
   if (!localStorage.getItem(tipKey)) {
-    var tip = TIPS_SEMANALES[TIPS_SEMANALES.length-1];
+    // Solo mostrar tip si hay un match real de semana
+    var tip = null;
     for (var i=0; i<TIPS_SEMANALES.length; i++) {
       if (semsVida >= TIPS_SEMANALES[i].semMin && semsVida <= TIPS_SEMANALES[i].semMax) { tip = TIPS_SEMANALES[i]; break; }
     }
-    queue.push({ prioridad:5, tipo:'tip', tip:tip, tipKey:tipKey });
+    if (!tip) {
+      var bestTip = null, bestSem = -1;
+      for (var j=0; j<TIPS_SEMANALES.length; j++) {
+        if (TIPS_SEMANALES[j].semMin <= semsVida && TIPS_SEMANALES[j].semMin > bestSem) {
+          bestTip = TIPS_SEMANALES[j]; bestSem = TIPS_SEMANALES[j].semMin;
+        }
+      }
+      tip = bestTip;
+    }
+    if (tip) {
+      var tipShownKey = 'tip_shown_' + DEVICE_ID + '_' + tip.id;
+      var lastShown = localStorage.getItem(tipShownKey);
+      var daysSince = lastShown ? (Date.now() - parseInt(lastShown)) / 86400000 : 999;
+      if (daysSince >= 3) {
+        queue.push({ prioridad:5, tipo:'tip', tip:tip, tipKey:tipKey, tipShownKey:tipShownKey });
+      }
+    }
+  }
+
+  // 6. Actividad del día — una sola por día, solo si hay algo pendiente
+  var actKey = 'cpop_act_' + DEVICE_ID + '_' + today.toISOString().slice(0,10);
+  if (!localStorage.getItem(actKey)) {
+    var actData = typeof getActividades === 'function' ? getActividades() : null;
+    if (actData && actData.actividades && actData.actividades.length > 0) {
+      var hoyAct = todayStr();
+      var hechasAct = (D.actividadesHechas && D.actividadesHechas[hoyAct]) || [];
+      var omitAct = (D.actividadesHechas && D.actividadesHechas[hoyAct+'_omit']) || [];
+      var domAct = new Date().getDate();
+      var totalAct = actData.actividades.length;
+      var idxsAct = [];
+      for (var ai = 0; ai < 3 && ai < totalAct; ai++) {
+        idxsAct.push((domAct - 1 + ai) % totalAct);
+      }
+      var pendAct = idxsAct.filter(function(i) {
+        return hechasAct.indexOf(i) < 0 && omitAct.indexOf(i) < 0;
+      });
+      if (pendAct.length > 0) {
+        queue.push({ prioridad:6, tipo:'actividad_dia', act:actData.actividades[pendAct[0]], actIdx:pendAct[0], hoy:hoyAct, actKey:actKey });
+      }
+    }
   }
 
   return queue;
@@ -5345,7 +5596,7 @@ var TIPS_SEMANALES = [
   { id:'tip_s0', semMin:0, semMax:0,
     icon:'🌱', title:'La semana cero',
     body:'El recién nacido no distingue día de noche todavía — su ciclo es de 90 minutos. La consistencia en la respuesta (no en el horario) es lo que va a ir ordenando el sueño con el tiempo.' },
-  { id:'tip_s1', semMin:1, semMax:1,
+  { id:'tip_s1', semMin:1, semMax:2,
     icon:'👁️', title:'La vista ya trabaja',
     body:'Esta semana Cefe enfoca mejor a 20-30 cm — exactamente la distancia al pecho. Tu cara es su objeto favorito. Hablale de cerca, que te registra.' },
   { id:'tip_s2', semMin:2, semMax:3,
@@ -5744,8 +5995,29 @@ function showNextMomento() {
 
   } else if (item.tipo === 'tip') {
     localStorage.setItem(item.tipKey, '1');
+    if (item.tipShownKey) localStorage.setItem(item.tipShownKey, Date.now().toString());
     showCpop('info', item.tip.icon, 'Semana ' + Math.floor(Math.floor((Date.now() - new Date(D.bebe.fn).getTime()) / 86400000) / 7),
       item.tip.title, item.tip.body, btnLabel, onNext);
+
+  } else if (item.tipo === 'actividad_dia') {
+    // Marcar que ya se mostró el pop-up de actividad hoy
+    localStorage.setItem(item.actKey, '1');
+    var apodoAct = D.bebe.apodo || D.bebe.nombre || 'Cefe';
+    showCpop('info', item.act.ic || '\uD83C\uDF31', 'Actividad del día',
+      item.act.label,
+      (item.act.desc || '') + '\n\n\u00bfLo hacemos hoy con ' + apodoAct + '?',
+      hasNext ? 'Siguiente →' : 'Ver actividades',
+      function() {
+        closeCpop();
+        // Registrar como hecha directamente desde el pop-up
+        if (!D.actividadesHechas) D.actividadesHechas = {};
+        if (!D.actividadesHechas[item.hoy]) D.actividadesHechas[item.hoy] = [];
+        if (D.actividadesHechas[item.hoy].indexOf(item.actIdx) < 0) {
+          D.actividadesHechas[item.hoy].push(item.actIdx);
+          saveData();
+        }
+        if (hasNext) { showNextMomento(); } else { updatePendBadge(); }
+      });
   }
 }
 
