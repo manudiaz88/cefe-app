@@ -30,9 +30,11 @@ button{font-family:Georgia,serif;-webkit-appearance:none}
 .bnav-btn.on::after{content:'';position:absolute;top:0;left:20%;right:20%;height:2px;background:linear-gradient(90deg,#d4a843,#f0d9a0);border-radius:0 0 3px 3px}
 .bnav-ic{font-size:20px;line-height:1;margin-bottom:3px;display:block}
 .bnav-lbl{font-size:9px;letter-spacing:.5px;text-transform:uppercase;font-family:Georgia,serif}
-.mas-menu{position:fixed;bottom:56px;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:rgba(10,18,28,.98);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-top:1px solid rgba(210,175,120,.15);padding:12px;z-index:99;display:none}
+.mas-menu{position:fixed;bottom:56px;left:50%;transform:translateX(-50%);width:100%;max-width:480px;max-height:70vh;background:rgba(10,18,28,.98);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-top:1px solid rgba(210,175,120,.15);border-radius:20px 20px 0 0;padding:12px;z-index:99;display:none;overflow:hidden}
 .mas-menu.open{display:block}
 .mas-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.mas-cat-hdr{font-size:9px;font-weight:bold;color:#a89070;text-transform:uppercase;letter-spacing:1.5px;padding:4px 2px 6px;grid-column:1/-1;margin-top:4px}
+.mas-cat-hdr:first-child{margin-top:0}
 .mas-item{background:rgba(255,255,255,.05);border:1px solid rgba(210,175,120,.12);border-radius:12px;padding:12px;display:flex;align-items:center;gap:10px;cursor:pointer;color:#e8dcc8;width:100%;text-align:left}
 .mas-item-ic{font-size:22px;flex-shrink:0}
 .mas-item-lbl{font-size:13px;font-weight:bold;color:#f0d9a0;display:block}
@@ -153,6 +155,7 @@ button{font-family:Georgia,serif;-webkit-appearance:none}
 .rb{flex:1;border-radius:10px;padding:9px;font-size:12px;cursor:pointer;background:rgba(255,255,255,.05);border:1px solid rgba(210,175,120,.2);color:#a89070}
 .rb.on{background:rgba(212,168,67,.2);border-color:rgba(212,168,67,.5);color:#f0d9a0}
 .ntbox{background:rgba(212,168,67,.08);border:1px solid rgba(212,168,67,.2);border-radius:11px;padding:10px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between}
+*::-webkit-scrollbar{display:none}
 </style>
 <script src="alba-cuentos.js"></script>
 </head>
@@ -208,70 +211,111 @@ button{font-family:Georgia,serif;-webkit-appearance:none}
     <button class="bnav-btn" data-tab="config" id="bn-config"><span class="bnav-ic">⚙️</span><span class="bnav-lbl">Config</span></button>
   </nav>
   <div id="mas-menu" class="mas-menu">
+    <div style="overflow-y:auto;max-height:calc(100vh - 120px);-webkit-overflow-scrolling:touch">
     <div class="mas-grid">
-      <button class="mas-item" data-action="goPendientes" id="mas-pend-btn">
-        <span class="mas-item-ic">📋</span>
-        <span style="flex:1"><span class="mas-item-lbl">Pendientes</span><span class="mas-item-sub">Checks y recordatorios</span></span>
-        <span id="pend-badge" style="display:none;background:#e07070;color:#fff;border-radius:10px;font-size:10px;font-weight:bold;padding:2px 7px;min-width:20px;text-align:center"></span>
+
+      <!-- 🍼 REGISTRO -->
+      <div class="mas-cat-hdr">🍼 Registro</div>
+      <button class="mas-item" data-action="startToma">
+        <span class="mas-item-ic">🍼</span>
+        <span><span class="mas-item-lbl">Toma</span><span class="mas-item-sub">Iniciar sesión ahora</span></span>
       </button>
-      <button class="mas-item" data-action="goHitos">
-        <span class="mas-item-ic">⭐</span>
-        <span><span class="mas-item-lbl">Hitos</span><span class="mas-item-sub">Momentos de Cefe</span></span>
+      <button class="mas-item" data-action="startTomaManual">
+        <span class="mas-item-ic">📝</span>
+        <span><span class="mas-item-lbl">Toma manual</span><span class="mas-item-sub">Ingresar datos a mano</span></span>
+      </button>
+      <button class="mas-item" data-action="startPanal">
+        <span class="mas-item-ic">🧷</span>
+        <span><span class="mas-item-lbl">Pañal</span><span class="mas-item-sub">Pis, caca o mixto</span></span>
+      </button>
+      <button class="mas-item" data-action="goPeso">
+        <span class="mas-item-ic">⚖️</span>
+        <span><span class="mas-item-lbl">Peso / Medidas</span><span class="mas-item-sub">Curva de crecimiento</span></span>
+      </button>
+      <button class="mas-item" data-action="goTimerLibre">
+        <span class="mas-item-ic">⏱️</span>
+        <span><span class="mas-item-lbl">Timer libre</span><span class="mas-item-sub">Baño, caminata, masaje</span></span>
+      </button>
+
+      <!-- 📊 SALUD -->
+      <div class="mas-cat-hdr">📊 Salud</div>
+      <button class="mas-item" data-action="goVacunas">
+        <span class="mas-item-ic">💉</span>
+        <span><span class="mas-item-lbl">Vacunas</span><span class="mas-item-sub">Calendario nacional</span></span>
       </button>
       <button class="mas-item" data-action="goMedicos">
         <span class="mas-item-ic">🏥</span>
         <span><span class="mas-item-lbl">Médicos</span><span class="mas-item-sub">Profesionales y visitas</span></span>
       </button>
-      <button class="mas-item" data-action="goCalendario">
-        <span class="mas-item-ic">📅</span>
-        <span><span class="mas-item-lbl">Calendario</span><span class="mas-item-sub">Agenda de Cefe</span></span>
-      </button>
-      <button class="mas-item" data-action="goVacunas">
-        <span class="mas-item-ic">💉</span>
-        <span><span class="mas-item-lbl">Vacunas</span><span class="mas-item-sub">Calendario nacional</span></span>
+      <button class="mas-item" data-action="goEstudios">
+        <span class="mas-item-ic">🔬</span>
+        <span><span class="mas-item-lbl">Estudios y med.</span><span class="mas-item-sub">FEI, OEA, medicación</span></span>
       </button>
       <button class="mas-item" data-action="goConsultaMedica">
-        <span class="mas-item-ic">🏥</span>
-        <span><span class="mas-item-lbl">Consulta médica</span><span class="mas-item-sub">Resumen + Historia clínica PDF</span></span>
+        <span class="mas-item-ic">📋</span>
+        <span><span class="mas-item-lbl">Consulta médica</span><span class="mas-item-sub">Resumen + PDF clínico</span></span>
       </button>
-      <button class="mas-item" data-action="goActividades">
-        <span class="mas-item-ic">🎯</span>
-        <span><span class="mas-item-lbl">Actividades</span><span class="mas-item-sub">Semana 0 de Cefe</span></span>
+      <button class="mas-item" data-action="goUrgencia">
+        <span class="mas-item-ic">🚨</span>
+        <span><span class="mas-item-lbl">Urgencia</span><span class="mas-item-sub">Reportar síntoma</span></span>
+      </button>
+      <button class="mas-item" data-action="goSprint">
+        <span class="mas-item-ic">📊</span>
+        <span><span class="mas-item-lbl">Sprint</span><span class="mas-item-sub">Diagnóstico intensivo</span></span>
+      </button>
+
+      <!-- 📖 HISTORIA -->
+      <div class="mas-cat-hdr">📖 Historia</div>
+      <button class="mas-item" data-action="goHitos">
+        <span class="mas-item-ic">⭐</span>
+        <span><span class="mas-item-lbl">Hitos</span><span class="mas-item-sub">Momentos de Cefe</span></span>
       </button>
       <button class="mas-item" data-action="goCuentos">
         <span class="mas-item-ic">&#128218;</span>
         <span><span class="mas-item-lbl">Cuentos</span><span class="mas-item-sub">Biblioteca de Cefe</span></span>
       </button>
+      <button class="mas-item" data-action="goActividades">
+        <span class="mas-item-ic">🎯</span>
+        <span><span class="mas-item-lbl">Actividades</span><span class="mas-item-sub">Plan de la semana</span></span>
+      </button>
       <button class="mas-item" data-action="goHistoria">
         <span class="mas-item-ic">📜</span>
-        <span><span class="mas-item-lbl">Historia de Cefe</span><span class="mas-item-sub">Línea de tiempo, notas, cartas</span></span>
-      </button>
-      <button class="mas-item" data-action="goEstudios">
-        <span class="mas-item-ic">🔬</span>
-        <span><span class="mas-item-lbl">Estudios y medicación</span><span class="mas-item-sub">FEI, OEA, fondo de ojo y más</span></span>
+        <span><span class="mas-item-lbl">Historia</span><span class="mas-item-sub">Línea de tiempo</span></span>
       </button>
       <button class="mas-item" data-action="goLogros">
         <span class="mas-item-ic">🏆</span>
         <span><span class="mas-item-lbl">Logros</span><span class="mas-item-sub">Tu camino como padres</span></span>
       </button>
+      <button class="mas-item" data-action="goPendientes" id="mas-pend-btn">
+        <span class="mas-item-ic">📋</span>
+        <span style="flex:1"><span class="mas-item-lbl">Pendientes</span><span class="mas-item-sub">Checks y recordatorios</span></span>
+        <span id="pend-badge" style="display:none;background:#e07070;color:#fff;border-radius:10px;font-size:10px;font-weight:bold;padding:2px 7px;min-width:20px;text-align:center"></span>
+      </button>
+
+      <!-- ⚙️ APP -->
+      <div class="mas-cat-hdr">⚙️ App</div>
+      <button class="mas-item" data-action="goPerfil">
+        <span class="mas-item-ic">👶</span>
+        <span><span class="mas-item-lbl">Perfil de Cefe</span><span class="mas-item-sub">Datos y obra social</span></span>
+      </button>
+      <button class="mas-item" data-action="goCalendario">
+        <span class="mas-item-ic">📅</span>
+        <span><span class="mas-item-lbl">Calendario</span><span class="mas-item-sub">Agenda de Cefe</span></span>
+      </button>
       <button class="mas-item" data-action="goConfig">
         <span class="mas-item-ic">⚙️</span>
-        <span><span class="mas-item-lbl">Configuración</span><span class="mas-item-sub">Notificaciones y preferencias</span></span>
+        <span><span class="mas-item-lbl">Configuración</span><span class="mas-item-sub">Notif. y preferencias</span></span>
+      </button>
+      <button class="mas-item" data-action="goAstro">
+        <span class="mas-item-ic">✨</span>
+        <span><span class="mas-item-lbl">Recreativo</span><span class="mas-item-sub">Quiz, datos, respira</span></span>
       </button>
       <button class="mas-item" data-action="toggleNight">
         <span class="mas-item-ic" id="night-ic">🌙</span>
         <span><span class="mas-item-lbl" id="night-lbl">Modo noche</span><span class="mas-item-sub">Tomas nocturnas</span></span>
       </button>
+
     </div>
-    <div style="display:flex;gap:8px;margin-top:8px">
-      <button class="mas-item" style="flex:1" data-action="goPerfil">
-        <span class="mas-item-ic">👶</span>
-        <span><span class="mas-item-lbl">Perfil de Cefe</span></span>
-      </button>
-      <button class="mas-item" style="flex:1" data-action="goAstro">
-        <span class="mas-item-ic">✨</span>
-        <span><span class="mas-item-lbl">Recreativo</span></span>
-      </button>
     </div>
   </div>
 </div>
@@ -515,6 +559,9 @@ var D = {
   editNotaFecha: null,
   editVisitaIdx: -1,
   actividadesHechas: {},  // {fecha: [idx, idx]} actividades del día marcadas
+  medsPersonales: [],    // [{nombre,dosis,unidad,frecuencia,indicacion,medico,fecha}]
+  consultasHechas: {},    // {id: true} consultas marcadas como realizadas
+  timerLibreData: null,   // {activo, inicio, secs, etiqueta, sesiones[]}
   logrosVistos: {},       // {id: true} logros ya celebrados con popup
   // alarm
   alarmTimer: null, alarmFired: false, nextToma: null, notifTimer: null,
@@ -537,7 +584,9 @@ var D = {
   // momentos / pendientes
   momentos: { respondidos: {}, descartados: {} },
   // alarm state
-  alarmTimer: null, alarmFired: false, nextToma: null, notifTimer: null
+  alarmTimer: null, alarmFired: false, nextToma: null, notifTimer: null,
+  // sprints de muestreo
+  sprints: [], sprintActivo: null
 };
 
 // ─── STORAGE & MIGRATION ──────────────────────────────────────
@@ -616,12 +665,16 @@ function loadData() {
     var ca = ls('cartas'); if (ca) D.cartas = JSON.parse(ca);
     var mo = ls('momentos'); if (mo) D.momentos = JSON.parse(mo);
     var ah = ls('actHechas'); if (ah) D.actividadesHechas = JSON.parse(ah);
+  var mp = ls('medsPersonales'); if (mp) D.medsPersonales = JSON.parse(mp);
+  var ch = ls('consultasHechas'); if (ch) D.consultasHechas = JSON.parse(ch);
     var lv = ls('logrosVistos'); if (lv) D.logrosVistos = JSON.parse(lv);
     var nm = ls('nightMode'); if (nm) D.nightMode = JSON.parse(nm);
     var am = ls('alarmMax'); if (am) D.alarmMaxInterval = parseInt(JSON.parse(am))||180;
     var cfg = ls('config2'); if (cfg) D.config = JSON.parse(cfg);
     var sl = ls('sleepLog2'); if (sl) D.sleepLog = JSON.parse(sl);
     var ss = ls('sleepStart2'); if (ss) D.sleepStart = JSON.parse(ss);
+    var sp = ls('sprints'); if (sp) D.sprints = JSON.parse(sp);
+    var spa = ls('sprintActivo'); if (spa) D.sprintActivo = JSON.parse(spa);
   } catch(e) {}
 
   migrate(savedVersion);
@@ -678,12 +731,16 @@ function saveData() {
   lss('hitos', D.hitos); lss('cartas', D.cartas);
   lss('momentos', D.momentos);
   lss('actHechas', D.actividadesHechas);
+  lss('medsPersonales', D.medsPersonales||[]);
+  lss('consultasHechas', D.consultasHechas||{});
   lss('logrosVistos', D.logrosVistos);
   lss('nightMode', D.nightMode);
   lss('alarmMax', D.alarmMaxInterval||180);
   lss('sleepStart2', D.sleepStart||null);
   lss('sleepLog2', D.sleepLog||[]);
   lss('config2', D.config||{});
+  lss('sprints', D.sprints||[]);
+  lss('sprintActivo', D.sprintActivo||null);
 
   // Firebase: must serialize all Date objects to ISO strings first
   if(window.fbSave) window.fbSave({
@@ -706,7 +763,9 @@ function saveData() {
     nightMode: D.nightMode,
     alarmMaxInterval: D.alarmMaxInterval||180,
     config: D.config||{},
-    actividadesHechas: D.actividadesHechas||{}
+    actividadesHechas: D.actividadesHechas||{},
+    sprints: D.sprints||[],
+    sprintActivo: D.sprintActivo||null
   });
 }
 
@@ -1482,15 +1541,20 @@ function renderTomaEntretenimiento(bd){
     var on=tab===t[0];
     var b=document.createElement('button');
     b.style.cssText='padding:5px 10px;border-radius:9px;border:1px solid rgba(180,140,220,'+(on?'.4':'.15')+');background:rgba(180,140,220,'+(on?'.15':'.04')+');color:'+(on?'#b48cdc':'#a89070')+';font-size:11px;cursor:pointer;font-family:Georgia,serif;white-space:nowrap;flex-shrink:0';
-    b.textContent=t[1];(function(k){b.onclick=function(){lss('toma_entret_tab',k);render();};})(t[0]);
+    b.textContent=t[1];(function(k){b.onclick=function(){lss('toma_entret_tab',k);var eb=document.getElementById('entret-content');if(eb&&typeof renderEntretContent==='function'){renderEntretContent(eb,k);}else{render();}};})(t[0]);
     tabR.appendChild(b);
   });
   box.appendChild(tabR);
+  var entretContent=mkDiv('');entretContent.id='entret-content';
+  box.appendChild(entretContent);
+  window.renderEntretContent=function(container,tabKey){
+    container.innerHTML='';
+    var tab=tabKey||ls('toma_entret_tab')||'dato';
 
   if(tab==='dato'){
     var dat=getDataToma();
-    box.appendChild(mkTxt('div',null,'Sabias que...','font-size:10px;color:#b48cdc;font-weight:bold;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px'));
-    box.appendChild(mkTxt('div',null,dat.dato,'font-size:13px;color:#d4c090;line-height:1.7'));
+    container.appendChild(mkTxt('div',null,'Sabias que...','font-size:10px;color:#b48cdc;font-weight:bold;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px'));
+    container.appendChild(mkTxt('div',null,dat.dato,'font-size:13px;color:#d4c090;line-height:1.7'));
 
   } else if(tab==='quiz'){
     // Quiz limitado: 7 preguntas con progreso
@@ -1498,13 +1562,13 @@ function renderTomaEntretenimiento(bd){
     var qIdx=parseInt(ls('quiz_toma_idx')||'0');
     var completado=qIdx>=TOTAL_Q;
     if(completado){
-      box.appendChild(mkTxt('div',null,'Quiz completo!','font-size:15px;font-weight:bold;color:#64c8b4;text-align:center;margin-bottom:8px'));
-      box.appendChild(mkTxt('div',null,'Terminaste las '+TOTAL_Q+' preguntas. Vuelve mañana para nuevas preguntas.','font-size:12px;color:#a89070;text-align:center;line-height:1.5;margin-bottom:10px'));
+      container.appendChild(mkTxt('div',null,'Quiz completo!','font-size:15px;font-weight:bold;color:#64c8b4;text-align:center;margin-bottom:8px'));
+      container.appendChild(mkTxt('div',null,'Terminaste las '+TOTAL_Q+' preguntas. Vuelve mañana para nuevas preguntas.','font-size:12px;color:#a89070;text-align:center;line-height:1.5;margin-bottom:10px'));
       var resetQBtn=document.createElement('button');
       resetQBtn.style.cssText='width:100%;padding:9px;border-radius:10px;border:1px solid rgba(180,140,220,.2);background:transparent;color:#b48cdc;font-size:12px;cursor:pointer;font-family:Georgia,serif';
       resetQBtn.textContent='Reiniciar quiz';
       resetQBtn.onclick=function(){lss('quiz_toma_idx','0');render();};
-      box.appendChild(resetQBtn);
+      container.appendChild(resetQBtn);
     } else {
       // Barra de progreso
       var pctQ=Math.round(qIdx/TOTAL_Q*100);
@@ -1513,18 +1577,18 @@ function renderTomaEntretenimiento(bd){
       var progFill=mkDiv('height:4px;background:#b48cdc;border-radius:2px;width:'+pctQ+'%');
       progBar.appendChild(progFill);progRow.appendChild(progBar);
       progRow.appendChild(mkTxt('span',null,qIdx+'/'+TOTAL_Q,'font-size:10px;color:#a89070'));
-      box.appendChild(progRow);
+      container.appendChild(progRow);
       var q=QUIZ_TOMA[qIdx];
       var rKey='qtoma_'+qIdx;var yaR=ls(rKey);
-      box.appendChild(mkTxt('div',null,q.p,'font-size:13px;font-weight:bold;color:#d4c090;line-height:1.5;margin-bottom:10px'));
+      container.appendChild(mkTxt('div',null,q.p,'font-size:13px;font-weight:bold;color:#d4c090;line-height:1.5;margin-bottom:10px'));
       if(yaR!==null){
         var ok=parseInt(yaR)===q.ok;
-        box.appendChild(mkTxt('div',null,(ok?'Correcto! ':'Casi! ')+q.exp,'font-size:12px;color:'+(ok?'#64c8b4':'#e07070')+';line-height:1.6;margin-bottom:10px'));
+        container.appendChild(mkTxt('div',null,(ok?'Correcto! ':'Casi! ')+q.exp,'font-size:12px;color:'+(ok?'#64c8b4':'#e07070')+';line-height:1.6;margin-bottom:10px'));
         var nBtn=document.createElement('button');
         nBtn.style.cssText='width:100%;padding:9px;border-radius:10px;border:1px solid rgba(180,140,220,.25);background:rgba(180,140,220,.08);color:#b48cdc;font-size:13px;cursor:pointer;font-family:Georgia,serif';
         nBtn.textContent='Siguiente ('+(qIdx+2<=TOTAL_Q?qIdx+2:'Final')+'/'+TOTAL_Q+')';
         nBtn.onclick=function(){lss('quiz_toma_idx',String(qIdx+1));render();};
-        box.appendChild(nBtn);
+        container.appendChild(nBtn);
       } else {
         var ops=mkDiv('display:flex;flex-direction:column;gap:6px');
         q.ops.forEach(function(op,oi){
@@ -1533,23 +1597,23 @@ function renderTomaEntretenimiento(bd){
           ob.textContent=op;(function(i){ob.onclick=function(){lss(rKey,String(i));render();};})(oi);
           ops.appendChild(ob);
         });
-        box.appendChild(ops);
+        container.appendChild(ops);
       }
     }
 
   } else if(tab==='celeb'){
     var cel=getCelebreDia();
-    box.appendChild(mkTxt('div',null,'Nacidos el 29 de Marzo...','font-size:10px;color:#d4a843;font-weight:bold;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px'));
+    container.appendChild(mkTxt('div',null,'Nacidos el 29 de Marzo...','font-size:10px;color:#d4a843;font-weight:bold;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px'));
     var celCard=mkDiv('text-align:center;padding:8px 0');
     celCard.appendChild(mkTxt('div',null,cel.emoji,'font-size:36px;margin-bottom:8px'));
     celCard.appendChild(mkTxt('div',null,cel.nombre,'font-size:16px;font-weight:bold;color:#f0d9a0;margin-bottom:6px'));
     celCard.appendChild(mkTxt('div',null,cel.desc,'font-size:12px;color:#a89070;line-height:1.6'));
-    box.appendChild(celCard);
+    container.appendChild(celCard);
     var nextCelBtn=document.createElement('button');
     nextCelBtn.style.cssText='width:100%;margin-top:10px;padding:8px;border-radius:10px;border:1px solid rgba(212,168,67,.2);background:transparent;color:#a89070;font-size:12px;cursor:pointer;font-family:Georgia,serif';
     nextCelBtn.textContent='Ver otra persona';
     nextCelBtn.onclick=function(){var cur=parseInt(ls('celeb_idx')||'0');lss('celeb_idx',String((cur+1)%CELEBRES_29_MAR.length));render();};
-    box.appendChild(nextCelBtn);
+    container.appendChild(nextCelBtn);
 
   } else if(tab==='respira'){
     // Animacion de respiracion — CSS puro, sin JS complejo
@@ -1569,8 +1633,10 @@ function renderTomaEntretenimiento(bd){
     });
     respDiv.appendChild(phases);
     respDiv.appendChild(mkTxt('div',null,'Seguí el pulso del círculo. Ideal para calmar la ansiedad nocturna.','font-size:11px;color:#a89070;line-height:1.5'));
-    box.appendChild(respDiv);
+    container.appendChild(respDiv);
   }
+  }; // fin renderEntretContent
+  renderEntretContent(entretContent, tab);
   bd.appendChild(box);
 }
 // ─── MODO MADRUGADA ────────────────────────────────────────────
@@ -1691,6 +1757,18 @@ function startTimer() {
   },1000);
 }
 function stopTimer(){if(D.timerInt){clearInterval(D.timerInt);D.timerInt=null;}D.elapsed=0;}
+
+var _tlInterval=null;
+function startTimerLibre(){
+  if(_tlInterval)clearInterval(_tlInterval);
+  _tlInterval=setInterval(function(){
+    if(!D.timerLibreData||!D.timerLibreData.activo)return;
+    var s=D.timerLibreData.secs+Math.floor((Date.now()-D.timerLibreData.inicio)/1000);
+    var el=document.getElementById('tmr-libre');
+    if(el)el.textContent=Math.floor(s/60)+':'+('0'+(s%60)).slice(-2);
+  },1000);
+}
+function stopTimerLibre(){if(_tlInterval){clearInterval(_tlInterval);_tlInterval=null;}}
 
 function schedAlarm(nt){
   if(D.alarmTimer)clearTimeout(D.alarmTimer);
@@ -2027,6 +2105,7 @@ function saveBebe(){
     pn:gi('bpn')||3365,talla:gi('btalla'),cc:gi('bcc'),
     sangre:gv('bsangre'),dni:gv('bdni'),eg:gi('beg')||40,
     parto:gv('bparto'),apgar:gv('bapgar'),notas:gv('bnotas'),
+    os:gv('bos')||prev.os||'',plan:gv('bplan')||prev.plan||'',afil:gv('bafil')||prev.afil||'',
     vacHepB:prev.vacHepB||'',vacBCG:prev.vacBCG||false,
     dx:prev.dx||'',pa:prev.pa||0,fa:prev.fa||''};
   saveData();setStep('perfil');
@@ -2553,7 +2632,7 @@ function render(){
   var nb=document.getElementById('night-btn');if(nb)nb.style.color=D.nightMode?'#f0d9a0':'#a89070';
   var htEl=document.getElementById('hdr-title');
   if(typeof updatePendBadge==='function')updatePendBadge();
-  if(htEl){var TITLES={home:'Ceferino',history:'Historial',peso:'Medidas',pesoEntry:'Peso',tallaEntry:'Talla',pcEntry:'Perimetro Cefalico',dash:'Dashboard',perfil:'Perfil',editBebe:'Perfil',editPadre:'Perfil',medicos:'M\u00e9dicos',editMed:'M\u00e9dicos',visitaForm:'Médicos',postVisita:'Seguimiento',consultaMedica:'Consulta Médica',logros:'Logros',config:'Configuración',agenda:'Agenda',nuevoEvento:'Nuevo evento',estudios:'Estudios y Medicación',extras:'Extras',notas:'Notas',editNota:'Nueva Nota',sintomas:'S\u00edntomas',editSintoma:'S\u00edntoma',hitos:'Hitos',cartas:'Cartas',editCarta:'Carta',astro:'Recreativo',actividades:'Actividades',vacunas:'Vacunas',memoria:'Memoria de Cefe',pendientes:'Pendientes',historia:'Historia de Cefe',toma:'Toma',panal:'Pa\u00f1al',preview:'Confirmar',summary:'Mensaje'};
+  if(htEl){var TITLES={home:'Ceferino',history:'Historial',peso:'Medidas',pesoEntry:'Peso',tallaEntry:'Talla',pcEntry:'Perimetro Cefalico',dash:'Dashboard',perfil:'Perfil',editBebe:'Perfil',editPadre:'Perfil',medicos:'M\u00e9dicos',editMed:'M\u00e9dicos',visitaForm:'Médicos',postVisita:'Seguimiento',consultaMedica:'Consulta Médica',sprintSetup:'Sprint de Muestreo',sprintResumen:'Resumen Sprint',logros:'Logros',config:'Configuración',agenda:'Agenda',nuevoEvento:'Nuevo evento',estudios:'Estudios y Medicación',extras:'Extras',notas:'Notas',editNota:'Nueva Nota',sintomas:'S\u00edntomas',editSintoma:'S\u00edntoma',hitos:'Hitos',cartas:'Cartas',editCarta:'Carta',astro:'Recreativo',actividades:'Actividades',vacunas:'Vacunas',memoria:'Memoria de Cefe',pendientes:'Pendientes',historia:'Historia de Cefe',toma:'Toma',panal:'Pa\u00f1al',preview:'Confirmar',summary:'Mensaje'};
   htEl.textContent=TITLES[D.step]||'Ceferino';}
 
   var bd=document.getElementById('bd');if(!bd)return;
@@ -3125,16 +3204,253 @@ function render(){
       bd.appendChild(miniPlan);
     })();
 
-    bd.appendChild(E.aBtn('🍼','Registrar Toma','Sesion ahora','','startToma'));
-    bd.appendChild(E.aBtn('\uD83D\uDCDD','Toma Manual','Ingresar datos a mano','','startTomaManual'));
-    bd.appendChild(E.aBtn('\uD83E\uDDF7','Registrar Panal','Pis, caca o mixto','bl','startPanal'));
-    bd.appendChild(E.aBtn('\u2696\uFE0F','Registrar Peso','Curva de crecimiento','tl','goPeso'));
-    if(D.hist.length>0){
-      var rh=mkDiv('margin-top:20px');rh.appendChild(E.slbl('Ultimos registros'));
-      D.hist.slice(0,4).forEach(function(h,i){rh.appendChild(E.histRow(h,i));});
-      if(D.hist.length>4){var more=E.btn('bk','Ver todos ('+D.hist.length+') \u2192','');more.dataset.tab='history';rh.appendChild(more);}
-      bd.appendChild(rh);
+    // ── Banner sprint activo ──────────────────────────────────────
+    if(D.sprintActivo){
+      var spFin=new Date(D.sprintActivo.fin);
+      var spMs=spFin.getTime()-Date.now();
+      var spMin=Math.max(0,Math.round(spMs/60000));
+      var spH=Math.floor(spMin/60), spM=spMin%60;
+      var spLabel=spH>0?(spH+'h '+(spM>0?spM+'min':'')):spM+'min';
+      var tiempoFin=spMs>0?('Termina en '+spLabel):'Sprint finalizado';
+      // Check-in message
+      var checkinMsg=sprintCheckin();
+      var spCard=mkDiv('background:linear-gradient(135deg,rgba(100,200,180,.12),rgba(180,140,220,.1));border:1px solid rgba(100,200,180,.35);border-radius:16px;padding:14px 16px;margin-bottom:12px');
+      // Header row
+      var spHdr=mkDiv('display:flex;align-items:center;justify-content:space-between;margin-bottom:8px');
+      var spLeft=mkDiv('display:flex;align-items:center;gap:8px');
+      spLeft.appendChild(mkTxt('span',null,'📊','font-size:18px'));
+      var spInfo=mkDiv('');
+      var tipoEmoji=D.sprintActivo.tipo==='clinico'?'🌡️':D.sprintActivo.tipo==='estadistico'?'📋':'🎯';
+      spInfo.appendChild(mkTxt('div',null,'SPRINT '+tipoEmoji+' ACTIVO','font-size:9px;font-weight:bold;color:#64c8b4;letter-spacing:1.5px;text-transform:uppercase'));
+      spInfo.appendChild(mkTxt('div',null,tiempoFin,'font-size:12px;color:#f0d9a0;font-weight:bold'));
+      spLeft.appendChild(spInfo);
+      spHdr.appendChild(spLeft);
+      // Contador mini (registros en este sprint)
+      var spSinceStart=new Date(D.sprintActivo.inicio);
+      var spRegCount=(D.hist||[]).filter(function(h){
+        var t=h.type==='toma'?new Date(h.s):new Date(h.t);
+        return t>=spSinceStart;
+      }).length;
+      var spBadge=mkDiv('text-align:center;background:rgba(100,200,180,.15);border-radius:10px;padding:4px 10px;min-width:44px');
+      spBadge.appendChild(mkTxt('div',null,String(spRegCount),'font-size:18px;font-weight:bold;color:#64c8b4;line-height:1.1'));
+      spBadge.appendChild(mkTxt('div',null,'reg.','font-size:9px;color:#a89070'));
+      spHdr.appendChild(spBadge);
+      spCard.appendChild(spHdr);
+      // Check-in Céfiro si hay mensaje
+      if(checkinMsg){
+        var ciRow=mkDiv('background:rgba(180,140,220,.1);border-radius:10px;padding:8px 10px;margin-bottom:8px;display:flex;align-items:flex-start;gap:6px');
+        ciRow.appendChild(mkTxt('span',null,'🌬️','font-size:13px;flex-shrink:0;line-height:1.5'));
+        ciRow.appendChild(mkTxt('span',null,checkinMsg,'font-size:11px;color:#d4c090;line-height:1.5'));
+        spCard.appendChild(ciRow);
+      }
+      // Botones: Registrar ahora + Ver progreso + Detener
+      var spBtns=mkDiv('display:flex;gap:6px');
+      var spBtnReg=document.createElement('button');
+      spBtnReg.style.cssText='flex:2;padding:9px 6px;border-radius:11px;border:1px solid rgba(212,168,67,.4);background:rgba(212,168,67,.15);color:#f0d9a0;font-size:12px;font-weight:bold;cursor:pointer;font-family:Georgia,serif';
+      spBtnReg.textContent='🍼 Registrar toma';
+      spBtnReg.dataset.action='startToma';
+      spBtns.appendChild(spBtnReg);
+      var spBtnStop=document.createElement('button');
+      spBtnStop.style.cssText='flex:1;padding:9px 6px;border-radius:11px;border:1px solid rgba(224,112,112,.3);background:rgba(224,112,112,.08);color:#e07070;font-size:11px;cursor:pointer;font-family:Georgia,serif';
+      spBtnStop.textContent='Finalizar';
+      spBtnStop.addEventListener('click',function(){if(confirm('\u00bfFinalizs el sprint y ver el resumen?')){stopSprint();}});
+      spBtns.appendChild(spBtnStop);
+      spCard.appendChild(spBtns);
+      bd.appendChild(spCard);
     }
+
+    // ── Widget de atajos rápidos (horizontal scrolleable) ──────
+    (function(){
+      var atajos=[
+        {ic:'🍼', lbl:'Toma',     sub:'pecho/mamadera', act:'startToma',    clr:'rgba(212,168,67,.15)',  bdr:'rgba(212,168,67,.4)'},
+        {ic:'🧷', lbl:'Pañal',    sub:'pis o caca',     act:'startPanal',   clr:'rgba(100,200,180,.1)',  bdr:'rgba(100,200,180,.3)'},
+        {ic:'⚖️', lbl:'Peso',     sub:'curva peso',     act:'goPeso',        clr:'rgba(180,140,220,.1)',  bdr:'rgba(180,140,220,.3)'},
+        {ic:'📝', lbl:'Manual',   sub:'toma a mano',    act:'startTomaManual',clr:'rgba(212,168,67,.08)', bdr:'rgba(212,168,67,.2)'},
+        {ic:'⏱️', lbl:'Timer',    sub:'actividad libre',act:'goTimerLibre',  clr:'rgba(100,200,180,.08)',bdr:'rgba(100,200,180,.2)'},
+        {ic:'📖', lbl:'Cuentos',  sub:'leer con Cefe',  act:'goCuentos',     clr:'rgba(180,140,220,.08)',bdr:'rgba(180,140,220,.2)'},
+        {ic:'🏃', lbl:'Actividades',sub:'plan del día',act:'goActividades',clr:'rgba(100,200,140,.08)',bdr:'rgba(100,200,140,.2)'},
+        {ic:'🏥', lbl:'Consultas', sub:'próxima visita',act:'goConsultas', clr:'rgba(224,112,112,.08)',bdr:'rgba(224,112,112,.25)'},
+        {ic:'🚨', lbl:'Urgencia',  sub:'reportar síntoma',act:'goUrgencia',  clr:'rgba(224,112,112,.1)', bdr:'rgba(224,112,112,.35)'}
+      ];
+
+      // Sección header
+      var hRow=mkDiv('display:flex;align-items:center;justify-content:space-between;margin-bottom:10px');
+      hRow.appendChild(mkTxt('div',null,'Acciones rápidas','font-size:10px;color:#a89070;text-transform:uppercase;letter-spacing:1.2px;font-weight:bold'));
+      bd.appendChild(hRow);
+
+      // Scroll container
+      var scrollWrap=mkDiv('overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;margin:0 -4px;padding:0 4px 10px 4px');
+      scrollWrap.style.cssText+='overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;-ms-overflow-style:none';
+      var scrollRow=mkDiv('display:flex;gap:10px;width:max-content;padding-bottom:4px');
+
+      atajos.forEach(function(a){
+        var chip=document.createElement('button');
+        chip.style.cssText='display:flex;flex-direction:column;align-items:center;justify-content:center;width:72px;min-height:76px;border-radius:18px;border:1px solid '+a.bdr+';background:'+a.clr+';padding:8px 4px;cursor:pointer;font-family:Georgia,serif;flex-shrink:0;-webkit-tap-highlight-color:transparent;transition:transform .1s';
+        chip.innerHTML='<span style="font-size:26px;line-height:1.2;display:block;margin-bottom:4px">'+a.ic+'</span>'
+          +'<span style="font-size:11px;font-weight:bold;color:#f0d9a0;white-space:nowrap;display:block;line-height:1.2">'+a.lbl+'</span>'
+          +'<span style="font-size:9px;color:#a89070;white-space:nowrap;display:block;margin-top:2px;line-height:1.2">'+a.sub+'</span>';
+        chip.dataset.action=a.act;
+        chip.addEventListener('touchstart',function(){chip.style.transform='scale(.93)';},{passive:true});
+        chip.addEventListener('touchend',function(){chip.style.transform='scale(1)';},{passive:true});
+        scrollRow.appendChild(chip);
+      });
+
+      scrollWrap.appendChild(scrollRow);
+      bd.appendChild(scrollWrap);
+
+      // CTA principal debajo del widget — toma
+      var ctaBtn=document.createElement('button');
+      ctaBtn.style.cssText='width:100%;padding:16px;border-radius:16px;border:none;background:linear-gradient(135deg,rgba(212,168,67,.6),rgba(212,168,67,.35));color:#f0d9a0;font-size:16px;font-weight:bold;cursor:pointer;font-family:Georgia,serif;letter-spacing:.3px;margin-bottom:10px;-webkit-tap-highlight-color:transparent';
+      ctaBtn.innerHTML='🍼  Registrar toma ahora';
+      ctaBtn.dataset.action='startToma';
+      bd.appendChild(ctaBtn);
+    })();
+  }
+
+  // ── SPRINT — Setup ───────────────────────────────────────────
+  else if(D.step==='sprintSetup'){
+    bd.appendChild(E.btn('bk','\u2190 Volver','goHome'));
+    bd.appendChild(E.el('div',{cls:'st',txt:'Sprint de Muestreo \uD83D\uDCCA'}));
+
+    // Intro card
+    var introCard=mkDiv('background:rgba(100,200,180,.07);border:1px solid rgba(100,200,180,.2);border-radius:14px;padding:14px 16px;margin-bottom:16px');
+    introCard.appendChild(mkTxt('div',null,'🌬️ Céfiro','font-size:11px;font-weight:bold;color:#64c8b4;margin-bottom:6px;letter-spacing:.5px'));
+    introCard.appendChild(mkTxt('div',null,'Un período corto e intensivo de registro genera mejor diagnóstico que meses de datos esposrádicos. Activá el sprint, registrá lo que pase, y al terminar te entrego un resumen completo para compartir con el pediatra.','font-size:12px;color:#d4c090;line-height:1.6'));
+    bd.appendChild(introCard);
+
+    // Tipo de sprint
+    bd.appendChild(E.slbl('\u00bfPor qué activar el sprint?'));
+    var tipos=[
+      {k:'voluntario',ic:'\uD83C\uDFAF',lbl:'Quiero ver tendencias',sub:'Generar base estadística para entender patrones'},
+      {k:'clinico',ic:'\uD83C\uDF21\uFE0F',lbl:'Seguimiento clínico',sub:'Cefe tiene algo (fiebre, diarrea) y quiero registrar todo'},
+      {k:'estadistico',ic:'\uD83D\uDCCB',lbl:'Para el pediatra',sub:'Necesito datos concretos para la próxima consulta'},
+    ];
+    if(!D._sprintTipo)D._sprintTipo='voluntario';
+    var tiposWrap=mkDiv('display:flex;flex-direction:column;gap:8px;margin-bottom:18px');
+    tipos.forEach(function(t){
+      var btn=document.createElement('button');
+      var sel=D._sprintTipo===t.k;
+      btn.style.cssText='width:100%;padding:12px 14px;border-radius:13px;border:1px solid '+(sel?'rgba(100,200,180,.5)':'rgba(210,175,120,.15)')+';background:'+(sel?'rgba(100,200,180,.12)':'rgba(255,255,255,.03)')+';text-align:left;cursor:pointer;font-family:Georgia,serif;display:flex;align-items:center;gap:10px';
+      btn.innerHTML='<span style="font-size:22px">'+t.ic+'</span><span><span style="display:block;font-size:13px;font-weight:bold;color:'+(sel?'#f0d9a0':'#d4c090')+'">'+t.lbl+'</span><span style="display:block;font-size:10px;color:#a89070;margin-top:2px">'+t.sub+'</span></span>'+(sel?'<span style="margin-left:auto;color:#64c8b4;font-size:16px">\u2713</span>':'');
+      btn.addEventListener('click',function(){D._sprintTipo=t.k;render();});
+      tiposWrap.appendChild(btn);
+    });
+    bd.appendChild(tiposWrap);
+
+    // Duración
+    bd.appendChild(E.slbl('Duración'));
+    if(!D._sprintHoras)D._sprintHoras=24;
+    var durRow=mkDiv('display:flex;gap:8px;margin-bottom:20px');
+    [12,24,48].forEach(function(h){
+      var btn=document.createElement('button');
+      var sel=D._sprintHoras===h;
+      btn.style.cssText='flex:1;padding:12px 8px;border-radius:13px;border:1px solid '+(sel?'rgba(212,168,67,.5)':'rgba(210,175,120,.15)')+';background:'+(sel?'rgba(212,168,67,.15)':'rgba(255,255,255,.03)')+';cursor:pointer;font-family:Georgia,serif';
+      btn.innerHTML='<div style="font-size:20px;font-weight:bold;color:'+(sel?'#f0d9a0':'#a89070')+'">'+h+'</div><div style="font-size:10px;color:#a89070;margin-top:2px">horas</div>';
+      btn.addEventListener('click',function(){D._sprintHoras=h;render();});
+      durRow.appendChild(btn);
+    });
+    bd.appendChild(durRow);
+
+    // Aviso si ya hay sprint activo
+    if(D.sprintActivo){
+      var warn=mkDiv('background:rgba(224,112,112,.1);border:1px solid rgba(224,112,112,.3);border-radius:11px;padding:10px 13px;margin-bottom:12px');
+      warn.appendChild(mkTxt('div',null,'\u26A0\uFE0F Ya hay un sprint activo. Iniciarlo reemplazará el anterior.','font-size:11px;color:#e07070;line-height:1.5'));
+      bd.appendChild(warn);
+    }
+
+    // CTA
+    var goBtn=document.createElement('button');
+    goBtn.style.cssText='width:100%;padding:16px;border-radius:16px;border:none;background:linear-gradient(135deg,rgba(100,200,180,.6),rgba(100,200,180,.35));color:#fff;font-size:15px;font-weight:bold;cursor:pointer;font-family:Georgia,serif;letter-spacing:.3px;margin-bottom:8px';
+    goBtn.textContent='📊 Activar Sprint';
+    goBtn.addEventListener('click',function(){startSprint(D._sprintTipo,D._sprintHoras);});
+    bd.appendChild(goBtn);
+    bd.appendChild(E.btn('gb','Cancelar','goHome'));
+  }
+
+  // ── SPRINT — Resumen ──────────────────────────────────────────
+  else if(D.step==='sprintResumen'){
+    var res=getSprintResumen();
+    if(!res){setStep('home');return;}
+    bd.appendChild(E.btn('bk','\u2190 Inicio','goHome'));
+    bd.appendChild(E.el('div',{cls:'st',txt:'Resumen del Sprint \uD83D\uDCCA'}));
+
+    // Narrativa Céfiro
+    var narCard=mkDiv('background:rgba(180,140,220,.08);border:1px solid rgba(180,140,220,.2);border-radius:14px;padding:14px 16px;margin-bottom:14px');
+    narCard.appendChild(mkTxt('div',null,'🌬️ Céfiro','font-size:11px;font-weight:bold;color:#b48cdc;margin-bottom:6px'));
+    narCard.appendChild(mkTxt('div',null,res.narrativa,'font-size:12px;color:#d4c090;line-height:1.7'));
+    bd.appendChild(narCard);
+
+    // Stats grid
+    var sgrid=mkDiv('display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px');
+    function spStat(ic,val,lbl,clr){
+      var c=mkDiv('background:rgba(255,255,255,.04);border-radius:12px;padding:10px 12px;text-align:center');
+      c.appendChild(mkTxt('div',null,ic,'font-size:18px;margin-bottom:2px'));
+      c.appendChild(mkTxt('div',null,val,'font-size:20px;font-weight:bold;color:'+(clr||'#f0d9a0')+';line-height:1.2'));
+      c.appendChild(mkTxt('div',null,lbl,'font-size:9px;color:#a89070;margin-top:2px;text-transform:uppercase;letter-spacing:.5px'));
+      return c;
+    }
+    sgrid.appendChild(spStat('🍼',String(res.tomas.length),'tomas','#d4a843'));
+    sgrid.appendChild(spStat('🧷',String(res.panales.length),'pañales','#64c8b4'));
+    sgrid.appendChild(spStat('⏱️',res.avgGap>0?(res.avgGap>=60?Math.floor(res.avgGap/60)+'h '+(res.avgGap%60)+'m':res.avgGap+'min'):'—','intervalo prom.','#b48cdc'));
+    sgrid.appendChild(spStat('💧',res.mlTot>0?res.mlTot+'ml':'—','total estimado','#64c8b4'));
+    bd.appendChild(sgrid);
+
+    // Electrocardiograma — línea de tiempo visual
+    if(res.registros.length>0){
+      bd.appendChild(E.slbl('Línea de tiempo'));
+      var ecgWrap=mkDiv('background:rgba(10,18,28,.6);border:1px solid rgba(210,175,120,.1);border-radius:13px;padding:12px 14px;margin-bottom:14px;overflow-x:auto;-webkit-overflow-scrolling:touch');
+      var ecgRow=mkDiv('display:flex;align-items:center;gap:0;min-width:max-content;padding-bottom:2px');
+      var spStart=res.inicio.getTime();
+      var spDur=res.fin.getTime()-spStart;
+      // Línea base
+      var baseBar=mkDiv('position:relative;height:4px;background:rgba(210,175,120,.12);border-radius:2px;min-width:280px;flex:1');
+      res.registros.forEach(function(h){
+        var t=(h.type==='toma'?new Date(h.s):new Date(h.t)).getTime();
+        var pct=Math.min(99,Math.max(0,Math.round((t-spStart)/spDur*100)));
+        var dot=mkDiv('position:absolute;top:50%;transform:translateY(-50%);width:'+(h.type==='toma'?'10px':'8px')+';height:'+(h.type==='toma'?'10px':'8px')+';border-radius:50%;background:'+(h.type==='toma'?'#d4a843':'#64c8b4')+';left:'+pct+'%;margin-left:-5px');
+        dot.title=h.type==='toma'?'Toma '+ft(new Date(h.s)):'Pañal '+ft(new Date(h.t));
+        baseBar.appendChild(dot);
+      });
+      ecgRow.appendChild(baseBar);
+      ecgWrap.appendChild(ecgRow);
+      // Leyenda
+      var leg=mkDiv('display:flex;gap:14px;margin-top:8px');
+      var mkLeg=function(clr,lbl){var r=mkDiv('display:flex;align-items:center;gap:4px');r.appendChild(mkDiv('width:8px;height:8px;border-radius:50%;background:'+clr+';flex-shrink:0'));r.appendChild(mkTxt('span',null,lbl,'font-size:10px;color:#a89070'));return r;};
+      leg.appendChild(mkLeg('#d4a843','Toma'));
+      leg.appendChild(mkLeg('#64c8b4','Pañal'));
+      ecgWrap.appendChild(leg);
+      bd.appendChild(ecgWrap);
+    }
+
+    // Botón compartir con pediatra
+    var shareBtn=document.createElement('button');
+    shareBtn.style.cssText='width:100%;padding:14px;border-radius:14px;border:1px solid rgba(100,200,180,.35);background:rgba(100,200,180,.1);color:#64c8b4;font-size:14px;font-weight:bold;cursor:pointer;font-family:Georgia,serif;margin-bottom:8px;display:flex;align-items:center;justify-content:center;gap:8px';
+    shareBtn.innerHTML='📱 Compartir con el pediatra';
+    shareBtn.addEventListener('click',function(){
+      var apodo=D.bebe.apodo||'Cefe';
+      var r=res;
+      var txt='*Sprint de muestreo — '+apodo+'*
+';
+      txt+='📅 '+r.inicio.toLocaleDateString('es-AR')+' '+r.inicio.toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'});
+      txt+=' → '+r.fin.toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'})+' ('+r.horasReales+'hs)
+
+';
+      txt+='🍼 Tomas: '+r.tomas.length+'
+';
+      txt+='🧷 Pañales: '+r.panales.length+'
+';
+      if(r.avgGap>0)txt+='⏱ Intervalo prom: '+(r.avgGap>=60?Math.floor(r.avgGap/60)+'h '+(r.avgGap%60)+'min':r.avgGap+' min')+'
+';
+      if(r.mlTot>0)txt+='💧 Total estimado: '+r.mlTot+'ml
+';
+      if(r.maxGap>0)txt+='🔵 Tramo máx sin toma: '+(r.maxGap>=60?Math.floor(r.maxGap/60)+'h '+(r.maxGap%60)+'min':r.maxGap+' min')+'
+';
+      txt+='
+_Enviado desde Alba · '+apodo+'_';
+      window.open('https://wa.me/?text='+encodeURIComponent(txt),'_blank');
+    });
+    bd.appendChild(shareBtn);
+    bd.appendChild(E.btn('gb','Volver al inicio','goHome'));
   }
 
   // ── TOMA ──────────────────────────────────────────────────────
@@ -3325,17 +3641,145 @@ function render(){
   else if(D.step==='pesoEntry'){
     bd.appendChild(E.btn('bk','\u2190 Volver','goPesoScreen'));
     bd.appendChild(E.el('div',{cls:'st',txt:'Registrar Peso \u2696\uFE0F'}));
-    var pw=E.div('pwrap');
-    var pdsp=mkTxt('div','pdsp',gkg(D.pg));pdsp.id='pdsp';pw.appendChild(pdsp);pw.appendChild(mkTxt('div','punit','kg'));
-    var pinpWrap=mkDiv('margin:12px 0 6px');pinpWrap.appendChild(E.slbl('Ingresar en kg'));
-    var pinp=E.input('fi','pinp','number','Ej: 3.200');pinp.step='0.001';pinp.min='0';pinp.max='20';
-    pinp.addEventListener('input',function(){var v=parseFloat(this.value);if(!isNaN(v)&&v>0){D.pg=Math.round(v*1000);var d=document.getElementById('pdsp');if(d)d.textContent=gkg(D.pg);}});
-    pinpWrap.appendChild(pinp);pw.appendChild(pinpWrap);
-    var pctrl=E.div('pctrl');
-    [[-100,''],[- 10,''],[- 1,'lg'],[1,'lg'],[10,''],[100,'']].forEach(function(pair){
-      var btn=E.btn('pbn'+(pair[1]?' '+pair[1]:''),(pair[0]>0?'+':'')+pair[0]+'g','adjustPeso');btn.dataset.d=pair[0];pctrl.appendChild(btn);
-    });
-    pw.appendChild(pctrl);bd.appendChild(pw);
+
+    // ── Picker estilo iOS ──────────────────────────────────────────
+    (function(){
+      // Valor inicial en kg y g
+      var initKg=D.pg?Math.floor(D.pg/1000):3;
+      var initG=D.pg?Math.round((D.pg%1000)/10)*10:300;
+
+      // Display grande
+      var dispWrap=mkDiv('text-align:center;margin:8px 0 18px');
+      var dispVal=mkTxt('div',null,(initKg+'.'+String(initG).padStart(3,'0'))+' kg','font-size:38px;font-weight:bold;color:#f0d9a0;font-family:monospace;letter-spacing:-1px');
+      dispVal.id='peso-picker-display';
+      dispWrap.appendChild(dispVal);
+      var dispCtx=mkTxt('div',null,'Arrastr\u00e1 las columnas para ajustar','font-size:10px;color:#a89070;margin-top:4px;letter-spacing:.5px');
+      dispCtx.id='peso-picker-ctx';
+      dispWrap.appendChild(dispCtx);
+      bd.appendChild(dispWrap);
+
+      // Helper: crea una columna picker
+      function mkPickerCol(items, initIdx, onchange, labelSuffix){
+        var ITEM_H=44;
+        var wrap=mkDiv('position:relative;width:80px;flex-shrink:0');
+        var scroller=mkDiv('height:'+(ITEM_H*5)+'px;overflow-y:scroll;scroll-snap-type:y mandatory;scrollbar-width:none;-ms-overflow-style:none;-webkit-overflow-scrolling:touch');
+        scroller.style.cssText+=';overflow-y:scroll;scroll-snap-type:y mandatory;scrollbar-width:none;-ms-overflow-style:none;-webkit-overflow-scrolling:touch';
+        // Padding top/bottom para centrar
+        var pad=mkDiv('height:'+(ITEM_H*2)+'px;flex-shrink:0');
+        scroller.appendChild(pad.cloneNode());
+        items.forEach(function(item,idx){
+          var el=mkDiv('height:'+ITEM_H+'px;display:flex;align-items:center;justify-content:center;scroll-snap-align:center;cursor:pointer;font-family:Georgia,serif;font-size:22px;color:#a89070;transition:color .15s,font-size .15s;flex-shrink:0');
+          el.textContent=item+(labelSuffix&&idx===items.length-1?labelSuffix:'');
+          el.setAttribute('data-idx',idx);
+          scroller.appendChild(el);
+        });
+        scroller.appendChild(pad.cloneNode());
+
+        // Selector visual highlight (líneas)
+        var topLine=mkDiv('position:absolute;top:'+(ITEM_H*2)+'px;left:0;right:0;height:1px;background:rgba(212,168,67,.3);pointer-events:none');
+        var botLine=mkDiv('position:absolute;top:'+(ITEM_H*3-1)+'px;left:0;right:0;height:1px;background:rgba(212,168,67,.3);pointer-events:none');
+        var hlBox=mkDiv('position:absolute;top:'+(ITEM_H*2)+'px;left:0;right:0;height:'+ITEM_H+'px;background:rgba(212,168,67,.07);border-radius:8px;pointer-events:none');
+        wrap.appendChild(hlBox);
+        wrap.appendChild(topLine);
+        wrap.appendChild(botLine);
+        wrap.appendChild(scroller);
+
+        // Scroll inicial
+        setTimeout(function(){
+          scroller.scrollTop=initIdx*ITEM_H;
+        },50);
+
+        // Actualizar estilos de items al scroll
+        function updateHighlight(){
+          var idx=Math.round(scroller.scrollTop/ITEM_H);
+          idx=Math.max(0,Math.min(items.length-1,idx));
+          scroller.querySelectorAll('[data-idx]').forEach(function(el){
+            var elIdx=parseInt(el.getAttribute('data-idx'));
+            var dist=Math.abs(elIdx-idx);
+            if(dist===0){el.style.color='#f0d9a0';el.style.fontSize='22px';el.style.fontWeight='bold';}
+            else if(dist===1){el.style.color='#c0a870';el.style.fontSize='18px';el.style.fontWeight='normal';}
+            else{el.style.color='rgba(168,144,112,.35)';el.style.fontSize='15px';el.style.fontWeight='normal';}
+          });
+          return idx;
+        }
+
+        // Listener snap + callback
+        var snapTimer=null;
+        scroller.addEventListener('scroll',function(){
+          clearTimeout(snapTimer);
+          updateHighlight();
+          snapTimer=setTimeout(function(){
+            var idx=Math.round(scroller.scrollTop/ITEM_H);
+            idx=Math.max(0,Math.min(items.length-1,idx));
+            onchange(idx);
+          },120);
+        },{passive:true});
+
+        // Init highlight
+        setTimeout(updateHighlight,80);
+        return wrap;
+      }
+
+      // Datos columnas
+      var kgItems=[];for(var k=0;k<=15;k++)kgItems.push(String(k));
+      // Gramos en pasos de 10g
+      var gItems=[];for(var g=0;g<=990;g+=10)gItems.push(String(g).padStart(3,'0'));
+
+      var initGIdx=Math.round(initG/10);
+      if(initGIdx>=gItems.length)initGIdx=gItems.length-1;
+
+      var pickerKg=initKg;
+      var pickerG=initG;
+
+      function refreshDisplay(){
+        var d=document.getElementById('peso-picker-display');
+        if(d)d.textContent=(pickerKg+'.'+String(pickerG).padStart(3,'0'))+' kg';
+        D.pg=pickerKg*1000+pickerG;
+      }
+
+      var colKg=mkPickerCol(kgItems,initKg,function(idx){pickerKg=idx;refreshDisplay();});
+      var colG=mkPickerCol(gItems,initGIdx,function(idx){pickerG=idx*10;refreshDisplay();});
+
+      // Layout: columnas + separador
+      var pickerRow=mkDiv('display:flex;align-items:center;justify-content:center;gap:0;margin:0 auto 20px;position:relative;max-width:240px');
+      pickerRow.appendChild(colKg);
+      var sep=mkTxt('div',null,',','font-size:28px;color:#f0d9a0;font-weight:bold;padding:0 2px;margin-top:4px;flex-shrink:0;font-family:monospace');
+      pickerRow.appendChild(sep);
+      pickerRow.appendChild(colG);
+      // Etiquetas
+      var lblKg=mkTxt('div',null,'kg','font-size:11px;color:#a89070;text-align:center;margin-top:-10px');
+      var lblG=mkTxt('div',null,'g (×10)','font-size:11px;color:#a89070;text-align:center;margin-top:-10px');
+      var lblWrap=mkDiv('display:flex;justify-content:center;gap:0;max-width:240px;margin:0 auto 6px');
+      var lk=mkDiv('width:80px;text-align:center');lk.appendChild(lblKg);
+      var ls2=mkDiv('width:20px');
+      var lg2=mkDiv('width:80px;text-align:center');lg2.appendChild(lblG);
+      lblWrap.appendChild(lk);lblWrap.appendChild(ls2);lblWrap.appendChild(lg2);
+
+      bd.appendChild(pickerRow);
+      bd.appendChild(lblWrap);
+
+      // Fine-tune: botones ±10g y ±1g para precisión
+      var fineWrap=mkDiv('display:flex;justify-content:center;gap:8px;margin-bottom:18px');
+      [
+        {d:-10,lbl:'-10g'},{d:-1,lbl:'-1g'},{d:1,lbl:'+1g'},{d:10,lbl:'+10g'}
+      ].forEach(function(b){
+        var btn=document.createElement('button');
+        btn.style.cssText='padding:7px 14px;border-radius:10px;border:1px solid rgba(212,168,67,.25);background:rgba(212,168,67,.07);color:#d4c090;font-size:12px;cursor:pointer;font-family:Georgia,serif';
+        btn.textContent=b.lbl;
+        btn.addEventListener('click',function(){
+          D.pg=Math.max(0,Math.min(20000,(D.pg||0)+b.d));
+          pickerKg=Math.floor(D.pg/1000);
+          pickerG=D.pg%1000;
+          var d2=document.getElementById('peso-picker-display');
+          if(d2)d2.textContent=(pickerKg+'.'+String(pickerG).padStart(3,'0'))+' kg';
+          var ctx=document.getElementById('peso-picker-ctx');
+          if(ctx)ctx.textContent='Ajuste fino: '+gkg(D.pg)+' kg';
+        });
+        fineWrap.appendChild(btn);
+      });
+      bd.appendChild(fineWrap);
+    })();
+
     // Date/time for retroactive entry
     var retroBox=E.div('ebox');retroBox.appendChild(E.slbl('Fecha (dejar en blanco = ahora)'));
     retroBox.appendChild(E.frow([E.field('Fecha',E.input('fi','pesofecha','date')),E.field('Hora',E.input('fi','pesohora','time'))]));
@@ -3707,6 +4151,9 @@ function render(){
     bd.appendChild(E.frow([E.field('CC (cm)',E.input('fi','bcc','number',null,b3.cc||'')),E.field('Grupo sanguineo',E.input('fi','bsangre','text','A+',b3.sangre||''))]));
     bd.appendChild(E.frow([E.field('DNI',E.input('fi','bdni','text',null,b3.dni||'')),E.field('Edad gestacional',E.input('fi','beg','number',null,b3.eg||40))]));
     bd.appendChild(E.frow([E.field('Tipo parto',E.input('fi','bparto','text',null,b3.parto||'')),E.field('Apgar',E.input('fi','bapgar','text','9/10',b3.apgar||''))]));
+    bd.appendChild(E.slbl('Cobertura médica'));
+    bd.appendChild(E.frow([E.field('Obra social / prepaga',E.input('fi','bos','text',null,b3.os||'')),E.field('Plan',E.input('fi','bplan','text',null,b3.plan||''))]));
+    bd.appendChild(E.field('N° afiliado del bebé',E.input('fi','bafil','text',null,b3.afil||'')));
     var notasEl=E.textarea('ni fi','bnotas','Notas medicas...',b3.notas||'');notasEl.style.minHeight='50px';
     bd.appendChild(E.field('Notas',notasEl));
     bd.appendChild(E.btn('pb go','Guardar','saveBebe'));bd.appendChild(E.btn('gb rd','Cancelar','goPerfil'));
@@ -3872,20 +4319,317 @@ function render(){
         bd.appendChild(card);
       });
     } else {
+      // Tab MEDICACION interactivo
+      var apodoMed=D.bebe.apodo||D.bebe.nombre||'Cefe';
+      if(!D.medsPersonales)D.medsPersonales=[];
+      var addMedBtn=document.createElement('button');
+      addMedBtn.style.cssText='width:100%;padding:12px;border-radius:13px;border:1px solid rgba(212,168,67,.35);background:rgba(212,168,67,.1);color:#d4a843;font-size:14px;font-weight:bold;cursor:pointer;font-family:Georgia,serif;margin-bottom:14px';
+      addMedBtn.textContent='+ Agregar medicamento o suplemento';
+      addMedBtn.onclick=function(){D._editMedPersonalIdx=-1;setStep('editMedPersonal');};
+      bd.appendChild(addMedBtn);
+      if(D.medsPersonales.length>0){
+        bd.appendChild(E.slbl('Medicamentos de '+apodoMed));
+        D.medsPersonales.forEach(function(m,mi){
+          var mc=mkDiv('background:rgba(212,168,67,.06);border:1px solid rgba(212,168,67,.2);border-radius:13px;padding:12px 14px;margin-bottom:10px');
+          var mhdr=mkDiv('display:flex;align-items:flex-start;justify-content:space-between;gap:10px');
+          var minfo=mkDiv('flex:1');
+          minfo.appendChild(mkTxt('div',null,m.nombre,'font-size:14px;font-weight:bold;color:#f0d9a0;margin-bottom:2px'));
+          if(m.dosis)minfo.appendChild(mkTxt('div',null,m.dosis+' '+m.unidad,'font-size:12px;color:#d4a843;margin-bottom:2px'));
+          if(m.frecuencia)minfo.appendChild(mkTxt('div',null,m.frecuencia,'font-size:11px;color:#a89070;margin-bottom:2px'));
+          if(m.indicacion)minfo.appendChild(mkTxt('div',null,'\u25b8 '+m.indicacion,'font-size:11px;color:#a89070;line-height:1.4;margin-bottom:2px'));
+          if(m.medico)minfo.appendChild(mkTxt('div',null,'Dr/a. '+m.medico,'font-size:10px;color:#b48cdc'));
+          mhdr.appendChild(minfo);
+          var mbts=mkDiv('display:flex;flex-direction:column;gap:4px;flex-shrink:0');
+          var eMedBtn=document.createElement('button');
+          eMedBtn.style.cssText='padding:4px 9px;border-radius:8px;border:1px solid rgba(212,168,67,.3);background:transparent;color:#d4a843;font-size:11px;cursor:pointer';
+          eMedBtn.textContent='Editar';
+          (function(i){eMedBtn.onclick=function(){D._editMedPersonalIdx=i;setStep('editMedPersonal');};})(mi);
+          mbts.appendChild(eMedBtn);
+          var dMedBtn=document.createElement('button');
+          dMedBtn.style.cssText='padding:4px 9px;border-radius:8px;border:1px solid rgba(224,112,112,.3);background:transparent;color:#e07070;font-size:11px;cursor:pointer';
+          dMedBtn.textContent='Eliminar';
+          (function(i,nm){dMedBtn.onclick=function(){if(confirm('Eliminar '+nm+'?')){D.medsPersonales.splice(i,1);saveData();render();}};})(mi,m.nombre);
+          mbts.appendChild(dMedBtn);
+          mhdr.appendChild(mbts);mc.appendChild(mhdr);
+          var shareR=document.createElement('button');
+          shareR.style.cssText='width:100%;margin-top:8px;padding:7px;border-radius:9px;border:1px solid rgba(100,200,180,.2);background:transparent;color:#64c8b4;font-size:11px;cursor:pointer;font-family:Georgia,serif';
+          shareR.textContent='\u25b8 Compartir por WhatsApp';
+          (function(med){shareR.onclick=function(){
+            var b2=D.bebe||{};
+            var msg='*Medicamento de '+apodoMed+'*\n';
+            if(b2.os)msg+='Obra social: '+b2.os+(b2.afil?' | N\u00b0 '+b2.afil:'')+'\n';
+            if(b2.dni)msg+='DNI: '+b2.dni+'\n';
+            msg+='\nMedicamento: '+med.nombre;
+            if(med.dosis)msg+='\nDosis: '+med.dosis+' '+med.unidad;
+            if(med.frecuencia)msg+='\n'+med.frecuencia;
+            if(med.indicacion)msg+='\nIndicaci\u00f3n: '+med.indicacion;
+            if(med.medico)msg+='\nIndicado por Dr/a. '+med.medico;
+            window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');
+          };})(m);
+          mc.appendChild(shareR);bd.appendChild(mc);
+        });
+      } else {
+        var emMed=mkDiv('text-align:center;padding:24px 16px');
+        emMed.appendChild(mkTxt('div',null,'\uD83D\uDC8A','font-size:32px;margin-bottom:8px'));
+        emMed.appendChild(mkTxt('div',null,'Sin medicamentos registrados','font-size:13px;color:#f0d9a0;margin-bottom:6px'));
+        emMed.appendChild(mkTxt('div',null,'Agrega los indicados por el pediatra.','font-size:12px;color:#a89070;line-height:1.5'));
+        bd.appendChild(emMed);
+      }
+      var refBtn=document.createElement('button');
+      refBtn.style.cssText='width:100%;margin-top:8px;padding:9px;border-radius:11px;border:1px solid rgba(255,255,255,.08);background:transparent;color:#a89070;font-size:12px;cursor:pointer;font-family:Georgia,serif';
+      refBtn.textContent='Ver tabla de dosis de referencia';
+      var refPanel=mkDiv('');refPanel.style.display='none';
       MEDICACION_RN.forEach(function(m){
-        var card2=mkDiv('background:rgba(255,255,255,.03);border:1px solid rgba(212,168,67,.12);border-radius:13px;padding:13px 14px;margin-bottom:10px');
-        card2.appendChild(mkTxt('div',null,m.nombre,'font-size:13px;font-weight:bold;color:#f0d9a0;margin-bottom:4px'));
-        card2.appendChild(mkTxt('div',null,'Uso: '+m.uso,'font-size:11px;color:#d4a843;margin-bottom:4px'));
-        card2.appendChild(mkTxt('div',null,'Dosis ref.: '+m.dosis,'font-size:12px;color:#a89070;line-height:1.5;margin-bottom:4px'));
-        card2.appendChild(mkTxt('div',null,'Desde: '+m.desde,'font-size:11px;color:#a89070;margin-bottom:4px'));
-        if(m.nota)card2.appendChild(mkTxt('div',null,m.nota,'font-size:11px;color:#c8a060;line-height:1.5;font-style:italic;margin-bottom:4px'));
-        card2.appendChild(mkTxt('div',null,'Fuente: '+m.fuente,'font-size:10px;color:#4a5060;margin-top:2px'));
-        bd.appendChild(card2);
+        var cr=mkDiv('background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-radius:11px;padding:10px 13px;margin-top:8px');
+        cr.appendChild(mkTxt('div',null,m.nombre,'font-size:12px;font-weight:bold;color:#f0d9a0;margin-bottom:3px'));
+        cr.appendChild(mkTxt('div',null,'Dosis ref.: '+m.dosis,'font-size:11px;color:#a89070;line-height:1.4'));
+        if(m.nota)cr.appendChild(mkTxt('div',null,m.nota,'font-size:10px;color:#c8a060;font-style:italic'));
+        refPanel.appendChild(cr);
       });
+      refBtn.onclick=function(){refPanel.style.display=refPanel.style.display==='none'?'block':'none';};
+      bd.appendChild(refBtn);bd.appendChild(refPanel);
     }
   }
 
   // ── NUEVO EVENTO ──────────────────────────────────────────────
+
+
+  // ── COMPARTIR INCIDENCIA AL MÉDICO ───────────────────────────────
+  else if(D.step==='urgencia'){
+    var apodoUrg=D.bebe.apodo||D.bebe.nombre||'Cefe';
+    bd.appendChild(E.el('div',{cls:'st',txt:'\uD83D\uDED1 Informar al m\u00e9dico'}));
+    bd.appendChild(mkTxt('div',null,'Completá lo que observás. Esto arma un mensaje claro para enviar al pediatra.','font-size:12px;color:#a89070;margin-bottom:16px;line-height:1.5'));
+    // Síntoma principal
+    bd.appendChild(E.slbl('¿Qué observás?'));
+    var sintomasOpc=[
+      {k:'fiebre',    ic:'\uD83C\uDF21\uFE0F', lbl:'Fiebre'},
+      {k:'llanto',    ic:'\uD83D\uDE22',         lbl:'Llanto inusual'},
+      {k:'vomito',    ic:'\uD83E\uDD22',         lbl:'Vómito'},
+      {k:'diarrea',   ic:'\uD83D\uDCA9',         lbl:'Diarrea'},
+      {k:'manchas',   ic:'\uD83D\uDCA6',         lbl:'Manchas en piel'},
+      {k:'no_come',   ic:'\uD83C\uDF7C',         lbl:'No come'},
+      {k:'resp',      ic:'\uD83D\uDCA8',         lbl:'Dificultad respirar'},
+      {k:'otro',      ic:'\u2753',                lbl:'Otro'},
+    ];
+    if(!D._urgSintoma)D._urgSintoma='';
+    var sRow=mkDiv('display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px');
+    sintomasOpc.forEach(function(s){
+      var on=D._urgSintoma===s.k;
+      var sb=document.createElement('button');
+      sb.style.cssText='padding:7px 12px;border-radius:20px;border:1px solid rgba(224,112,112,'+(on?'.5':'.2')+');background:rgba(224,112,112,'+(on?'.15':'.03')+');color:'+(on?'#f0d9a0':'#a89070')+';font-size:12px;cursor:pointer;font-family:Georgia,serif';
+      sb.textContent=s.ic+' '+s.lbl;
+      (function(sk){sb.onclick=function(){D._urgSintoma=sk;render();};})(s.k);
+      sRow.appendChild(sb);
+    });
+    bd.appendChild(sRow);
+    // Temperatura
+    bd.appendChild(E.frow([
+      E.field('Temperatura (°C)',E.input('fi','urgTemp','text','Ej: 38.5',D._urgTemp||'')),
+      E.field('Duración (hs)',E.input('fi','urgHoras','text','Ej: 3',D._urgHoras||''))
+    ]));
+    // Descripción libre
+    var urgDesc=E.textarea('ni fi','urgDesc','Describí con tus palabras lo que estás observando...',D._urgDesc||'');
+    urgDesc.style.minHeight='80px';
+    bd.appendChild(E.field('Descripción',urgDesc));
+    // Botón generar mensaje
+    var genUrgBtn=document.createElement('button');
+    genUrgBtn.style.cssText='width:100%;padding:14px;border-radius:13px;border:1px solid rgba(212,168,67,.4);background:rgba(212,168,67,.12);color:#f0d9a0;font-size:14px;font-weight:bold;cursor:pointer;font-family:Georgia,serif;margin-top:8px;margin-bottom:10px';
+    genUrgBtn.textContent='\uD83D\uDCE4 Generar y enviar al m\u00e9dico';
+    genUrgBtn.onclick=function(){
+      D._urgTemp=document.getElementById('urgTemp')&&document.getElementById('urgTemp').value||'';
+      D._urgHoras=document.getElementById('urgHoras')&&document.getElementById('urgHoras').value||'';
+      D._urgDesc=document.getElementById('urgDesc')&&document.getElementById('urgDesc').value||'';
+      var sintObj=sintomasOpc.find(function(s){return s.k===D._urgSintoma;})||{ic:'\u2753',lbl:'Consulta'};
+      var b2=D.bebe||{};
+      var msg='*Consulta pedi\u00e1trica \u2014 '+apodoUrg+'*\n';
+      msg+='Fecha: '+new Date().toLocaleDateString('es-AR')+' '+new Date().toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'})+'\n';
+      if(b2.fn)msg+='Edad: '+ageD()+' d\u00edas ('+ageW()+' semanas)\n';
+      if(b2.os)msg+='Obra social: '+b2.os+(b2.afil?' | N\u00b0 '+b2.afil:'')+'\n';
+      msg+='\nSíntoma: '+sintObj.ic+' '+sintObj.lbl;
+      if(D._urgTemp)msg+='\nTemperatura: '+D._urgTemp+'\u00b0C';
+      if(D._urgHoras)msg+='\nDuraci\u00f3n: '+D._urgHoras+' horas';
+      if(D._urgDesc)msg+='\n\nDescripci\u00f3n: '+D._urgDesc;
+      // Buscar médico de guardia (primer médico de la lista)
+      var med=(D.meds&&D.meds.length>0)?D.meds[0]:null;
+      var tel=med&&med.tel?med.tel.replace(/\D/g,''):'';
+      var waUrl=tel?'https://wa.me/549'+tel+'?text='+encodeURIComponent(msg):'https://wa.me/?text='+encodeURIComponent(msg);
+      window.open(waUrl,'_blank');
+    };
+    bd.appendChild(genUrgBtn);
+    bd.appendChild(E.btn('gb','\u2190 Volver','home'));
+  }
+
+  // ── TIMER LIBRE ──────────────────────────────────────────────────
+  else if(D.step==='timerLibre'){
+    var apodoTL=D.bebe.apodo||D.bebe.nombre||'Cefe';
+    if(!D.timerLibreData)D.timerLibreData={activo:false,inicio:null,secs:0,etiqueta:'',sesiones:[]};
+    var tld=D.timerLibreData;
+    var tipos=[
+      {k:'caminata',   ic:'\uD83D\uDEB6', lbl:'Caminata'},
+      {k:'bano',       ic:'\uD83D\uDEC0', lbl:'Ba\u00f1o'},
+      {k:'masaje',     ic:'\uD83E\uDDD8', lbl:'Masaje'},
+      {k:'juego',      ic:'\uD83C\uDFAE', lbl:'Juego'},
+      {k:'pecho',      ic:'\uD83E\uDD31', lbl:'Pecho'},
+      {k:'otro',       ic:'\u23F1\uFE0F',  lbl:'Otro'},
+    ];
+    bd.appendChild(E.el('div',{cls:'st',txt:'\u23F1\uFE0F Timer libre'}));
+    // Selector de tipo
+    var tipoRow=mkDiv('display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px');
+    tipos.forEach(function(t){
+      var on=tld.etiqueta===t.k;
+      var tb=document.createElement('button');
+      tb.style.cssText='padding:8px 14px;border-radius:20px;border:1px solid rgba(212,168,67,'+(on?'.5':'.2')+');background:rgba(212,168,67,'+(on?'.15':'.04')+');color:'+(on?'#f0d9a0':'#a89070')+';font-size:13px;cursor:pointer;font-family:Georgia,serif;display:flex;align-items:center;gap:6px';
+      tb.innerHTML=t.ic+' '+t.lbl;
+      (function(tk){tb.onclick=function(){
+        if(!D.timerLibreData)D.timerLibreData={activo:false,inicio:null,secs:0,etiqueta:'',sesiones:[]};
+        D.timerLibreData.etiqueta=tk;render();
+      };})(t.k);
+      tipoRow.appendChild(tb);
+    });
+    bd.appendChild(tipoRow);
+    // Display del timer
+    var secsNow=tld.secs+(tld.activo&&tld.inicio?Math.floor((Date.now()-tld.inicio)/1000):0);
+    var timerBox=mkDiv('text-align:center;padding:28px 16px;border-radius:18px;background:rgba(212,168,67,.08);border:2px solid rgba(212,168,67,'+(tld.activo?'.5':'.15')+');margin-bottom:16px;cursor:pointer');
+    var tipoActual=tipos.find(function(t){return t.k===tld.etiqueta;})||tipos[0];
+    timerBox.appendChild(mkTxt('div',null,tipoActual.ic,'font-size:28px;margin-bottom:8px'));
+    var tlEl=mkTxt('div',null,Math.floor(secsNow/60)+':'+('0'+(secsNow%60)).slice(-2),'font-size:48px;font-weight:bold;font-family:monospace;color:#f0d9a0;line-height:1');
+    tlEl.id='tmr-libre';
+    timerBox.appendChild(tlEl);
+    timerBox.appendChild(mkTxt('div',null,tld.activo?'Tap para pausar':'Tap para '+(secsNow>0?'continuar':'iniciar'),'font-size:12px;color:#a89070;margin-top:8px'));
+    timerBox.onclick=function(){
+      if(!D.timerLibreData)D.timerLibreData={activo:false,inicio:null,secs:0,etiqueta:'',sesiones:[]};
+      var tld2=D.timerLibreData;
+      if(tld2.activo){
+        tld2.secs+=Math.floor((Date.now()-tld2.inicio)/1000);
+        tld2.activo=false;tld2.inicio=null;
+        stopTimerLibre();
+      } else {
+        tld2.activo=true;tld2.inicio=Date.now();
+        startTimerLibre();
+      }
+      render();
+    };
+    bd.appendChild(timerBox);
+    // Botones
+    var btRow=mkDiv('display:flex;gap:8px;margin-bottom:14px');
+    if(secsNow>5){
+      var finTLBtn=document.createElement('button');
+      finTLBtn.style.cssText='flex:1;padding:13px;border-radius:13px;border:1px solid rgba(100,200,140,.4);background:rgba(100,200,140,.1);color:#64c88c;font-size:14px;font-weight:bold;cursor:pointer;font-family:Georgia,serif';
+      finTLBtn.textContent='\u2713 Guardar';
+      finTLBtn.onclick=function(){
+        if(!D.timerLibreData)return;
+        var tld3=D.timerLibreData;
+        if(tld3.activo){tld3.secs+=Math.floor((Date.now()-tld3.inicio)/1000);tld3.activo=false;tld3.inicio=null;stopTimerLibre();}
+        if(!tld3.sesiones)tld3.sesiones=[];
+        var tipoLbl=tipos.find(function(t){return t.k===tld3.etiqueta;})||tipos[5];
+        tld3.sesiones.push({etiqueta:tld3.etiqueta,ic:tipoLbl.ic,lbl:tipoLbl.lbl,secs:tld3.secs,ts:new Date().toISOString()});
+        // Compartir opcion
+        var mins2=Math.floor(tld3.secs/60),secs2=tld3.secs%60;
+        var msg='\uD83D\uDCC4 Registro de '+apodoTL+'\n'+tipoLbl.ic+' '+tipoLbl.lbl+': '+mins2+'m'+(secs2>0?' '+secs2+'s':'')+'\n'+new Date().toLocaleDateString('es-AR');
+        tld3.secs=0;tld3.inicio=null;tld3.activo=false;
+        saveData();
+        if(confirm('\u00bfCompartir por WhatsApp?')){window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');}
+        render();
+      };
+      btRow.appendChild(finTLBtn);
+      var resetTLBtn=document.createElement('button');
+      resetTLBtn.style.cssText='padding:13px 16px;border-radius:13px;border:1px solid rgba(224,112,112,.3);background:transparent;color:#e07070;font-size:14px;cursor:pointer;font-family:Georgia,serif';
+      resetTLBtn.textContent='\u21BA';
+      resetTLBtn.onclick=function(){
+        if(confirm('\u00bfReiniciar el timer?')){
+          if(D.timerLibreData){if(D.timerLibreData.activo)stopTimerLibre();D.timerLibreData.secs=0;D.timerLibreData.activo=false;D.timerLibreData.inicio=null;}
+          render();
+        }
+      };
+      btRow.appendChild(resetTLBtn);
+    }
+    bd.appendChild(btRow);
+    // Historial de sesiones del día
+    if(tld.sesiones&&tld.sesiones.length>0){
+      var hoyTL=new Date().toISOString().slice(0,10);
+      var sesHoy=tld.sesiones.filter(function(s){return s.ts&&s.ts.slice(0,10)===hoyTL;});
+      if(sesHoy.length>0){
+        bd.appendChild(E.slbl('Hoy'));
+        sesHoy.forEach(function(s){
+          var mins3=Math.floor(s.secs/60),secs3=s.secs%60;
+          var sr=mkDiv('display:flex;align-items:center;gap:8px;padding:8px 12px;background:rgba(255,255,255,.03);border-radius:10px;margin-bottom:6px');
+          sr.appendChild(mkTxt('span',null,s.ic,'font-size:16px'));
+          sr.appendChild(mkTxt('span',null,s.lbl,'font-size:12px;color:#f0d9a0;flex:1'));
+          sr.appendChild(mkTxt('span',null,mins3+'m'+(secs3>0?' '+secs3+'s':''),'font-size:12px;color:#64c8b4;font-weight:bold'));
+          bd.appendChild(sr);
+        });
+      }
+    }
+    bd.appendChild(E.btn('gb','\u2190 Volver','home'));
+  }
+
+  // ── CONSULTAS PEDIÁTRICAS PAUTADAS ──────────────────────────────
+  else if(D.step==='consultas'){
+    var apodoCons=D.bebe.apodo||D.bebe.nombre||'Cefe';
+    bd.appendChild(E.el('div',{cls:'st',txt:'\uD83D\uDCC5 Consultas de '+apodoCons}));
+    bd.appendChild(mkTxt('div',null,'Calendario SAP Argentina. Tap para marcar como realizada.','font-size:11px;color:#a89070;margin-bottom:16px;line-height:1.5'));
+    if(!D.consultasHechas)D.consultasHechas={};
+    var diasVidaCons=ageD();
+    CONSULTAS_PAUTADAS.forEach(function(c){
+      var st=getConsultaStatus(c);
+      var done=D.consultasHechas[c.id];
+      var isPast=diasVidaCons>c.dias+14;
+      var isNear=!done&&st.diff<=14&&st.diff>=-7;
+      var borderClr=done?'rgba(100,200,140,.3)':isNear?'rgba(212,168,67,.4)':'rgba(255,255,255,.08)';
+      var bgClr=done?'rgba(100,200,140,.06)':isNear?'rgba(212,168,67,.06)':'rgba(255,255,255,.02)';
+      var card=mkDiv('background:'+bgClr+';border:1px solid '+borderClr+';border-radius:14px;padding:13px 14px;margin-bottom:10px');
+      var hd=mkDiv('display:flex;align-items:flex-start;gap:10px');
+      var chk=document.createElement('button');
+      chk.style.cssText='width:26px;height:26px;border-radius:50%;flex-shrink:0;border:2px solid rgba(100,200,140,'+(done?'1':'.4')+');background:'+(done?'rgba(100,200,140,.3)':'transparent')+';color:#64c88c;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;margin-top:2px';
+      chk.textContent=done?'\u2713':'';
+      (function(cid){chk.onclick=function(){
+        if(!D.consultasHechas)D.consultasHechas={};
+        if(D.consultasHechas[cid]){delete D.consultasHechas[cid];}else{D.consultasHechas[cid]=true;}
+        saveData();render();
+      };})(c.id);
+      hd.appendChild(chk);
+      var info=mkDiv('flex:1');
+      var titleRow=mkDiv('display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:3px');
+      titleRow.appendChild(mkTxt('span',null,c.icon,'font-size:16px'));
+      titleRow.appendChild(mkTxt('span',null,c.label,'font-size:13px;font-weight:bold;color:'+(done?'#64c88c':'#f0d9a0')));
+      if(c.obligatorio&&!done)titleRow.appendChild(mkTxt('span',null,'Obligatoria','font-size:9px;color:#e07070;background:rgba(224,112,112,.12);border-radius:5px;padding:2px 6px'));
+      info.appendChild(titleRow);
+      var whenTxt=done?'\u2713 Realizada':st.diff<0?'Venci\u00f3 hace '+Math.abs(st.diff)+' d\u00edas':st.diff===0?'Hoy':st.diff<=7?'En '+st.diff+' d\u00edas':'Fecha ideal: '+st.fechaStr;
+      info.appendChild(mkTxt('div',null,whenTxt,'font-size:11px;color:'+(done?'#64c88c':st.diff<0&&!done?'#e07070':'#a89070')+';margin-bottom:4px'));
+      info.appendChild(mkTxt('div',null,c.desc,'font-size:11px;color:#a89070;line-height:1.5'));
+      hd.appendChild(info);card.appendChild(hd);
+      // Botón agendar si no está hecha y es próxima
+      if(!done&&st.diff>-30&&st.diff<60){
+        var agBtn=document.createElement('button');
+        agBtn.style.cssText='margin-top:8px;padding:6px 12px;border-radius:9px;border:1px solid rgba(100,200,140,.3);background:transparent;color:#64c88c;font-size:11px;cursor:pointer;font-family:Georgia,serif';
+        agBtn.textContent='\u25b8 Agendar en calendario';
+        (function(cv){agBtn.onclick=function(){D._nuevoEventoPrefill={tipo:'consulta',titulo:cv.label,fecha:cv.fechaStr};setStep('nuevoEvento');};})(c);
+        card.appendChild(agBtn);
+      }
+      bd.appendChild(card);
+    });
+    bd.appendChild(mkTxt('div',null,'\uD83D\uDCDA Fuente: Sociedad Argentina de Pediatr\u00eda (SAP)','font-size:10px;color:#a89070;margin-top:8px;text-align:center'));
+  }
+
+  // ── EDITAR MEDICAMENTO PERSONAL ──────────────────────────
+  else if(D.step==='editMedPersonal'){
+    if(!D.medsPersonales)D.medsPersonales=[];
+    var mpIdx=typeof D._editMedPersonalIdx==='number'?D._editMedPersonalIdx:-1;
+    var mpEdit=mpIdx>=0&&mpIdx<D.medsPersonales.length?D.medsPersonales[mpIdx]:{};
+    var isNewMp=!mpEdit.nombre;
+    bd.appendChild(E.btn('bk','← Volver','goEstudios'));
+    bd.appendChild(E.el('div',{cls:'st',txt:(isNewMp?'Agregar':'Editar')+' medicamento'}));
+    bd.appendChild(E.field('Nombre del medicamento *',E.input('fi','mpNombre','text','Ej: Biogaia, Paracetamol...',mpEdit.nombre||'')));
+    bd.appendChild(E.frow([E.field('Dosis',E.input('fi','mpDosis','text','Ej: 5',mpEdit.dosis||'')),E.field('Unidad',E.select('fs','mpUnidad',[{v:'ml',l:'ml'},{v:'gotas',l:'gotas'},{v:'mg',l:'mg'},{v:'g',l:'g'},{v:'comp',l:'comprimido'},{v:'sobre',l:'sobre'},{v:'UI',l:'UI'}],mpEdit.unidad||'ml'))]));
+    bd.appendChild(E.field('Frecuencia',E.input('fi','mpFrec','text','Ej: 1 vez al día, cada 8hs...',mpEdit.frecuencia||'')));
+    bd.appendChild(E.field('Indicación / Motivo',E.input('fi','mpInd','text','Ej: Próbiotico, Vitamina D...',mpEdit.indicacion||'')));
+    bd.appendChild(E.field('Indicado por',E.input('fi','mpMed','text','Nombre del médico',mpEdit.medico||'')));
+    bd.appendChild(E.field('Notas',E.input('fi','mpNota','text','Observaciones',mpEdit.nota||'')));
+    bd.appendChild(E.btn('pb go','Guardar','saveMedPersonal'));
+    bd.appendChild(E.btn('gb rd','Cancelar','goEstudios'));
+  }
+
+  // ── NUEVO EVENTO ────────────────────────────────────────────
   else if(D.step==='nuevoEvento'){
     bd.appendChild(E.btn('bk','← Agenda','agenda'));
     bd.appendChild(E.el('div',{cls:'st',txt:'Nuevo evento'}));
@@ -4538,14 +5282,43 @@ function render(){
     var act=getActividades(),sw=ageW();
     bd.appendChild(mkTxt('div',null,act.titulo,'font-size:14px;font-weight:bold;color:#f0d9a0;margin-bottom:4px'));
     bd.appendChild(mkTxt('div',null,'Semana '+sw+' · Foco: '+act.foco,'font-size:11px;color:#a89070;margin-bottom:16px'));
-    (act.actividades||[]).forEach(function(a){
+    var hoyAct2=todayStr();
+    if(!D.actividadesHechas)D.actividadesHechas={};
+    var hechasAct2=D.actividadesHechas[hoyAct2]||[];
+    var omitAct2=D.actividadesHechas[hoyAct2+'_omit']||[];
+    (act.actividades||[]).forEach(function(a,aIdx){
       if(!a)return;
-      var c=E.div('card'),hd=mkDiv('display:flex;align-items:center;gap:10px;margin-bottom:8px');
-      hd.appendChild(mkTxt('span',null,a.ic,'font-size:24px;flex-shrink:0'));
-      var right=E.div('');right.style.flex='1';
-      right.appendChild(mkTxt('div',null,a.label,'font-size:14px;font-weight:bold;color:#f0d9a0;margin-bottom:3px'));
-      right.appendChild(mkTxt('div',null,a.desc,'font-size:12px;color:#d4c090;line-height:1.6'));
-      hd.appendChild(right);c.appendChild(hd);bd.appendChild(c);
+      var hecha=hechasAct2.indexOf(aIdx)>=0;
+      var omitida=omitAct2.indexOf(aIdx)>=0;
+      var c=mkDiv('background:rgba(255,255,255,'+(hecha?'.06':'.03')+');border:1px solid rgba('+(hecha?'100,200,140':'255,255,255')+','+(hecha?'.25':'.06')+');border-radius:14px;padding:13px 14px;margin-bottom:10px;opacity:'+(omitida?'.45':'1'));
+      var hd=mkDiv('display:flex;align-items:flex-start;gap:12px');
+      var chk=document.createElement('button');
+      chk.style.cssText='width:26px;height:26px;border-radius:50%;border:2px solid rgba(100,200,140,'+(hecha?'1':'.4')+');background:'+(hecha?'rgba(100,200,140,.3)':'transparent')+';flex-shrink:0;cursor:pointer;color:#64c88c;font-size:14px;display:flex;align-items:center;justify-content:center;margin-top:1px';
+      chk.textContent=hecha?'\u2713':'';
+      (function(i2){chk.onclick=function(){
+        if(!D.actividadesHechas[hoyAct2])D.actividadesHechas[hoyAct2]=[];
+        var ix=D.actividadesHechas[hoyAct2].indexOf(i2);
+        if(ix>=0){D.actividadesHechas[hoyAct2].splice(ix,1);}else{D.actividadesHechas[hoyAct2].push(i2);}
+        saveData();render();
+      };})(aIdx);
+      hd.appendChild(chk);
+      var info=mkDiv('flex:1');
+      info.appendChild(mkTxt('div',null,a.ic+' '+a.label,'font-size:14px;font-weight:bold;color:'+(hecha?'#64c88c':'#f0d9a0')+';margin-bottom:3px'));
+      info.appendChild(mkTxt('div',null,a.desc,'font-size:12px;color:#d4c090;line-height:1.6'));
+      if(hecha)info.appendChild(mkTxt('div',null,'\u2713 Hecho hoy','font-size:10px;color:#64c88c;margin-top:3px;font-weight:bold'));
+      hd.appendChild(info);c.appendChild(hd);
+      if(!hecha&&!omitida){
+        var ob=document.createElement('button');
+        ob.style.cssText='background:none;border:none;color:#a89070;font-size:11px;cursor:pointer;font-family:Georgia,serif;padding:4px 0;margin-top:6px';
+        ob.textContent='Omitir hoy';
+        (function(i3){ob.onclick=function(){
+          if(!D.actividadesHechas[hoyAct2+'_omit'])D.actividadesHechas[hoyAct2+'_omit']=[];
+          D.actividadesHechas[hoyAct2+'_omit'].push(i3);
+          saveData();render();
+        };})(aIdx);
+        c.appendChild(ob);
+      }
+      bd.appendChild(c);
     });
     bd.appendChild(mkTxt('div',null,'📚 AAP / SAP / Denver II / Brazelton','font-size:10px;color:#a89070;margin-top:8px;text-align:center'));
   }
@@ -4985,11 +5758,26 @@ document.addEventListener('click', function(ev) {
         case 'goCartas': setStep('cartas'); return;
         case 'goAstro': closeMasMenu(); setStep('astro'); return;
         case 'goEstudios': closeMasMenu(); setStep('estudios'); return;
+        case 'goConsultas': closeMasMenu(); setStep('consultas'); return;
+        case 'goTimerLibre': closeMasMenu(); setStep('timerLibre'); return;
+        case 'goUrgencia': closeMasMenu(); setStep('urgencia'); return;
+        case 'saveMedPersonal': (function(){
+          var nm=document.getElementById('mpNombre')&&document.getElementById('mpNombre').value.trim();
+          if(!nm){alert('Ingres\u00e1 el nombre del medicamento.');return;}
+          if(!D.medsPersonales)D.medsPersonales=[];
+          var med={nombre:nm,dosis:(document.getElementById('mpDosis')||{}).value||'',unidad:(document.getElementById('mpUnidad')||{}).value||'ml',frecuencia:(document.getElementById('mpFrec')||{}).value||'',indicacion:(document.getElementById('mpInd')||{}).value||'',medico:(document.getElementById('mpMed')||{}).value||'',nota:(document.getElementById('mpNota')||{}).value||'',fecha:todayStr()};
+          var idx=D._editMedPersonalIdx;
+          if(idx>=0&&idx<D.medsPersonales.length){D.medsPersonales[idx]=med;}else{D.medsPersonales.push(med);}
+          saveData();setStep('estudios');
+        })();return;
         case 'goActividades': closeMasMenu(); setStep('actividades'); return;
         case 'goVacunas': closeMasMenu(); setStep('vacunas'); return;
         case 'goPendientes': closeMasMenu(); setStep('pendientes'); return;
         case 'goConsultaMedica': closeMasMenu(); setStep('consultaMedica'); return;
         case 'goLogros': closeMasMenu(); setStep('logros'); return;
+        case 'goSprint': closeMasMenu(); setStep('sprintSetup'); return;
+        case 'goSprintResumen': setStep('sprintResumen'); return;
+        case 'goHome': setStep('home'); return;
         case 'goNotas': closeMasMenu(); setStep('notas'); return;
         case 'goMemoria': closeMasMenu(); setStep('memoria'); return;
         case 'goCuentos': closeMasMenu(); setStep('cuentos'); return;
@@ -5088,6 +5876,121 @@ function getVisitasPendientesSeguimiento() {
 
 
 // ══════════════════════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════════════════
+// ══  SPRINT DE MUESTREO — CÉFIRO
+// ══════════════════════════════════════════════════════════════════════════
+
+// ── Iniciar sprint ────────────────────────────────────────────
+function startSprint(tipo, horas){
+  var ahora=new Date();
+  var fin=new Date(ahora.getTime()+horas*3600000);
+  D.sprintActivo={
+    id:'sp_'+Date.now(),
+    tipo:tipo,       // 'voluntario'|'clinico'|'estadistico'
+    horas:horas,
+    inicio:ahora.toISOString(),
+    fin:fin.toISOString(),
+    lastCheck:ahora.toISOString(),
+    histSnap:(D.hist||[]).length   // snapshot de cuántos registros había al inicio
+  };
+  saveData();
+  setStep('home');
+}
+
+// ── Detener sprint ────────────────────────────────────────────
+function stopSprint(){
+  if(!D.sprintActivo)return;
+  // Guardar en historial de sprints con resumen
+  var sp=D.sprintActivo;
+  var inicio=new Date(sp.inicio);
+  var ahora=new Date();
+  var registrosDurante=(D.hist||[]).filter(function(h){
+    var t=h.type==='toma'?new Date(h.s):new Date(h.t);
+    return t>=inicio&&t<=ahora;
+  });
+  sp.finReal=ahora.toISOString();
+  sp.totalRegistros=registrosDurante.length;
+  sp.tomas=registrosDurante.filter(function(h){return h.type==='toma';}).length;
+  sp.panales=registrosDurante.filter(function(h){return h.type==='panal';}).length;
+  if(!D.sprints)D.sprints=[];
+  D.sprints.unshift(sp);
+  D.sprintActivo=null;
+  saveData();
+  setStep('sprintResumen');
+}
+
+// ── Resumen del sprint (datos para render) ────────────────────
+function getSprintResumen(){
+  var sp=D.sprints&&D.sprints[0];
+  if(!sp)return null;
+  var inicio=new Date(sp.inicio);
+  var fin=new Date(sp.finReal||sp.fin);
+  var horasReales=Math.round((fin-inicio)/3600000*10)/10;
+  var registros=(D.hist||[]).filter(function(h){
+    var t=h.type==='toma'?new Date(h.s):new Date(h.t);
+    return t>=inicio&&t<=fin;
+  }).sort(function(a,b){
+    var ta=a.type==='toma'?new Date(a.s):new Date(a.t);
+    var tb=b.type==='toma'?new Date(b.s):new Date(b.t);
+    return ta-tb;
+  });
+  var tomas=registros.filter(function(h){return h.type==='toma';});
+  var panales=registros.filter(function(h){return h.type==='panal';});
+  // Gap máximo entre tomas
+  var maxGap=0,gaps=[];
+  for(var i=1;i<tomas.length;i++){
+    var g=Math.round((new Date(tomas[i].s)-new Date(tomas[i-1].e||tomas[i-1].s))/60000);
+    if(g>0&&g<360){gaps.push(g);maxGap=Math.max(maxGap,g);}
+  }
+  var avgGap=gaps.length>0?Math.round(gaps.reduce(function(a,b){return a+b;},0)/gaps.length):0;
+  // ML totales
+  var mlTot=tomas.reduce(function(a,h){return a+(h.mlEst||h.mlProvistos||0);},0);
+  // Céfiro narrativa
+  var apodo=D.bebe.apodo||'Cefe';
+  var narrativa='';
+  var tipoLbl=sp.tipo==='clinico'?'clínico':sp.tipo==='estadistico'?'estadístico':'voluntario';
+  narrativa='Sprint '+tipoLbl+' de '+horasReales+'hs completado. ';
+  if(tomas.length>0){
+    narrativa+=apodo+' tuvo '+tomas.length+' toma'+(tomas.length!==1?'s':'')+' en ese período';
+    if(avgGap>0)narrativa+=' con un intervalo promedio de '+(avgGap>=60?Math.floor(avgGap/60)+'h '+(avgGap%60)+'min':avgGap+' min');
+    narrativa+='. ';
+  }
+  if(panales.length>0)narrativa+=panales.length+' pañal'+(panales.length!==1?'es':'')+' registrado'+(panales.length!==1?'s':'')+'. ';
+  if(mlTot>0)narrativa+='Total estimado: '+mlTot+'ml. ';
+  if(maxGap>0&&maxGap>avgGap*1.5)narrativa+='El tramo más largo sin toma fue de '+(maxGap>=60?Math.floor(maxGap/60)+'h '+(maxGap%60)+'min':maxGap+' min')+'. ';
+  return {sp,inicio,fin,horasReales,registros,tomas,panales,mlTot,maxGap,avgGap,narrativa};
+}
+
+// ── Check-in de Céfiro (qué faltó registrar) ─────────────────
+function sprintCheckin(){
+  if(!D.sprintActivo)return null;
+  var ahora=new Date();
+  var inicio=new Date(D.sprintActivo.inicio);
+  var last=new Date(D.sprintActivo.lastCheck||D.sprintActivo.inicio);
+  var minDesde=Math.round((ahora-last)/60000);
+  if(minDesde<160)return null; // check-in cada ~3hs
+  // Qué hubo desde el último check
+  var desdeRegistros=(D.hist||[]).filter(function(h){
+    var t=h.type==='toma'?new Date(h.s):new Date(h.t);
+    return t>=last&&t<=ahora;
+  });
+  var msg='';
+  if(desdeRegistros.length===0){
+    var hSinReg=Math.round((ahora-last)/3600000*10)/10;
+    msg='¿Sin registros en las últimas '+hSinReg+'hs? Si hubo tomas o pañales, registrálos para que el resumen sea completo.';
+  } else {
+    var t=desdeRegistros.filter(function(h){return h.type==='toma';}).length;
+    var p=desdeRegistros.filter(function(h){return h.type==='panal';}).length;
+    var partes=[];
+    if(t>0)partes.push(t+' toma'+(t!==1?'s':''));
+    if(p>0)partes.push(p+' pañal'+(p!==1?'es':''));
+    msg='¡Bien! Últimas '+Math.round((ahora-last)/3600000)+'hs: '+partes.join(' y ')+'. Seguí registrando.';
+  }
+  D.sprintActivo.lastCheck=ahora.toISOString();
+  saveData();
+  return msg;
+}
+
 // ══  SISTEMA MOMENTOS — CÉFIRO
 // ══════════════════════════════════════════════════════════════════════════
 function getMisDescartados() {
