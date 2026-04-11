@@ -2085,7 +2085,8 @@ function saveVisita(){
   var notif2h=(document.getElementById('vnotif2h')||{}).checked!==false;
   var entry={type:'visita',mi:mi,dt:new Date(dv+'T'+hv),mod:rb?rb.dataset.v:'presencial',
     desc:gv('vdesc'),estado:'pendiente',conclusiones:'',receta:'',proxVisita:'',pesoEnVisita:0,
-    tipo:tipo,durMin:durMin,notif1d:notif1d,notif2h:notif2h};
+    tipo:tipo,durMin:durMin,notif1d:notif1d,notif2h:notif2h,
+    tituloManual:gv('vdesc')||tipo};
   D.visits.unshift(entry);saveData();D.msg=genMsg(entry);D.msgType='visita';setStep('summary');
 }
 function savePostVisita(idx){
@@ -2361,6 +2362,265 @@ function drawChart(){
   ctx.fillStyle='rgba(168,144,112,0.7)';ctx.font='9px Georgia';ctx.textAlign='center';ctx.fillText('Semanas',pl+cW/2,H-2);
 }
 
+// ── PREDICCIÓN TALLA ──────────────────────────────────────────────────────────────────
+function calcTallaPrediccion(){
+  if(!D.tallas||D.tallas.length<2)return null;
+  var sample=D.tallas.slice(0,Math.min(5,D.tallas.length));
+  var n=sample.length,sumX=0,sumY=0,sumXY=0,sumX2=0;
+  var t0=new Date(sample[n-1].t).getTime();
+  sample.forEach(function(p){
+    var x=(new Date(p.t).getTime()-t0)/86400000;
+    var y=p.cm;sumX+=x;sumY+=y;sumXY+=x*y;sumX2+=x*x;
+  });
+  var slope=(n*sumXY-sumX*sumY)/(n*sumX2-sumX*sumX);
+  if(isNaN(slope)||slope<=0)return null;
+  var tallaActual=D.tallas[0].cm;
+  var tallaNac=D.bebe.talla||49;
+  var diasDesdeUlt=(Date.now()-new Date(D.tallas[0].t).getTime())/86400000;
+  var tallaHoy=tallaActual+slope*diasDesdeUlt;
+  var tallaEn30=Math.round((tallaActual+slope*30)*10)/10;
+  var tallaEn90=Math.round((tallaActual+slope*90)*10)/10;
+  // OMS: mediana a 3 meses (13 semanas) ~62cm nino
+  var whoMediana3m=D.bebe.sexo==='F'?61.5:62.1;
+  var diffMediana=Math.round((tallaActual-getWhoTallaRow(ageW())[2])*10)/10;
+  return{
+    slopeCmDia:Math.round(slope*100)/100,
+    slopeCmSem:Math.round(slope*7*10)/10,
+    tallaActual:tallaActual,
+    tallaNac:tallaNac,
+    tallaHoyEst:Math.round(tallaHoy*10)/10,
+    tallaEn30:tallaEn30,
+    tallaEn90:tallaEn90,
+    diffMediana:diffMediana,
+    yaConDatos:true
+  };
+}
+
+// ── PREDICCIÓN PERIMETRO CEFALICO ───────────────────────────────────────────────
+function calcPCPrediccion(){
+  if(!D.pcs||D.pcs.length<2)return null;
+  var sample=D.pcs.slice(0,Math.min(5,D.pcs.length));
+  var n=sample.length,sumX=0,sumY=0,sumXY=0,sumX2=0;
+  var t0=new Date(sample[n-1].t).getTime();
+  sample.forEach(function(p){
+    var x=(new Date(p.t).getTime()-t0)/86400000;
+    var y=p.cm;sumX+=x;sumY+=y;sumXY+=x*y;sumX2+=x*x;
+  });
+  var slope=(n*sumXY-sumX*sumY)/(n*sumX2-sumX*sumX);
+  if(isNaN(slope)||slope<=0)return null;
+  var pcActual=D.pcs[0].cm;
+  var diasDesdeUlt=(Date.now()-new Date(D.pcs[0].t).getTime())/86400000;
+  var pcHoy=pcActual+slope*diasDesdeUlt;
+  var pcEn30=Math.round((pcActual+slope*30)*10)/10;
+  var diffMediana=Math.round((pcActual-getWhoPCRow(ageW())[2])*10)/10;
+  // OMS: PC crece ~1cm/mes en los primeros 3 meses
+  return{
+    slopeCmSem:Math.round(slope*7*10)/10,
+    pcActual:pcActual,
+    pcNac:D.bebe.cc||32,
+    pcHoyEst:Math.round(pcHoy*10)/10,
+    pcEn30:pcEn30,
+    diffMediana:diffMediana,
+    yaConDatos:true
+  };
+}
+
+// ── GRÁFICO OMS TALLA ──────────────────────────────────────────────────────────────────────
+function drawTallaChart(){
+  var c=document.getElementById('talla-oms-chart');if(!c||!c.getContext)return;
+  var ctx=c.getContext('2d'),W=c.width,H=c.height;
+  var pl=36,pr=28,pt=14,pb=30,cW=W-pl-pr,cH=H-pt-pb;
+  ctx.clearRect(0,0,W,H);
+  var tbl=D.bebe.sexo==='F'?WHO_TALLA_G:WHO_TALLA_B;
+  var wkKeys=[0,4,8,13,17,26,39,52];
+  var ageWnow=ageW();
+  var mxW=Math.max(17,ageWnow+4);
+  // Rango Y: desde 44cm hasta 80cm (cubre 0-12m)
+  var mnH=44,mxH=80;
+  function xP(w){return pl+(w/mxW)*cW;}
+  function yP(h){return pt+(1-(h-mnH)/(mxH-mnH))*cH;}
+  // Grid horizontal
+  ctx.strokeStyle='rgba(210,175,120,0.08)';ctx.lineWidth=1;
+  for(var h=46;h<=78;h+=4){
+    ctx.beginPath();ctx.moveTo(pl,yP(h));ctx.lineTo(pl+cW,yP(h));ctx.stroke();
+    ctx.fillStyle='rgba(168,144,112,0.6)';ctx.font='8px Georgia';ctx.textAlign='right';
+    ctx.fillText(h+'cm',pl-3,yP(h)+3);
+  }
+  // Grid vertical
+  ctx.strokeStyle='rgba(210,175,120,0.06)';
+  for(var wg=0;wg<=mxW;wg+=4){
+    ctx.beginPath();ctx.moveTo(xP(wg),pt);ctx.lineTo(xP(wg),pt+cH);ctx.stroke();
+    ctx.fillStyle='rgba(168,144,112,0.5)';ctx.font='8px Georgia';ctx.textAlign='center';
+    ctx.fillText('S'+wg,xP(wg),pt+cH+11);
+  }
+  // Banda P3-P97 fill
+  ctx.beginPath();
+  wkKeys.forEach(function(w,i){if(i===0)ctx.moveTo(xP(w),yP(tbl[w][4]));else ctx.lineTo(xP(w),yP(tbl[w][4]));});
+  wkKeys.slice().reverse().forEach(function(w){ctx.lineTo(xP(w),yP(tbl[w][0]));});
+  ctx.closePath();ctx.fillStyle='rgba(180,140,220,0.07)';ctx.fill();
+  // P97
+  ctx.beginPath();ctx.strokeStyle='rgba(224,112,112,0.3)';ctx.lineWidth=1;ctx.setLineDash([2,4]);
+  wkKeys.forEach(function(w,i){if(i===0)ctx.moveTo(xP(w),yP(tbl[w][4]));else ctx.lineTo(xP(w),yP(tbl[w][4]));});
+  ctx.stroke();ctx.setLineDash([]);
+  // P85
+  ctx.beginPath();ctx.strokeStyle='rgba(212,168,67,0.4)';ctx.lineWidth=1;ctx.setLineDash([3,4]);
+  wkKeys.forEach(function(w,i){if(i===0)ctx.moveTo(xP(w),yP(tbl[w][3]));else ctx.lineTo(xP(w),yP(tbl[w][3]));});
+  ctx.stroke();ctx.setLineDash([]);
+  // P50
+  ctx.beginPath();ctx.strokeStyle='rgba(180,140,220,0.7)';ctx.lineWidth=1.5;ctx.setLineDash([4,3]);
+  wkKeys.forEach(function(w,i){if(i===0)ctx.moveTo(xP(w),yP(tbl[w][2]));else ctx.lineTo(xP(w),yP(tbl[w][2]));});
+  ctx.stroke();ctx.setLineDash([]);
+  // P15
+  ctx.beginPath();ctx.strokeStyle='rgba(212,168,67,0.4)';ctx.lineWidth=1;ctx.setLineDash([3,4]);
+  wkKeys.forEach(function(w,i){if(i===0)ctx.moveTo(xP(w),yP(tbl[w][1]));else ctx.lineTo(xP(w),yP(tbl[w][1]));});
+  ctx.stroke();ctx.setLineDash([]);
+  // P3
+  ctx.beginPath();ctx.strokeStyle='rgba(224,112,112,0.3)';ctx.lineWidth=1;ctx.setLineDash([2,4]);
+  wkKeys.forEach(function(w,i){if(i===0)ctx.moveTo(xP(w),yP(tbl[w][0]));else ctx.lineTo(xP(w),yP(tbl[w][0]));});
+  ctx.stroke();ctx.setLineDash([]);
+  // Labels percentil en margen derecho
+  var aSafe=Math.min(52,Math.max(0,ageWnow));
+  var nearestKey=wkKeys.reduce(function(a,b){return Math.abs(b-aSafe)<Math.abs(a-aSafe)?b:a;});
+  ctx.font='7px Georgia';ctx.textAlign='left';
+  ctx.fillStyle='rgba(224,112,112,0.7)';ctx.fillText('P97',pl+cW+2,yP(tbl[nearestKey][4])+3);
+  ctx.fillStyle='rgba(212,168,67,0.8)';ctx.fillText('P85',pl+cW+2,yP(tbl[nearestKey][3])+3);
+  ctx.fillStyle='rgba(180,140,220,0.9)';ctx.fillText('P50',pl+cW+2,yP(tbl[nearestKey][2])+3);
+  ctx.fillStyle='rgba(212,168,67,0.8)';ctx.fillText('P15',pl+cW+2,yP(tbl[nearestKey][1])+3);
+  ctx.fillStyle='rgba(224,112,112,0.7)';ctx.fillText('P3',pl+cW+2,yP(tbl[nearestKey][0])+3);
+  // Linea talla nacimiento
+  var tNac=D.bebe.talla||49;
+  if(tNac>=mnH&&tNac<=mxH){
+    ctx.beginPath();ctx.strokeStyle='rgba(212,168,67,0.35)';ctx.lineWidth=1;ctx.setLineDash([3,3]);
+    ctx.moveTo(pl,yP(tNac));ctx.lineTo(pl+cW,yP(tNac));ctx.stroke();ctx.setLineDash([]);
+    ctx.fillStyle='rgba(212,168,67,0.6)';ctx.font='7px Georgia';ctx.textAlign='left';
+    ctx.fillText('Nac.',pl+2,yP(tNac)-3);
+  }
+  // Datos reales
+  if((D.tallas||[]).length>0){
+    var sorted=D.tallas.slice().sort(function(a,b){return new Date(a.t)-new Date(b.t);});
+    // Linea de datos
+    ctx.beginPath();ctx.strokeStyle='#b48cdc';ctx.lineWidth=2.5;
+    sorted.forEach(function(p,i){
+      var wk=Math.floor((new Date(p.t)-new Date(D.bebe.fn||Date.now()))/604800000);
+      if(i===0)ctx.moveTo(xP(wk),yP(p.cm));else ctx.lineTo(xP(wk),yP(p.cm));
+    });ctx.stroke();
+    // Puntos
+    sorted.forEach(function(p){
+      var wk=Math.floor((new Date(p.t)-new Date(D.bebe.fn||Date.now()))/604800000);
+      ctx.beginPath();ctx.arc(xP(wk),yP(p.cm),4,0,Math.PI*2);
+      ctx.fillStyle='#b48cdc';ctx.fill();
+      ctx.fillStyle='rgba(240,217,160,0.9)';ctx.font='bold 9px Georgia';ctx.textAlign='center';
+      ctx.fillText(p.cm+'cm',xP(wk),yP(p.cm)-9);
+    });
+    // Linea predictiva (si hay prediccion)
+    var predT=calcTallaPrediccion();
+    if(predT&&sorted.length>=2){
+      var lastP=sorted[sorted.length-1];
+      var wkLast=Math.floor((new Date(lastP.t)-new Date(D.bebe.fn||Date.now()))/604800000);
+      var wkPred=wkLast+8; // proyectar 8 semanas
+      var cmPred=Math.min(mxH-1,lastP.cm+predT.slopeCmSem*8);
+      ctx.beginPath();ctx.strokeStyle='rgba(180,140,220,0.4)';ctx.lineWidth=1.5;ctx.setLineDash([4,4]);
+      ctx.moveTo(xP(wkLast),yP(lastP.cm));ctx.lineTo(xP(Math.min(wkPred,mxW)),yP(cmPred));
+      ctx.stroke();ctx.setLineDash([]);
+      // Punto prediccion
+      ctx.beginPath();ctx.arc(xP(Math.min(wkPred,mxW)),yP(cmPred),3,0,Math.PI*2);
+      ctx.fillStyle='rgba(180,140,220,0.5)';ctx.fill();
+    }
+  }
+  ctx.fillStyle='rgba(168,144,112,0.7)';ctx.font='9px Georgia';ctx.textAlign='center';
+  ctx.fillText('Semanas de vida',pl+cW/2,H-2);
+}
+
+// ── GRÁFICO OMS PERIMETRO CEFALICO ───────────────────────────────────────────────────
+function drawPCChart(){
+  var c=document.getElementById('pc-oms-chart');if(!c||!c.getContext)return;
+  var ctx=c.getContext('2d'),W=c.width,H=c.height;
+  var pl=36,pr=28,pt=14,pb=30,cW=W-pl-pr,cH=H-pt-pb;
+  ctx.clearRect(0,0,W,H);
+  var tbl=D.bebe.sexo==='F'?WHO_PC_G:WHO_PC_B;
+  var wkKeys=[0,4,8,13,17,26,39,52];
+  var ageWnow=ageW();
+  var mxW=Math.max(17,ageWnow+4);
+  var mnH=30,mxH=52;
+  function xP(w){return pl+(w/mxW)*cW;}
+  function yP(h){return pt+(1-(h-mnH)/(mxH-mnH))*cH;}
+  // Grid
+  ctx.strokeStyle='rgba(210,175,120,0.08)';ctx.lineWidth=1;
+  for(var h=31;h<=50;h+=2){
+    ctx.beginPath();ctx.moveTo(pl,yP(h));ctx.lineTo(pl+cW,yP(h));ctx.stroke();
+    ctx.fillStyle='rgba(168,144,112,0.6)';ctx.font='8px Georgia';ctx.textAlign='right';
+    ctx.fillText(h+'cm',pl-3,yP(h)+3);
+  }
+  for(var wg=0;wg<=mxW;wg+=4){
+    ctx.strokeStyle='rgba(210,175,120,0.06)';
+    ctx.beginPath();ctx.moveTo(xP(wg),pt);ctx.lineTo(xP(wg),pt+cH);ctx.stroke();
+    ctx.fillStyle='rgba(168,144,112,0.5)';ctx.font='8px Georgia';ctx.textAlign='center';
+    ctx.fillText('S'+wg,xP(wg),pt+cH+11);
+  }
+  // Banda fill
+  ctx.beginPath();
+  wkKeys.forEach(function(w,i){if(i===0)ctx.moveTo(xP(w),yP(tbl[w][4]));else ctx.lineTo(xP(w),yP(tbl[w][4]));});
+  wkKeys.slice().reverse().forEach(function(w){ctx.lineTo(xP(w),yP(tbl[w][0]));});
+  ctx.closePath();ctx.fillStyle='rgba(212,168,67,0.07)';ctx.fill();
+  // Curvas percentiles
+  var pcLines=[
+    {idx:4,clr:'rgba(224,112,112,0.3)',lbl:'P97',dash:[2,4],w:1},
+    {idx:3,clr:'rgba(212,168,67,0.4)',lbl:'P85',dash:[3,4],w:1},
+    {idx:2,clr:'rgba(212,168,67,0.8)',lbl:'P50',dash:[4,3],w:1.5},
+    {idx:1,clr:'rgba(212,168,67,0.4)',lbl:'P15',dash:[3,4],w:1},
+    {idx:0,clr:'rgba(224,112,112,0.3)',lbl:'P3', dash:[2,4],w:1},
+  ];
+  pcLines.forEach(function(l){
+    ctx.beginPath();ctx.strokeStyle=l.clr;ctx.lineWidth=l.w;ctx.setLineDash(l.dash);
+    wkKeys.forEach(function(w,i){if(i===0)ctx.moveTo(xP(w),yP(tbl[w][l.idx]));else ctx.lineTo(xP(w),yP(tbl[w][l.idx]));});
+    ctx.stroke();ctx.setLineDash([]);
+  });
+  // Labels
+  var aSafe=Math.min(52,Math.max(0,ageWnow));
+  var nearestKey=wkKeys.reduce(function(a,b){return Math.abs(b-aSafe)<Math.abs(a-aSafe)?b:a;});
+  ctx.font='7px Georgia';ctx.textAlign='left';
+  pcLines.forEach(function(l){
+    ctx.fillStyle=l.clr.replace('0.','0.9').replace('0.3','0.8');
+    ctx.fillText(l.lbl,pl+cW+2,yP(tbl[nearestKey][l.idx])+3);
+  });
+  // Nacimiento
+  var pcNac=D.bebe.cc||32;
+  ctx.beginPath();ctx.strokeStyle='rgba(212,168,67,0.35)';ctx.lineWidth=1;ctx.setLineDash([3,3]);
+  ctx.moveTo(pl,yP(pcNac));ctx.lineTo(pl+cW,yP(pcNac));ctx.stroke();ctx.setLineDash([]);
+  ctx.fillStyle='rgba(212,168,67,0.6)';ctx.font='7px Georgia';ctx.textAlign='left';
+  ctx.fillText('Nac.',pl+2,yP(pcNac)-3);
+  // Datos reales
+  if((D.pcs||[]).length>0){
+    var sorted=D.pcs.slice().sort(function(a,b){return new Date(a.t)-new Date(b.t);});
+    ctx.beginPath();ctx.strokeStyle='#d4a843';ctx.lineWidth=2.5;
+    sorted.forEach(function(p,i){
+      var wk=Math.floor((new Date(p.t)-new Date(D.bebe.fn||Date.now()))/604800000);
+      if(i===0)ctx.moveTo(xP(wk),yP(p.cm));else ctx.lineTo(xP(wk),yP(p.cm));
+    });ctx.stroke();
+    sorted.forEach(function(p){
+      var wk=Math.floor((new Date(p.t)-new Date(D.bebe.fn||Date.now()))/604800000);
+      ctx.beginPath();ctx.arc(xP(wk),yP(p.cm),4,0,Math.PI*2);
+      ctx.fillStyle='#d4a843';ctx.fill();
+      ctx.fillStyle='rgba(240,217,160,0.9)';ctx.font='bold 9px Georgia';ctx.textAlign='center';
+      ctx.fillText(p.cm+'cm',xP(wk),yP(p.cm)-9);
+    });
+    // Prediccion
+    var predPC=calcPCPrediccion();
+    if(predPC&&sorted.length>=2){
+      var lastP=sorted[sorted.length-1];
+      var wkLast=Math.floor((new Date(lastP.t)-new Date(D.bebe.fn||Date.now()))/604800000);
+      var wkPred=wkLast+6;
+      var cmPred=Math.min(mxH-1,lastP.cm+predPC.slopeCmSem*6);
+      ctx.beginPath();ctx.strokeStyle='rgba(212,168,67,0.4)';ctx.lineWidth=1.5;ctx.setLineDash([4,4]);
+      ctx.moveTo(xP(wkLast),yP(lastP.cm));ctx.lineTo(xP(Math.min(wkPred,mxW)),yP(cmPred));
+      ctx.stroke();ctx.setLineDash([]);
+      ctx.beginPath();ctx.arc(xP(Math.min(wkPred,mxW)),yP(cmPred),3,0,Math.PI*2);
+      ctx.fillStyle='rgba(212,168,67,0.5)';ctx.fill();
+    }
+  }
+  ctx.fillStyle='rgba(168,144,112,0.7)';ctx.font='9px Georgia';ctx.textAlign='center';
+  ctx.fillText('Semanas de vida',pl+cW/2,H-2);
+}
 function drawWeightTrendChart(){
   var c=document.getElementById('trend-chart');if(!c||!c.getContext)return;
   var ctx=c.getContext('2d'),W=c.width,H=c.height;
@@ -2733,12 +2993,229 @@ function renderSprintResumen(bd){
   bd.appendChild(sh);
   bd.appendChild(E.btn('gb','Volver al inicio','goHome'));
 }
+// ── CÉFIRO POST-TOMA ────────────────────────────────────────────────────────────
+function generarCefiroPostToma(entrada) {
+  // entrada: el objeto de historial recien guardado (type===toma)
+  if (!entrada || entrada.type !== 'toma') return null;
+  var apodo = D.bebe.apodo || D.bebe.nombre || 'Cefe';
+  var hora = new Date(entrada.s).getHours();
+  var dur = entrada.tot || 0;
+  var tomasHoy = D.hist.filter(function(h) {
+    return h.type === 'toma' && sameDay(h.s || h.t, entrada.s);
+  });
+  var nHoy = tomasHoy.length;
+  var mlEst = entrada.mlEst || 0;
+  var efi = entrada.efi || 0;
+  var msgs = [];
+  // — Contexto de hora
+  var esNoche = hora >= 20 || hora < 6;
+  var esMadrugada = hora >= 1 && hora < 5;
+  // — Duración
+  if (dur >= 20) {
+    msgs.push(dur + ' minutos es una toma completa. El vaciado por seno suele ocurrir entre 10-20 min.');
+  } else if (dur <= 7) {
+    msgs.push('Toma corta (' + dur + ' min). En semana ' + ageW() + ' es normal si la succin es eficaz — los bebes se vuelven más eficientes con el tiempo.');
+  }
+  // — Eficiencia + ml
+  if (efi >= 4 && mlEst > 0) {
+    msgs.push('Succin eficaz. Estimado: ≈' + mlEst + 'ml — ' + Math.round(mlEst / ((gasC().mn + gasC().mx) / 2) * 100) + '% de la cap. gástrica.');
+  } else if (efi <= 2 && dur > 10) {
+    msgs.push('Duración larga con succin dispersa. Normal en semana ' + ageW() + '. Probá cambiar de seno cuando note que traga menos.');
+  }
+  // — Número de tomas del día
+  if (nHoy === 1) {
+    msgs.push('Primera toma registrada del día.');
+  } else if (nHoy >= 8 && nHoy <= 12) {
+    msgs.push('Toma n°' + nHoy + ' del día — dentro del rango óptimo (8-12 diarias en semana ' + ageW() + ').');
+  } else if (nHoy > 12) {
+    msgs.push('Toma n°' + nHoy + ' del día. Más de 12 tomas puede indicar cluster feeding o salto de crecimiento. Es intenso pero pasajero.');
+  } else {
+    msgs.push('Toma n°' + nHoy + ' del día.');
+  }
+  // — Contexto nocturno
+  if (esMadrugada) {
+    var tomasNoche = D.hist.filter(function(h) {
+      return h.type === 'toma' && h.s &&
+        (new Date(h.s).getHours() >= 22 || new Date(h.s).getHours() < 6);
+    }).length;
+    if (tomasNoche >= 3) {
+      msgs.push('Noche activa (' + tomasNoche + ' tomas). El sueño fragmentado es la norma en semana ' + ageW() + '. El ritmo circadiano no madura hasta los 3-4 meses.');
+    }
+  }
+  // — Prediccion peso (si tiene datos)
+  var predP = calcPesoPrediccion ? calcPesoPrediccion() : null;
+  if (predP && !predP.yaRecupero && predP.diasParaNac <= 10 && predP.slope > 0) {
+    msgs.push('Al ritmo de peso actual, ' + apodo + ' recuperaría el peso de nacimiento en ≈' + predP.diasParaNac + ' días más.');
+  }
+  // Devolver solo el primer mensaje más relevante (no abrumar)
+  return msgs.length > 0 ? msgs[0] : null;
+}
+
+// ── REGISTRAR RÁPIDO (modo una mano) ───────────────────────────────────────
+function registrarRapido(tipo) {
+  // Captura instantánea con 1 tap. Sin sheets, sin confirmar.
+  var ahora = new Date();
+  var apodo = D.bebe.apodo || D.bebe.nombre || 'Cefe';
+  if (tipo === 'toma') {
+    // Registra toma instantánea de 10 min en el seno menos usado
+    var ultSeno2 = getUltimoSeno ? getUltimoSeno() : 'Izq';
+    var otroSeno = (ultSeno2 && ultSeno2.toLowerCase().indexOf('der') >= 0) ? 'Izq' : 'Der';
+    var inicio = new Date(ahora.getTime() - 10 * 60000);
+    var entrada = {
+      type: 'toma', s: inicio, e: ahora,
+      lados: [{s: otroSeno, m: 10}], tot: 10,
+      ext: {l:0,r:0}, mlProvistos: 0, mlEst: 0, efi: 3,
+      nt: new Date(ahora.getTime() + 150 * 60000),
+      note: 'Registro rápido', _rapido: true
+    };
+    D.hist.unshift(entrada);
+    saveData();
+    D._quickFeedback = {tipo:'toma', msg: apodo + ' — toma registrada. ¿Fue diferente? Editala desde el historial.', ts: Date.now()};
+    setStep('home');
+  } else if (tipo === 'pis' || tipo === 'caca' || tipo === 'mixto') {
+    var pNom = tipo === 'pis' ? 'Pis' : tipo === 'caca' ? 'Caca' : 'Mixto';
+    var entrada2 = {type: 'panal', p: pNom, t: ahora, note: 'Registro rápido'};
+    D.hist.unshift(entrada2);
+    saveData();
+    D._quickFeedback = {tipo:'panal', msg: 'Pañal ' + pNom.toLowerCase() + ' registrado.', ts: Date.now()};
+    setStep('home');
+  } else if (tipo === 'llanto') {
+    // Registra un momento de llanto como nota rápida
+    if (!D.notas) D.notas = [];
+    D.notas.unshift({t: ahora, txt: 'Llanto registrado (registro rápido) — ' + ahora.toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'})});
+    saveData();
+    D._quickFeedback = {tipo:'llanto', msg: 'Llanto anotado. Causas posibles: hambre, pañal, agarre, contacto o temperatura.', ts: Date.now()};
+    setStep('home');
+  }
+}
+// ── PANTALLA RESUMEN SEMANAL ───────────────────────────────────────────────────────
+function renderResumenSemanal(bd) {
+  var now=new Date(),desde=new Date(now.getTime()-7*86400000);
+  var apodo=D.bebe.apodo||D.bebe.nombre||'Cefe';
+  var semVida=Math.floor(ageD()/7);
+  var th=D.hist.filter(function(h){return h.type==='toma'&&new Date(h.s)>=desde;});
+  var ph=D.hist.filter(function(h){return h.type==='panal'&&new Date(h.t)>=desde;});
+  var lp=D.pesos[0];
+  var pn=D.bebe.pn||3365;
+  var pred=typeof calcPesoPrediccion==='function'?calcPesoPrediccion():null;
+  // Calcular tramos de descanso (entre tomas)
+  var tomasSorted=D.hist.filter(function(h){return h.type==='toma'&&h.s&&h.e&&new Date(h.s)>=desde;})
+    .map(function(h){return{s:new Date(h.s).getTime(),e:new Date(h.e).getTime()};}).sort(function(a,b){return a.s-b.s;});
+  var tramos=[];
+  for(var ii=1;ii<tomasSorted.length;ii++){
+    var gap=Math.round((tomasSorted[ii].s-tomasSorted[ii-1].e)/60000);
+    if(gap>0&&gap<480)tramos.push(gap);
+  }
+  var maxTramo=tramos.length?Math.max.apply(null,tramos):0;
+  var avgTramo=tramos.length?Math.round(tramos.reduce(function(a,b){return a+b;},0)/tramos.length):0;
+  // Sueños de sleepLog esta semana
+  var sleepsW=(D.sleepLog||[]).filter(function(s){return s.start&&new Date(s.start)>=desde;});
+  var maxSleepDur=sleepsW.length?Math.max.apply(null,sleepsW.map(function(s){return s.dur||0;})):0;
+  var totalSleepMin=sleepsW.reduce(function(a,s){return a+(s.dur||0);},0);
+  // Hito de la semana
+  var hitoSem=null;
+  (D.hitos||[]).forEach(function(h){
+    if(h.fecha&&new Date(h.fecha)>=desde){
+      var def=(HITOS_DEF||[]).find(function(x){return x.id===h.id;});
+      if(def)hitoSem={label:def.label,ic:def.ic||'\u2B50',foto:h.foto||null};
+    }
+  });
+  // Header
+  var semLabel=desde.toLocaleDateString('es-AR',{day:'2-digit',month:'short'})+' — '+now.toLocaleDateString('es-AR',{day:'2-digit',month:'short'});
+  bd.appendChild(mkTxt('div',null,'Semana '+semVida+' de '+apodo,'font-size:12px;color:#d4a843;text-align:center;margin-bottom:2px;font-weight:bold'));
+  bd.appendChild(mkTxt('div',null,semLabel,'font-size:11px;color:#a89070;text-align:center;margin-bottom:18px'));
+  // Helper: tarjeta de sección
+  function mkCard(ic,titulo,items,color,extra){
+    var c=mkDiv('background:rgba(255,255,255,.03);border:1px solid rgba('+color+',.2);border-radius:14px;padding:13px 14px;margin-bottom:10px');
+    var hdr=mkDiv('display:flex;align-items:center;gap:8px;margin-bottom:10px');
+    hdr.appendChild(mkTxt('span',null,ic,'font-size:18px'));
+    hdr.appendChild(mkTxt('span',null,titulo,'font-size:13px;font-weight:bold;color:#f0d9a0'));
+    c.appendChild(hdr);
+    items.forEach(function(it){
+      var row=mkDiv('display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px');
+      row.appendChild(mkTxt('span',null,it[0],'font-size:12px;color:#a89070'));
+      row.appendChild(mkTxt('span',null,it[1],'font-size:13px;font-weight:bold;color:rgb('+color+')'));
+      c.appendChild(row);
+    });
+    if(extra){var ex=mkTxt('div',null,extra,'font-size:11px;color:#a89070;margin-top:6px;line-height:1.5;font-style:italic');c.appendChild(ex);}
+    return c;
+  }
+  // Card tomas
+  if(th.length>0){
+    var tpd=Math.round(th.length/7);
+    var totMin=th.reduce(function(a,b){return a+b.tot;},0);
+    var promMin=Math.round(totMin/th.length);
+    var tomaExtra=maxTramo>0?'Tramo de descanso más largo: '+(maxTramo>=60?Math.floor(maxTramo/60)+'h '+maxTramo%60+'min':maxTramo+'min')+'. Promedio entre tomas: '+avgTramo+'min.':null;
+    bd.appendChild(mkCard('🍼','Lactancia',[
+      ['Tomas totales',th.length],
+      ['Por día (prom.)','~'+tpd],
+      ['Duración promedio',promMin+' min'],
+    ],'100,200,180',tomaExtra));
+  }
+  // Card sueño
+  var sleepItems=[];
+  if(maxSleepDur>0)sleepItems.push(['Tramo más largo registrado',maxSleepDur>=60?Math.floor(maxSleepDur/60)+'h '+maxSleepDur%60+'m':maxSleepDur+'min']);
+  if(totalSleepMin>0)sleepItems.push(['Total siestas registradas',Math.round(totalSleepMin/60)+'h '+(totalSleepMin%60)+'min']);
+  if(maxTramo>0)sleepItems.push(['Mayor ventana entre tomas',maxTramo>=60?Math.floor(maxTramo/60)+'h '+maxTramo%60+'min':maxTramo+'min']);
+  var sleepTip='En semana '+semVida+', los bebés no distinguen día de noche. El ritmo circadiano madura hacia la semana 12-16. El tramo más largo entre tomas es la métrica que importa.';
+  bd.appendChild(mkCard('😴','Sueño y descanso',
+    sleepItems.length>0?sleepItems:[['Sin registros de sueño','—']],
+    '180,140,220',sleepTip));
+  // Card peso
+  if(lp){
+    var diffNacR=lp.g-pn;
+    var pesoSub=diffNacR>=0?'\u2705 Superó el peso de nacimiento':pred&&pred.diasParaNac<=14?'Lo recupera en ~'+pred.diasParaNac+' días':'';
+    var pesoExtra=pred&&pred.slope>0?'Ganando ~'+pred.slope+'g/día. Proyección a 7 días: '+gkg(pred.pesoEn7)+'kg.':null;
+    bd.appendChild(mkCard('⚖️','Peso',[
+      ['Peso actual',gkg(lp.g)+'kg'],
+      ['Percentil OMS',pctLbl(lp.g,ageW())],
+      [diffNacR>=0?'Sobre nacimiento':'Falta para nacimiento',(diffNacR>=0?'+':'')+diffNacR+'g'],
+    ],'212,168,67',pesoExtra));
+  }
+  // Card pañales
+  if(ph.length>0){
+    var nc2=ph.filter(function(p){return p.p==='Caca';}).length;
+    var np2=ph.filter(function(p){return p.p==='Pis';}).length;
+    bd.appendChild(mkCard('🧷','Pañales',[
+      ['Total de la semana',ph.length],
+      ['Con deposición',nc2],
+      ['Solo pis',np2],
+    ],'100,200,140','En semana '+semVida+': 6+ pañales húmedos y 3+ con caca indica buena hidratación y alimentación. Fuente: AAP.'));
+  }
+  // Card hito si hay
+  if(hitoSem){
+    var hCard=mkDiv('background:rgba(212,168,67,.08);border:1px solid rgba(212,168,67,.3);border-radius:14px;padding:13px 14px;margin-bottom:10px;text-align:center');
+    hCard.appendChild(mkTxt('div',null,hitoSem.ic,'font-size:32px;margin-bottom:6px'));
+    hCard.appendChild(mkTxt('div',null,'\u2B50 Hito de la semana','font-size:10px;color:#d4a843;letter-spacing:1px;text-transform:uppercase;margin-bottom:4px'));
+    hCard.appendChild(mkTxt('div',null,hitoSem.label,'font-size:14px;font-weight:bold;color:#f0d9a0'));
+    if(hitoSem.foto){
+      var hFoto=document.createElement('img');hFoto.src=hitoSem.foto;
+      hFoto.style.cssText='width:100%;max-height:140px;object-fit:cover;border-radius:10px;margin-top:10px';
+      hCard.appendChild(hFoto);
+    }
+    bd.appendChild(hCard);
+  }
+  // Card Céfiro narrativo
+  var cefNarr=mkDiv('background:rgba(100,200,180,.07);border:1px solid rgba(100,200,180,.18);border-radius:14px;padding:13px 14px;margin-bottom:14px');
+  cefNarr.appendChild(mkTxt('div',null,'🌀 Céfiro — semana '+semVida,'font-size:9px;color:#64c8b4;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:7px'));
+  var cefMsg2=ageD()<14?'Los primeros días son los más intensos. Lo más importante ahora es que '+apodo+' coma, duerma y tenga pañales húmedos. Todo lo demás espera.':
+    ageD()<30?'Semana '+semVida+': el caos empieza a tener forma. Las tomas se van espaciando poco a poco. Duermen más. Ustedes también.':
+    ageD()<60?'Mes 2: '+apodo+' los reconoce. Puede aparecer la primera sonrisa social. Sigan hablando, cantando y miándolo de cerca.':
+    'Cada semana '+apodo+' cambia. Lo que registran hoy es el libro que van a leer en 20 años.';
+  cefNarr.appendChild(mkTxt('div',null,cefMsg2,'font-size:12px;color:#a0e8d8;line-height:1.7'));
+  bd.appendChild(cefNarr);
+  // Botones compartir
+  var shRow=mkDiv('display:flex;gap:8px;margin-bottom:8px');
+  var cpBtn2=E.btn('pb gy','Copiar texto','copyWeekly');cpBtn2.style.flex='1';shRow.appendChild(cpBtn2);
+  var shBtn2=E.btn('pb bl','Compartir','shareWeekly');shBtn2.style.flex='1';shRow.appendChild(shBtn2);
+  bd.appendChild(shRow);
+}
 function render(){
   applyNightMode();
   // Update device name display
   var dnEl=document.getElementById('device-name-display');
   if(dnEl)dnEl.textContent=getDeviceName()||'';
-  var MAS_STEPS=['cuentos','perfil','editBebe','editPadre','medicos','editMed','visitaForm','postVisita','consultaMedica','extras','notas','editNota','sintomas','editSintoma','hitos','cartas','editCarta','astro','actividades','vacunas','memoria','pendientes','historia','logros','config','agenda','nuevoEvento','tallaEntry','pcEntry','estudios'];
+  var MAS_STEPS=['semanalResumen','quickReg','cuentos','perfil','editBebe','editPadre','medicos','editMed','visitaForm','postVisita','consultaMedica','extras','notas','editNota','sintomas','editSintoma','hitos','cartas','editCarta','astro','actividades','vacunas','memoria','pendientes','historia','logros','config','agenda','nuevoEvento','tallaEntry','pcEntry','estudios'];
   var TAB_MAP={home:['home'],history:['history'],agenda:['agenda','nuevoEvento'],mas:MAS_STEPS,config:['config']};
   Object.keys(TAB_MAP).forEach(function(t){
     var el=document.getElementById('bn-'+t);if(!el)return;
@@ -2748,7 +3225,7 @@ function render(){
   var htEl=document.getElementById('hdr-title');
   if(typeof updatePendBadge==='function')updatePendBadge();
   if(htEl){var _apodoNav=D.bebe.apodo||D.bebe.nombre||'Cefe';
-  var TITLES={home:_apodoNav,history:'Historial',peso:'Medidas',pesoEntry:'Peso',tallaEntry:'Talla',pcEntry:'Perímetro Cefálico',dash:'Dashboard',perfil:'Perfil',editBebe:'Perfil',editPadre:'Perfil',medicos:'Médicos',editMed:'Médicos',visitaForm:'Médicos',postVisita:'Seguimiento',consultaMedica:'Consulta Médica',sprintSetup:'Sprint',sprintResumen:'Resumen Sprint',logros:'Logros',config:'Configuración',agenda:'Agenda',nuevoEvento:'Nuevo evento',estudios:'Estudios y Medicación',extras:'Extras',notas:'Notas',editNota:'Nueva Nota',sintomas:'Síntomas',editSintoma:'Síntoma',hitos:'Hitos',cartas:'Cartas',editCarta:'Carta',astro:'Recreativo',actividades:'Actividades',vacunas:'Vacunas',memoria:'Memoria de '+_apodoNav,pendientes:'Pendientes',historia:'Historia de '+_apodoNav,toma:'Toma',panal:'Pañal',preview:'Confirmar',summary:'Mensaje'};
+  var TITLES={home:_apodoNav,history:'Historial',peso:'Medidas',pesoEntry:'Peso',tallaEntry:'Talla',pcEntry:'Perímetro Cefálico',dash:'Dashboard',perfil:'Perfil',editBebe:'Perfil',editPadre:'Perfil',medicos:'Médicos',editMed:'Médicos',visitaForm:'Médicos',postVisita:'Seguimiento',consultaMedica:'Consulta Médica',sprintSetup:'Sprint',sprintResumen:'Resumen Sprint',logros:'Logros',config:'Configuración',agenda:'Agenda',nuevoEvento:'Nuevo evento',estudios:'Estudios y Medicación',extras:'Extras',notas:'Notas',editNota:'Nueva Nota',sintomas:'Síntomas',editSintoma:'Síntoma',hitos:'Hitos',cartas:'Cartas',editCarta:'Carta',astro:'Recreativo',actividades:'Actividades',vacunas:'Vacunas',memoria:'Memoria de '+_apodoNav,pendientes:'Pendientes',historia:'Historia de '+_apodoNav,semanalResumen:'Semana de '+(D.bebe.apodo||'Cefe'),toma:'Toma',panal:'Pañal',preview:'Confirmar',summary:'Mensaje'};
   htEl.textContent=TITLES[D.step]||_apodoNav;}
 
   var bd=document.getElementById('bd');if(!bd)return;
@@ -2766,13 +3243,64 @@ function render(){
         {ic:'🍼',lbl:'Toma',      sub:'pecho/mamadera',  act:'startToma',      clr:'rgba(212,168,67,.15)', bdr:'rgba(212,168,67,.4)'},
         {ic:'🧷',lbl:'Pañal',     sub:'pis o caca',     act:'startPanal',     clr:'rgba(100,200,180,.1)', bdr:'rgba(100,200,180,.3)'},
         {ic:'⚖️',lbl:'Medidas',   sub:'curva y graficos', act:'goPeso',          clr:'rgba(180,140,220,.1)', bdr:'rgba(180,140,220,.3)'},
+        {ic:'⚡',lbl:'Rápido',    sub:'1 tap = listo',   act:'goQuickReg',      clr:'rgba(224,112,112,.08)', bdr:'rgba(224,112,112,.2)'},
         {ic:'⏱️',lbl:'Timer',     sub:'actividad libre', act:'goTimerLibre',    clr:'rgba(100,200,180,.08)',bdr:'rgba(100,200,180,.2)'},
         {ic:'📖',lbl:'Cuentos',   sub:'leer con Cefe',   act:'goCuentos',       clr:'rgba(180,140,220,.08)',bdr:'rgba(180,140,220,.2)'},
         {ic:'🏃',lbl:'Actividades',sub:'plan del día',act:'goActividades',  clr:'rgba(100,200,140,.08)',bdr:'rgba(100,200,140,.2)'},
         {ic:'🏥',lbl:'Consultas', sub:'próxima visita',act:'goConsultas',   clr:'rgba(224,112,112,.08)',bdr:'rgba(224,112,112,.25)'},
+        {ic:'📆',lbl:'Semana',    sub:'resumen 7 días',  act:'goSemanal',      clr:'rgba(180,140,220,.08)',bdr:'rgba(180,140,220,.2)'},
         {ic:'📊',lbl:'Sprint',    sub:'diagnóstico',    act:'goSprint',       clr:'rgba(100,200,180,.08)',bdr:'rgba(100,200,180,.2)'}
       ];
-      bd.appendChild(mkTxt('div',null,'Acciones rápidas','font-size:10px;color:#a89070;text-transform:uppercase;letter-spacing:1.2px;font-weight:bold;margin-bottom:10px'));
+      // Card sueño home (si hay sleepLog o sleepStart activo)
+        (function(){
+          var apodoSH=D.bebe.apodo||D.bebe.nombre||'Cefe';
+          var ahora=new Date();
+          // Tramo de descanso más largo de las últimas 24h (entre tomas)
+          var desde24=new Date(ahora.getTime()-24*3600000);
+          var tomasR=D.hist.filter(function(h){return h.type==='toma'&&h.s&&h.e&&new Date(h.s)>=desde24;})
+            .map(function(h){return{s:new Date(h.s).getTime(),e:new Date(h.e).getTime()};}).sort(function(a,b){return a.s-b.s;});
+          var maxGap=0;
+          for(var gi=1;gi<tomasR.length;gi++){
+            var gp=Math.round((tomasR[gi].s-tomasR[gi-1].e)/60000);
+            if(gp>0&&gp<480)maxGap=Math.max(maxGap,gp);
+          }
+          // Sueño activo (sleep timer corriendo)
+          var sleepActivo=!!D.sleepStart;
+          var sleepMins=sleepActivo?Math.round((ahora-new Date(D.sleepStart))/60000):0;
+          // Solo mostrar si hay datos útiles
+          if(maxGap<30&&!sleepActivo&&(!D.sleepLog||D.sleepLog.length===0))return;
+          var sCard=mkDiv('background:rgba(60,70,120,.15);border:1px solid rgba(140,160,220,.15);border-radius:16px;padding:12px 14px;margin-bottom:10px');
+          var sHdr=mkDiv('display:flex;align-items:center;justify-content:space-between;margin-bottom:6px');
+          sHdr.appendChild(mkTxt('span',null,'😴 Sueño y descanso','font-size:12px;font-weight:bold;color:#d4c0f0'));
+          var sBtn=document.createElement('button');
+          sBtn.style.cssText='padding:4px 10px;border-radius:12px;border:1px solid rgba(180,140,220,.3);background:transparent;color:#b48cdc;font-size:10px;cursor:pointer;font-family:Georgia,serif';
+          sBtn.textContent=sleepActivo?'Detener':'⏱ Iniciar';
+          sBtn.dataset.action='toggleSleep';
+          sHdr.appendChild(sBtn);
+          sCard.appendChild(sHdr);
+          if(sleepActivo){
+            var sm=sleepMins;
+            sCard.appendChild(mkTxt('div',null,'En curso: '+(sm>=60?Math.floor(sm/60)+'h '+sm%60+'m':sm+'m'),'font-size:18px;font-weight:bold;color:#b48cdc;margin-bottom:4px'));
+            sCard.appendChild(mkTxt('div',null,'Iniciado a las '+new Date(D.sleepStart).toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'}),'font-size:11px;color:#a89070'));
+          } else if(maxGap>0){
+            sCard.appendChild(mkTxt('div',null,'Mayor ventana entre tomas: '+(maxGap>=60?Math.floor(maxGap/60)+'h '+maxGap%60+'m':maxGap+'m'),'font-size:13px;color:#b48cdc;margin-bottom:3px'));
+            // Tip contextual
+            var tipSueño=maxGap>=180?'\uD83C\uDF00 Céfiro: tramo largo de '+apodoSH+'. Un bloque de 3h+ es muy valioso para ustedes también.':
+              maxGap>=90?'\uD83C\uDF00 Céfiro: '+apodoSH+' dormía entre tomas. Al ritmo actual, el tramo nocturno más largo irá creciendo poco a poco.':
+              '\uD83C\uDF00 Céfiro: ventanas cortas son normales en semana '+ageW()+'. El ritmo circadiano madura hacia las 12-16 semanas.';
+            sCard.appendChild(mkTxt('div',null,tipSueño,'font-size:11px;color:#a89070;line-height:1.5;margin-top:4px'));
+          }
+          bd.appendChild(sCard);
+        })();
+        // Banner feedback registro rápido
+          if(D._quickFeedback&&Date.now()-D._quickFeedback.ts<8000){
+            var qfb=mkDiv('background:rgba(100,200,180,.1);border:1px solid rgba(100,200,180,.3);border-radius:14px;padding:11px 14px;margin-bottom:10px;display:flex;align-items:center;gap:10px');
+            qfb.appendChild(mkTxt('span',null,'\u2713','font-size:18px;color:#64c8b4;flex-shrink:0'));
+            qfb.appendChild(mkTxt('span',null,D._quickFeedback.msg,'font-size:12px;color:#a0e8d8;line-height:1.5'));
+            bd.appendChild(qfb);
+            setTimeout(function(){D._quickFeedback=null;render();},8000);
+          }
+          bd.appendChild(mkTxt('div',null,'Acciones rápidas','font-size:10px;color:#a89070;text-transform:uppercase;letter-spacing:1.2px;font-weight:bold;margin-bottom:10px'));
       var sw=mkDiv('overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;-ms-overflow-style:none;margin:0 -4px;padding:0 4px 10px 4px');
       var sr=mkDiv('display:flex;gap:10px;width:max-content;padding-bottom:4px');
       atajos.forEach(function(a){
@@ -3697,6 +4225,17 @@ function render(){
     canvas.style.cssText='width:100%;border-radius:12px;background:rgba(255,255,255,.02);border:1px solid rgba(210,175,120,.1);margin-bottom:12px;display:block';
     bd.appendChild(canvas);setTimeout(drawChart,80);
 
+    // Cefiro prediccion peso (en tab medidas)
+    var predPeso=calcPesoPrediccion();
+    if(predPeso){
+      var cefPeso=mkDiv('background:rgba(100,200,180,.08);border:1px solid rgba(100,200,180,.2);border-radius:12px;padding:11px 14px;margin-bottom:12px');
+      var apodoPeso=D.bebe.apodo||D.bebe.nombre||'Cefe';
+      var msgPeso='\uD83C\uDF00 C\u00e9firo • Peso: ganando '+predPeso.slope+'g/d\u00eda.';
+      if(predPeso.yaRecupero){msgPeso+=' Ya recuper\u00f3 el peso de nacimiento. En 7 d\u00edas proyecci\u00f3n: '+gkg(predPeso.pesoEn7)+'kg.';}
+      else{msgPeso+=' A este ritmo recupera el peso de nacimiento en ~'+predPeso.diasParaNac+' d\u00edas (proyecci\u00f3n: '+gkg(predPeso.pesoEn7)+'kg en 7 d\u00edas).';}
+      cefPeso.appendChild(mkTxt('div',null,msgPeso,'font-size:12px;color:#a0e8d8;line-height:1.6'));
+      bd.appendChild(cefPeso);
+    }
     bd.appendChild(E.aBtn('\u2696\uFE0F','Registrar peso','Fecha actual o retroactivo','tl','goPeso'));
     if(D.pesos.length>0){var cpb=E.btn('pb gy','Copiar historial de peso','cpPesos');cpb.style.marginBottom='12px';bd.appendChild(cpb);}
     D.pesos.forEach(function(p,i){
@@ -3717,47 +4256,54 @@ function render(){
     else if(D._medidasTab==='talla'){
       var tNac=D.bebe.talla||49;
       var lTalla=(D.tallas&&D.tallas.length>0)?D.tallas[0]:null;
+      var predT=calcTallaPrediccion();
+      // Mini cards
       var miniRowT=mkDiv('display:flex;gap:8px;margin-bottom:12px');
       miniRowT.appendChild(miniCard('Nac.',tNac+'cm',''));
-      if(lTalla){var pctT=pctLblTalla(lTalla.cm,ageW());miniRowT.appendChild(miniCard('Actual',lTalla.cm+'cm',pctClr(pctT)));}
-      bd.appendChild(miniRowT);
-      // Grafi simple de talla
-      if((D.tallas||[]).length>=2){
-        var tcT=document.createElement('canvas');tcT.id='talla-chart';tcT.width=420;tcT.height=140;
-        tcT.style.cssText='width:100%;border-radius:12px;background:rgba(255,255,255,.02);border:1px solid rgba(180,140,220,.2);margin-bottom:12px;display:block';
-        bd.appendChild(tcT);
-        setTimeout(function(){
-          var c=document.getElementById('talla-chart');if(!c)return;
-          var ctx=c.getContext('2d');if(!ctx)return;
-          var W=c.width,H=c.height,pad=28;
-          var sorted=(D.tallas||[]).slice().sort(function(a,b){return new Date(a.t)-new Date(b.t);});
-          var vals=sorted.map(function(p){return p.cm;});
-          var mn=Math.min.apply(null,vals)-2,mx=Math.max.apply(null,vals)+2;
-          var xS=function(i){return pad+(W-pad*2)*i/(vals.length-1);};
-          var yS=function(v){return H-pad-(H-pad*2)*(v-mn)/(mx-mn);};
-          ctx.clearRect(0,0,W,H);
-          ctx.strokeStyle='rgba(180,140,220,.6)';ctx.lineWidth=2;ctx.beginPath();
-          vals.forEach(function(v,i){i===0?ctx.moveTo(xS(i),yS(v)):ctx.lineTo(xS(i),yS(v));});
-          ctx.stroke();
-          vals.forEach(function(v,i){
-            ctx.fillStyle='#b48cdc';ctx.beginPath();ctx.arc(xS(i),yS(v),4,0,Math.PI*2);ctx.fill();
-            ctx.fillStyle='#a89070';ctx.font='9px sans-serif';ctx.fillText(v+'cm',xS(i)-10,yS(v)-8);
-          });
-        },60);
+      if(lTalla){
+        var pctT=pctLblTalla(lTalla.cm,ageW());
+        var mc2T=miniCard('Actual',lTalla.cm+'cm',pctClr(pctT));
+        mc2T.appendChild(mkTxt('div',null,pctT,'font-size:10px;color:'+pctClr(pctT)));
+        miniRowT.appendChild(mc2T);
       }
+      if(predT){
+        var mc3T=miniCard('En 30 d.',predT.tallaEn30+'cm','#b48cdc');
+        mc3T.appendChild(mkTxt('div',null,predT.slopeCmSem+'cm/sem','font-size:10px;color:#b48cdc'));
+        miniRowT.appendChild(mc3T);
+      }
+      bd.appendChild(miniRowT);
+      // Cefiro prediccion
+      if(predT){
+        var cefTalla=mkDiv('background:rgba(180,140,220,.08);border:1px solid rgba(180,140,220,.2);border-radius:12px;padding:11px 14px;margin-bottom:12px');
+        var apodoCT=D.bebe.apodo||D.bebe.nombre||'Cefe';
+        var msgT='\uD83C\uDF00 C\u00e9firo • Talla: al ritmo actual ('+predT.slopeCmSem+'cm/sem), '+apodoCT+' llegar\u00eda a '+predT.tallaEn30+'cm en 30 d\u00edas y '+predT.tallaEn90+'cm en 3 meses.';
+        if(predT.diffMediana>0)msgT+=' Est\u00e1 '+predT.diffMediana+'cm por encima de la mediana OMS para su edad.';
+        else if(predT.diffMediana<0)msgT+=' Est\u00e1 '+Math.abs(predT.diffMediana)+'cm por debajo de la mediana OMS. Normal en el rango P15-P85.';
+        cefTalla.appendChild(mkTxt('div',null,msgT,'font-size:12px;color:#d4c0f0;line-height:1.6'));
+        bd.appendChild(cefTalla);
+      } else if((D.tallas||[]).length===1){
+        var cefT1=mkDiv('background:rgba(180,140,220,.06);border:1px solid rgba(180,140,220,.15);border-radius:12px;padding:10px 14px;margin-bottom:12px');
+        cefT1.appendChild(mkTxt('div',null,'\uD83C\uDF00 C\u00e9firo • Con un segundo registro de talla puedo calcular la curva de crecimiento y proyectar los pr\u00f3ximos meses.','font-size:12px;color:#d4c0f0;line-height:1.6'));
+        bd.appendChild(cefT1);
+      }
+      // Grafico OMS talla
+      bd.appendChild(mkTxt('div',null,'Percentiles OMS 2006 — Talla','font-size:11px;color:#a89070;letter-spacing:2px;text-transform:uppercase;margin-bottom:6px'));
+      var tcOms=document.createElement('canvas');tcOms.id='talla-oms-chart';tcOms.width=420;tcOms.height=200;
+      tcOms.style.cssText='width:100%;border-radius:12px;background:rgba(255,255,255,.02);border:1px solid rgba(180,140,220,.15);margin-bottom:12px;display:block';
+      bd.appendChild(tcOms);setTimeout(drawTallaChart,80);
       // Boton registrar
       var regTallaBtn=document.createElement('button');
       regTallaBtn.style.cssText='width:100%;padding:12px;border-radius:12px;border:1px solid rgba(180,140,220,.3);background:rgba(180,140,220,.08);color:#b48cdc;font-size:14px;font-weight:bold;cursor:pointer;font-family:Georgia,serif;margin-bottom:12px';
       regTallaBtn.textContent='+ Registrar talla';
       regTallaBtn.onclick=function(){setStep('tallaEntry');};
       bd.appendChild(regTallaBtn);
-      // Historial talla
+      // Historial
       (D.tallas||[]).forEach(function(p,i){
         var row2=E.div('hr2 pe'),left2=E.div('');
         left2.appendChild(mkTxt('div','hrt',fdt(p.t)));
         if(p.n)left2.appendChild(mkTxt('div','hrs',p.n));
         var prev4=(D.tallas||[])[i+1];
-        if(prev4){var df4=((p.cm-prev4.cm)*10)/10;left2.appendChild(mkTxt('div','dup','+'+df4.toFixed(1)+'cm vs anterior'));}
+        if(prev4){var df4=Math.round((p.cm-prev4.cm)*10)/10;left2.appendChild(mkTxt('div','dup','+'+df4+'cm vs anterior'));}
         left2.appendChild(mkTxt('div',null,'Percentil: '+pctLblTalla(p.cm,Math.floor((new Date(p.t)-new Date(D.bebe.fn||Date.now()))/604800000)),'font-size:10px;color:#b48cdc'));
         var right2=E.div('hri');
         right2.appendChild(mkTxt('div',null,p.cm+'cm','font-size:15px;font-weight:bold;color:#b48cdc'));
@@ -3769,22 +4315,55 @@ function render(){
     else if(D._medidasTab==='pc'){
       var pcNac=D.bebe.cc||32;
       var lPC=(D.pcs&&D.pcs.length>0)?D.pcs[0]:null;
+      var predPC=calcPCPrediccion();
+      // Mini cards
       var miniRowP=mkDiv('display:flex;gap:8px;margin-bottom:12px');
       miniRowP.appendChild(miniCard('Nac.',pcNac+'cm',''));
-      if(lPC){var pctPC=pctLblPC(lPC.cm,ageW());miniRowP.appendChild(miniCard('Actual',lPC.cm+'cm','#d4a843'));}
+      if(lPC){
+        var pctPC=pctLblPC(lPC.cm,ageW());
+        var mcPC=miniCard('Actual',lPC.cm+'cm','#d4a843');
+        mcPC.appendChild(mkTxt('div',null,pctPC,'font-size:10px;color:#d4a843'));
+        miniRowP.appendChild(mcPC);
+      }
+      if(predPC){
+        var mc3PC=miniCard('En 30 d.',predPC.pcEn30+'cm','#d4a843');
+        mc3PC.appendChild(mkTxt('div',null,predPC.slopeCmSem+'cm/sem','font-size:10px;color:#d4a843'));
+        miniRowP.appendChild(mc3PC);
+      }
       bd.appendChild(miniRowP);
-      bd.appendChild(mkTxt('div',null,'El perimetro cefalico refleja el crecimiento del cerebro. Fuente: OMS Child Growth Standards 2006','font-size:11px;color:#a89070;line-height:1.5;margin-bottom:10px'));
+      // Cefiro prediccion PC
+      if(predPC){
+        var cefPC=mkDiv('background:rgba(212,168,67,.08);border:1px solid rgba(212,168,67,.2);border-radius:12px;padding:11px 14px;margin-bottom:12px');
+        var apodoCP=D.bebe.apodo||D.bebe.nombre||'Cefe';
+        var msgPC='\uD83C\uDF00 C\u00e9firo • Per\u00edmetro cef\u00e1lico: creciendo '+predPC.slopeCmSem+'cm/semana — lo que refleja el desarrollo activo del cerebro en esta etapa.';
+        if(predPC.diffMediana>0)msgPC+=' '+predPC.diffMediana+'cm por encima de la mediana OMS para la edad de '+apodoCP+'.';
+        else if(predPC.diffMediana<0)msgPC+=' '+Math.abs(predPC.diffMediana)+'cm por debajo de la mediana, dentro del rango normal P15-P85.';
+        msgPC+=' En 30 d\u00edas se proyecta en '+predPC.pcEn30+'cm.';
+        cefPC.appendChild(mkTxt('div',null,msgPC,'font-size:12px;color:#f0d9a0;line-height:1.6'));
+        bd.appendChild(cefPC);
+      } else {
+        var cefPC0=mkDiv('background:rgba(212,168,67,.06);border:1px solid rgba(212,168,67,.15);border-radius:12px;padding:10px 14px;margin-bottom:12px');
+        cefPC0.appendChild(mkTxt('div',null,'\uD83C\uDF00 C\u00e9firo • El per\u00edmetro cef\u00e1lico refleja el crecimiento del cerebro. OMS: crece ~1cm/mes en los primeros 3 meses. Registr\u00e1 dos mediciones para activar la predicci\u00f3n.','font-size:12px;color:#f0d9a0;line-height:1.6'));
+        bd.appendChild(cefPC0);
+      }
+      // Grafico OMS PC
+      bd.appendChild(mkTxt('div',null,'Percentiles OMS 2006 — Per\u00edmetro Cef\u00e1lico','font-size:11px;color:#a89070;letter-spacing:2px;text-transform:uppercase;margin-bottom:6px'));
+      var pcOmsCanvas=document.createElement('canvas');pcOmsCanvas.id='pc-oms-chart';pcOmsCanvas.width=420;pcOmsCanvas.height=200;
+      pcOmsCanvas.style.cssText='width:100%;border-radius:12px;background:rgba(255,255,255,.02);border:1px solid rgba(212,168,67,.15);margin-bottom:12px;display:block';
+      bd.appendChild(pcOmsCanvas);setTimeout(drawPCChart,80);
+      // Boton registrar
       var regPCBtn=document.createElement('button');
       regPCBtn.style.cssText='width:100%;padding:12px;border-radius:12px;border:1px solid rgba(212,168,67,.3);background:rgba(212,168,67,.08);color:#d4a843;font-size:14px;font-weight:bold;cursor:pointer;font-family:Georgia,serif;margin-bottom:12px';
-      regPCBtn.textContent='+ Registrar perimetro cefalico';
+      regPCBtn.textContent='+ Registrar per\u00edmetro cef\u00e1lico';
       regPCBtn.onclick=function(){setStep('pcEntry');};
       bd.appendChild(regPCBtn);
+      // Historial
       (D.pcs||[]).forEach(function(p,i){
         var rowP=E.div('hr2 pe'),leftP=E.div('');
         leftP.appendChild(mkTxt('div','hrt',fdt(p.t)));
         if(p.n)leftP.appendChild(mkTxt('div','hrs',p.n));
         var prevP=(D.pcs||[])[i+1];
-        if(prevP){var dfP=((p.cm-prevP.cm)*10)/10;leftP.appendChild(mkTxt('div','dup','+'+dfP.toFixed(1)+'cm'));}
+        if(prevP){var dfP=Math.round((p.cm-prevP.cm)*10)/10;leftP.appendChild(mkTxt('div','dup','+'+dfP+'cm vs anterior'));}
         leftP.appendChild(mkTxt('div',null,'Percentil: '+pctLblPC(p.cm,Math.floor((new Date(p.t)-new Date(D.bebe.fn||Date.now()))/604800000)),'font-size:10px;color:#d4a843'));
         var rightP=E.div('hri');
         rightP.appendChild(mkTxt('div',null,p.cm+'cm','font-size:15px;font-weight:bold;color:#d4a843'));
@@ -3835,6 +4414,57 @@ function render(){
   }
 
   // ── SUMMARY ───────────────────────────────────────────────────
+  // ── RESUMEN SEMANAL ──────────────────────────────────────────────────────────────────
+  else if(D.step==='semanalResumen'){
+    bd.appendChild(E.btn('bk','\u2190 Volver','goHome'));
+    bd.appendChild(E.el('div',{cls:'st',txt:'\uD83D\uDCC6 Semana de '+( D.bebe.apodo||D.bebe.nombre||'Cefe')}));
+    renderResumenSemanal(bd);
+  }
+  // ── REGISTRO RÁPIDO (modo una mano) ─────────────────────────────────────────
+  else if(D.step==='quickReg'){
+    var apodoQR=D.bebe.apodo||D.bebe.nombre||'Cefe';
+    var ultSenoQR=getUltimoSeno?getUltimoSeno():null;
+    var senoLabel=ultSenoQR?(ultSenoQR.toLowerCase().indexOf('der')>=0?'Izq':'Der'):'Izq';
+    // Header mínimo
+    bd.appendChild(mkTxt('div',null,'\uD83C\uDF00 ¿Qué registramos?','font-size:13px;color:#a89070;text-align:center;margin-bottom:20px;margin-top:8px'));
+    // Botón TOMA — el más grande, el más frecuente
+    var btToma=document.createElement('button');
+    btToma.style.cssText='width:100%;padding:28px 16px;border-radius:22px;border:1px solid rgba(212,168,67,.5);background:rgba(212,168,67,.12);color:#f0d9a0;font-size:22px;font-weight:bold;cursor:pointer;font-family:Georgia,serif;margin-bottom:12px;-webkit-tap-highlight-color:transparent;text-align:center';
+    btToma.innerHTML='<div style="font-size:44px;margin-bottom:8px">🍼</div>'
+      +'<div>Toma — seno '+senoLabel+'</div>'
+      +'<div style="font-size:12px;color:rgba(240,217,160,.6);margin-top:4px">10 min, registrado ahora</div>';
+    btToma.addEventListener('touchstart',function(){this.style.transform='scale(.96)';},{passive:true});
+    btToma.addEventListener('touchend',function(){this.style.transform='scale(1)';},{passive:true});
+    btToma.onclick=function(){registrarRapido('toma');};
+    bd.appendChild(btToma);
+    // Grid 3 botones pañal
+    bd.appendChild(mkTxt('div',null,'PAÑAL','font-size:10px;color:#a89070;letter-spacing:2px;text-align:center;margin-bottom:10px'));
+    var panGrid=mkDiv('display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px');
+    var mkPQ=function(label,em,tipo,clr){
+      var b=document.createElement('button');
+      b.style.cssText='padding:20px 8px;border-radius:18px;border:1px solid rgba(100,200,180,.3);background:rgba(100,200,180,.07);cursor:pointer;font-family:Georgia,serif;text-align:center;-webkit-tap-highlight-color:transparent';
+      b.innerHTML='<div style="font-size:32px;margin-bottom:6px">'+em+'</div><div style="font-size:13px;color:#64c8b4;font-weight:bold">'+label+'</div>';
+      b.addEventListener('touchstart',function(){this.style.transform='scale(.94)';},{passive:true});
+      b.addEventListener('touchend',function(){this.style.transform='scale(1)';},{passive:true});
+      b.onclick=function(){registrarRapido(tipo);};
+      return b;
+    };
+    panGrid.appendChild(mkPQ('Pis','📛','pis'));
+    panGrid.appendChild(mkPQ('Caca','💩','caca'));
+    panGrid.appendChild(mkPQ('Mixto','🔀','mixto'));
+    bd.appendChild(panGrid);
+    // Botón llanto
+    var btLlanto=document.createElement('button');
+    btLlanto.style.cssText='width:100%;padding:16px;border-radius:18px;border:1px solid rgba(180,140,220,.25);background:rgba(180,140,220,.06);color:#b48cdc;font-size:15px;font-weight:bold;cursor:pointer;font-family:Georgia,serif;margin-bottom:16px;-webkit-tap-highlight-color:transparent';
+    btLlanto.innerHTML='😢️  Llanto — anotar momento';
+    btLlanto.addEventListener('touchstart',function(){this.style.transform='scale(.97)';},{passive:true});
+    btLlanto.addEventListener('touchend',function(){this.style.transform='scale(1)';},{passive:true});
+    btLlanto.onclick=function(){registrarRapido('llanto');};
+    bd.appendChild(btLlanto);
+    // Aviso: editable desde historial
+    bd.appendChild(mkTxt('div',null,'El registro rápido se puede editar o completar desde el Historial.','font-size:11px;color:#a89070;text-align:center;line-height:1.6;margin-bottom:12px'));
+    bd.appendChild(E.btn('gb','\u2190 Volver','goHome'));
+  }
   else if(D.step==='summary'){
     bd.appendChild(E.el('div',{cls:'st',txt:'Mensaje listo'}));
     bd.appendChild(E.el('div',{cls:'ss',txt:'Copia o comparte el texto'}));
@@ -3847,7 +4477,18 @@ function render(){
       try{if(typeof Notification!=='undefined'){if(Notification.permission==='granted')ntb.appendChild(mkTxt('span',null,'Alerta programada','font-size:11px;color:#64c8b4'));else ntb.appendChild(E.btn('tb','Activar alerta','reqNotif'));}}catch(e){}
       bd.appendChild(ntb);
     }
-    var cbtn=E.btn('pb gr','Copiar','copyMsg');cbtn.id='cbtn';bd.appendChild(cbtn);
+    // Céfiro post-toma: insight contextual
+        if(D.msgType==='toma'&&D.hist&&D.hist.length>0){
+          var ultimaToma=D.hist[0];
+          var cefMsg=generarCefiroPostToma(ultimaToma);
+          if(cefMsg){
+            var cefCard=mkDiv('background:rgba(100,200,180,.07);border:1px solid rgba(100,200,180,.18);border-radius:13px;padding:11px 14px;margin-bottom:12px');
+            cefCard.appendChild(mkTxt('div',null,'\uD83C\uDF00 C\u00e9firo','font-size:9px;color:#64c8b4;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:5px'));
+            cefCard.appendChild(mkTxt('div',null,cefMsg,'font-size:12px;color:#a0e8d8;line-height:1.6'));
+            bd.appendChild(cefCard);
+          }
+        }
+        var cbtn=E.btn('pb gr','Copiar','copyMsg');cbtn.id='cbtn';bd.appendChild(cbtn);
     bd.appendChild(E.btn('pb bl','Compartir','shareMsg'));
     bd.appendChild(E.btn('gb wh','Volver al inicio','goHome'));
     if(D.msgType==='toma'||D.msgType==='panal')bd.appendChild(E.btn('gb rd','Borrar registro','discardMsg'));
@@ -4100,7 +4741,18 @@ function render(){
   // ── VISITA FORM ───────────────────────────────────────────────
   else if(D.step==='visitaForm'){
     if(D.meds.length===0){bd.appendChild(mkTxt('div','mu','Primero agrega un medico.'));bd.appendChild(E.btn('pb go','Agregar medico','newMed'));return;}
-    bd.appendChild(E.btn('bk','\u2190 Volver','goMedicos'));bd.appendChild(E.el('div',{cls:'st',txt:'Agendar Visita'}));
+    bd.appendChild(E.btn('bk','\u2190 Volver','goMedicos'));
+        // Leer prefill de consulta pautada si existe
+        var vpf=D._visitaPrefill||{};
+        // Si viene de consulta pautada, mostrar banner informativo
+        if(vpf.origen==='consulta_pautada'){
+          var pfBanner=mkDiv('background:rgba(212,168,67,.08);border:1px solid rgba(212,168,67,.25);border-radius:13px;padding:10px 14px;margin-bottom:12px');
+          pfBanner.appendChild(mkTxt('div',null,'\uD83D\uDDD3 Pre-cargada desde Consultas SAP','font-size:10px;color:#d4a843;letter-spacing:.5px;text-transform:uppercase;margin-bottom:5px'));
+          pfBanner.appendChild(mkTxt('div',null,vpf.label||'','font-size:13px;font-weight:bold;color:#f0d9a0;margin-bottom:3px'));
+          pfBanner.appendChild(mkTxt('div',null,vpf.desc||'','font-size:11px;color:#a89070;line-height:1.5'));
+          bd.appendChild(pfBanner);
+        }
+        bd.appendChild(E.el('div',{cls:'st',txt:'Agendar Visita'}));
     bd.appendChild(E.field('Tipo',E.select('fs','vtipo',[
       {v:'consulta',l:'Consulta m\u00E9dica'},{v:'vacuna',l:'Vacuna'},
       {v:'peso',l:'Control de peso'},{v:'actividad',l:'Actividad'},{v:'otro',l:'Otro'}
@@ -4133,7 +4785,19 @@ function render(){
     bd.appendChild(titlePrevBox);
     bd.appendChild(E.btn('pb rs','Guardar y generar Google Calendar','saveVisita'));
     bd.appendChild(E.btn('gb rd','Cancelar','goMedicos'));
-    setTimeout(function(){
+    // Pre-cargar campos desde _visitaPrefill
+        setTimeout(function(){
+          var vpf2=D._visitaPrefill||{};
+          if(vpf2.fecha){var fe=document.getElementById('vfecha');if(fe)fe.value=vpf2.fecha;}
+          if(vpf2.hora){var ho=document.getElementById('vhora');if(ho)ho.value=vpf2.hora;}
+          if(vpf2.tipo){var ti=document.getElementById('vtipo');if(ti)ti.value=vpf2.tipo;}
+          if(vpf2.desc){var de=document.getElementById('vdesc');if(de)de.value=vpf2.desc;}
+          if(vpf2.durMin){var du=document.getElementById('vdur');if(du)du.value=String(vpf2.durMin);}
+          if(typeof vpf2.mi==='number'&&vpf2.mi>=0){var me=document.getElementById('vmed');if(me)me.value=String(vpf2.mi);}
+          // Limpiar prefill para que no persista en navegaciones futuras
+          D._visitaPrefill=null;
+        },50);
+        setTimeout(function(){
       function updateTitle(){
         var tipoEl=document.getElementById('vtipo'),medEl=document.getElementById('vmed');
         var tipo=tipoEl?tipoEl.value:'consulta';
@@ -4338,6 +5002,7 @@ function render(){
     if(!D.timerLibreData)D.timerLibreData={activo:false,inicio:null,secs:0,etiqueta:'',sesiones:[]};
     var tld=D.timerLibreData;
     var tipos=[
+      {k:'sueño',    ic:'\uD83D\uDE34', lbl:'Sue\u00f1o'},
       {k:'caminata',   ic:'\uD83D\uDEB6', lbl:'Caminata'},
       {k:'bano',       ic:'\uD83D\uDEC0', lbl:'Ba\u00f1o'},
       {k:'masaje',     ic:'\uD83E\uDDD8', lbl:'Masaje'},
@@ -4396,7 +5061,15 @@ function render(){
         if(!tld3.sesiones)tld3.sesiones=[];
         var tipoLbl=tipos.find(function(t){return t.k===tld3.etiqueta;})||tipos[5];
         var secsGuardados=tld3.secs;
-        tld3.sesiones.push({etiqueta:tld3.etiqueta,ic:tipoLbl.ic,lbl:tipoLbl.lbl,secs:secsGuardados,ts:new Date().toISOString()});
+        var slTs=new Date().toISOString();
+        tld3.sesiones.push({etiqueta:tld3.etiqueta,ic:tipoLbl.ic,lbl:tipoLbl.lbl,secs:secsGuardados,ts:slTs});
+        // Si es sueño: guardar también en D.sleepLog para análisis
+        if(tld3.etiqueta==='sue\u00f1o'&&secsGuardados>=120){
+          var slEnd=new Date();
+          var slStart=new Date(slEnd.getTime()-secsGuardados*1000);
+          if(!D.sleepLog)D.sleepLog=[];
+          D.sleepLog.unshift({start:slStart.toISOString(),end:slEnd.toISOString(),dur:Math.round(secsGuardados/60)});
+        }
         tld3.secs=0;tld3.inicio=null;tld3.activo=false;
         saveData();
         // Feedback sin confirm() — mostrar mensaje inline
@@ -4478,20 +5151,58 @@ function render(){
       titleRow.appendChild(mkTxt('span',null,c.label,'font-size:13px;font-weight:bold;color:'+(done?'#64c88c':'#f0d9a0')));
       if(c.obligatorio&&!done)titleRow.appendChild(mkTxt('span',null,'Obligatoria','font-size:9px;color:#e07070;background:rgba(224,112,112,.12);border-radius:5px;padding:2px 6px'));
       info.appendChild(titleRow);
-      var whenTxt=done?'\u2713 Realizada':st.diff<0?'Venci\u00f3 hace '+Math.abs(st.diff)+' d\u00edas':st.diff===0?'Hoy':st.diff<=7?'En '+st.diff+' d\u00edas':'Fecha ideal: '+st.fechaStr;
+      // Detectar si ya hay una visita agendada en Alba para esta consulta
+            var yaAgendadaEnAlba=(D.visits||[]).some(function(v){
+              if(!v||v.estado!=='pendiente')return false;
+              var vd=safeDate(v.dt);
+              if(!vd)return false;
+              // Considerar agendada si la visita cae dentro de 7 días del ideal
+              return Math.abs(vd-st.fecha)<7*86400000;
+            });
+            var whenTxt=done?'\u2713 Realizada':st.diff<0?'Venci\u00f3 hace '+Math.abs(st.diff)+' d\u00edas':st.diff===0?'Hoy':st.diff<=7?'En '+st.diff+' d\u00edas':'Fecha ideal: '+st.fechaStr;
       info.appendChild(mkTxt('div',null,whenTxt,'font-size:11px;color:'+(done?'#64c88c':st.diff<0&&!done?'#e07070':'#a89070')+';margin-bottom:4px'));
+            if(yaAgendadaEnAlba&&!done){
+              var agBadge=mkTxt('span',null,'\uD83D\uDDD3 Agendada en Alba','font-size:10px;color:#d4a843;background:rgba(212,168,67,.1);border:1px solid rgba(212,168,67,.25);border-radius:8px;padding:2px 8px;display:inline-block;margin-bottom:4px');
+              info.appendChild(agBadge);
+            }
       info.appendChild(mkTxt('div',null,c.desc,'font-size:11px;color:#a89070;line-height:1.5'));
       hd.appendChild(info);card.appendChild(hd);
-      // Botón agendar si no está hecha y es próxima
+      // Botones agendar (si no está hecha y es próxima)
       if(!done&&st.diff>-30&&st.diff<60){
-        var agBtn=document.createElement('button');
-        agBtn.style.cssText='margin-top:8px;padding:6px 12px;border-radius:9px;border:1px solid rgba(100,200,140,.3);background:transparent;color:#64c88c;font-size:11px;cursor:pointer;font-family:Georgia,serif';
-        agBtn.textContent='\u25b8 Agendar en calendario';
+        var agRow=mkDiv('display:flex;gap:8px;margin-top:8px');
+        // Botón 1: Agendar en Alba (crea visita en D.visits)
+        var agAlbaBtn=document.createElement('button');
+        agAlbaBtn.style.cssText='flex:1;padding:7px 10px;border-radius:10px;border:1px solid rgba(212,168,67,.4);background:rgba(212,168,67,.1);color:#f0d9a0;font-size:11px;font-weight:bold;cursor:pointer;font-family:Georgia,serif';
+        agAlbaBtn.textContent='\uD83D\uDDD3 Agendar en Alba';
         (function(cv,stv){
-          agBtn.onclick=function(){
-            // Buscar pediatra o primer médico registrado
+          agAlbaBtn.onclick=function(){
+            // Pre-llenar visitaForm con datos de la consulta pautada
+            var med=D.meds&&D.meds.length>0?D.meds[0]:null;
+            var mi=med?0:-1;
+            var dt=stv.fecha;
+            var fechaStr=dt.getFullYear()+'-'+p2(dt.getMonth()+1)+'-'+p2(dt.getDate());
+            D._visitaPrefill={
+              tipo:'consulta',
+              label:cv.label,
+              desc:cv.desc,
+              fecha:fechaStr,
+              hora:'09:00',
+              mi:mi,
+              durMin:60,
+              origen:'consulta_pautada',
+              consultaId:cv.id
+            };
+            setStep('visitaForm');
+          };
+        })(c,st);
+        agRow.appendChild(agAlbaBtn);
+        // Botón 2: Google Calendar (igual que antes)
+        var agGCalBtn=document.createElement('button');
+        agGCalBtn.style.cssText='flex:1;padding:7px 10px;border-radius:10px;border:1px solid rgba(100,200,140,.25);background:transparent;color:#64c88c;font-size:11px;cursor:pointer;font-family:Georgia,serif';
+        agGCalBtn.textContent='\uD83D\uDCC5 Google Cal';
+        (function(cv,stv){
+          agGCalBtn.onclick=function(){
             var med=D.meds&&D.meds.length>0?D.meds[0]:{};
-            // Construir fecha/hora: fecha ideal a las 9:00
             var dt=stv.fecha;
             var dtS=dt.getFullYear()+p2(dt.getMonth()+1)+p2(dt.getDate())+'T090000';
             var dtE=dt.getFullYear()+p2(dt.getMonth()+1)+p2(dt.getDate())+'T100000';
@@ -4499,9 +5210,9 @@ function render(){
             var titulo=cv.label+' — '+apodo;
             var desc=[cv.desc];
             if(D.bebe.dni)desc.push('DNI '+apodo+': '+D.bebe.dni);
-            if(D.bebe.os)desc.push('⚡️ OS: '+D.bebe.os);
+            if(D.bebe.os)desc.push('OS: '+D.bebe.os);
             if(med.nom)desc.push('Médico: Dr/a. '+med.nom+' '+med.ape+(med.esp?' — '+med.esp:''));
-            if(med.tel)desc.push('☎️ Tel: '+med.tel);
+            if(med.tel)desc.push('Tel: '+med.tel);
             var gcUrl='https://calendar.google.com/calendar/render?action=TEMPLATE'
               +'&text='+encodeURIComponent(titulo)
               +'&dates='+dtS+'/'+dtE
@@ -4510,7 +5221,8 @@ function render(){
             window.open(gcUrl,'_blank');
           };
         })(c,st);
-        card.appendChild(agBtn);
+        agRow.appendChild(agGCalBtn);
+        card.appendChild(agRow);
       }
       bd.appendChild(card);
     });
@@ -5664,6 +6376,8 @@ document.addEventListener('click', function(ev) {
         case 'goCartas': setStep('cartas'); return;
         case 'goAstro': closeMasMenu(); setStep('astro'); return;
         case 'goEstudios': closeMasMenu(); setStep('estudios'); return;
+        case 'goSemanal': setStep('semanalResumen'); return;
+        case 'goQuickReg': setStep('quickReg'); return;
         case 'goConsultas': closeMasMenu(); setStep('consultas'); return;
         case 'goTimerLibre': closeMasMenu(); setStep('timerLibre'); return;
         case 'goUrgencia': closeMasMenu(); setStep('urgencia'); return;
@@ -6641,67 +7355,140 @@ function renderHistoria(bd) {
     return;
   }
 
-  // Renderizar agrupado por mes
+  // ── STATS BANNER ─────────────────────────────────────────────
+  var nHitos  = items.filter(function(x){return x.tipo==='hito';}).length;
+  var nSalud  = items.filter(function(x){return x.tipo==='salud';}).length;
+  var nNotas  = items.filter(function(x){return x.tipo==='nota'||x.tipo==='carta';}).length;
+  var nFotos  = items.filter(function(x){return !!x.foto;}).length;
+  var diasVida = fn ? Math.floor((Date.now()-fn.getTime())/86400000) : 0;
+  var statsBanner = mkDiv('display:flex;gap:8px;margin-bottom:16px;overflow-x:auto;padding-bottom:2px');
+  var mkStat2=function(v,l,clr){
+    var s=mkDiv('text-align:center;background:rgba(255,255,255,.03);border:1px solid rgba('+clr+',.2);border-radius:12px;padding:8px 12px;flex-shrink:0;min-width:54px');
+    s.appendChild(mkTxt('div',null,String(v),'font-size:18px;font-weight:bold;color:rgb('+clr+')'));
+    s.appendChild(mkTxt('div',null,l,'font-size:10px;color:#a89070;margin-top:2px'));
+    return s;
+  };
+  if(diasVida>0)statsBanner.appendChild(mkStat2(diasVida,'días','212,168,67'));
+  statsBanner.appendChild(mkStat2(nHitos,'hitos','100,200,180'));
+  statsBanner.appendChild(mkStat2(nSalud,'salud','224,112,112'));
+  statsBanner.appendChild(mkStat2(nNotas,'notas','180,140,220'));
+  if(nFotos>0)statsBanner.appendChild(mkStat2(nFotos,'fotos','212,168,67'));
+  bd.appendChild(statsBanner);
+
+  // ── LÍNEA DE TIEMPO VISUAL ────────────────────────────────────────
+  // Contenedor principal con línea vertical
+  var tlWrap = mkDiv('position:relative;padding-left:36px');
+  // Línea vertical continua
+  var vline = mkDiv('position:absolute;left:14px;top:0;bottom:0;width:2px;background:linear-gradient(to bottom,rgba(212,168,67,.4),rgba(212,168,67,.08))');
+  tlWrap.appendChild(vline);
+
   var seenMonth = {};
-  items.forEach(function(item) {
+  var hoy2Str = new Date().toISOString().slice(0,10);
+  var insertedHoy = false;
+
+  items.forEach(function(item, idx) {
     if (!item.fecha) return;
+
+    // ─ Separador de mes ─
     var mesKey = item.fecha.slice(0,7);
     if (!seenMonth[mesKey]) {
       seenMonth[mesKey] = true;
       try {
-        var d = new Date(item.fecha+'T12:00');
-        var mesLbl = d.toLocaleDateString('es-AR',{month:'long',year:'numeric'});
-        var mHdr = mkDiv('display:flex;align-items:center;gap:8px;margin:16px 0 8px');
-        mHdr.appendChild(mkTxt('span',null,'━','color:rgba(212,168,67,.3);font-size:16px'));
-        mHdr.appendChild(mkTxt('span',null,mesLbl.charAt(0).toUpperCase()+mesLbl.slice(1),'font-size:10px;font-weight:bold;color:#d4a843;text-transform:uppercase;letter-spacing:1.5px'));
-        bd.appendChild(mHdr);
-      } catch(e) {}
+        var d2 = new Date(item.fecha+'T12:00');
+        var mesLbl = d2.toLocaleDateString('es-AR',{month:'long',year:'numeric'});
+        // Nodo de mes en la línea
+        var mRow = mkDiv('display:flex;align-items:center;gap:8px;margin:20px 0 10px;margin-left:-28px');
+        var mDot = mkDiv('width:12px;height:12px;border-radius:50%;background:#d4a843;flex-shrink:0;margin-top:1px');
+        var mLbl = mkTxt('span',null,mesLbl.charAt(0).toUpperCase()+mesLbl.slice(1),'font-size:10px;font-weight:bold;color:#d4a843;text-transform:uppercase;letter-spacing:1.5px');
+        mRow.appendChild(mDot);
+        mRow.appendChild(mLbl);
+        tlWrap.appendChild(mRow);
+      } catch(e){}
     }
 
-    // Card de item
-    var card = mkDiv('position:relative;background:rgba(255,255,255,.03);border-left:3px solid '+item.color+';border-radius:0 12px 12px 0;padding:11px 12px;margin-bottom:8px');
-
-    // Celebración especial
-    if (item.celebracion) {
-      card.style.background = 'rgba(212,168,67,.06)';
-      card.style.border = '1px solid rgba(212,168,67,.2)';
-      card.style.borderLeft = '3px solid '+item.color;
-      card.style.borderRadius = '0 12px 12px 0';
+    // ─ Indicador HOY (si pasamos de hoy a antes) ─
+    if (!insertedHoy && item.fecha < hoy2Str) {
+      insertedHoy = true;
+      var hoyRow = mkDiv('display:flex;align-items:center;gap:8px;margin:8px 0 8px;margin-left:-32px');
+      var hoyLine = mkDiv('flex:1;height:1px;background:rgba(100,200,180,.4)');
+      var hoyLbl = mkTxt('span',null,'HOY','font-size:9px;color:#64c8b4;letter-spacing:2px;flex-shrink:0');
+      hoyRow.appendChild(hoyLbl);
+      hoyRow.appendChild(hoyLine);
+      tlWrap.appendChild(hoyRow);
     }
 
-    var row = mkDiv('display:flex;align-items:flex-start;gap:10px');
-    row.appendChild(mkTxt('span',null,item.ic,'font-size:20px;flex-shrink:0;line-height:1.3'));
-    var txt = mkDiv('flex:1;min-width:0');
-    txt.appendChild(mkTxt('div',null,item.titulo,'font-size:13px;font-weight:bold;color:#f0d9a0;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis'));
-    if (item.sub) txt.appendChild(mkTxt('div',null,item.sub,'font-size:11px;color:#a89070;line-height:1.5;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical'));
-    // Fecha
+    // ─ Nodo del item ─
+    var nodeRow = mkDiv('display:flex;align-items:flex-start;gap:12px;margin-bottom:10px;margin-left:-22px');
+
+    // Círculo del nodo — tamaño según tipo
+    var isCelebr = !!item.celebracion;
+    var nodeSz = isCelebr ? 28 : 22;
+    var nodeBg = isCelebr ? 'rgba(212,168,67,.25)' : 'rgba(20,30,40,1)';
+    var nodeBdr = isCelebr ? '2px solid '+item.color : '1.5px solid '+item.color;
+    var node = mkDiv('width:'+nodeSz+'px;height:'+nodeSz+'px;border-radius:50%;background:'+nodeBg+';border:'+nodeBdr+';display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px');
+    var nodeIc = mkTxt('span',null,item.ic,'font-size:'+(isCelebr?'13':'11')+'px;line-height:1');
+    node.appendChild(nodeIc);
+    nodeRow.appendChild(node);
+
+    // Contenido de la card
+    var cardBg = isCelebr ? 'rgba(212,168,67,.07)' : 'rgba(255,255,255,.025)';
+    var cardBdr = isCelebr ? '1px solid rgba(212,168,67,.25)' : '1px solid rgba(255,255,255,.06)';
+    var card = mkDiv('flex:1;min-width:0;background:'+cardBg+';border:'+cardBdr+';border-radius:13px;padding:10px 13px;overflow:hidden');
+
+    // Fila superior: titulo + fecha
+    var topRow = mkDiv('display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:2px');
+    var titleEl = mkTxt('div',null,item.titulo,'font-size:13px;font-weight:bold;color:#f0d9a0;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap');
     try {
-      var fd2 = new Date(item.fecha+'T12:00');
-      txt.appendChild(mkTxt('div',null,fd2.toLocaleDateString('es-AR',{weekday:'short',day:'2-digit',month:'short'}),'font-size:10px;color:'+item.color+';margin-top:4px;opacity:.8'));
-    } catch(e){}
-    row.appendChild(txt);
-    // Foto thumbnail si existe
-    if (item.foto) {
-      var thumb = document.createElement('img');
-      thumb.src = item.foto;
-      thumb.style.cssText = 'width:52px;height:52px;border-radius:10px;object-fit:cover;flex-shrink:0;border:1px solid rgba(212,168,67,.2);cursor:pointer';
-      thumb.title = 'Ver foto';
-      thumb.onclick = (function(src) { return function(e) {
-        e.stopPropagation();
-        var ov = document.createElement('div');
-        ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:9999;display:flex;align-items:center;justify-content:center';
-        var img = document.createElement('img');
-        img.src = src;
-        img.style.cssText = 'max-width:92vw;max-height:88vh;border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,.6)';
-        ov.appendChild(img);
-        ov.onclick = function(){ document.body.removeChild(ov); };
-        document.body.appendChild(ov);
-      }; })(item.foto);
-      row.appendChild(thumb);
+      var fd3 = new Date(item.fecha+'T12:00');
+      var fdLbl = fd3.toLocaleDateString('es-AR',{day:'2-digit',month:'short'});
+      var fdEl = mkTxt('div',null,fdLbl,'font-size:10px;color:'+item.color+';flex-shrink:0;margin-top:2px');
+      topRow.appendChild(titleEl);
+      topRow.appendChild(fdEl);
+    } catch(e){topRow.appendChild(titleEl);}
+    card.appendChild(topRow);
+
+    // Subtexto
+    if (item.sub) {
+      card.appendChild(mkTxt('div',null,item.sub,'font-size:11px;color:#a89070;line-height:1.5;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical'));
     }
-    card.appendChild(row);
-    bd.appendChild(card);
+
+    // Foto — full width dentro de la card para hitos con foto
+    if (item.foto) {
+      var fotoWrap = mkDiv('margin-top:8px;border-radius:9px;overflow:hidden;cursor:pointer');
+      var img2 = document.createElement('img');
+      img2.src = item.foto;
+      img2.style.cssText = 'width:100%;max-height:160px;object-fit:cover;display:block';
+      img2.onclick = (function(src){return function(e){
+        e.stopPropagation();
+        var ov=document.createElement('div');
+        ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:9999;display:flex;align-items:center;justify-content:center';
+        var im=document.createElement('img');
+        im.src=src;im.style.cssText='max-width:94vw;max-height:90vh;border-radius:10px';
+        ov.appendChild(im);ov.onclick=function(){document.body.removeChild(ov);};
+        document.body.appendChild(ov);
+      };})(item.foto);
+      fotoWrap.appendChild(img2);
+      card.appendChild(fotoWrap);
+    }
+
+    nodeRow.appendChild(card);
+    tlWrap.appendChild(nodeRow);
   });
+
+  // Punto de origen al final de la línea (nacimiento)
+  if (fn) {
+    var nacRow = mkDiv('display:flex;align-items:center;gap:10px;margin-top:8px;margin-left:-22px');
+    var nacDot = mkDiv('width:22px;height:22px;border-radius:50%;background:rgba(212,168,67,.2);border:2px solid #d4a843;display:flex;align-items:center;justify-content:center;flex-shrink:0');
+    nacDot.appendChild(mkTxt('span',null,'🌱','font-size:11px'));
+    nacRow.appendChild(nacDot);
+    var nacInfo = mkDiv('');
+    nacInfo.appendChild(mkTxt('div',null,'Nació '+apodo,'font-size:12px;font-weight:bold;color:#d4a843'));
+    nacInfo.appendChild(mkTxt('div',null,fn.toLocaleDateString('es-AR',{weekday:'long',day:'2-digit',month:'long',year:'numeric'}),'font-size:11px;color:#a89070'));
+    nacRow.appendChild(nacInfo);
+    tlWrap.appendChild(nacRow);
+  }
+
+  bd.appendChild(tlWrap);
 
   // Botón de acciones rápidas al fondo
   var actRow = mkDiv('display:flex;gap:8px;margin-top:16px');
