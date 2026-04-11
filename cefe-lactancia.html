@@ -33,8 +33,12 @@ button{font-family:Georgia,serif;-webkit-appearance:none}
 .mas-menu{position:fixed;bottom:56px;left:50%;transform:translateX(-50%);width:100%;max-width:480px;max-height:70vh;background:rgba(10,18,28,.98);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-top:1px solid rgba(210,175,120,.15);border-radius:20px 20px 0 0;padding:12px;z-index:99;display:none;overflow:hidden}
 .mas-menu.open{display:block}
 .mas-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.mas-cat-hdr{font-size:9px;font-weight:bold;color:#a89070;text-transform:uppercase;letter-spacing:1.5px;padding:4px 2px 6px;grid-column:1/-1;margin-top:4px}
+.mas-cat-hdr{font-size:9px;font-weight:bold;color:#a89070;text-transform:uppercase;letter-spacing:1.5px;padding:6px 2px 6px;grid-column:1/-1;margin-top:4px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;user-select:none}
 .mas-cat-hdr:first-child{margin-top:0}
+.mas-cat-hdr .mas-cat-arrow{font-size:10px;transition:transform .2s;display:inline-block}
+.mas-cat-collapsed .mas-cat-arrow{transform:rotate(-90deg)}
+.mas-group-items{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.mas-group-items.hidden{display:none}
 .mas-item{background:rgba(255,255,255,.05);border:1px solid rgba(210,175,120,.12);border-radius:12px;padding:12px;display:flex;align-items:center;gap:10px;cursor:pointer;color:#e8dcc8;width:100%;text-align:left}
 .mas-item-ic{font-size:22px;flex-shrink:0}
 .mas-item-lbl{font-size:13px;font-weight:bold;color:#f0d9a0;display:block}
@@ -157,7 +161,7 @@ button{font-family:Georgia,serif;-webkit-appearance:none}
 .ntbox{background:rgba(212,168,67,.08);border:1px solid rgba(212,168,67,.2);border-radius:11px;padding:10px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between}
 *::-webkit-scrollbar{display:none}
 </style>
-<script src="alba-cuentos.js"></script>
+<script src="alba-cuentos.js" onerror="console.warn('alba-cuentos.js no disponible — módulo de cuentos desactivado')"></script>
 </head>
 <body>
 <!-- ONBOARDING -->
@@ -212,33 +216,44 @@ button{font-family:Georgia,serif;-webkit-appearance:none}
   </nav>
   <div id="mas-menu" class="mas-menu">
     <div style="overflow-y:auto;max-height:calc(70vh - 24px);-webkit-overflow-scrolling:touch">
-    <div class="mas-grid">
-      <div class="mas-cat-hdr">🍼 Registro</div>
-      <button class="mas-item" data-action="startToma"><span class="mas-item-ic">🍼</span><span><span class="mas-item-lbl">Toma</span><span class="mas-item-sub">Iniciar sesión ahora</span></span></button>
-      <button class="mas-item" data-action="startTomaManual"><span class="mas-item-ic">📝</span><span><span class="mas-item-lbl">Toma manual</span><span class="mas-item-sub">Ingresar datos a mano</span></span></button>
-      <button class="mas-item" data-action="startPanal"><span class="mas-item-ic">🧷</span><span><span class="mas-item-lbl">Pañal</span><span class="mas-item-sub">Pis, caca o mixto</span></span></button>
-      <button class="mas-item" data-action="goPeso"><span class="mas-item-ic">⚖️</span><span><span class="mas-item-lbl">Peso / Medidas</span><span class="mas-item-sub">Curva de crecimiento</span></span></button>
-      <button class="mas-item" data-action="goTimerLibre"><span class="mas-item-ic">⏱️</span><span><span class="mas-item-lbl">Timer libre</span><span class="mas-item-sub">Baño, caminata, masaje</span></span></button>
-      <div class="mas-cat-hdr">📊 Salud</div>
-      <button class="mas-item" data-action="goVacunas"><span class="mas-item-ic">💉</span><span><span class="mas-item-lbl">Vacunas</span><span class="mas-item-sub">Calendario nacional</span></span></button>
-      <button class="mas-item" data-action="goMedicos"><span class="mas-item-ic">🏥</span><span><span class="mas-item-lbl">Médicos</span><span class="mas-item-sub">Profesionales y visitas</span></span></button>
-      <button class="mas-item" data-action="goEstudios"><span class="mas-item-ic">🔬</span><span><span class="mas-item-lbl">Estudios y med.</span><span class="mas-item-sub">FEI, OEA, medicación</span></span></button>
-      <button class="mas-item" data-action="goConsultaMedica"><span class="mas-item-ic">📋</span><span><span class="mas-item-lbl">Consulta médica</span><span class="mas-item-sub">Resumen + PDF clínico</span></span></button>
-      <button class="mas-item" data-action="goUrgencia"><span class="mas-item-ic">🚨</span><span><span class="mas-item-lbl">Urgencia</span><span class="mas-item-sub">Reportar síntoma</span></span></button>
-      <button class="mas-item" data-action="goSprint"><span class="mas-item-ic">📊</span><span><span class="mas-item-lbl">Sprint</span><span class="mas-item-sub">Diagnóstico intensivo</span></span></button>
-      <div class="mas-cat-hdr">📖 Historia</div>
-      <button class="mas-item" data-action="goHitos"><span class="mas-item-ic">⭐</span><span><span class="mas-item-lbl">Hitos</span><span class="mas-item-sub">Momentos de Cefe</span></span></button>
-      <button class="mas-item" data-action="goCuentos"><span class="mas-item-ic">&#128218;</span><span><span class="mas-item-lbl">Cuentos</span><span class="mas-item-sub">Biblioteca de Cefe</span></span></button>
-      <button class="mas-item" data-action="goActividades"><span class="mas-item-ic">🎯</span><span><span class="mas-item-lbl">Actividades</span><span class="mas-item-sub">Plan de la semana</span></span></button>
-      <button class="mas-item" data-action="goHistoria"><span class="mas-item-ic">📜</span><span><span class="mas-item-lbl">Historia</span><span class="mas-item-sub">Línea de tiempo</span></span></button>
-      <button class="mas-item" data-action="goLogros"><span class="mas-item-ic">🏆</span><span><span class="mas-item-lbl">Logros</span><span class="mas-item-sub">Tu camino como padres</span></span></button>
-      <button class="mas-item" data-action="goPendientes" id="mas-pend-btn"><span class="mas-item-ic">📋</span><span style="flex:1"><span class="mas-item-lbl">Pendientes</span><span class="mas-item-sub">Checks y recordatorios</span></span><span id="pend-badge" style="display:none;background:#e07070;color:#fff;border-radius:10px;font-size:10px;font-weight:bold;padding:2px 7px;min-width:20px;text-align:center"></span></button>
-      <div class="mas-cat-hdr">⚙️ App</div>
-      <button class="mas-item" data-action="goPerfil"><span class="mas-item-ic">👶</span><span><span class="mas-item-lbl">Perfil de Cefe</span><span class="mas-item-sub">Datos y obra social</span></span></button>
-      <button class="mas-item" data-action="goCalendario"><span class="mas-item-ic">📅</span><span><span class="mas-item-lbl">Calendario</span><span class="mas-item-sub">Agenda de Cefe</span></span></button>
-      <button class="mas-item" data-action="goConfig"><span class="mas-item-ic">⚙️</span><span><span class="mas-item-lbl">Configuración</span><span class="mas-item-sub">Notif. y preferencias</span></span></button>
-      <button class="mas-item" data-action="goAstro"><span class="mas-item-ic">✨</span><span><span class="mas-item-lbl">Recreativo</span><span class="mas-item-sub">Quiz, datos, respira</span></span></button>
-      <button class="mas-item" data-action="toggleNight"><span class="mas-item-ic" id="night-ic">🌙</span><span><span class="mas-item-lbl" id="night-lbl">Modo noche</span><span class="mas-item-sub">Tomas nocturnas</span></span></button>
+    <div class="mas-grid" id="mas-grid-root">
+      <!-- Grupo: Registro -->
+      <div class="mas-cat-hdr" onclick="toggleMasGroup('registro')" id="mas-hdr-registro">🍼 Registro<span class="mas-cat-arrow">&#9660;</span></div>
+      <div class="mas-group-items" id="mas-grp-registro">
+        <button class="mas-item" data-action="startToma"><span class="mas-item-ic">🍼</span><span><span class="mas-item-lbl">Toma</span><span class="mas-item-sub">Iniciar sesión ahora</span></span></button>
+        <button class="mas-item" data-action="startPanal"><span class="mas-item-ic">🧷</span><span><span class="mas-item-lbl">Pañal</span><span class="mas-item-sub">Pis, caca o mixto</span></span></button>
+        <button class="mas-item" data-action="goPeso"><span class="mas-item-ic">⚖️</span><span><span class="mas-item-lbl">Medidas</span><span class="mas-item-sub">Curva de crecimiento</span></span></button>
+        <button class="mas-item" data-action="goTimerLibre"><span class="mas-item-ic">⏱️</span><span><span class="mas-item-lbl">Timer libre</span><span class="mas-item-sub">Baño, caminata, masaje</span></span></button>
+      </div>
+      <!-- Grupo: Salud -->
+      <div class="mas-cat-hdr mas-cat-collapsed" onclick="toggleMasGroup('salud')" id="mas-hdr-salud">📊 Salud<span class="mas-cat-arrow">&#9660;</span></div>
+      <div class="mas-group-items hidden" id="mas-grp-salud">
+        <button class="mas-item" data-action="goVacunas"><span class="mas-item-ic">💉</span><span><span class="mas-item-lbl">Vacunas</span><span class="mas-item-sub">Calendario nacional</span></span></button>
+        <button class="mas-item" data-action="goMedicos"><span class="mas-item-ic">🏥</span><span><span class="mas-item-lbl">Médicos</span><span class="mas-item-sub">Profesionales y visitas</span></span></button>
+        <button class="mas-item" data-action="goEstudios"><span class="mas-item-ic">🔬</span><span><span class="mas-item-lbl">Estudios y med.</span><span class="mas-item-sub">FEI, OEA, medicación</span></span></button>
+        <button class="mas-item" data-action="goConsultaMedica"><span class="mas-item-ic">📋</span><span><span class="mas-item-lbl">Consulta médica</span><span class="mas-item-sub">Resumen + PDF clínico</span></span></button>
+        <button class="mas-item" data-action="goUrgencia"><span class="mas-item-ic">🚨</span><span><span class="mas-item-lbl">Urgencia</span><span class="mas-item-sub">Reportar síntoma</span></span></button>
+        <button class="mas-item" data-action="goSprint"><span class="mas-item-ic">📊</span><span><span class="mas-item-lbl">Sprint</span><span class="mas-item-sub">Diagnóstico intensivo</span></span></button>
+      </div>
+      <!-- Grupo: Historia -->
+      <div class="mas-cat-hdr mas-cat-collapsed" onclick="toggleMasGroup('historia')" id="mas-hdr-historia">📖 Historia<span class="mas-cat-arrow">&#9660;</span></div>
+      <div class="mas-group-items hidden" id="mas-grp-historia">
+        <button class="mas-item" data-action="goHitos"><span class="mas-item-ic">⭐</span><span><span class="mas-item-lbl">Hitos</span><span class="mas-item-sub">Momentos de Cefe</span></span></button>
+        <button class="mas-item" data-action="goCuentos"><span class="mas-item-ic">📚</span><span><span class="mas-item-lbl">Cuentos</span><span class="mas-item-sub">Biblioteca de Cefe</span></span></button>
+        <button class="mas-item" data-action="goActividades"><span class="mas-item-ic">🎯</span><span><span class="mas-item-lbl">Actividades</span><span class="mas-item-sub">Plan de la semana</span></span></button>
+        <button class="mas-item" data-action="goHistoria"><span class="mas-item-ic">📜</span><span><span class="mas-item-lbl">Historia</span><span class="mas-item-sub">Línea de tiempo</span></span></button>
+        <button class="mas-item" data-action="goLogros"><span class="mas-item-ic">🏆</span><span><span class="mas-item-lbl">Logros</span><span class="mas-item-sub">Tu camino como padres</span></span></button>
+        <button class="mas-item" data-action="goPendientes" id="mas-pend-btn"><span class="mas-item-ic">📋</span><span style="flex:1"><span class="mas-item-lbl">Pendientes</span><span class="mas-item-sub">Checks y recordatorios</span></span><span id="pend-badge" style="display:none;background:#e07070;color:#fff;border-radius:10px;font-size:10px;font-weight:bold;padding:2px 7px;min-width:20px;text-align:center"></span></button>
+      </div>
+      <!-- Grupo: App -->
+      <div class="mas-cat-hdr mas-cat-collapsed" onclick="toggleMasGroup('app')" id="mas-hdr-app">⚙️ App<span class="mas-cat-arrow">&#9660;</span></div>
+      <div class="mas-group-items hidden" id="mas-grp-app">
+        <button class="mas-item" data-action="goPerfil"><span class="mas-item-ic">👶</span><span><span class="mas-item-lbl">Perfil de Cefe</span><span class="mas-item-sub">Datos y obra social</span></span></button>
+        <button class="mas-item" data-action="goCalendario"><span class="mas-item-ic">📅</span><span><span class="mas-item-lbl">Calendario</span><span class="mas-item-sub">Agenda de Cefe</span></span></button>
+        <button class="mas-item" data-action="goConfig"><span class="mas-item-ic">⚙️</span><span><span class="mas-item-lbl">Configuración</span><span class="mas-item-sub">Notif. y preferencias</span></span></button>
+        <button class="mas-item" data-action="goAstro"><span class="mas-item-ic">✨</span><span><span class="mas-item-lbl">Recreativo</span><span class="mas-item-sub">Quiz, datos, respira</span></span></button>
+        <button class="mas-item" data-action="toggleNight"><span class="mas-item-ic" id="night-ic">🌙</span><span><span class="mas-item-lbl" id="night-lbl">Modo noche</span><span class="mas-item-sub">Tomas nocturnas</span></span></button>
+      </div>
     </div>
     </div>
   </div>
@@ -509,7 +524,8 @@ var D = {
   momentos: { respondidos: {}, descartados: {} },
   // alarm state
   alarmTimer: null, alarmFired: false, nextToma: null, notifTimer: null,
-  sprints: [], sprintActivo: null
+  sprints: [], sprintActivo: null,
+  onboarding: {}  // {pregId: {resp, ts, pospHasta}}
 };
 
 // ─── STORAGE & MIGRATION ──────────────────────────────────────
@@ -597,6 +613,7 @@ function loadData() {
     var sl = ls('sleepLog2'); if (sl) D.sleepLog = JSON.parse(sl);
     var ss = ls('sleepStart2'); if (ss) D.sleepStart = JSON.parse(ss);
     var sp = ls('sprints'); if (sp) D.sprints = JSON.parse(sp);
+    var ob = ls('onboarding'); if (ob) D.onboarding = JSON.parse(ob);
     var spa = ls('sprintActivo'); if (spa) D.sprintActivo = JSON.parse(spa);
   } catch(e) {}
 
@@ -664,6 +681,7 @@ function saveData() {
   lss('config2', D.config||{});
   lss('sprints', D.sprints||[]);
   lss('sprintActivo', D.sprintActivo||null);
+  lss('onboarding', D.onboarding||{});
 
   // Firebase: must serialize all Date objects to ISO strings first
   if(window.fbSave) window.fbSave({
@@ -688,7 +706,8 @@ function saveData() {
     config: D.config||{},
     actividadesHechas: D.actividadesHechas||{},
     sprints: D.sprints||[],
-    sprintActivo: D.sprintActivo||null
+    sprintActivo: D.sprintActivo||null,
+    onboarding: D.onboarding||{}
   });
 }
 
@@ -1634,8 +1653,29 @@ function markVacuna(id,done){
 }
 function setAstroTab(k){D.astroTab=k;render();}
 function setHitoTab(k){D.hitoTab=k;render();}
-function toggleMasMenu(){var mm=document.getElementById('mas-menu');if(mm)mm.classList.toggle('open');}
+function toggleMasMenu(){var mm=document.getElementById('mas-menu');if(mm){mm.classList.toggle('open');if(mm.classList.contains('open')&&typeof initMasGroupState==='function')initMasGroupState();}}
 function closeMasMenu(){var mm=document.getElementById('mas-menu');if(mm)mm.classList.remove('open');}
+function toggleMasGroup(id){
+  var items=document.getElementById('mas-grp-'+id);
+  var hdr=document.getElementById('mas-hdr-'+id);
+  if(!items||!hdr)return;
+  var collapsed=items.classList.contains('hidden');
+  items.classList.toggle('hidden',!collapsed);
+  hdr.classList.toggle('mas-cat-collapsed',!collapsed);
+  try{localStorage.setItem('mas_grp_'+id,collapsed?'1':'0');}catch(e){}
+}
+function initMasGroupState(){
+  ['registro','salud','historia','app'].forEach(function(id){
+    var saved=null;try{saved=localStorage.getItem('mas_grp_'+id);}catch(e){}
+    // Default: registro open, rest closed — unless saved state exists
+    var shouldOpen = saved!==null ? saved==='1' : id==='registro';
+    var items=document.getElementById('mas-grp-'+id);
+    var hdr=document.getElementById('mas-hdr-'+id);
+    if(!items||!hdr)return;
+    if(shouldOpen){items.classList.remove('hidden');hdr.classList.remove('mas-cat-collapsed');}
+    else{items.classList.add('hidden');hdr.classList.add('mas-cat-collapsed');}
+  });
+}
 
 // ─── CARTA ASTRAL ─────────────────────────────────────────────
 function calcAstro() {
@@ -1891,7 +1931,7 @@ function genWeeklySummary(){
 
 
 // ─── ACTIONS ──────────────────────────────────────────────────
-function setStep(s){D.step=s;render();}
+function setStep(s){if(typeof closeMasMenu==='function')closeMasMenu();D.step=s;render();}
 
 function startToma(manual){
   D.manualMode=!!manual;D.ts=new Date();D.lados=[];D.cSide=null;D.cStart=null;
@@ -2228,6 +2268,22 @@ function copyPesoText(){
 function toggleNightMode(){D.nightMode=!D.nightMode;saveData();applyNightMode();}
 function applyNightMode(){document.body.classList.toggle('night',D.nightMode);}
 
+// Auto-modo madrugada: re-render home cuando cruza umbral horario
+(function() {
+  var _lastMadrugadaState = null;
+  setInterval(function() {
+    var cfg = D.config || {};
+    if ((cfg.modo_madrugada || 'auto') !== 'auto') return; // solo en modo auto
+    if (D.step !== 'home') return; // solo afecta el home
+    var current = isMadrugada();
+    if (_lastMadrugadaState !== null && current !== _lastMadrugadaState) {
+      // Cruzamos umbral — re-render para activar/desactivar home nocturno
+      if (typeof render === 'function') render();
+    }
+    _lastMadrugadaState = current;
+  }, 60000); // chequea cada minuto
+})();
+
 // ─── CHART ────────────────────────────────────────────────────
 function drawChart(){
   var c=document.getElementById('pchart');if(!c||!c.getContext)return;
@@ -2380,10 +2436,10 @@ function handleAction(action,data){
     case 'startToma':startToma(false);break;
     case 'startTomaManual':startToma(true);break;
     case 'startPanal':startPanal();break;
-    case 'goPeso':setStep('pesoEntry');break;
+    case 'goPeso':setStep('peso');break;
     case 'goHome':setStep('home');break;
     case 'goPerfil':setStep('perfil');break;
-    case 'goMedicos':setStep('medicos');break;
+    case 'goMedicos':closeMasMenu&&closeMasMenu();setStep('medicos');break;
     case 'goPesoScreen':setStep('peso');break;
     case 'discardCurrent':if(confirm('Descartar?'))discardCurrent();break;
     case 'discardPending':discardPending();break;
@@ -2453,9 +2509,21 @@ function handleAction(action,data){
       if(!hd)return;
       var existing=D.hitos.find(function(h){return h.id===data.id;});
       if(existing)return;
-      var nota=hd.cat==='vida'?'':undefined;
-      D.hitos.push({id:data.id,fecha:new Date().toISOString(),nota:nota||''});
-      saveData();render();
+      // Para hitos de vida: pedir fecha + foto opcional
+      if(hd.cat==='vida'){
+        _mostrarObHitoRetro({
+          icon:hd.ic||'⭐',
+          badge:'Hito de vida',
+          titulo:hd.label,
+          cuerpo:'Registrá el día exacto y una foto si tenés. Queda guardado en la historia de Cefe.',
+          tipo_resp:'hito_retroactivo',
+          hitoId:data.id,
+          opcNegLabel:'Cancelar'
+        }, hd.label, D.bebe.apodo||D.bebe.nombre||'Cefe', function(){ render(); });
+      } else {
+        D.hitos.push({id:data.id,fecha:new Date().toISOString(),nota:''});
+        saveData();render();
+      }
     })();break;
     case 'desmarcarHito':(function(){
       if(!confirm('Desmarcar este hito?'))return;
@@ -2679,8 +2747,9 @@ function render(){
   var nb=document.getElementById('night-btn');if(nb)nb.style.color=D.nightMode?'#f0d9a0':'#a89070';
   var htEl=document.getElementById('hdr-title');
   if(typeof updatePendBadge==='function')updatePendBadge();
-  if(htEl){var TITLES={home:'Ceferino',history:'Historial',peso:'Medidas',pesoEntry:'Peso',tallaEntry:'Talla',pcEntry:'Perimetro Cefalico',dash:'Dashboard',perfil:'Perfil',editBebe:'Perfil',editPadre:'Perfil',medicos:'M\u00e9dicos',editMed:'M\u00e9dicos',visitaForm:'Médicos',postVisita:'Seguimiento',consultaMedica:'Consulta Médica',sprintSetup:'Sprint',sprintResumen:'Resumen Sprint',logros:'Logros',config:'Configuración',agenda:'Agenda',nuevoEvento:'Nuevo evento',estudios:'Estudios y Medicación',extras:'Extras',notas:'Notas',editNota:'Nueva Nota',sintomas:'S\u00edntomas',editSintoma:'S\u00edntoma',hitos:'Hitos',cartas:'Cartas',editCarta:'Carta',astro:'Recreativo',actividades:'Actividades',vacunas:'Vacunas',memoria:'Memoria de Cefe',pendientes:'Pendientes',historia:'Historia de Cefe',toma:'Toma',panal:'Pa\u00f1al',preview:'Confirmar',summary:'Mensaje'};
-  htEl.textContent=TITLES[D.step]||'Ceferino';}
+  if(htEl){var _apodoNav=D.bebe.apodo||D.bebe.nombre||'Cefe';
+  var TITLES={home:_apodoNav,history:'Historial',peso:'Medidas',pesoEntry:'Peso',tallaEntry:'Talla',pcEntry:'Perímetro Cefálico',dash:'Dashboard',perfil:'Perfil',editBebe:'Perfil',editPadre:'Perfil',medicos:'Médicos',editMed:'Médicos',visitaForm:'Médicos',postVisita:'Seguimiento',consultaMedica:'Consulta Médica',sprintSetup:'Sprint',sprintResumen:'Resumen Sprint',logros:'Logros',config:'Configuración',agenda:'Agenda',nuevoEvento:'Nuevo evento',estudios:'Estudios y Medicación',extras:'Extras',notas:'Notas',editNota:'Nueva Nota',sintomas:'Síntomas',editSintoma:'Síntoma',hitos:'Hitos',cartas:'Cartas',editCarta:'Carta',astro:'Recreativo',actividades:'Actividades',vacunas:'Vacunas',memoria:'Memoria de '+_apodoNav,pendientes:'Pendientes',historia:'Historia de '+_apodoNav,toma:'Toma',panal:'Pañal',preview:'Confirmar',summary:'Mensaje'};
+  htEl.textContent=TITLES[D.step]||_apodoNav;}
 
   var bd=document.getElementById('bd');if(!bd)return;
   while(bd.firstChild)bd.removeChild(bd.firstChild);
@@ -2691,6 +2760,37 @@ function render(){
 
   // ── HOME ──────────────────────────────────────────────────────
   if(D.step==='home'){
+    // ── Widget atajos ────────────────────────────────────────────────
+    (function(){
+      var atajos=[
+        {ic:'🍼',lbl:'Toma',      sub:'pecho/mamadera',  act:'startToma',      clr:'rgba(212,168,67,.15)', bdr:'rgba(212,168,67,.4)'},
+        {ic:'🧷',lbl:'Pañal',     sub:'pis o caca',     act:'startPanal',     clr:'rgba(100,200,180,.1)', bdr:'rgba(100,200,180,.3)'},
+        {ic:'⚖️',lbl:'Medidas',   sub:'curva y graficos', act:'goPeso',          clr:'rgba(180,140,220,.1)', bdr:'rgba(180,140,220,.3)'},
+        {ic:'⏱️',lbl:'Timer',     sub:'actividad libre', act:'goTimerLibre',    clr:'rgba(100,200,180,.08)',bdr:'rgba(100,200,180,.2)'},
+        {ic:'📖',lbl:'Cuentos',   sub:'leer con Cefe',   act:'goCuentos',       clr:'rgba(180,140,220,.08)',bdr:'rgba(180,140,220,.2)'},
+        {ic:'🏃',lbl:'Actividades',sub:'plan del día',act:'goActividades',  clr:'rgba(100,200,140,.08)',bdr:'rgba(100,200,140,.2)'},
+        {ic:'🏥',lbl:'Consultas', sub:'próxima visita',act:'goConsultas',   clr:'rgba(224,112,112,.08)',bdr:'rgba(224,112,112,.25)'},
+        {ic:'📊',lbl:'Sprint',    sub:'diagnóstico',    act:'goSprint',       clr:'rgba(100,200,180,.08)',bdr:'rgba(100,200,180,.2)'}
+      ];
+      bd.appendChild(mkTxt('div',null,'Acciones rápidas','font-size:10px;color:#a89070;text-transform:uppercase;letter-spacing:1.2px;font-weight:bold;margin-bottom:10px'));
+      var sw=mkDiv('overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;-ms-overflow-style:none;margin:0 -4px;padding:0 4px 10px 4px');
+      var sr=mkDiv('display:flex;gap:10px;width:max-content;padding-bottom:4px');
+      atajos.forEach(function(a){
+        var chip=document.createElement('button');
+        chip.style.cssText='display:flex;flex-direction:column;align-items:center;justify-content:center;width:72px;min-height:76px;border-radius:18px;border:1px solid '+a.bdr+';background:'+a.clr+';padding:8px 4px;cursor:pointer;font-family:Georgia,serif;flex-shrink:0;-webkit-tap-highlight-color:transparent;transition:transform .1s';
+        chip.innerHTML='<span style="font-size:26px;line-height:1.2;display:block;margin-bottom:4px">'+a.ic+'</span><span style="font-size:11px;font-weight:bold;color:#f0d9a0;white-space:nowrap;display:block;line-height:1.2">'+a.lbl+'</span><span style="font-size:9px;color:#a89070;white-space:nowrap;display:block;margin-top:2px;line-height:1.2">'+a.sub+'</span>';
+        chip.dataset.action=a.act;
+        chip.addEventListener('touchstart',function(){chip.style.transform='scale(.93)';},{passive:true});
+        chip.addEventListener('touchend',function(){chip.style.transform='scale(1)';},{passive:true});
+        sr.appendChild(chip);
+      });
+      sw.appendChild(sr);bd.appendChild(sw);
+      var cta=document.createElement('button');
+      cta.style.cssText='width:100%;padding:16px;border-radius:16px;border:none;background:linear-gradient(135deg,rgba(212,168,67,.6),rgba(212,168,67,.35));color:#f0d9a0;font-size:16px;font-weight:bold;cursor:pointer;font-family:Georgia,serif;letter-spacing:.3px;margin-bottom:10px;-webkit-tap-highlight-color:transparent';
+      cta.innerHTML='🍼  Registrar toma ahora';
+      cta.dataset.action='startToma';
+      bd.appendChild(cta);
+    })()
     // ── Modo Madrugada ──────────────────────────────────────────
     if(isMadrugada()){
       var ultSeno=getUltimoSeno();
@@ -3277,38 +3377,7 @@ function render(){
       var spSt=document.createElement('button');spSt.style.cssText='flex:1;padding:9px 6px;border-radius:11px;border:1px solid rgba(224,112,112,.3);background:rgba(224,112,112,.08);color:#e07070;font-size:11px;cursor:pointer;font-family:Georgia,serif';spSt.textContent='Finalizar';spSt.addEventListener('click',function(){if(confirm('¿Finalizás el sprint?')){stopSprint();}});spBtns.appendChild(spSt);
       spCard.appendChild(spBtns);bd.appendChild(spCard);
     }
-    // ── Widget atajos ────────────────────────────────────────────────
-    (function(){
-      var atajos=[
-        {ic:'🍼',lbl:'Toma',      sub:'pecho/mamadera',  act:'startToma',      clr:'rgba(212,168,67,.15)', bdr:'rgba(212,168,67,.4)'},
-        {ic:'🧷',lbl:'Pañal',     sub:'pis o caca',     act:'startPanal',     clr:'rgba(100,200,180,.1)', bdr:'rgba(100,200,180,.3)'},
-        {ic:'⚖️',lbl:'Peso',      sub:'curva peso',      act:'goPeso',          clr:'rgba(180,140,220,.1)', bdr:'rgba(180,140,220,.3)'},
-        {ic:'📝',lbl:'Manual',    sub:'toma a mano',     act:'startTomaManual', clr:'rgba(212,168,67,.08)',bdr:'rgba(212,168,67,.2)'},
-        {ic:'⏱️',lbl:'Timer',     sub:'actividad libre', act:'goTimerLibre',    clr:'rgba(100,200,180,.08)',bdr:'rgba(100,200,180,.2)'},
-        {ic:'📖',lbl:'Cuentos',   sub:'leer con Cefe',   act:'goCuentos',       clr:'rgba(180,140,220,.08)',bdr:'rgba(180,140,220,.2)'},
-        {ic:'🏃',lbl:'Actividades',sub:'plan del día',act:'goActividades',  clr:'rgba(100,200,140,.08)',bdr:'rgba(100,200,140,.2)'},
-        {ic:'🏥',lbl:'Consultas', sub:'próxima visita',act:'goConsultas',   clr:'rgba(224,112,112,.08)',bdr:'rgba(224,112,112,.25)'},
-        {ic:'📊',lbl:'Sprint',    sub:'diagnóstico',    act:'goSprint',       clr:'rgba(100,200,180,.08)',bdr:'rgba(100,200,180,.2)'}
-      ];
-      bd.appendChild(mkTxt('div',null,'Acciones rápidas','font-size:10px;color:#a89070;text-transform:uppercase;letter-spacing:1.2px;font-weight:bold;margin-bottom:10px'));
-      var sw=mkDiv('overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;-ms-overflow-style:none;margin:0 -4px;padding:0 4px 10px 4px');
-      var sr=mkDiv('display:flex;gap:10px;width:max-content;padding-bottom:4px');
-      atajos.forEach(function(a){
-        var chip=document.createElement('button');
-        chip.style.cssText='display:flex;flex-direction:column;align-items:center;justify-content:center;width:72px;min-height:76px;border-radius:18px;border:1px solid '+a.bdr+';background:'+a.clr+';padding:8px 4px;cursor:pointer;font-family:Georgia,serif;flex-shrink:0;-webkit-tap-highlight-color:transparent;transition:transform .1s';
-        chip.innerHTML='<span style="font-size:26px;line-height:1.2;display:block;margin-bottom:4px">'+a.ic+'</span><span style="font-size:11px;font-weight:bold;color:#f0d9a0;white-space:nowrap;display:block;line-height:1.2">'+a.lbl+'</span><span style="font-size:9px;color:#a89070;white-space:nowrap;display:block;margin-top:2px;line-height:1.2">'+a.sub+'</span>';
-        chip.dataset.action=a.act;
-        chip.addEventListener('touchstart',function(){chip.style.transform='scale(.93)';},{passive:true});
-        chip.addEventListener('touchend',function(){chip.style.transform='scale(1)';},{passive:true});
-        sr.appendChild(chip);
-      });
-      sw.appendChild(sr);bd.appendChild(sw);
-      var cta=document.createElement('button');
-      cta.style.cssText='width:100%;padding:16px;border-radius:16px;border:none;background:linear-gradient(135deg,rgba(212,168,67,.6),rgba(212,168,67,.35));color:#f0d9a0;font-size:16px;font-weight:bold;cursor:pointer;font-family:Georgia,serif;letter-spacing:.3px;margin-bottom:10px;-webkit-tap-highlight-color:transparent';
-      cta.innerHTML='🍼  Registrar toma ahora';
-      cta.dataset.action='startToma';
-      bd.appendChild(cta);
-    })();
+;
   }
 
   else if(D.step==='sprintSetup'){renderSprintSetup(bd);}
@@ -3317,6 +3386,11 @@ function render(){
   else if(D.step==='toma'){
     bd.appendChild(E.btn('bk','\u2190 Descartar','discardCurrent'));
     if(D.manualMode){
+      var modeToggleM = document.createElement('button');
+      modeToggleM.style.cssText = 'float:right;margin-top:-4px;padding:5px 10px;border-radius:10px;border:1px solid rgba(255,255,255,.12);background:transparent;color:#a89070;font-size:11px;cursor:pointer;font-family:Georgia,serif';
+      modeToggleM.textContent = '⏱️ Usar timer';
+      modeToggleM.onclick = function() { D.manualMode=false; render(); };
+      bd.appendChild(modeToggleM);
       bd.appendChild(E.el('div',{cls:'st',txt:'Toma Manual'}));
       bd.appendChild(E.frow([E.field('Fecha',E.input('fi','mdate','date',null,D.mDate)),E.field('Hora inicio',E.input('fi','mstart','time'))]));
       bd.appendChild(E.field('Hora fin (opcional)',E.input('fi','mend','time')));
@@ -3337,6 +3411,12 @@ function render(){
       if(D.mLados.length>0||(D.mlProvistos&&D.mlProvistos>0))bd.appendChild(E.btn('pb go','Guardar toma','finishToma'));
       bd.appendChild(E.btn('gb rd','Cancelar','discardCurrent'));
     } else {
+      // Mini toggle para cambiar a modo manual
+      var modeToggle = document.createElement('button');
+      modeToggle.style.cssText = 'float:right;margin-top:-4px;padding:5px 10px;border-radius:10px;border:1px solid rgba(255,255,255,.12);background:transparent;color:#a89070;font-size:11px;cursor:pointer;font-family:Georgia,serif';
+      modeToggle.textContent = '📝 Ingresar a mano';
+      modeToggle.onclick = function() { D.manualMode=true; render(); };
+      bd.appendChild(modeToggle);
       renderTomaEntretenimiento(bd);
 
       // ── TIMER VISUAL 3 DISPLAYS ──
@@ -4242,7 +4322,14 @@ function render(){
       window.open(waUrl,'_blank');
     };
     bd.appendChild(genUrgBtn);
-    bd.appendChild(E.btn('gb','\u2190 Volver','home'));
+    // Botón volver — si timer activo, avisa que sigue corriendo
+    var volverTL=document.createElement('button');
+    volverTL.className='gb';
+    var tlRunning=tld&&tld.activo;
+    volverTL.textContent=tlRunning?'← Volver (timer sigue en 2do plano)':'← Volver';
+    volverTL.style.cssText='width:100%;padding:13px;border-radius:13px;border:1px solid rgba(255,255,255,.1);background:'+(tlRunning?'rgba(212,168,67,.08)':'transparent')+';color:'+(tlRunning?'#d4a843':'#a89070')+';font-size:13px;cursor:pointer;font-family:Georgia,serif;margin-top:4px';
+    volverTL.onclick=function(){setStep('home');};
+    bd.appendChild(volverTL);
   }
 
   // ── TIMER LIBRE ──────────────────────────────────────────────────
@@ -4308,14 +4395,25 @@ function render(){
         if(tld3.activo){tld3.secs+=Math.floor((Date.now()-tld3.inicio)/1000);tld3.activo=false;tld3.inicio=null;stopTimerLibre();}
         if(!tld3.sesiones)tld3.sesiones=[];
         var tipoLbl=tipos.find(function(t){return t.k===tld3.etiqueta;})||tipos[5];
-        tld3.sesiones.push({etiqueta:tld3.etiqueta,ic:tipoLbl.ic,lbl:tipoLbl.lbl,secs:tld3.secs,ts:new Date().toISOString()});
-        // Compartir opcion
-        var mins2=Math.floor(tld3.secs/60),secs2=tld3.secs%60;
-        var msg='\uD83D\uDCC4 Registro de '+apodoTL+'\n'+tipoLbl.ic+' '+tipoLbl.lbl+': '+mins2+'m'+(secs2>0?' '+secs2+'s':'')+'\n'+new Date().toLocaleDateString('es-AR');
+        var secsGuardados=tld3.secs;
+        tld3.sesiones.push({etiqueta:tld3.etiqueta,ic:tipoLbl.ic,lbl:tipoLbl.lbl,secs:secsGuardados,ts:new Date().toISOString()});
         tld3.secs=0;tld3.inicio=null;tld3.activo=false;
         saveData();
-        if(confirm('\u00bfCompartir por WhatsApp?')){window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');}
-        render();
+        // Feedback sin confirm() — mostrar mensaje inline
+        var mins2=Math.floor(secsGuardados/60),secs2=secsGuardados%60;
+        var msg='📄 Registro de '+apodoTL+'\n'+tipoLbl.ic+' '+tipoLbl.lbl+': '+mins2+'m'+(secs2>0?' '+secs2+'s':'')+'\n'+new Date().toLocaleDateString('es-AR');
+
+
+        finTLBtn.textContent='✓ Guardado — '+mins2+'m'+(secs2>0?' '+secs2+'s':'');
+        finTLBtn.style.background='rgba(100,200,140,.2)';
+        finTLBtn.disabled=true;
+        // Botón WhatsApp separado (no bloquea)
+        var waBtn=document.createElement('button');
+        waBtn.style.cssText='flex:0 0 auto;padding:13px 14px;border-radius:13px;border:1px solid rgba(100,200,140,.3);background:transparent;color:#64c8b4;font-size:13px;cursor:pointer;font-family:Georgia,serif';
+        waBtn.textContent='📤 WA';
+        waBtn.onclick=function(){window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');};
+        btRow.appendChild(waBtn);
+        render(); // refresh sesiones list below
       };
       btRow.appendChild(finTLBtn);
       var resetTLBtn=document.createElement('button');
@@ -4389,7 +4487,29 @@ function render(){
         var agBtn=document.createElement('button');
         agBtn.style.cssText='margin-top:8px;padding:6px 12px;border-radius:9px;border:1px solid rgba(100,200,140,.3);background:transparent;color:#64c88c;font-size:11px;cursor:pointer;font-family:Georgia,serif';
         agBtn.textContent='\u25b8 Agendar en calendario';
-        (function(cv){agBtn.onclick=function(){D._nuevoEventoPrefill={tipo:'consulta',titulo:cv.label,fecha:cv.fechaStr};setStep('nuevoEvento');};})(c);
+        (function(cv,stv){
+          agBtn.onclick=function(){
+            // Buscar pediatra o primer médico registrado
+            var med=D.meds&&D.meds.length>0?D.meds[0]:{};
+            // Construir fecha/hora: fecha ideal a las 9:00
+            var dt=stv.fecha;
+            var dtS=dt.getFullYear()+p2(dt.getMonth()+1)+p2(dt.getDate())+'T090000';
+            var dtE=dt.getFullYear()+p2(dt.getMonth()+1)+p2(dt.getDate())+'T100000';
+            var apodo=D.bebe.apodo||D.bebe.nombre||'Cefe';
+            var titulo=cv.label+' — '+apodo;
+            var desc=[cv.desc];
+            if(D.bebe.dni)desc.push('DNI '+apodo+': '+D.bebe.dni);
+            if(D.bebe.os)desc.push('⚡️ OS: '+D.bebe.os);
+            if(med.nom)desc.push('Médico: Dr/a. '+med.nom+' '+med.ape+(med.esp?' — '+med.esp:''));
+            if(med.tel)desc.push('☎️ Tel: '+med.tel);
+            var gcUrl='https://calendar.google.com/calendar/render?action=TEMPLATE'
+              +'&text='+encodeURIComponent(titulo)
+              +'&dates='+dtS+'/'+dtE
+              +(med.dir?'&location='+encodeURIComponent(med.dir):'')
+              +'&details='+encodeURIComponent(desc.join('\n'));
+            window.open(gcUrl,'_blank');
+          };
+        })(c,st);
         card.appendChild(agBtn);
       }
       bd.appendChild(card);
@@ -5538,7 +5658,7 @@ document.addEventListener('click', function(ev) {
   while (t && t !== document.body) {
     if (t.dataset && t.dataset.action) {
       switch(t.dataset.action) {
-        case 'goNotas': setStep('notas'); return;
+        case 'goNotas': closeMasMenu(); setStep('notas'); return;
         case 'goSintomas': setStep('sintomas'); return;
         case 'goHitos': setStep('hitos'); return;
         case 'goCartas': setStep('cartas'); return;
@@ -5713,8 +5833,14 @@ function responderMomento(id, valor, accion) {
   } else if (valor === 'no_aun') {
     // Solo descarta para este device — el otro sigue viendo el popup
     setMiDescartado('ts_' + id, Date.now());
-  } else if (valor === 'descartado' || valor === 'pendiente') {
-    setMiDescartado(id, Date.now());
+  } else if (valor === 'pendiente') {
+    // Snooze: guarda timestamp de posposición — buildMomentosQueue respeta snooze_dias del recordatorio
+    setMiDescartado('snz_' + id, Date.now());
+    // Limpiar snooze anterior si existía
+    var misD = getMisDescartados();
+    if (misD[id]) delete misD[id]; // quitar descarte permanente si había
+  } else if (valor === 'descartado') {
+    setMiDescartado(id, Date.now()); // descarte permanente
   }
 
   saveData();
@@ -5762,6 +5888,465 @@ function getMomentosPendientes() {
   return pendientes;
 }
 
+
+// ═══════════════════════════════════════════════════════════════════════
+// ══  ONBOARDING CONTEXTUAL — CÉFIRO APRENDE CON EL USO
+// ═══════════════════════════════════════════════════════════════════════
+
+// Definición de preguntas de onboarding con sus triggers
+var ONBOARDING_PREGS = [
+  // P0 — Apodo (día 1, inmediato si no hay apodo definido)
+  {
+    id: 'ob_apodo',
+    trigger: function() { return !D.bebe.apodo || (D.bebe.apodo === D.bebe.nombre && !D.onboarding['ob_apodo']); },
+    icon: '👶',
+    badge: 'Personalicemos Alba',
+    titulo: '¿Cómo le van a decir?',
+    cuerpo: 'Todos los bebés tienen un apodo especial. ¿Con qué nombre lo van a llamar en casa?',
+    tipo_resp: 'texto',
+    placeholder: 'Cefe, Fefo, Feri...',
+    onResp: function(val) {
+      if (val && val.trim()) { D.bebe.apodo = val.trim(); saveData(); }
+    }
+  },
+  // P1 — Tipo de alimentación (tras primera toma o día 2+)
+  {
+    id: 'ob_alimentacion',
+    trigger: function() {
+      var diasVida = Math.floor((Date.now() - new Date(D.bebe.fn||'2026-03-29').getTime()) / 86400000);
+      return diasVida >= 1 && D.hist.length >= 1;
+    },
+    icon: '🍼',
+    badge: 'Alimentación',
+    titulo: '¿Cuál es el objetivo de alimentación?',
+    cuerpo: 'Céfiro personaliza sus sugerencias según lo que buscan.',
+    tipo_resp: 'opciones',
+    opciones: [
+      { label: '🤟 Lactancia materna exclusiva', valor: 'pecho' },
+      { label: '🍼 Mixta (pecho + fórmula)', valor: 'mixta' },
+      { label: '📦 Fórmula exclusiva', valor: 'formula' }
+    ],
+    onResp: function(val) {
+      D.config.tipoAlimentacion = val; saveData();
+    }
+  },
+  // P2 — Hito retroactivo: Cordón umbilical (trigger: días > 5)
+  {
+    id: 'ob_cordon',
+    trigger: function() {
+      var dias = Math.floor((Date.now() - new Date(D.bebe.fn||'2026-03-29').getTime()) / 86400000);
+      var yaMarcado = D.hitos && D.hitos.some(function(h){ return h && h.id === 'v05'; });
+      return dias >= 5 && !yaMarcado;
+    },
+    icon: '👶',
+    badge: 'Hito de salud',
+    titulo: '¿Ya le cayó el cordón umbilical?',
+    cuerpo: 'Suele ocurrir entre el día 7 y 15. Si ya pasó, lo registramos con fecha y una foto si querés.',
+    tipo_resp: 'hito_retroactivo',
+    hitoId: 'v05',
+    opcNegLabel: 'Todavía no'
+  },
+  // P3 — Hito retroactivo: Primer baño (trigger: días > 3 o tras caer cordón)
+  {
+    id: 'ob_primer_bano',
+    trigger: function() {
+      var dias = Math.floor((Date.now() - new Date(D.bebe.fn||'2026-03-29').getTime()) / 86400000);
+      var cordonCaido = D.hitos && D.hitos.some(function(h){ return h && h.id === 'v05'; });
+      var yaMarcado = D.hitos && D.hitos.some(function(h){ return h && h.id === 'v04'; });
+      return (dias >= 3 || cordonCaido) && !yaMarcado;
+    },
+    icon: '🚿',
+    badge: 'Hito de vida',
+    titulo: '¿Ya tuvieron el primer baño de balde?',
+    cuerpo: 'El primer baño es un momento enorme. Si ya lo vivieron, guardámoslo con fecha y una foto del recuerdo.',
+    tipo_resp: 'hito_retroactivo',
+    hitoId: 'v04',
+    opcNegLabel: 'Todavía no'
+  },
+  // P4 — Cuántos cuidadores (día 3+)
+  {
+    id: 'ob_cuidadores',
+    trigger: function() {
+      var dias = Math.floor((Date.now() - new Date(D.bebe.fn||'2026-03-29').getTime()) / 86400000);
+      return dias >= 3;
+    },
+    icon: '👪',
+    badge: 'Equipo de crianza',
+    titulo: '¿Quiénes cuidan a ' + (D.bebe.apodo||D.bebe.nombre||'Cefe') + '?',
+    cuerpo: 'Céfiro puede coordinar notificaciones entre cuidadores. ¿Hay más de una persona usando Alba?',
+    tipo_resp: 'opciones',
+    opciones: [
+      { label: '🙋 Solo yo por ahora', valor: 'uno' },
+      { label: '💑 Somos dos (mamá y papá)', valor: 'dos' },
+      { label: '👨‍👨‍👦 Más de dos', valor: 'varios' }
+    ],
+    onResp: function(val) {
+      if (!D.bebe.cuidadores) D.bebe.cuidadores = val;
+      saveData();
+    }
+  },
+  // P5 — Primera salida a la calle (trigger: día 30+)
+  {
+    id: 'ob_primera_salida',
+    trigger: function() {
+      var dias = Math.floor((Date.now() - new Date(D.bebe.fn||'2026-03-29').getTime()) / 86400000);
+      var yaMarcado = D.hitos && D.hitos.some(function(h){ return h && h.id === 'v03'; });
+      return dias >= 25 && !yaMarcado;
+    },
+    icon: '🌳',
+    badge: 'Hito de vida',
+    titulo: '¿Ya tuvieron la primera salida a la calle?',
+    cuerpo: 'El pediatra suele dar el OK al mes. Si ya la hicieron, la anotamos.',
+    tipo_resp: 'hito_retroactivo',
+    hitoId: 'v03',
+    opcNegLabel: 'Todavía no'
+  }
+];
+
+// Verifica si una pregunta ya fue respondida o pospuesta indefinidamente
+function obPregRespondida(preg) {
+  if (!D.onboarding) D.onboarding = {};
+  var estado = D.onboarding[preg.id];
+  if (!estado) return false;
+  if (estado.resp !== undefined && estado.resp !== null) return true; // respondida
+  if (estado.pospHasta && Date.now() < estado.pospHasta) return true; // pospuesta
+  return false;
+}
+
+// Obtiene preguntas de onboarding pendientes que ya tienen trigger activo
+function getOnboardingPendientes() {
+  if (!D.bebe || !D.bebe.fn) return [];
+  return ONBOARDING_PREGS.filter(function(preg) {
+    if (obPregRespondida(preg)) return false;
+    try { return preg.trigger(); } catch(e) { return false; }
+  });
+}
+
+// Registra respuesta de onboarding
+function responderOnboarding(pregId, valor) {
+  if (!D.onboarding) D.onboarding = {};
+  D.onboarding[pregId] = { resp: valor, ts: Date.now() };
+  saveData();
+}
+
+// Pospone una pregunta de onboarding N días
+function posponerOnboarding(pregId, dias) {
+  if (!D.onboarding) D.onboarding = {};
+  D.onboarding[pregId] = { pospHasta: Date.now() + (dias||2) * 86400000 };
+  saveData();
+}
+
+// Muestra el popup de una pregunta de onboarding
+function mostrarOnboardingPreg(preg, onDone) {
+  var apodo = D.bebe.apodo || D.bebe.nombre || 'Cefe';
+  // Actualizar cuerpo dinámico si usa apodo
+  var cuerpo = preg.cuerpo.replace(/Cefe/g, apodo);
+
+  if (preg.tipo_resp === 'texto') {
+    // Input de texto — sheet personalizada
+    _mostrarObSheet(preg, cuerpo, apodo, onDone);
+  } else if (preg.tipo_resp === 'hito_retroactivo') {
+    _mostrarObHitoRetro(preg, cuerpo, apodo, onDone);
+  } else {
+    // Opciones — usamos cpop con botones extra
+    _mostrarObOpciones(preg, cuerpo, apodo, onDone);
+  }
+}
+
+function _mostrarObSheet(preg, cuerpo, apodo, onDone) {
+  var ov = document.getElementById('cpop-overlay');
+  var sh = document.getElementById('cpop-sheet');
+  var ico = document.getElementById('cpop-icon');
+  var bdg = document.getElementById('cpop-badge');
+  var ttl = document.getElementById('cpop-title');
+  var bdy = document.getElementById('cpop-body');
+  var btn = document.getElementById('cpop-btn');
+  var btn2 = document.getElementById('cpop-btn2');
+  if (!ov || !sh) return;
+  sh.className = 'info';
+  ico.textContent = preg.icon;
+  bdg.textContent = preg.badge;
+  ttl.textContent = preg.titulo;
+  bdy.textContent = cuerpo;
+  btn.style.display = 'none';
+  if (btn2) btn2.style.display = 'none';
+  // Limpiar extras
+  sh.querySelectorAll('.cpop-extra-btn,.ob-input-row').forEach(function(x){ x.remove(); });
+  // Input row
+  var row = document.createElement('div');
+  row.className = 'ob-input-row';
+  row.style.cssText = 'display:flex;gap:8px;margin-top:12px;align-items:center';
+  var inp = document.createElement('input');
+  inp.type = 'text';
+  inp.placeholder = preg.placeholder || '';
+  inp.style.cssText = 'flex:1;padding:11px 14px;border-radius:11px;border:1px solid rgba(212,168,67,.3);background:rgba(255,255,255,.07);color:#f0d9a0;font-size:16px;font-family:Georgia,serif;outline:none';
+  var confirmBtn = document.createElement('button');
+  confirmBtn.textContent = 'Guardar';
+  confirmBtn.style.cssText = 'padding:11px 16px;border-radius:11px;border:none;background:#d4a843;color:#1a1008;font-size:13px;font-weight:bold;font-family:Georgia,serif;cursor:pointer;white-space:nowrap';
+  confirmBtn.onclick = function() {
+    var v = inp.value.trim();
+    if (!v) return;
+    if (preg.onResp) preg.onResp(v);
+    responderOnboarding(preg.id, v);
+    sh.querySelectorAll('.ob-input-row').forEach(function(x){ x.remove(); });
+    btn.style.display = 'block';
+    btn.textContent = '👋 ¡Guardado!';
+    btn.onclick = function() { closeCpop(); if (onDone) onDone(); };
+    setTimeout(function() { closeCpop(); if (onDone) onDone(); }, 1200);
+  };
+  row.appendChild(inp);
+  row.appendChild(confirmBtn);
+  btn.parentNode.insertBefore(row, btn);
+  // Botón Ahora no
+  var skipBtn = document.createElement('button');
+  skipBtn.className = 'cpop-extra-btn';
+  skipBtn.style.cssText = 'width:100%;padding:9px;border-radius:11px;border:1px solid rgba(255,255,255,.1);font-size:12px;cursor:pointer;font-family:Georgia,serif;color:#a89070;background:transparent;margin-top:6px';
+  skipBtn.textContent = 'Ahora no (preguntar en 2 días)';
+  skipBtn.onclick = function() {
+    posponerOnboarding(preg.id, 2);
+    sh.querySelectorAll('.cpop-extra-btn,.ob-input-row').forEach(function(x){ x.remove(); });
+    btn.style.display = 'block';
+    closeCpop();
+    if (onDone) onDone();
+  };
+  btn.parentNode.insertBefore(skipBtn, btn);
+  ov.classList.remove('hidden');
+  setTimeout(function() { inp.focus(); }, 200);
+}
+
+function _mostrarObOpciones(preg, cuerpo, apodo, onDone) {
+  var ov = document.getElementById('cpop-overlay');
+  var sh = document.getElementById('cpop-sheet');
+  var ico = document.getElementById('cpop-icon');
+  var bdg = document.getElementById('cpop-badge');
+  var ttl = document.getElementById('cpop-title');
+  var bdy = document.getElementById('cpop-body');
+  var btn = document.getElementById('cpop-btn');
+  var btn2 = document.getElementById('cpop-btn2');
+  if (!ov || !sh) return;
+  sh.className = 'info';
+  ico.textContent = preg.icon;
+  bdg.textContent = preg.badge;
+  ttl.textContent = preg.titulo;
+  bdy.textContent = cuerpo;
+  btn.style.display = 'none';
+  if (btn2) btn2.style.display = 'none';
+  sh.querySelectorAll('.cpop-extra-btn').forEach(function(x){ x.remove(); });
+  preg.opciones.forEach(function(op) {
+    var el = document.createElement('button');
+    el.className = 'cpop-extra-btn';
+    el.style.cssText = 'width:100%;padding:11px;border-radius:11px;border:1px solid rgba(100,200,180,.25);font-size:13px;font-weight:bold;cursor:pointer;font-family:Georgia,serif;color:#e8dcc8;background:rgba(100,200,180,.08);margin-bottom:7px';
+    el.textContent = op.label;
+    (function(opC) {
+      el.onclick = function() {
+        if (preg.onResp) preg.onResp(opC.valor);
+        responderOnboarding(preg.id, opC.valor);
+        sh.querySelectorAll('.cpop-extra-btn').forEach(function(x){ x.remove(); });
+        btn.style.display = 'block';
+        btn.textContent = 'Perfecto 👋';
+        btn.onclick = function() { closeCpop(); if (onDone) onDone(); };
+        setTimeout(function() { closeCpop(); if (onDone) onDone(); }, 900);
+      };
+    })(op);
+    btn.parentNode.insertBefore(el, btn);
+  });
+  // Ahora no
+  var skipEl = document.createElement('button');
+  skipEl.className = 'cpop-extra-btn';
+  skipEl.style.cssText = 'width:100%;padding:9px;border-radius:11px;border:1px solid rgba(255,255,255,.08);font-size:12px;cursor:pointer;font-family:Georgia,serif;color:#a89070;background:transparent;margin-top:2px';
+  skipEl.textContent = 'Ahora no (preguntar en 2 días)';
+  skipEl.onclick = function() {
+    posponerOnboarding(preg.id, 2);
+    sh.querySelectorAll('.cpop-extra-btn').forEach(function(x){ x.remove(); });
+    btn.style.display = 'block';
+    closeCpop();
+    if (onDone) onDone();
+  };
+  btn.parentNode.insertBefore(skipEl, btn);
+  ov.classList.remove('hidden');
+}
+
+function _mostrarObHitoRetro(preg, cuerpo, apodo, onDone) {
+  var ov = document.getElementById('cpop-overlay');
+  var sh = document.getElementById('cpop-sheet');
+  var ico = document.getElementById('cpop-icon');
+  var bdg = document.getElementById('cpop-badge');
+  var ttl = document.getElementById('cpop-title');
+  var bdy = document.getElementById('cpop-body');
+  var btn = document.getElementById('cpop-btn');
+  var btn2 = document.getElementById('cpop-btn2');
+  if (!ov || !sh) return;
+  sh.className = 'celebracion';
+  ico.textContent = preg.icon;
+  bdg.textContent = preg.badge;
+  ttl.textContent = preg.titulo;
+  bdy.textContent = cuerpo;
+  btn.style.display = 'none';
+  if (btn2) btn2.style.display = 'none';
+  sh.querySelectorAll('.cpop-extra-btn,.ob-hito-retro').forEach(function(x){ x.remove(); });
+
+  // Bloque de captura de fecha + foto
+  var bloque = document.createElement('div');
+  bloque.className = 'ob-hito-retro';
+  bloque.style.cssText = 'margin-top:12px';
+
+  var fechaLbl = document.createElement('div');
+  fechaLbl.textContent = 'Fecha (aproximada está bien):';
+  fechaLbl.style.cssText = 'font-size:11px;color:#a89070;margin-bottom:5px;font-family:Georgia,serif';
+  bloque.appendChild(fechaLbl);
+
+  var fechaInp = document.createElement('input');
+  fechaInp.type = 'date';
+  fechaInp.style.cssText = 'width:100%;padding:10px 14px;border-radius:11px;border:1px solid rgba(212,168,67,.3);background:rgba(255,255,255,.07);color:#f0d9a0;font-size:16px;font-family:Georgia,serif;margin-bottom:10px;box-sizing:border-box;outline:none';
+  // Default: fecha de nacimiento
+  var fnDef = D.bebe.fn || '2026-03-29';
+  fechaInp.value = fnDef;
+  fechaInp.max = new Date().toISOString().slice(0,10);
+  fechaInp.min = fnDef;
+  bloque.appendChild(fechaInp);
+
+  // Foto (opcional)
+  var fotoLbl = document.createElement('div');
+  fotoLbl.textContent = 'Foto del momento (opcional):';
+  fotoLbl.style.cssText = 'font-size:11px;color:#a89070;margin-bottom:5px;font-family:Georgia,serif';
+  bloque.appendChild(fotoLbl);
+
+  var fotoRow = document.createElement('div');
+  fotoRow.style.cssText = 'display:flex;gap:8px;align-items:center;margin-bottom:10px';
+
+  var fotoBtn = document.createElement('button');
+  fotoBtn.textContent = '📷 Agregar foto';
+  fotoBtn.style.cssText = 'padding:9px 14px;border-radius:11px;border:1px solid rgba(212,168,67,.3);background:rgba(212,168,67,.1);color:#f0d9a0;font-size:12px;font-family:Georgia,serif;cursor:pointer';
+  var fotoInput = document.createElement('input');
+  fotoInput.type = 'file';
+  fotoInput.accept = 'image/*';
+  fotoInput.style.display = 'none';
+  var fotoPreview = document.createElement('div');
+  fotoPreview.style.cssText = 'font-size:11px;color:#64c8b4;flex:1';
+  var _fotoB64 = null;
+
+  fotoInput.onchange = function() {
+    var f = fotoInput.files[0];
+    if (!f) return;
+    var reader = new FileReader();
+    reader.onload = function(ev) {
+      _fotoB64 = ev.target.result;
+      fotoPreview.textContent = '✅ Foto lista (' + Math.round(f.size/1024) + 'KB)';
+      fotoBtn.textContent = '📷 Cambiar foto';
+    };
+    reader.readAsDataURL(f);
+  };
+  fotoBtn.onclick = function() { fotoInput.click(); };
+  fotoRow.appendChild(fotoInput);
+  fotoRow.appendChild(fotoBtn);
+  fotoRow.appendChild(fotoPreview);
+  bloque.appendChild(fotoRow);
+
+  btn.parentNode.insertBefore(bloque, btn);
+
+  // Botón Sí, lo registramos
+  var siBtn = document.createElement('button');
+  siBtn.className = 'cpop-extra-btn';
+  siBtn.style.cssText = 'width:100%;padding:12px;border-radius:11px;border:none;background:#64c8b4;color:#0d1a17;font-size:14px;font-weight:bold;cursor:pointer;font-family:Georgia,serif;margin-bottom:7px';
+  siBtn.textContent = '✅ Sí, registrar este hito';
+  siBtn.onclick = function() {
+    var fechaVal = fechaInp.value || fnDef;
+    var hitoObj = { id: preg.hitoId, fecha: fechaVal + 'T12:00:00.000Z', nota: '' };
+    if (_fotoB64) hitoObj.foto = _fotoB64;
+    if (!D.hitos.find(function(h){ return h && h.id === preg.hitoId; })) {
+      D.hitos.push(hitoObj);
+    }
+    responderOnboarding(preg.id, 'registrado');
+    saveData();
+    sh.querySelectorAll('.cpop-extra-btn,.ob-hito-retro').forEach(function(x){ x.remove(); });
+    btn.style.display = 'block';
+    ico.textContent = '✨';
+    ttl.textContent = '¡Guardado en la historia de ' + apodo + '!';
+    bdy.textContent = 'Cada momento que registran se convierte en un recuerdo que él podrá leer cuando sea grande.';
+    btn.textContent = '💖 Qué lindo';
+    btn.onclick = function() { closeCpop(); if (onDone) onDone(); };
+  };
+  btn.parentNode.insertBefore(siBtn, btn);
+
+  // Botón Todavía no
+  var noBtn = document.createElement('button');
+  noBtn.className = 'cpop-extra-btn';
+  noBtn.style.cssText = 'width:100%;padding:10px;border-radius:11px;border:1px solid rgba(255,255,255,.1);font-size:12px;cursor:pointer;font-family:Georgia,serif;color:#a89070;background:transparent;margin-bottom:7px';
+  noBtn.textContent = preg.opcNegLabel || 'Todavía no';
+  noBtn.onclick = function() {
+    posponerOnboarding(preg.id, 7); // preguntar de nuevo en 7 días
+    sh.querySelectorAll('.cpop-extra-btn,.ob-hito-retro').forEach(function(x){ x.remove(); });
+    btn.style.display = 'block';
+    closeCpop();
+    if (onDone) onDone();
+  };
+  btn.parentNode.insertBefore(noBtn, btn);
+
+  // Saltar
+  var saltarBtn = document.createElement('button');
+  saltarBtn.className = 'cpop-extra-btn';
+  saltarBtn.style.cssText = 'width:100%;padding:8px;border-radius:11px;border:none;font-size:11px;cursor:pointer;font-family:Georgia,serif;color:#7a7060;background:transparent';
+  saltarBtn.textContent = 'No lo voy a registrar';
+  saltarBtn.onclick = function() {
+    responderOnboarding(preg.id, 'skip');
+    sh.querySelectorAll('.cpop-extra-btn,.ob-hito-retro').forEach(function(x){ x.remove(); });
+    btn.style.display = 'block';
+    closeCpop();
+    if (onDone) onDone();
+  };
+  btn.parentNode.insertBefore(saltarBtn, btn);
+
+  ov.classList.remove('hidden');
+}
+
+// Corre el flujo de onboarding: muestra UN popup por sesión
+// (el primero pendiente con trigger activo)
+function checkOnboardingContextual() {
+  var pendientes = getOnboardingPendientes();
+  if (pendientes.length === 0) return;
+  var preg = pendientes[0]; // solo una por sesión
+  setTimeout(function() {
+    mostrarOnboardingPreg(preg, function() {
+      // nada más tras responder — no mostrar otro en la misma sesión
+    });
+  }, 2500); // espera 2.5s para que la app termine de cargar
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// ══  NOCTURNA CÉFIRO — SUGERENCIA DE CUENTO AL CAER EL DÍA
+// ═══════════════════════════════════════════════════════════════════════
+
+function checkNocturnaCuento() {
+  var hora = new Date().getHours();
+  if (hora < 20) return; // solo a partir de las 20hs
+  var hoy = new Date().toISOString().slice(0,10);
+  var key = 'nocturna_cuento_' + DEVICE_ID + '_' + hoy;
+  if (localStorage.getItem(key)) return; // ya se mostró hoy
+  localStorage.setItem(key, '1');
+  var apodo = D.bebe.apodo || D.bebe.nombre || 'Cefe';
+  // Elegir cuento al azar de los disponibles
+  var titulosCuento = [
+    'La Luna y el Niño Viento', 'El Río que Cantaba', 'El Abuelo del Bosque',
+    'La Oveja Estrella', 'El Dragón Tranquilo', 'El Jardín de los Sueños'
+  ];
+  var idx = new Date().getDate() % titulosCuento.length;
+  var titulo = titulosCuento[idx];
+
+  setTimeout(function() {
+    showCpop(
+      'celebracion',
+      '🌙',
+      'Ritual nocturno',
+      'Hora del cuento para ' + apodo,
+      'Céfiro sugiere: “' + titulo + '”. Un cuento antes de dormir regula el sistema nervioso y fortalece el vínculo. Son solo 5 minutos que él va a recordar toda la vida.',
+      '📖 Ir a cuentos',
+      function() { setStep('cuentos'); },
+      'Ahora no',
+      function() { /* cerrado, no hacer nada */ }
+    );
+  }, 4000);
+}
+
 // ─── OVERRIDE: buildMomentosQueue — device-aware ──────────────
 function buildMomentosQueue() {
   if (!D.bebe || !D.bebe.fn) return [];
@@ -5806,13 +6391,29 @@ function buildMomentosQueue() {
     queue.push({ prioridad:2, tipo:'check_hito', chk:chk });
   });
 
-  // 3. Recordatorios — por device
+  // 3. Recordatorios — por device, con snooze inteligente
+  // Solo se muestra UN recordatorio por sesión (el más urgente)
+  var recAdded = 0;
   RECORDATORIOS.forEach(function(rec) {
-    if (semsVida < rec.semMin || semsVida > rec.semMax) return;
+    if (recAdded > 0) return; // un solo recordatorio por cola
+    if (semsVida < (rec.semTrigger || rec.semMin) || semsVida > rec.semMax) return;
+    // Respuesta definitiva → nunca más
     var resp = D.momentos.respondidos[rec.id];
     if (resp && (resp.valor === 'si' || resp.valor === 'agendado' || resp === 'si' || resp === 'agendado')) return;
-    if (misDesc[rec.id]) return;
-    queue.push({ prioridad:3, tipo:'recordatorio', rec:rec });
+    // Descartado permanente
+    if (misDesc[rec.id] && !misDesc['snz_' + rec.id]) return;
+    // Snooze activo: "pendiente" → esperar snooze_dias antes de volver a mostrar
+    var snzTs = misDesc['snz_' + rec.id];
+    if (snzTs) {
+      var diasDesde = (Date.now() - snzTs) / 86400000;
+      var snooze = rec.snooze_dias || 3;
+      if (diasDesde < snooze) return; // todavía en snooze
+    }
+    // Calcular urgencia: si estamos a <= urgencia_semanas del deadline, marcar urgente
+    var semsAlDeadline = (rec.semDeadline || rec.semMax) - semsVida;
+    var esUrgente = semsAlDeadline <= (rec.urgencia_semanas || 2);
+    queue.push({ prioridad: esUrgente ? 2.5 : 3, tipo:'recordatorio', rec:rec, urgente:esUrgente });
+    recAdded++;
   });
 
   // 4. Cumple semanas/meses — compartido pero localStorage por device
@@ -5895,6 +6496,7 @@ function renderHistoria(bd) {
     { id:'peso',    ic:'⚖️', label:'Peso' },
     { id:'nota',    ic:'📝', label:'Notas' },
     { id:'carta',   ic:'💌', label:'Cartas' },
+    { id:'foto',   ic:'📸', label:'Con foto' },
   ];
   var filtRow = mkDiv('display:flex;gap:6px;margin-bottom:16px;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch');
   filtros.forEach(function(f) {
@@ -5926,7 +6528,8 @@ function renderHistoria(bd) {
         fecha = est.toISOString().slice(0,10);
       }
     }
-    if (fecha) items.push({ tipo:'hito', fecha:fecha, ic:def.ic||'⭐', titulo:def.label, sub:nota, color:def.celebracion?'#d4a843':'#64c8b4', celebracion:def.celebracion });
+    var fotoData = (typeof h === 'object' && h.foto) ? h.foto : null;
+    if (fecha) items.push({ tipo:'hito', fecha:fecha, ic:def.ic||'⭐', titulo:def.label, sub:nota, color:def.celebracion?'#d4a843':'#64c8b4', celebracion:def.celebracion, foto:fotoData });
   });
 
   // Cartas
@@ -6077,6 +6680,25 @@ function renderHistoria(bd) {
       txt.appendChild(mkTxt('div',null,fd2.toLocaleDateString('es-AR',{weekday:'short',day:'2-digit',month:'short'}),'font-size:10px;color:'+item.color+';margin-top:4px;opacity:.8'));
     } catch(e){}
     row.appendChild(txt);
+    // Foto thumbnail si existe
+    if (item.foto) {
+      var thumb = document.createElement('img');
+      thumb.src = item.foto;
+      thumb.style.cssText = 'width:52px;height:52px;border-radius:10px;object-fit:cover;flex-shrink:0;border:1px solid rgba(212,168,67,.2);cursor:pointer';
+      thumb.title = 'Ver foto';
+      thumb.onclick = (function(src) { return function(e) {
+        e.stopPropagation();
+        var ov = document.createElement('div');
+        ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:9999;display:flex;align-items:center;justify-content:center';
+        var img = document.createElement('img');
+        img.src = src;
+        img.style.cssText = 'max-width:92vw;max-height:88vh;border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,.6)';
+        ov.appendChild(img);
+        ov.onclick = function(){ document.body.removeChild(ov); };
+        document.body.appendChild(ov);
+      }; })(item.foto);
+      row.appendChild(thumb);
+    }
     card.appendChild(row);
     bd.appendChild(card);
   });
@@ -6098,8 +6720,14 @@ function renderHistoria(bd) {
 // Checks interactivos, recordatorios accionables y tips contextuales
 
 // ── Definición de RECORDATORIOS por etapa ────────────────────
+// Cada recordatorio tiene:
+//   semTrigger: semana en que aparece por primera vez (no antes)
+//   semDeadline: semana límite — cuando queda < 2 semanas el mensaje se vuelve urgente
+//   snooze_dias: cuántos días esperar antes de volver a mostrar si el usuario dice "pendiente"
+//   urgencia_semanas: a cuántas semanas del deadline empieza a aparecer
 var RECORDATORIOS = [
-  { id:'rec_control48h',  semMin:0,  semMax:1,
+  { id:'rec_control48h',  semMin:0, semMax:1,
+    semTrigger:0, semDeadline:1, snooze_dias:1, urgencia_semanas:1,
     icon:'🏥', badge:'Control obligatorio',
     title:'Primer control post-alta',
     body:'La epicrisis indica el primer control ambulatorio a las 48hs del alta. ¿Ya fue?',
@@ -6110,21 +6738,25 @@ var RECORDATORIOS = [
       {label:'⏳ Pendiente', valor:'pendiente'}
     ]
   },
-  { id:'rec_pesquisa_aud', semMin:2, semMax:11,
+  // Pesquisa auditiva: no aparece hasta semana 8 (tiene hasta semana 11 = 3 meses)
+  // A partir de sem 8 ya queda 1 mes → snooze de 5 días para no perseguir
+  { id:'rec_pesquisa_aud', semMin:8, semMax:11,
+    semTrigger:8, semDeadline:12, snooze_dias:5, urgencia_semanas:4,
     icon:'👂', badge:'Pesquisa auditiva',
-    title:'Pesquisa auditiva — antes de los 3 meses',
-    body:'Obligatoria antes de los 3 meses. ¿Ya tienen turno en fonoaudiología? Llamar al 11-5401-5030 (solo WhatsApp) o 0800-777-2583.',
+    title:'Pesquisa auditiva — quedan pocas semanas',
+    body:'Obligatoria antes de los 3 meses. Fonoaudiología Trinidad: 11-5401-5030 (WhatsApp) · 0800-777-2583. No tiene costo.',
     tipo:'accionable',
     opciones:[
       {label:'✅ Ya está hecha', valor:'si'},
-      {label:'📅 Agendada', valor:'agendado'},
-      {label:'⏳ Pendiente', valor:'pendiente'}
+      {label:'📅 Turno agendado', valor:'agendado'},
+      {label:'⏳ Lo agendamos esta semana', valor:'pendiente'}
     ]
   },
   { id:'rec_control_1m',  semMin:4, semMax:6,
+    semTrigger:4, semDeadline:6, snooze_dias:3, urgencia_semanas:2,
     icon:'📏', badge:'Control 1 mes',
     title:'Control del primer mes',
-    body:'El pediatra evalúa peso, talla, reflejo, desarrollo y da el ok para las vacunas de los 2 meses. ¿Lo tienen agendado?',
+    body:'El pediatra evalúa peso, talla, reflejo y da el ok para las vacunas de los 2 meses. ¿Lo tienen agendado?',
     tipo:'accionable',
     opciones:[
       {label:'✅ Ya fue', valor:'si'},
@@ -6133,9 +6765,10 @@ var RECORDATORIOS = [
     ]
   },
   { id:'rec_vac_2m',      semMin:7, semMax:9,
+    semTrigger:7, semDeadline:9, snooze_dias:4, urgencia_semanas:2,
     icon:'💉', badge:'Vacunas 2 meses',
     title:'Se acercan las vacunas de los 2 meses',
-    body:'Pentavalente, Salk, Neumococo, Rotavirus y Meningococo B. ¿Ya tienen turno con el pediatra?',
+    body:'Pentavalente, Salk, Neumócoco, Rotavirus y Meningococo B. ¿Ya tienen turno con el pediatra?',
     tipo:'accionable',
     opciones:[
       {label:'✅ Turno confirmado', valor:'si'},
@@ -6144,6 +6777,7 @@ var RECORDATORIOS = [
     ]
   },
   { id:'rec_control_2m',  semMin:9, semMax:11,
+    semTrigger:9, semDeadline:11, snooze_dias:4, urgencia_semanas:2,
     icon:'📏', badge:'Control 2 meses',
     title:'Control de los 2 meses',
     body:'Revisión completa + primera tanda de vacunas. Llevá la curva de peso y anotá tus preguntas antes de ir.',
@@ -6154,7 +6788,8 @@ var RECORDATORIOS = [
       {label:'⏳ Pendiente', valor:'pendiente'}
     ]
   },
-  { id:'rec_intro_solidos', semMin:24, semMax:28,
+  { id:'rec_intro_solidos', semMin:22, semMax:28,
+    semTrigger:22, semDeadline:26, snooze_dias:7, urgencia_semanas:4,
     icon:'🥣', badge:'Alimentación complementaria',
     title:'Se acerca la incorporación de sólidos',
     body:'A los 6 meses se incorpora la alimentación complementaria. Buena idea consultar al pediatra qué método prefiere: BLW o papillas.',
@@ -6278,14 +6913,34 @@ function responderMomento(id, valor, accion) {
 }
 
 function updatePendBadge() {
+  // Badge dentro del sheet "Más"
   var badge = document.getElementById('pend-badge');
-  if (!badge) return;
-  var n = getMomentosPendientes().length;
-  if (n > 0) {
-    badge.textContent = n;
-    badge.style.display = 'inline-block';
-  } else {
-    badge.style.display = 'none';
+  if (badge) {
+    var n = getMomentosPendientes().length;
+    if (n > 0) {
+      badge.textContent = n;
+      badge.style.display = 'inline-block';
+    } else {
+      badge.style.display = 'none';
+    }
+  }
+  // Punto rojo en el botón "☰ Más" del nav — solo si hay urgentes de la queue
+  var navMas = document.getElementById('bn-mas');
+  if (navMas) {
+    var urgenteDot = navMas.querySelector('.nav-urgente-dot');
+    var queueLen = typeof _momentosQueue !== 'undefined' ? _momentosQueue.length : 0;
+    var hayUrgentes = queueLen > 0;
+    if (hayUrgentes) {
+      if (!urgenteDot) {
+        urgenteDot = document.createElement('span');
+        urgenteDot.className = 'nav-urgente-dot';
+        urgenteDot.style.cssText = 'position:absolute;top:4px;right:6px;width:8px;height:8px;border-radius:50%;background:#e07070;border:1.5px solid #1a1008';
+        navMas.style.position = 'relative';
+        navMas.appendChild(urgenteDot);
+      }
+    } else {
+      if (urgenteDot) urgenteDot.remove();
+    }
   }
 }
 
@@ -6524,33 +7179,47 @@ function showNextMomento() {
 
   } else if (item.tipo === 'recordatorio') {
     var rec = item.rec;
-    showCpop('urgente', rec.icon, rec.badge, rec.title, rec.body,
+    var tipo_popup = item.urgente ? 'urgente' : 'info';
+    // Badge inteligente: mostrar días restantes si es urgente
+    var badgeLabel = rec.badge;
+    if (item.urgente && rec.semDeadline) {
+      var _semsNow = D.bebe && D.bebe.fn ? Math.floor((Date.now() - new Date(D.bebe.fn).getTime()) / (7*86400000)) : 0;
+      var diasRest = Math.max(0, (rec.semDeadline - _semsNow) * 7);
+      if (diasRest <= 14) badgeLabel = rec.badge + ' · ' + diasRest + ' días';
+    }
+    showCpop(tipo_popup, rec.icon, badgeLabel, rec.title, rec.body,
       btnLabel,
       function() {
         if (rec.opciones && rec.opciones[1] && rec.opciones[1].accion) {
           closeCpop(); setStep(rec.opciones[1].accion.replace('go','').toLowerCase());
         } else { onNext(); }
       });
-    // Agregar botones de respuesta inline
+    // Botones de respuesta inline
     setTimeout(function() {
       var btnEl = document.getElementById('cpop-btn');
       if (!btnEl) return;
       var btnArea2 = btnEl.parentNode;
-      var extras2 = btnArea2.querySelectorAll('.cpop-extra-btn');
-      extras2.forEach(function(b){ b.remove(); });
+      btnArea2.querySelectorAll('.cpop-extra-btn').forEach(function(b){ b.remove(); });
       btnEl.style.display = 'none';
       rec.opciones.forEach(function(op) {
         var el = document.createElement('button');
         el.className = 'cpop-extra-btn';
         var isPos = op.valor === 'si' || op.valor === 'agendado';
-        el.style.cssText = 'width:100%;padding:11px;border-radius:11px;border:1px solid rgba(224,112,112,.3);font-size:13px;font-weight:bold;cursor:pointer;font-family:Georgia,serif;color:#e8dcc8;background:' + (isPos ? 'rgba(100,200,140,.15)' : 'rgba(255,255,255,.06)') + ';margin-bottom:7px';
-        el.textContent = op.label;
+        var isPend = op.valor === 'pendiente';
+        var borderColor = isPos ? 'rgba(100,200,140,.3)' : isPend ? 'rgba(255,255,255,.12)' : 'rgba(224,112,112,.25)';
+        var bgColor = isPos ? 'rgba(100,200,140,.15)' : isPend ? 'rgba(255,255,255,.05)' : 'rgba(255,255,255,.04)';
+        // Etiqueta de snooze para "pendiente"
+        var snoozeLabel = op.label;
+        if (isPend && rec.snooze_dias) {
+          snoozeLabel = op.label + ' (vuelve en ' + rec.snooze_dias + ' días)';
+        }
+        el.style.cssText = 'width:100%;padding:11px;border-radius:11px;border:1px solid ' + borderColor + ';font-size:' + (isPend ? '12' : '13') + 'px;font-weight:' + (isPend ? 'normal' : 'bold') + ';cursor:pointer;font-family:Georgia,serif;color:' + (isPend ? '#a89070' : '#e8dcc8') + ';background:' + bgColor + ';margin-bottom:7px';
+        el.textContent = snoozeLabel;
         (function(opCopy, recCopy) {
           el.onclick = function() {
             btnArea2.querySelectorAll('.cpop-extra-btn').forEach(function(x){ x.remove(); });
             btnEl.style.display = 'block';
-            D.momentos.respondidos[recCopy.id] = opCopy.valor;
-            saveData();
+            responderMomento(recCopy.id, opCopy.valor, opCopy.accion);
             if (opCopy.accion) { closeCpop(); setStep(opCopy.accion.replace('go','').toLowerCase()); }
             else { onNext(); }
           };
@@ -7236,6 +7905,34 @@ var VACUNAS_ARG = [
   {id:'v25', nombre:'Sabin (refuerzo)',              mes:18, desc:'Refuerzo polio oral.'},
 ];
 
+// ── CONSULTAS PEDIÁTRICAS PAUTADAS (SAP Argentina) ──────────────────────────────
+// Estructura: { id, dias, icon, label, desc, obligatorio }
+// dias: días de vida ideales para la consulta
+var CONSULTAS_PAUTADAS = [
+  {id:'cp01', dias:2,   icon:'🏥', label:'Control post-alta (48hs)',   obligatorio:true,  desc:'Evaluación de peso, ictericia y lactancia. Obligatorio.'},
+  {id:'cp02', dias:15,  icon:'📊', label:'Control 15 días',           obligatorio:false, desc:'Revisión de peso y cordón umbilical.'},
+  {id:'cp03', dias:30,  icon:'📊', label:'Control 1 mes',              obligatorio:true,  desc:'Evaluación completa. Ok para vacunas de los 2 meses.'},
+  {id:'cp04', dias:60,  icon:'💉', label:'Control 2 meses + vacunas',  obligatorio:true,  desc:'Primera tanda: Pentavalente, Salk, Neumócoco, Rotavirus, Meningococo B.'},
+  {id:'cp05', dias:90,  icon:'💉', label:'Control 3 meses + vacunas',  obligatorio:true,  desc:'Meningococo C. Evaluación de desarrollo motor y visual.'},
+  {id:'cp06', dias:120, icon:'💉', label:'Control 4 meses + vacunas',  obligatorio:true,  desc:'Segunda tanda: Pentavalente, Salk, Neumócoco, Rotavirus, Meningococo B.'},
+  {id:'cp07', dias:150, icon:'💉', label:'Control 5 meses + vacunas',  obligatorio:false, desc:'Meningococo C 2° dosis.'},
+  {id:'cp08', dias:180, icon:'🥣', label:'Control 6 meses + sólidos',  obligatorio:true,  desc:'Pentavalente 3°, Salk 3°. Inicio de alimentación complementaria.'},
+  {id:'cp09', dias:270, icon:'📊', label:'Control 9 meses',             obligatorio:false, desc:'Evaluación de gateo, pinza y lenguaje.'},
+  {id:'cp10', dias:365, icon:'🎂', label:'Control 12 meses + vacunas', obligatorio:true,  desc:'Triple viral, Neumócoco refuerzo, Hepatitis A. Primer año.'},
+  {id:'cp11', dias:540, icon:'📊', label:'Control 18 meses + vacunas', obligatorio:true,  desc:'Pentavalente refuerzo, Sabin. Lenguaje y autonomía.'},
+];
+
+function getConsultaStatus(c) {
+  var fn = D.bebe.fn ? new Date(D.bebe.fn) : new Date('2026-03-29');
+  var fechaIdeal = new Date(fn.getTime() + c.dias * 86400000);
+  var now = new Date();
+  var diff = Math.round((fechaIdeal - now) / 86400000);
+  return {
+    fecha: fechaIdeal,
+    diff: diff,
+    fechaStr: fechaIdeal.toLocaleDateString('es-AR', {day:'2-digit', month:'2-digit', year:'numeric'})
+  };
+}
 function getVacunaStatus(v) {
   var fn = D.bebe.fn ? new Date(D.bebe.fn) : new Date('2026-03-29');
   var fechaVac = new Date(fn);
@@ -7764,6 +8461,10 @@ onValue(ref(db,'cefe'),function(snap){
     var defNotif={cefiro_tips:true,logros_triviales:false,dato_dia:true,brotes:true,vacunas:true,hitos:true,plan_dia:true};
     D.config=Object.assign({notif:defNotif,historial_expandido:true,perfil_home:true},data.config,{notif:Object.assign(defNotif,(data.config.notif||{}))});
   }
+  // onboarding: merge (Firebase gana para datos respondidos compartidos)
+  if(data.onboarding&&typeof data.onboarding==='object'){
+    D.onboarding=Object.assign({},data.onboarding,D.onboarding);
+  }
 
   // Guardar el estado actualizado en localStorage inmediatamente
   // para que si Firebase llega tarde en la próxima carga, tengamos los datos correctos
@@ -7789,6 +8490,14 @@ onValue(ref(db,'cefe'),function(snap){
   setTimeout(function(){
     if(typeof checkSintomasContextuales==='function') checkSintomasContextuales();
   }, 3500);
+  // Onboarding contextual — una pregunta por sesión, 5s tras carga
+  setTimeout(function(){
+    if(typeof checkOnboardingContextual==='function') checkOnboardingContextual();
+  }, 5000);
+  // Nocturna Céfiro — sugerencia de cuento a partir de las 20hs
+  setTimeout(function(){
+    if(typeof checkNocturnaCuento==='function') checkNocturnaCuento();
+  }, 6500);
 },function(err){fbReady=true;setDot('#e07070','Error Firebase');console.error(err);});
 </script>
 
