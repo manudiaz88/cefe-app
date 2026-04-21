@@ -605,6 +605,7 @@ function loadData() {
     var mo = ls('momentos'); if (mo) D.momentos = JSON.parse(mo);
     var ah = ls('actHechas'); if (ah) D.actividadesHechas = JSON.parse(ah);
   var mp = ls('medsPersonales'); if (mp) D.medsPersonales = JSON.parse(mp);
+  if(typeof migrateMedsPersonales==='function') migrateMedsPersonales();
   var ch = ls('consultasHechas'); if (ch) D.consultasHechas = JSON.parse(ch);
     var lv = ls('logrosVistos'); if (lv) D.logrosVistos = JSON.parse(lv);
     var nm = ls('nightMode'); if (nm) D.nightMode = JSON.parse(nm);
@@ -707,7 +708,8 @@ function saveData() {
     actividadesHechas: D.actividadesHechas||{},
     sprints: D.sprints||[],
     sprintActivo: D.sprintActivo||null,
-    onboarding: D.onboarding||{}
+    onboarding: D.onboarding||{},
+    medsPersonales: D.medsPersonales||[]
   });
 }
 
@@ -2275,15 +2277,20 @@ function applyNightMode(){document.body.classList.toggle('night',D.nightMode);}
 (function() {
   var _lastMadrugadaState = null;
   setInterval(function() {
+    if (D.step !== 'home') return;
+    var needsRender = false;
+    // 1. Cambio de modo madrugada
     var cfg = D.config || {};
-    if ((cfg.modo_madrugada || 'auto') !== 'auto') return; // solo en modo auto
-    if (D.step !== 'home') return; // solo afecta el home
-    var current = isMadrugada();
-    if (_lastMadrugadaState !== null && current !== _lastMadrugadaState) {
-      // Cruzamos umbral — re-render para activar/desactivar home nocturno
-      if (typeof render === 'function') render();
+    if ((cfg.modo_madrugada || 'auto') === 'auto') {
+      var current = isMadrugada();
+      if (_lastMadrugadaState !== null && current !== _lastMadrugadaState) needsRender = true;
+      _lastMadrugadaState = current;
     }
-    _lastMadrugadaState = current;
+    // 2. Meds con recordatorio activo: refrescar countdown cada minuto
+    if (D.medsPersonales && D.medsPersonales.some(function(m){ return m && m.recordatorio_activo && m.intervalo_h; })) {
+      needsRender = true;
+    }
+    if (needsRender && typeof render === 'function') render();
   }, 60000); // chequea cada minuto
 })();
 
@@ -3852,6 +3859,78 @@ function render(){
     var nmb=E.btn('tb'+(D.nightMode?' on':''),D.nightMode?'\uD83C\uDF19 Modo noche ON':'\uD83C\uDF19 Modo noche','toggleNight');
     nmBtn.appendChild(nmb);bd.appendChild(nmBtn);
 
+    // ── Próximas dosis de medicamentos (Fase 3) ─────────────────
+    (function(){
+      if(!D.medsPersonales || D.medsPersonales.length===0) return;
+      migrateMedsPersonales();
+      var medsActivos = D.medsPersonales.map(function(m,i){ return {m:m,idx:i}; })
+        .filter(function(x){ return x.m.recordatorio_activo && x.m.intervalo_h; });
+      if(medsActivos.length===0) return;
+
+      var hayAtrasada = medsActivos.some(function(x){ var p=calcProximaDosis(x.m); return p && p.atrasada; });
+      var cardBg = hayAtrasada ? 'rgba(224,112,112,.07)' : 'rgba(100,200,180,.06)';
+      var cardBorder = hayAtrasada ? 'rgba(224,112,112,.3)' : 'rgba(100,200,180,.2)';
+
+      var card = mkDiv('background:'+cardBg+';border:1px solid '+cardBorder+';border-radius:14px;padding:12px 14px;margin-bottom:14px');
+      var header = mkDiv('display:flex;align-items:center;justify-content:space-between;margin-bottom:8px');
+      var titleEl = mkTxt('div', null, '\uD83D\uDC8A Próximas dosis', 'font-size:11px;color:'+(hayAtrasada?'#e07070':'#64c8b4')+';letter-spacing:2px;text-transform:uppercase;font-weight:bold');
+      header.appendChild(titleEl);
+      var countEl = mkTxt('div', null, String(medsActivos.length) + ' activo' + (medsActivos.length>1?'s':''), 'font-size:10px;color:#a89070');
+      header.appendChild(countEl);
+      card.appendChild(header);
+
+      // Expandible si hay más de 2
+      var expanded = D._medsHomeExpanded===true;
+      var visibles = (medsActivos.length<=2 || expanded) ? medsActivos : medsActivos.slice(0,2);
+
+      visibles.forEach(function(x){
+        var m = x.m; var idx = x.idx;
+        var prox = calcProximaDosis(m);
+        var row = mkDiv('display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px dashed rgba(255,255,255,.06)');
+        // Info
+        var info = mkDiv('flex:1;min-width:0');
+        var nombreLine = m.nombre + (m.marca ? ' \u00b7 ' + m.marca : '');
+        info.appendChild(mkTxt('div', null, nombreLine, 'font-size:13px;color:#f0d9a0;font-weight:bold;white-space:nowrap;overflow:hidden;text-overflow:ellipsis'));
+        var subLine = '';
+        if(m.dosis) subLine = m.dosis + ' ' + (m.unidad||'');
+        subLine += (subLine?' \u00b7 ':'') + 'cada ' + m.intervalo_h + 'h';
+        info.appendChild(mkTxt('div', null, subLine, 'font-size:11px;color:#a89070'));
+        if(prox && m.ultima_dosis_ts){
+          var pxColor = prox.atrasada ? '#e07070' : '#a0e8d8';
+          info.appendChild(mkTxt('div', null, fmtDosisCountdown(prox.diffMin), 'font-size:11px;color:'+pxColor+';font-weight:bold;margin-top:2px'));
+        } else {
+          info.appendChild(mkTxt('div', null, 'Sin dosis registrada a\u00fan', 'font-size:11px;color:#a89070;font-style:italic;margin-top:2px'));
+        }
+        row.appendChild(info);
+        // Botón Lo di ahora
+        var btn = document.createElement('button');
+        btn.style.cssText='flex-shrink:0;padding:8px 12px;border-radius:10px;border:1px solid rgba(100,200,180,.4);background:rgba(100,200,180,.15);color:#64c8b4;font-size:11px;font-weight:bold;cursor:pointer;font-family:Georgia,serif;white-space:nowrap';
+        btn.textContent = '\u2713 Lo di';
+        btn.dataset.action = 'registrarDosisAhora';
+        btn.dataset.idx = String(idx);
+        row.appendChild(btn);
+        card.appendChild(row);
+      });
+
+      // Toggle expand si hay más de 2
+      if(medsActivos.length>2){
+        var tog = document.createElement('button');
+        tog.style.cssText='width:100%;margin-top:6px;padding:6px;border-radius:8px;border:none;background:transparent;color:#a89070;font-size:11px;cursor:pointer;font-family:Georgia,serif';
+        tog.textContent = expanded ? '\u25b2 Ver menos' : '\u25bc Ver ' + (medsActivos.length-2) + ' más';
+        tog.onclick = function(){ D._medsHomeExpanded = !expanded; render(); };
+        card.appendChild(tog);
+      }
+
+      // Link a gestión
+      var goLink = document.createElement('button');
+      goLink.style.cssText='width:100%;margin-top:4px;padding:6px;border-radius:8px;border:none;background:transparent;color:#a89070;font-size:10px;cursor:pointer;font-family:Georgia,serif';
+      goLink.textContent = 'Gestionar medicamentos \u203a';
+      goLink.onclick = function(){ D._estudiosTab='medicacion'; setStep('estudios'); };
+      card.appendChild(goLink);
+
+      bd.appendChild(card);
+    })();
+
     // ── Plan del día de Cefe (mini-card compacta) ───────────────
     (function(){
       var cfg=D.config||{};var notif=cfg.notif||{};
@@ -4872,29 +4951,82 @@ function render(){
       addMedBtn.onclick=function(){D._editMedPersonalIdx=-1;setStep('editMedPersonal');};
       bd.appendChild(addMedBtn);
       if(D.medsPersonales.length>0){
+        migrateMedsPersonales();
         bd.appendChild(E.slbl('Medicamentos de '+apodoMed));
         D.medsPersonales.forEach(function(m,mi){
-          var mc=mkDiv('background:rgba(212,168,67,.06);border:1px solid rgba(212,168,67,.2);border-radius:13px;padding:12px 14px;margin-bottom:10px');
+          var prox = calcProximaDosis(m);
+          var cardBorder = prox && prox.atrasada ? 'rgba(224,112,112,.45)' : 'rgba(212,168,67,.2)';
+          var cardBg = prox && prox.atrasada ? 'rgba(224,112,112,.06)' : 'rgba(212,168,67,.06)';
+          var mc=mkDiv('background:'+cardBg+';border:1px solid '+cardBorder+';border-radius:13px;padding:12px 14px;margin-bottom:10px');
           var mhdr=mkDiv('display:flex;align-items:flex-start;justify-content:space-between;gap:10px');
-          var minfo=mkDiv('flex:1');
-          minfo.appendChild(mkTxt('div',null,m.nombre,'font-size:14px;font-weight:bold;color:#f0d9a0;margin-bottom:2px'));
-          if(m.dosis)minfo.appendChild(mkTxt('div',null,m.dosis+' '+m.unidad,'font-size:12px;color:#d4a843;margin-bottom:2px'));
-          if(m.frecuencia)minfo.appendChild(mkTxt('div',null,m.frecuencia,'font-size:11px;color:#a89070;margin-bottom:2px'));
-          if(m.indicacion)minfo.appendChild(mkTxt('div',null,'\u25b8 '+m.indicacion,'font-size:11px;color:#a89070;line-height:1.4;margin-bottom:2px'));
-          if(m.medico)minfo.appendChild(mkTxt('div',null,'Dr/a. '+m.medico,'font-size:10px;color:#b48cdc'));
+          var minfo=mkDiv('flex:1;min-width:0');
+          // Titulo: nombre + marca
+          var tituloMed = m.nombre + (m.marca ? ' \u00b7 ' + m.marca : '');
+          minfo.appendChild(mkTxt('div',null,tituloMed,'font-size:14px;font-weight:bold;color:#f0d9a0;margin-bottom:2px'));
+          // Dosis + via + intervalo
+          var dosisLine = '';
+          if(m.dosis) dosisLine = m.dosis + ' ' + (m.unidad||'');
+          if(m.via && m.via !== 'oral') dosisLine += (dosisLine ? ' \u00b7 ' : '') + m.via;
+          if(m.intervalo_h) dosisLine += (dosisLine ? ' \u00b7 ' : '') + 'cada ' + m.intervalo_h + 'h';
+          if(dosisLine) minfo.appendChild(mkTxt('div',null,dosisLine,'font-size:12px;color:#d4a843;margin-bottom:3px'));
+          if(m.indicacion) minfo.appendChild(mkTxt('div',null,'\u25b8 '+m.indicacion,'font-size:11px;color:#a89070;line-height:1.4;margin-bottom:2px'));
+          if(m.nota) minfo.appendChild(mkTxt('div',null,m.nota,'font-size:11px;color:#a89070;font-style:italic;line-height:1.4;margin-bottom:2px'));
+          if(m.medico) minfo.appendChild(mkTxt('div',null,'Dr/a. '+m.medico,'font-size:10px;color:#b48cdc'));
           mhdr.appendChild(minfo);
+          // Botones Editar / (eliminar desde editor)
           var mbts=mkDiv('display:flex;flex-direction:column;gap:4px;flex-shrink:0');
           var eMedBtn=document.createElement('button');
           eMedBtn.style.cssText='padding:4px 9px;border-radius:8px;border:1px solid rgba(212,168,67,.3);background:transparent;color:#d4a843;font-size:11px;cursor:pointer';
           eMedBtn.textContent='Editar';
           (function(i){eMedBtn.onclick=function(){D._editMedPersonalIdx=i;setStep('editMedPersonal');};})(mi);
           mbts.appendChild(eMedBtn);
-          var dMedBtn=document.createElement('button');
-          dMedBtn.style.cssText='padding:4px 9px;border-radius:8px;border:1px solid rgba(224,112,112,.3);background:transparent;color:#e07070;font-size:11px;cursor:pointer';
-          dMedBtn.textContent='Eliminar';
-          (function(i,nm){dMedBtn.onclick=function(){if(confirm('Eliminar '+nm+'?')){D.medsPersonales.splice(i,1);saveData();render();}};})(mi,m.nombre);
-          mbts.appendChild(dMedBtn);
-          mhdr.appendChild(mbts);mc.appendChild(mhdr);
+          mhdr.appendChild(mbts);
+          mc.appendChild(mhdr);
+
+          // Bloque de recordatorio (si tiene intervalo)
+          if(m.intervalo_h){
+            var recBox = mkDiv('margin-top:10px;padding-top:10px;border-top:1px dashed rgba(255,255,255,.08)');
+            var recRow = mkDiv('display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap');
+            // Info de próxima dosis
+            var infoRec = mkDiv('flex:1;min-width:120px');
+            if(m.recordatorio_activo){
+              if(m.ultima_dosis_ts){
+                var ldText = 'Última: ' + fdt(new Date(m.ultima_dosis_ts));
+                infoRec.appendChild(mkTxt('div',null,ldText,'font-size:10px;color:#a89070;margin-bottom:2px'));
+                var pxColor = prox.atrasada ? '#e07070' : '#a0e8d8';
+                infoRec.appendChild(mkTxt('div',null,'Próxima: '+fmtDosisCountdown(prox.diffMin),'font-size:12px;color:'+pxColor+';font-weight:bold'));
+              } else {
+                infoRec.appendChild(mkTxt('div',null,'Recordatorio activo \u00b7 sin dosis registrada','font-size:11px;color:#a89070;font-style:italic'));
+              }
+            } else {
+              infoRec.appendChild(mkTxt('div',null,'Recordatorio desactivado','font-size:11px;color:#6a6a6a;font-style:italic'));
+            }
+            recRow.appendChild(infoRec);
+            // Botones
+            var accRow = mkDiv('display:flex;gap:6px;flex-shrink:0');
+            var dioseBtn = document.createElement('button');
+            dioseBtn.style.cssText='padding:6px 11px;border-radius:9px;border:1px solid rgba(100,200,180,.35);background:rgba(100,200,180,.12);color:#64c8b4;font-size:11px;font-weight:bold;cursor:pointer;font-family:Georgia,serif';
+            dioseBtn.textContent='\u2713 Lo di ahora';
+            dioseBtn.dataset.action='registrarDosisAhora';
+            dioseBtn.dataset.idx=String(mi);
+            accRow.appendChild(dioseBtn);
+            var togRec = document.createElement('button');
+            togRec.style.cssText='padding:6px 11px;border-radius:9px;border:1px solid rgba(168,144,112,.3);background:transparent;color:#a89070;font-size:11px;cursor:pointer;font-family:Georgia,serif';
+            togRec.textContent = m.recordatorio_activo ? '\u25cb Pausar' : '\u25b6 Activar';
+            togRec.dataset.action='toggleMedRec';
+            togRec.dataset.idx=String(mi);
+            accRow.appendChild(togRec);
+            recRow.appendChild(accRow);
+            recBox.appendChild(recRow);
+            // Historial corto (últimas 3 dosis)
+            if(m.historial && m.historial.length>0){
+              var histList = m.historial.slice(0,3).map(function(h){ return fdt(new Date(h.ts)); }).join('  \u00b7  ');
+              recBox.appendChild(mkTxt('div',null,'Últimas: ' + histList, 'font-size:10px;color:#6a6a6a;margin-top:6px'));
+            }
+            mc.appendChild(recBox);
+          }
+
+          // Compartir WhatsApp (queda)
           var shareR=document.createElement('button');
           shareR.style.cssText='width:100%;margin-top:8px;padding:7px;border-radius:9px;border:1px solid rgba(100,200,180,.2);background:transparent;color:#64c8b4;font-size:11px;cursor:pointer;font-family:Georgia,serif';
           shareR.textContent='\u25b8 Compartir por WhatsApp';
@@ -4903,14 +5035,18 @@ function render(){
             var msg='*Medicamento de '+apodoMed+'*\n';
             if(b2.os)msg+='Obra social: '+b2.os+(b2.afil?' | N\u00b0 '+b2.afil:'')+'\n';
             if(b2.dni)msg+='DNI: '+b2.dni+'\n';
-            msg+='\nMedicamento: '+med.nombre;
-            if(med.dosis)msg+='\nDosis: '+med.dosis+' '+med.unidad;
-            if(med.frecuencia)msg+='\n'+med.frecuencia;
+            msg+='\nMedicamento: '+med.nombre+(med.marca?' ('+med.marca+')':'');
+            if(med.dosis)msg+='\nDosis: '+med.dosis+' '+(med.unidad||'');
+            if(med.via && med.via!=='oral')msg+='\nV\u00eda: '+med.via;
+            if(med.intervalo_h)msg+='\nCada '+med.intervalo_h+'hs';
             if(med.indicacion)msg+='\nIndicaci\u00f3n: '+med.indicacion;
+            if(med.nota)msg+='\nNota: '+med.nota;
             if(med.medico)msg+='\nIndicado por Dr/a. '+med.medico;
+            if(med.ultima_dosis_ts)msg+='\n\u00daltima dosis registrada: '+fdt(new Date(med.ultima_dosis_ts));
             window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');
           };})(m);
-          mc.appendChild(shareR);bd.appendChild(mc);
+          mc.appendChild(shareR);
+          bd.appendChild(mc);
         });
       } else {
         var emMed=mkDiv('text-align:center;padding:24px 16px');
@@ -5243,22 +5379,100 @@ function render(){
     bd.appendChild(mkTxt('div',null,'\uD83D\uDCDA Fuente: Sociedad Argentina de Pediatr\u00eda (SAP)','font-size:10px;color:#a89070;margin-top:8px;text-align:center'));
   }
 
-  // ── EDITAR MEDICAMENTO PERSONAL ──────────────────────────
+  // ── EDITAR MEDICAMENTO PERSONAL (reescrito Fase 3) ──────────
   else if(D.step==='editMedPersonal'){
     if(!D.medsPersonales)D.medsPersonales=[];
+    migrateMedsPersonales();
     var mpIdx=typeof D._editMedPersonalIdx==='number'?D._editMedPersonalIdx:-1;
     var mpEdit=mpIdx>=0&&mpIdx<D.medsPersonales.length?D.medsPersonales[mpIdx]:{};
     var isNewMp=!mpEdit.nombre;
-    bd.appendChild(E.btn('bk','← Volver','goEstudios'));
+    bd.appendChild(E.btn('bk','\u2190 Volver','goEstudios'));
     bd.appendChild(E.el('div',{cls:'st',txt:(isNewMp?'Agregar':'Editar')+' medicamento'}));
-    bd.appendChild(E.field('Nombre del medicamento *',E.input('fi','mpNombre','text','Ej: Biogaia, Paracetamol...',mpEdit.nombre||'')));
-    bd.appendChild(E.frow([E.field('Dosis',E.input('fi','mpDosis','text','Ej: 5',mpEdit.dosis||'')),E.field('Unidad',E.select('fs','mpUnidad',[{v:'ml',l:'ml'},{v:'gotas',l:'gotas'},{v:'mg',l:'mg'},{v:'g',l:'g'},{v:'comp',l:'comprimido'},{v:'sobre',l:'sobre'},{v:'UI',l:'UI'}],mpEdit.unidad||'ml'))]));
-    bd.appendChild(E.field('Frecuencia',E.input('fi','mpFrec','text','Ej: 1 vez al día, cada 8hs...',mpEdit.frecuencia||'')));
-    bd.appendChild(E.field('Indicación / Motivo',E.input('fi','mpInd','text','Ej: Próbiotico, Vitamina D...',mpEdit.indicacion||'')));
-    bd.appendChild(E.field('Indicado por',E.input('fi','mpMed','text','Nombre del médico',mpEdit.medico||'')));
-    bd.appendChild(E.field('Notas',E.input('fi','mpNota','text','Observaciones',mpEdit.nota||'')));
+
+    // Disclaimer de seguridad
+    var discl=mkDiv('background:rgba(212,168,67,.08);border:1px solid rgba(212,168,67,.2);border-radius:10px;padding:9px 12px;margin-bottom:14px');
+    discl.appendChild(mkTxt('div',null,'\u26a0\ufe0f Alba es un asistente de seguimiento. No reemplaza al pediatra. Cargá dosis e intervalos seg\u00fan la indicaci\u00f3n m\u00e9dica.','font-size:11px;color:#f0d9a0;line-height:1.5'));
+    bd.appendChild(discl);
+
+    // DROGA (desplegable desde FARMACOLOGIA_PED)
+    var drogaOpts = [{v:'',l:'(seleccionar droga)'}];
+    FARMACOLOGIA_PED.forEach(function(d){
+      drogaOpts.push({v:d.id, l:d.nombre + (d.cat!=='Custom' ? ' \u00b7 '+d.cat : '')});
+    });
+    var drogaSel = D._mpDrogaSel !== undefined ? D._mpDrogaSel : (mpEdit.droga||'');
+    bd.appendChild(E.field('Droga *', E.select('fs','mpDroga', drogaOpts, drogaSel)));
+
+    // Cuando cambia la droga, render de nuevo para actualizar marcas
+    setTimeout(function(){
+      var sd=document.getElementById('mpDroga');
+      if(sd) sd.onchange = function(){ D._mpDrogaSel = this.value; render(); };
+    },50);
+
+    // MARCA (dependiente de la droga seleccionada)
+    var drogaActual = getDrogaById(drogaSel);
+    if(drogaActual && drogaActual.marcas && drogaActual.marcas.length>0){
+      var marcaOpts = [{v:'',l:'(seleccionar o dejar vac\u00edo)'}];
+      drogaActual.marcas.forEach(function(m){ marcaOpts.push({v:m,l:m}); });
+      marcaOpts.push({v:'__custom',l:'\u270f\ufe0f Otra marca (ingresar)'});
+      var marcaSel = D._mpMarcaSel !== undefined ? D._mpMarcaSel : (mpEdit.marca||'');
+      var marcaEsCustom = marcaSel === '__custom' || (marcaSel && drogaActual.marcas.indexOf(marcaSel)<0 && marcaSel!=='__custom');
+      bd.appendChild(E.field('Marca comercial', E.select('fs','mpMarcaSel', marcaOpts, marcaEsCustom?'__custom':marcaSel)));
+      setTimeout(function(){
+        var sm=document.getElementById('mpMarcaSel');
+        if(sm) sm.onchange = function(){ D._mpMarcaSel = this.value; render(); };
+      },50);
+      if(marcaEsCustom){
+        bd.appendChild(E.field('Nombre de la marca', E.input('fi','mpMarcaCustom','text','Escrib\u00ed la marca', (marcaSel==='__custom'?'':marcaSel)||'')));
+      }
+    } else if(drogaSel==='otro'){
+      bd.appendChild(E.field('Nombre del medicamento *', E.input('fi','mpNombre','text','Escrib\u00ed el nombre', mpEdit.nombre||'')));
+    }
+
+    // DOSIS + UNIDAD
+    bd.appendChild(E.frow([
+      E.field('Dosis', E.input('fi','mpDosis','text','Ej: 5', mpEdit.dosis||'')),
+      E.field('Unidad', E.select('fs','mpUnidad',[{v:'ml',l:'ml'},{v:'gotas',l:'gotas'},{v:'mg',l:'mg'},{v:'g',l:'g'},{v:'comp',l:'comp'},{v:'sobre',l:'sobre'},{v:'UI',l:'UI'},{v:'aplic',l:'aplicaci\u00f3n'}], mpEdit.unidad||'ml'))
+    ]));
+
+    // VIA
+    var viasDroga = (drogaActual && drogaActual.vias) ? drogaActual.vias : ['oral','oftalmica','otica','nasal','topica','rectal','inhalatoria'];
+    var viaOpts = viasDroga.map(function(v){
+      var lbls={oral:'\uD83D\uDC8A Oral', oftalmica:'\uD83D\uDC41\uFE0F Oft\u00e1lmica', otica:'\uD83D\uDC42 \u00d3tica', nasal:'\uD83D\uDC45 Nasal', topica:'\uD83D\uDD90\uFE0F T\u00f3pica', rectal:'\uD83D\uDCA1 Rectal', inhalatoria:'\uD83D\uDCA8 Inhalatoria'};
+      return {v:v, l:lbls[v]||v};
+    });
+    bd.appendChild(E.field('V\u00eda de administraci\u00f3n', E.select('fs','mpVia',viaOpts,mpEdit.via||viasDroga[0])));
+
+    // INTERVALO EN HORAS (recordatorio opcional)
+    var intervaloHs = mpEdit.intervalo_h!=null ? String(mpEdit.intervalo_h) : '';
+    bd.appendChild(E.field('Intervalo en horas (opcional)', E.input('fi','mpIntervaloH','number','Ej: 4, 6, 8, 12, 24', intervaloHs)));
+
+    // RECORDATORIO ACTIVO
+    var recCheck = document.createElement('div');
+    recCheck.style.cssText='display:flex;align-items:center;gap:10px;padding:10px 12px;background:rgba(100,200,180,.06);border:1px solid rgba(100,200,180,.2);border-radius:10px;margin-bottom:12px';
+    var recChk = document.createElement('input');
+    recChk.type='checkbox';
+    recChk.id='mpRecActivo';
+    recChk.checked = mpEdit.recordatorio_activo===true;
+    recChk.style.cssText='width:18px;height:18px';
+    var recLbl = document.createElement('label');
+    recLbl.htmlFor='mpRecActivo';
+    recLbl.style.cssText='font-size:13px;color:#a0e8d8;cursor:pointer';
+    recLbl.textContent = 'Mostrar pr\u00f3xima dosis en el inicio';
+    recCheck.appendChild(recChk); recCheck.appendChild(recLbl);
+    bd.appendChild(recCheck);
+    bd.appendChild(mkTxt('div',null,'\uD83D\uDCA1 Configurá también una alarma en el celular: Alba solo te avisa cuando la abr\u00eds.','font-size:11px;color:#a89070;margin:-6px 0 12px 4px;font-style:italic'));
+
+    bd.appendChild(E.field('Indicaci\u00f3n / Motivo', E.input('fi','mpInd','text','Ej: Conjuntivitis, fiebre...', mpEdit.indicacion||'')));
+    bd.appendChild(E.field('Indicado por', E.input('fi','mpMed','text','Nombre del pediatra', mpEdit.medico||'')));
+    bd.appendChild(E.field('Notas del modo de toma', E.input('fi','mpNota','text','Ej: Despu\u00e9s de comer, agitar...', mpEdit.nota||'')));
+
     bd.appendChild(E.btn('pb go','Guardar','saveMedPersonal'));
-    bd.appendChild(E.btn('gb rd','Cancelar','goEstudios'));
+    if(mpIdx>=0){
+      var delBtn=E.btn('gb rd','Eliminar medicamento','delMedPersonal');
+      delBtn.dataset.idx=mpIdx;
+      bd.appendChild(delBtn);
+    }
+    bd.appendChild(E.btn('gb','Cancelar','goEstudios'));
   }
 
   // ── NUEVO EVENTO ────────────────────────────────────────────
@@ -6396,14 +6610,90 @@ document.addEventListener('click', function(ev) {
         case 'goTimerLibre': closeMasMenu(); setStep('timerLibre'); return;
         case 'goUrgencia': closeMasMenu(); setStep('urgencia'); return;
         case 'saveMedPersonal': (function(){
-          var nm=document.getElementById('mpNombre')&&document.getElementById('mpNombre').value.trim();
-          if(!nm){alert('Ingres\u00e1 el nombre del medicamento.');return;}
           if(!D.medsPersonales)D.medsPersonales=[];
-          var med={nombre:nm,dosis:(document.getElementById('mpDosis')||{}).value||'',unidad:(document.getElementById('mpUnidad')||{}).value||'ml',frecuencia:(document.getElementById('mpFrec')||{}).value||'',indicacion:(document.getElementById('mpInd')||{}).value||'',medico:(document.getElementById('mpMed')||{}).value||'',nota:(document.getElementById('mpNota')||{}).value||'',fecha:todayStr()};
-          var idx=D._editMedPersonalIdx;
-          if(idx>=0&&idx<D.medsPersonales.length){D.medsPersonales[idx]=med;}else{D.medsPersonales.push(med);}
-          saveData();setStep('estudios');
-        })();return;
+          migrateMedsPersonales();
+          // Resolver droga y nombre
+          var drogaSel = (document.getElementById('mpDroga')||{}).value || D._mpDrogaSel || '';
+          if(!drogaSel){ alert('Selecciona la droga.'); return; }
+          var drogaObj = getDrogaById(drogaSel);
+          var nombre = '';
+          var marca = '';
+          if(drogaSel==='otro'){
+            nombre = ((document.getElementById('mpNombre')||{}).value||'').trim();
+            if(!nombre){ alert('Ingres\u00e1 el nombre del medicamento.'); return; }
+          } else {
+            nombre = drogaObj ? drogaObj.nombre : drogaSel;
+            var marcaSelVal = (document.getElementById('mpMarcaSel')||{}).value || D._mpMarcaSel || '';
+            if(marcaSelVal === '__custom'){
+              marca = ((document.getElementById('mpMarcaCustom')||{}).value||'').trim();
+            } else {
+              marca = marcaSelVal;
+            }
+          }
+          var idx = D._editMedPersonalIdx;
+          var existing = idx>=0 && idx<D.medsPersonales.length ? D.medsPersonales[idx] : null;
+          var intervalo_h_raw = (document.getElementById('mpIntervaloH')||{}).value;
+          var intervalo_h = intervalo_h_raw ? parseFloat(intervalo_h_raw) : null;
+          if(intervalo_h!=null && (isNaN(intervalo_h) || intervalo_h<=0 || intervalo_h>168)) intervalo_h = null;
+          var recActivo = !!(document.getElementById('mpRecActivo')||{}).checked;
+          // Si activa recordatorio sin intervalo, deshabilitar
+          if(recActivo && !intervalo_h){
+            alert('Para mostrar en el inicio, ingres\u00e1 el intervalo en horas.');
+            return;
+          }
+          var med = {
+            id: existing && existing.id ? existing.id : 'mp_'+Math.random().toString(36).slice(2,9),
+            nombre: nombre,
+            droga: drogaSel,
+            marca: marca,
+            dosis: (document.getElementById('mpDosis')||{}).value || '',
+            unidad: (document.getElementById('mpUnidad')||{}).value || 'ml',
+            via: (document.getElementById('mpVia')||{}).value || 'oral',
+            intervalo_h: intervalo_h,
+            recordatorio_activo: recActivo,
+            indicacion: (document.getElementById('mpInd')||{}).value || '',
+            medico: (document.getElementById('mpMed')||{}).value || '',
+            nota: (document.getElementById('mpNota')||{}).value || '',
+            ultima_dosis_ts: existing ? existing.ultima_dosis_ts : null,
+            historial: existing ? (existing.historial||[]) : [],
+            activo: existing ? (existing.activo!==false) : true,
+            created_at: existing ? existing.created_at : Date.now(),
+            updated_at: Date.now(),
+            fecha: existing ? (existing.fecha||todayStr()) : todayStr()
+          };
+          if(idx>=0 && idx<D.medsPersonales.length){ D.medsPersonales[idx] = med; } else { D.medsPersonales.push(med); }
+          // Limpiar flags de UI
+          D._mpDrogaSel = undefined;
+          D._mpMarcaSel = undefined;
+          saveData(); setStep('estudios');
+        })(); return;
+        case 'delMedPersonal': (function(){
+          var idx = parseInt(data && data.idx != null ? data.idx : '-1');
+          if(isNaN(idx) || idx<0) idx = D._editMedPersonalIdx;
+          if(!D.medsPersonales || !D.medsPersonales[idx]) return;
+          if(!confirm('Eliminar este medicamento del historial?')) return;
+          D.medsPersonales.splice(idx,1);
+          D._editMedPersonalIdx = -1;
+          saveData(); setStep('estudios');
+        })(); return;
+        case 'registrarDosisAhora': (function(){
+          var idx = parseInt(data && data.idx != null ? data.idx : '-1');
+          if(isNaN(idx) || idx<0 || !D.medsPersonales || !D.medsPersonales[idx]) return;
+          registrarDosisAhora(idx);
+          render();
+        })(); return;
+        case 'toggleMedRec': (function(){
+          var idx = parseInt(data && data.idx != null ? data.idx : '-1');
+          if(isNaN(idx) || idx<0 || !D.medsPersonales || !D.medsPersonales[idx]) return;
+          var med = D.medsPersonales[idx];
+          med.recordatorio_activo = !med.recordatorio_activo;
+          if(med.recordatorio_activo && !med.intervalo_h){
+            alert('Este med no tiene intervalo. Edit\u00e1 y cargá un intervalo en horas.');
+            med.recordatorio_activo = false;
+            return;
+          }
+          saveData(); render();
+        })(); return;
         case 'goActividades': closeMasMenu(); setStep('actividades'); return;
         case 'goVacunas': closeMasMenu(); setStep('vacunas'); return;
         case 'goPendientes': closeMasMenu(); setStep('pendientes'); return;
@@ -8677,6 +8967,107 @@ function getActividades() {
 
 // ─── VACUNAS ARGENTINA (Calendario Nacional 2024) ─────────────
 
+
+
+// ══════════════════════════════════════════════════════════════════════════
+// ══  FARMACOLOGIA PEDIATRICA (Starter kit - ANMAT/SAP Argentina)
+// ══  Listado de drogas habituales en 0-24 meses con marcas comerciales.
+// ══  IMPORTANTE: La app NUNCA sugiere dosis ni intervalo. El usuario carga
+// ══  lo que indico el pediatra. Esta es solo la base de busqueda.
+// ══════════════════════════════════════════════════════════════════════════
+var FARMACOLOGIA_PED = [
+  // ── Analgesicos / antipireticos ──
+  {id:'paracetamol',  nombre:'Paracetamol',           cat:'Analg\u00e9sico/antipir\u00e9tico', vias:['oral','rectal'], marcas:['Tafirol','Panadol','Termofren','Bio Grip','Ped\u00edctol']},
+  {id:'ibuprofeno',   nombre:'Ibuprofeno',            cat:'Analg\u00e9sico/antipir\u00e9tico', vias:['oral'], marcas:['Actron pediatrico','Ibupirac','Dioxad\u00f3l','Dalsy','Novo Gesic']},
+  {id:'dipirona',     nombre:'Dipirona',              cat:'Analg\u00e9sico', vias:['oral'], marcas:['Novalgina','Termag\u00e9sico']},
+  // ── Antibioticos pediatricos ──
+  {id:'amoxicilina',  nombre:'Amoxicilina',           cat:'Antibi\u00f3tico', vias:['oral'], marcas:['Amoxidal','Trifamox','Optamox','Amixen']},
+  {id:'amoxiclav',    nombre:'Amoxicilina + clavul\u00e1nico', cat:'Antibi\u00f3tico', vias:['oral'], marcas:['Amoxidal Duo','Trifamox IBL Duo','Fullgram Duo']},
+  {id:'cefalexina',   nombre:'Cefalexina',            cat:'Antibi\u00f3tico', vias:['oral'], marcas:['Keflex','Cefabiot','Leciram']},
+  {id:'azitromicina', nombre:'Azitromicina',          cat:'Antibi\u00f3tico', vias:['oral'], marcas:['Azitrocin','Zitromax','Misultina']},
+  {id:'eritromicina_oft', nombre:'Eritromicina oft\u00e1lmica', cat:'Antibi\u00f3tico t\u00f3pico', vias:['oftalmica'], marcas:['Eritrocin oftalmico','Lagricel Ofteno']},
+  {id:'nistatina',    nombre:'Nistatina',             cat:'Antif\u00fangico', vias:['oral','topica'], marcas:['Mycostatin','Ganagrin']},
+  // ── Antirreflujo / digestivos ──
+  {id:'ranitidina',   nombre:'Ranitidina',            cat:'Antirreflujo', vias:['oral'], marcas:['Taural','Vizerul']},
+  {id:'omeprazol',    nombre:'Omeprazol pedi\u00e1trico', cat:'Antirreflujo', vias:['oral'], marcas:['Ompranyt','Losec']},
+  {id:'domperidona',  nombre:'Domperidona',           cat:'Proquin\u00e9tico', vias:['oral'], marcas:['Motilium','Dompe']},
+  {id:'probiotico',   nombre:'Probi\u00f3ticos',           cat:'Suplemento', vias:['oral'], marcas:['Biogaia','Florat\u00edl','Perenterol','Ultrabiot\u00edx','Lacteol']},
+  // ── Antihistaminicos ──
+  {id:'difenhidr',    nombre:'Difenhidramina',        cat:'Antihistam\u00ednico', vias:['oral'], marcas:['Benadryl']},
+  {id:'cetirizina',   nombre:'Cetirizina',            cat:'Antihistam\u00ednico', vias:['oral'], marcas:['Zyrtec','Alerfin','Alercet']},
+  // ── Vitaminas y suplementos ──
+  {id:'vitd',         nombre:'Vitamina D',            cat:'Vitamina', vias:['oral'], marcas:['Raquiferol','Deltius','Calcium D']},
+  {id:'vitad',        nombre:'Vitaminas A+D',         cat:'Vitamina', vias:['oral'], marcas:['Vitamina A+D gotas','ADC']},
+  {id:'hierro',       nombre:'Sulfato ferroso',       cat:'Suplemento', vias:['oral'], marcas:['Fer-In-Sol','Ferranin','Ferrovital']},
+  // ── Dermicos / topicos ──
+  {id:'dexpantenol',  nombre:'Dexpantenol',           cat:'D\u00e9rmico', vias:['topica'], marcas:['Bepantol','Pantensive']},
+  {id:'oxido_zinc',   nombre:'\u00d3xido de zinc',         cat:'D\u00e9rmico', vias:['topica'], marcas:['Hipogl\u00f3s','Mustela pa\u00f1al','Dermaglos','Weleda']},
+  {id:'hidrocort',    nombre:'Hidrocortisona crema',  cat:'Corticoide t\u00f3pico', vias:['topica'], marcas:['Lacticare HC','Dermis HC']},
+  // ── Nasales / gotas ──
+  {id:'suero_fis',    nombre:'Suero fisiol\u00f3gico',     cat:'Soluci\u00f3n salina', vias:['nasal','oftalmica'], marcas:['Sterimar','Respimar','Rhinomer','Solusim']},
+  // ── Custom ──
+  {id:'otro',         nombre:'Otro (ingresar manualmente)', cat:'Custom', vias:['oral','oftalmica','otica','nasal','topica','rectal','inhalatoria'], marcas:[]}
+];
+
+// Helper: buscar droga por id
+function getDrogaById(id){ return FARMACOLOGIA_PED.find(function(d){ return d.id===id; }); }
+
+// ══════════════════════════════════════════════════════════════════════════
+// Helpers para modulo medicamentos
+// ══════════════════════════════════════════════════════════════════════════
+
+// Migracion: asegurar campos nuevos en meds viejos
+function migrateMedsPersonales(){
+  if(!D.medsPersonales) D.medsPersonales = [];
+  var changed = false;
+  D.medsPersonales.forEach(function(m){
+    if(m.id===undefined){ m.id = 'mp_'+Math.random().toString(36).slice(2,9); changed=true; }
+    if(m.droga===undefined){ m.droga = m.droga || ''; changed=true; }
+    if(m.via===undefined){ m.via = m.via || 'oral'; changed=true; }
+    if(m.intervalo_h===undefined){ m.intervalo_h = null; changed=true; }
+    if(m.ultima_dosis_ts===undefined){ m.ultima_dosis_ts = null; changed=true; }
+    if(m.recordatorio_activo===undefined){ m.recordatorio_activo = false; changed=true; }
+    if(!m.historial) { m.historial = []; changed=true; }
+    if(!m.activo && m.activo!==false) { m.activo = true; changed=true; }
+    if(!m.created_at) { m.created_at = Date.now(); changed=true; }
+  });
+  return changed;
+}
+
+// Calcular proxima dosis segun sliding schedule
+function calcProximaDosis(med){
+  if(!med || !med.recordatorio_activo || !med.intervalo_h || !med.ultima_dosis_ts) return null;
+  var proxMs = new Date(med.ultima_dosis_ts).getTime() + (med.intervalo_h * 3600000);
+  var nowMs = Date.now();
+  var diffMin = Math.round((proxMs - nowMs)/60000);
+  return { proxMs: proxMs, diffMin: diffMin, atrasada: diffMin < 0 };
+}
+
+// Formateo humano del countdown de dosis
+function fmtDosisCountdown(diffMin){
+  if(diffMin < 0){
+    var m = Math.abs(diffMin);
+    if(m<60) return 'Atrasada '+m+' min';
+    return 'Atrasada '+Math.floor(m/60)+'h '+(m%60)+'m';
+  }
+  if(diffMin<1) return 'Ahora';
+  if(diffMin<60) return 'En '+diffMin+' min';
+  return 'En '+Math.floor(diffMin/60)+'h '+(diffMin%60)+'m';
+}
+
+// Registrar dosis dada: actualiza ultima_dosis_ts y historial
+function registrarDosisAhora(medIdx, ts){
+  if(!D.medsPersonales || !D.medsPersonales[medIdx]) return;
+  var med = D.medsPersonales[medIdx];
+  var dosisTs = ts || Date.now();
+  med.ultima_dosis_ts = new Date(dosisTs).toISOString();
+  if(!med.historial) med.historial = [];
+  med.historial.unshift({ ts: med.ultima_dosis_ts, ingresado_en: new Date().toISOString() });
+  // Limitar historial a 200 entradas
+  if(med.historial.length>200) med.historial = med.historial.slice(0,200);
+  saveData();
+}
+
 // ══════════════════════════════════════════════════════════════════════════
 // ══  DATOS ESTÁTICOS (VACUNAS, HITOS, TIPS...)
 // ══════════════════════════════════════════════════════════════════════════
@@ -9221,6 +9612,12 @@ onValue(ref(db,'cefe'),function(snap){
 
   // Meds y visits: Firebase siempre gana si existe (son datos editados, no solo appended)
   if(data.meds&&Array.isArray(data.meds)&&data.meds.filter(Boolean).length>=D.meds.length)D.meds=data.meds.filter(Boolean);
+  // medsPersonales (medicamentos del bebé): Firebase siempre gana si existe
+  if(data.medsPersonales&&Array.isArray(data.medsPersonales)){
+    var fbMp = data.medsPersonales.filter(Boolean);
+    if(fbMp.length >= (D.medsPersonales||[]).length) D.medsPersonales = fbMp;
+    if(typeof migrateMedsPersonales==='function') migrateMedsPersonales();
+  }
   if(data.visits&&Array.isArray(data.visits)){
     var fbV=data.visits.map(function(v){if(!v)return null;var dt=restoreDate(v.dt);if(!dt)return null;return Object.assign({},v,{dt:dt});}).filter(Boolean);
     if(fbV.length>=D.visits.length)D.visits=fbV;
