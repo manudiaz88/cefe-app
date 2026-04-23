@@ -5,11 +5,11 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Cefe">
+<meta name="apple-mobile-web-app-title" content="Alba">
 <meta name="theme-color" content="#0f1923">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<title>Cefe App v2.3</title>
+<title>Alba</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 body{min-height:100vh;background:linear-gradient(135deg,#0f1923,#1a2d3d,#0f2030);font-family:Georgia,serif;color:#e8dcc8;display:flex;flex-direction:column;align-items:center;padding-bottom:40px;transition:background .3s}
@@ -168,7 +168,7 @@ button{font-family:Georgia,serif;-webkit-appearance:none}
 <div id="onboard-overlay" class="hidden" style="position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:600;align-items:center;justify-content:center;padding:20px">
   <div style="width:100%;max-width:380px;background:linear-gradient(160deg,#0f1923,#1a2d3d);border:1px solid rgba(212,168,67,.3);border-radius:20px;padding:28px 22px;text-align:center">
     <div style="font-size:40px;margin-bottom:12px">👶</div>
-    <div style="font-size:18px;font-weight:bold;color:#f0d9a0;margin-bottom:6px">Bienvenido a la app de Cefe</div>
+    <div style="font-size:18px;font-weight:bold;color:#f0d9a0;margin-bottom:6px">Bienvenido a Alba</div>
     <div style="font-size:12px;color:#a89070;margin-bottom:20px;line-height:1.6">¿Cómo te llamás? Así podemos saber quién registra cada cosa y sincronizar las alertas entre dispositivos.</div>
     <input id="onboard-name-input" type="text" placeholder="Tu nombre (ej: Manu, Sari…)"
       style="width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(212,168,67,.3);border-radius:10px;padding:12px 14px;color:#f0d9a0;font-family:Georgia,serif;font-size:16px;outline:none;margin-bottom:14px;text-align:center"
@@ -200,7 +200,7 @@ button{font-family:Georgia,serif;-webkit-appearance:none}
 
 <div id="app">
   <div id="hdr">
-    <div><div class="hl">Alba · v3.0</div><div class="hm" id="hdr-title">Ceferino</div></div>
+    <div><div class="hl">Alba · v3.0</div><div class="hm" id="hdr-title"></div></div>
     <div class="hr">
       <span id="sync-dot" style="font-size:9px;color:#d4a843" title="Conectando">●</span>
       <button id="night-btn" class="tb" data-action="toggleNight">🌙</button>
@@ -238,8 +238,8 @@ button{font-family:Georgia,serif;-webkit-appearance:none}
       <!-- Grupo: Historia -->
       <div class="mas-cat-hdr mas-cat-collapsed" onclick="toggleMasGroup('historia')" id="mas-hdr-historia">📖 Historia<span class="mas-cat-arrow">&#9660;</span></div>
       <div class="mas-group-items hidden" id="mas-grp-historia">
-        <button class="mas-item" data-action="goHitos"><span class="mas-item-ic">⭐</span><span><span class="mas-item-lbl">Hitos</span><span class="mas-item-sub">Momentos de Cefe</span></span></button>
-        <button class="mas-item" data-action="goCuentos"><span class="mas-item-ic">📚</span><span><span class="mas-item-lbl">Cuentos</span><span class="mas-item-sub">Biblioteca de Cefe</span></span></button>
+        <button class="mas-item" data-action="goHitos"><span class="mas-item-ic">⭐</span><span><span class="mas-item-lbl">Hitos</span><span class="mas-item-sub">Desarrollo</span></span></button>
+        <button class="mas-item" data-action="goCuentos"><span class="mas-item-ic">📚</span><span><span class="mas-item-lbl">Cuentos</span><span class="mas-item-sub">Biblioteca</span></span></button>
         <button class="mas-item" data-action="goActividades"><span class="mas-item-ic">🎯</span><span><span class="mas-item-lbl">Actividades</span><span class="mas-item-sub">Plan de la semana</span></span></button>
         <button class="mas-item" data-action="goHistoria"><span class="mas-item-ic">📜</span><span><span class="mas-item-lbl">Historia</span><span class="mas-item-sub">Línea de tiempo</span></span></button>
         <button class="mas-item" data-action="goLogros"><span class="mas-item-ic">🏆</span><span><span class="mas-item-lbl">Logros</span><span class="mas-item-sub">Tu camino como padres</span></span></button>
@@ -248,8 +248,8 @@ button{font-family:Georgia,serif;-webkit-appearance:none}
       <!-- Grupo: App -->
       <div class="mas-cat-hdr mas-cat-collapsed" onclick="toggleMasGroup('app')" id="mas-hdr-app">⚙️ App<span class="mas-cat-arrow">&#9660;</span></div>
       <div class="mas-group-items hidden" id="mas-grp-app">
-        <button class="mas-item" data-action="goPerfil"><span class="mas-item-ic">👶</span><span><span class="mas-item-lbl">Perfil de Cefe</span><span class="mas-item-sub">Datos y obra social</span></span></button>
-        <button class="mas-item" data-action="goCalendario"><span class="mas-item-ic">📅</span><span><span class="mas-item-lbl">Calendario</span><span class="mas-item-sub">Agenda de Cefe</span></span></button>
+        <button class="mas-item" data-action="goPerfil"><span class="mas-item-ic">👶</span><span><span class="mas-item-lbl">Perfil</span><span class="mas-item-sub">Datos y obra social</span></span></button>
+        <button class="mas-item" data-action="goCalendario"><span class="mas-item-ic">📅</span><span><span class="mas-item-lbl">Calendario</span><span class="mas-item-sub">Tu agenda familiar</span></span></button>
         <button class="mas-item" data-action="goConfig"><span class="mas-item-ic">⚙️</span><span><span class="mas-item-lbl">Configuración</span><span class="mas-item-sub">Notif. y preferencias</span></span></button>
         <button class="mas-item" data-action="goAstro"><span class="mas-item-ic">✨</span><span><span class="mas-item-lbl">Recreativo</span><span class="mas-item-sub">Quiz, datos, respira</span></span></button>
         <button class="mas-item" data-action="toggleNight"><span class="mas-item-ic" id="night-ic">🌙</span><span><span class="mas-item-lbl" id="night-lbl">Modo noche</span><span class="mas-item-sub">Tomas nocturnas</span></span></button>
@@ -260,7 +260,7 @@ button{font-family:Georgia,serif;-webkit-appearance:none}
 </div>
 <script>
 // ═══════════════════════════════════════════════════════════════
-// CEFE LACTANCIA APP  —  v2.0
+// ALBA — PWA de crianza inteligente
 // ═══════════════════════════════════════════════════════════════
 
 var APP_VERSION = 3;
@@ -488,7 +488,7 @@ var D = {
       plan_dia: true,          // Plan de actividades del día
     },
     historial_expandido: true, // Historial muestra todos los días por default
-    perfil_home: true,         // Mostrar perfil de Cefe en home colapsado
+    perfil_home: true,         // Mostrar perfil del hijo en home colapsado
     modo_madrugada: 'auto',    // 'auto'=23-6hs | 'on'=siempre | 'off'=nunca
     tipoAlimentacion: 'pecho', // 'pecho' | 'mixta' | 'formula'
   },
@@ -517,7 +517,7 @@ var D = {
   // night mode
   nightMode: false,
   // astro tab
-  astroTab: 'horoscopo',
+  recreativoTab: 'actividades',
   // hitos tab
   hitoTab: 'vida',
   // momentos / pendientes
@@ -529,8 +529,8 @@ var D = {
 };
 
 // ─── STORAGE & MIGRATION ──────────────────────────────────────
-function ls(k) { try { return localStorage.getItem('cefe_' + k); } catch(e) { return null; } }
-function lss(k, v) { try { localStorage.setItem('cefe_' + k, JSON.stringify(v)); } catch(e) {} }
+function ls(k) { try { return localStorage.getItem('alba_' + k); } catch(e) { return null; } }
+function lss(k, v) { try { localStorage.setItem('alba_' + k, JSON.stringify(v)); } catch(e) {} }
 
 function parseEntry(e) {
   if (!e) return null;
@@ -587,7 +587,34 @@ function migrate(savedVersion) {
 // ══════════════════════════════════════════════════════════════════════════
 // ══  STORAGE — loadData / saveData
 // ══════════════════════════════════════════════════════════════════════════
+
+// ─── MIGRATION cefe_ -> alba_ (A.1, 21/04/2026) ──────────
+// Copia claves localStorage del prefix legacy al nuevo. Se ejecuta una vez
+// en el primer load tras el deploy de A.1. Se puede eliminar tras ~30 días.
+function migrateLocalStoragePrefix() {
+  try {
+    if (localStorage.getItem('alba_migrated_v1')) return;
+    var keys = [];
+    for (var i = 0; i < localStorage.length; i++) {
+      var k = localStorage.key(i);
+      if (k && k.indexOf('cefe_') === 0) keys.push(k);
+    }
+    var migrated = 0;
+    keys.forEach(function(oldKey) {
+      var newKey = 'alba_' + oldKey.substring(5);
+      if (localStorage.getItem(newKey) == null) {
+        localStorage.setItem(newKey, localStorage.getItem(oldKey));
+        migrated++;
+      }
+      localStorage.removeItem(oldKey);
+    });
+    localStorage.setItem('alba_migrated_v1', '1');
+    if (migrated > 0) console.log('[Alba] Migradas ' + migrated + ' claves localStorage de cefe_ a alba_');
+  } catch(e) { /* quota o modo privado: seguir silenciosamente */ }
+}
+
 function loadData() {
+  migrateLocalStoragePrefix();
   var savedVersion = parseInt(ls('version') || '1');
   try {
     var h = ls('hist'); if (h) D.hist = JSON.parse(h).map(parseEntry).filter(Boolean);
@@ -1129,7 +1156,7 @@ function genIcal(title, dtStart, dtEnd, location, description) {
     return dt.getFullYear()+p2(dt.getMonth()+1)+p2(dt.getDate())+'T'+p2(dt.getHours())+p2(dt.getMinutes())+'00';
   };
   var ics = [
-    'BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Alba//Cefe//ES',
+    'BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Alba//Alba//ES',
     'BEGIN:VEVENT',
     'SUMMARY:'+title,
     'DTSTART:'+fmt(dtStart),
@@ -1309,7 +1336,7 @@ function showAgendaActionSheet(item) {
   if(item.fuente==='visita'){
     var v=item.data;var m=D.meds[v.mi]||{};var dt=new Date(v.dt);var isPast=dt<new Date();
     var fmt=function(d){return d.getFullYear()+p2(d.getMonth()+1)+p2(d.getDate())+'T'+p2(d.getHours())+p2(d.getMinutes())+'00';};
-    var t=(AGENDA_TIPOS[v.tipo||'consulta']||AGENDA_TIPOS.consulta).label+(m.esp?' '+m.esp:'')+(m.nom?' — Dr/a. '+m.nom+' '+m.ape:'')+' — Cefe';
+    var t=(AGENDA_TIPOS[v.tipo||'consulta']||AGENDA_TIPOS.consulta).label+(m.esp?' '+m.esp:'')+(m.nom?' \u2014 Dr/a. '+m.nom+' '+m.ape:'')+' \u2014 '+apodo();
     if(!isPast){
       sheet.appendChild(mkSBtn('\uD83D\uDCC5','Agregar a Google Calendar','Abre Google Calendar con todo pre-cargado','#d4a843',function(){
         var dur=(v.durMin||60)*60000;var de=new Date(dt.getTime()+dur);
@@ -1318,7 +1345,7 @@ function showAgendaActionSheet(item) {
       }));
       sheet.appendChild(mkSBtn('\uD83C\uDF4E','Agregar a Apple Calendar (iCal)','Descarga archivo .ics','#8ab4dc',function(){
         var dur=(v.durMin||60)*60000;var de=new Date(dt.getTime()+dur);
-        var a=document.createElement('a');a.href=genIcal(t,dt,de,m.dir||'','DNI: '+(D.bebe.dni||''));a.download='cefe_evento.ics';a.click();
+        var a=document.createElement('a');a.href=genIcal(t,dt,de,m.dir||'','DNI: '+(D.bebe.dni||''));a.download='alba_evento.ics';a.click();
       }));
     }
     if(isPast&&v.estado==='pendiente'){
@@ -1327,7 +1354,7 @@ function showAgendaActionSheet(item) {
       sheet.appendChild(mkSBtn('✏️','Ver / editar seguimiento',v.conclusiones?(v.conclusiones.substring(0,35)+'...'):'Sin conclusiones aún','#64c8b4',function(){D.editVisitaIdx=item.idx;setStep('postVisita');}));
     }
     if(m.tel){
-      sheet.appendChild(mkSBtn('👨‍⚕️','Enviar datos de Cefe al médico','Por WhatsApp','#25d366',function(){
+      sheet.appendChild(mkSBtn('👨‍⚕️','Enviar datos de '+apodo()+' al m\u00e9dico','Por WhatsApp','#25d366',function(){
         var b3=D.bebe||{};
         var msg='\uD83D\uDC76 '+b3.nombre+' '+b3.apellido+(b3.dni?'\nDNI: '+b3.dni:'')+(b3.os?'\nOS: '+b3.os+(b3.afil?' N° '+b3.afil:''):'')+(b3.sangre?'\nGrupo: '+b3.sangre:'')+(D.pesos&&D.pesos[0]?'\nÚlt peso: '+gkg(D.pesos[0].g)+'kg':'');
         window.open('https://wa.me/'+m.tel.replace(/[^0-9]/g,'')+'?text='+encodeURIComponent(msg),'_blank');
@@ -1340,8 +1367,8 @@ function showAgendaActionSheet(item) {
     sheet.appendChild(mkSBtn('Ok','Marcar como aplicada hoy','Actualiza el calendario de vacunas','#64c8b4',function(){markVacuna(item.data.id,true);}));
     sheet.appendChild(mkSBtn('\uD83D\uDC89','Ver calendario de vacunas','Calendario Nacional Argentina 2024','#e07070',function(){setStep('vacunas');}));
   } else if(item.fuente==='hito'){
-    sheet.appendChild(mkSBtn('⭐','Ya ocurrió — marcar con fecha real','Se guarda en la historia de Cefe','#d4a843',function(){showHitoDialog(item.data.id);}));
-    sheet.appendChild(mkSBtn('\uD83C\uDF1F','Ver todos los hitos','Línea de desarrollo de Cefe','#b48cdc',function(){setStep('hitos');}));
+    sheet.appendChild(mkSBtn('⭐','Ya ocurrió — marcar con fecha real','Se guarda en la historia de '+apodo(),'#d4a843',function(){showHitoDialog(item.data.id);}));
+    sheet.appendChild(mkSBtn('\uD83C\uDF1F','Ver todos los hitos','L\u00ednea de desarrollo de '+apodo(),'#b48cdc',function(){setStep('hitos');}));
   } else if(item.fuente==='brote'){
     sheet.appendChild(mkSBtn('\uD83C\uDF31','¿Qué es un brote de crecimiento?','Info de la OMS y AAP','#d4a843',function(){
       showCpop('info','\uD83C\uDF31','Brote de crecimiento','Semana '+item.ts,
@@ -1458,7 +1485,7 @@ function getDataToma(){
 }
 
 
-// Personajes célebres nacidos el 29 de marzo (dia de nacimiento de Cefe)
+// Personajes célebres nacidos el mismo día del hijo (instancia 0: 29 de marzo)
 // Fuente: registros históricos públicos
 var CELEBRES_29_MAR = [
   {nombre:'Cy Young', desc:'Pitcher de béisbol, el premio más importante del béisbol lleva su nombre. (1867)', emoji:'⚾'},
@@ -1655,7 +1682,7 @@ function markVacuna(id,done){
   else delete D.bebe.vacunas[id];
   saveData();render();
 }
-function setAstroTab(k){D.astroTab=k;render();}
+function setRecreativoTab(k){D.recreativoTab=k;render();}
 function setHitoTab(k){D.hitoTab=k;render();}
 function toggleMasMenu(){var mm=document.getElementById('mas-menu');if(mm){mm.classList.toggle('open');if(mm.classList.contains('open')&&typeof initMasGroupState==='function')initMasGroupState();}}
 function closeMasMenu(){var mm=document.getElementById('mas-menu');if(mm)mm.classList.remove('open');}
@@ -1682,28 +1709,6 @@ function initMasGroupState(){
 }
 
 // ─── CARTA ASTRAL ─────────────────────────────────────────────
-function calcAstro() {
-  // Cefe: 29/03/2026 05:20 hs, San Isidro, Argentina
-  var signo = 'Aries';
-  var elemento = 'Fuego';
-  var regente = 'Marte';
-  var ascendente = 'Capricornio'; // aprox 05:20hs, lat -34
-  var luna = 'Tauro'; // Luna en Tauro aprox esa fecha
-  var numerologia = (2+9+0+3+2+0+2+6); // = 24 -> 2+4 = 6
-  while(numerologia > 9 && numerologia !== 11 && numerologia !== 22 && numerologia !== 33) {
-    var s=0; String(numerologia).split('').forEach(function(d){s+=parseInt(d);}); numerologia=s;
-  }
-  return {
-    signo: signo, elemento: elemento, regente: regente,
-    ascendente: ascendente, luna: luna,
-    numerologia: numerologia,
-    descripcionSigno: 'Aries es el primer signo del zodíaco, el pionero. Energía, impulsividad, valentía y liderazgo nato. Los Aries tienden a ser directos, apasionados y muy independientes. Les encanta iniciar proyectos aunque no siempre los terminen. Son competitivos por naturaleza y detestan la pasividad.',
-    descripcionAsc: 'Ascendente Capricornio da una primera impresión seria, responsable y determinada. Estos niños suelen mostrar madurez precoz y un enfoque metódico ante los desafíos. La combinación Aries-Capricornio crea alguien que sueña en grande y además sabe cómo ejecutar.',
-    descripcionLuna: 'Luna en Tauro habla de una vida emocional que busca seguridad, rutina y placer sensorial. En un bebé: se calma con contacto físico, calor y ritmo estable. Le costará adaptarse a cambios bruscos pero una vez seguro, es muy afectuoso.',
-    descripcionNum: 'Número de vida 6: el arquetipo del cuidador, el armonizador. Las personas con camino de vida 6 tienen vocación de servicio, amor profundo por la familia y un fuerte sentido de la responsabilidad. Suelen ser creativos, empáticos y buscan siempre el equilibrio en sus vínculos.',
-    descripcionCombinada: 'La combinación de un Sol en Aries (fuego, acción) con una Luna en Tauro (tierra, calma) crea una personalidad fascinante: la energía y el coraje de Aries se anclan en la paciencia y la sensualidad de Tauro. Cefe puede ser la persona que arranca con todo pero también sabe detenerse a disfrutar. El Ascendente Capricornio agrega ambición y estructura. Un líder con corazón.'
-  };
-}
 
 // ─── TIMER / ALARM ────────────────────────────────────────────
 function startTimer() {
@@ -1746,7 +1751,7 @@ function schedAlarm(nt){
     if(typeof Notification!=='undefined'&&Notification.permission==='granted'){
       if(D.notifTimer)clearTimeout(D.notifTimer);
       var ms2=new Date(nt).getTime()-Date.now();
-      if(ms2>0)D.notifTimer=setTimeout(function(){new Notification('Cefe \u2014 hora de comer',{body:'Proxima toma: '+ft(nt)});},ms2);
+      if(ms2>0)D.notifTimer=setTimeout(function(){new Notification(apodo()+' \u2014 hora de comer',{body:'Pr\u00f3xima toma: '+ft(nt)});},ms2);
     }
   }catch(e){}
 }
@@ -1783,7 +1788,7 @@ function genMsg(entry){
     if(entry.note&&entry.note.trim())lines.push('Nota: '+entry.note.trim());
   } else if(entry.type==='panal'){
     var pH=D.hist.filter(function(h){return h.type==='panal'&&sameDay(h.t,entry.t);});
-    lines.push('*Registro de Panal - Cefe*');
+    lines.push('*Registro de pa\u00f1ales \u2014 '+apodo()+'*');
     lines.push(fdt(entry.t)+' (#'+(pH.length+1)+' del dia)');
     lines.push('Tipo: '+entry.p);
     if(entry.note&&entry.note.trim())lines.push('Nota: '+entry.note.trim());
@@ -1798,8 +1803,8 @@ function genMsg(entry){
     var des2=de2.getFullYear()+p2(de2.getMonth()+1)+p2(de2.getDate())+'T'+p2(de2.getHours())+p2(de2.getMinutes())+'00';
     var tipoLabels2={consulta:'Consulta',vacuna:'Vacuna',peso:'Control de peso',actividad:'Actividad',otro:'Evento'};
     var tipoLbl2=tipoLabels2[entry.tipo||'consulta']||'Consulta';
-    var eventTitle2=tipoLbl2+(med.esp?' '+med.esp:'')+(med.nom||med.ape?' — Dr/a. '+(med.nom||'')+' '+(med.ape||''):'')+' — Cefe';
-    var gcDesc2='Paciente: '+(b2.nombre||'Cefe')+' '+(b2.apellido||'');
+    var eventTitle2=tipoLbl2+(med.esp?' '+med.esp:'')+(med.nom||med.ape?' \u2014 Dr/a. '+(med.nom||'')+' '+(med.ape||''):'')+' \u2014 '+apodo();
+    var gcDesc2='Paciente: '+(b2.nombre||'')+' '+(b2.apellido||'');
     if(b2.dni)gcDesc2+='\nDNI: '+b2.dni;
     if(b2.os)gcDesc2+='\nObra social: '+b2.os+(b2.afil?' N° '+b2.afil:'');
     if(b2.sangre)gcDesc2+='\nGrupo: '+b2.sangre;
@@ -1826,7 +1831,7 @@ function genMsg(entry){
 // ─── WEEKLY SUMMARY GENERATOR ─────────────────────────────────
 function genWeeklySummary(){
   var now=new Date(), desde=new Date(now.getTime()-7*86400000);
-  var apodo=D.bebe.apodo||D.bebe.nombre||'Cefe';
+  var apodo=apodo();
   var semana=Math.floor(ageD()/7);
   var semsVida=ageW();
   var th=D.hist.filter(function(h){return h.type==='toma'&&new Date(h.s)>=desde;});
@@ -2214,7 +2219,7 @@ function showHitoDialog(id){
 function saveCarta(){
   var titulo=gv('carta-titulo')||'Carta sin titulo';
   var texto=gv('carta-texto');
-  if(!texto.trim()){alert('Escribe algo para Cefe.');return;}
+  if(!texto.trim()){alert('Escrib\u00ed algo para '+apodo()+'.');return;}
   var carta={id:Date.now(),fecha:todayStr(),titulo:titulo,texto:texto};
   if(D.editCartaIdx>=0)D.cartas[D.editCartaIdx]=carta;else D.cartas.unshift(carta);
   D.editCartaIdx=-1;saveData();setStep('cartas');
@@ -2255,7 +2260,7 @@ function exportCSV(){
   var csv=rows.map(function(r){return r.map(function(c){return '"'+String(c||'').replace(/"/g,'""')+'"';}).join(',');}).join('\n');
   var blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});
   var url=URL.createObjectURL(blob);
-  var a=document.createElement('a');a.href=url;a.download='cefe-registro.csv';
+  var a=document.createElement('a');a.href=url;a.download='alba-registro.csv';
   document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
 }
 function copyHistText(){
@@ -2267,7 +2272,7 @@ function copyHistText(){
   copyText(txt);
 }
 function copyPesoText(){
-  var txt='Registro peso Cefe\n'+D.pesos.map(function(p){return fdt(p.t)+': '+gkg(p.g)+'kg'+(p.n?' ('+p.n+')':'');}).join('\n');
+  var txt='Registro de peso \u2014 '+apodo()+'\n'+D.pesos.map(function(p){return fdt(p.t)+': '+gkg(p.g)+'kg'+(p.n?' ('+p.n+')':'');}).join('\n');
   copyText(txt);
 }
 function toggleNightMode(){D.nightMode=!D.nightMode;saveData();applyNightMode();}
@@ -2779,7 +2784,7 @@ function handleAction(action,data){
     case 'editCarta':D.editCartaIdx=parseInt(data.idx);setStep('editCarta');break;
     case 'delCarta':delCarta(parseInt(data.idx));break;
     case 'saveCarta':saveCarta();break;
-    case 'setAstroTab':setAstroTab(data.k);break;
+    case 'setRecreativoTab':setRecreativoTab(data.k);break;
     case 'toggleVacuna':markVacuna(data.id,data.done!=='1');break;
     case 'mlProvPlus':D.mlProvistos=Math.min(300,(D.mlProvistos||0)+5);var ep=document.getElementById('mlprov-val');if(ep)ep.textContent=D.mlProvistos+'ml';break;
     case 'mlProvMinus':D.mlProvistos=Math.max(0,(D.mlProvistos||0)-5);var emp=document.getElementById('mlprov-val');if(emp)emp.textContent=D.mlProvistos+'ml';break;
@@ -2796,11 +2801,11 @@ function handleAction(action,data){
           icon:hd.ic||'⭐',
           badge:'Hito de vida',
           titulo:hd.label,
-          cuerpo:'Registrá el día exacto y una foto si tenés. Queda guardado en la historia de Cefe.',
+          cuerpo:'Registr\u00e1 el d\u00eda exacto y una foto si ten\u00e9s. Queda guardado en la historia de '+apodo()+'.',
           tipo_resp:'hito_retroactivo',
           hitoId:data.id,
           opcNegLabel:'Cancelar'
-        }, hd.label, D.bebe.apodo||D.bebe.nombre||'Cefe', function(){ render(); });
+        }, hd.label, apodo(), function(){ render(); });
       } else {
         D.hitos.push({id:data.id,fecha:new Date().toISOString(),nota:''});
         saveData();render();
@@ -2914,7 +2919,7 @@ function getSprintResumen(){
   for(var i=1;i<tomas.length;i++){var g=Math.round((new Date(tomas[i].s)-new Date(tomas[i-1].e||tomas[i-1].s))/60000);if(g>0&&g<360){gaps.push(g);maxGap=Math.max(maxGap,g);}}
   var avgGap=gaps.length?Math.round(gaps.reduce(function(a,b){return a+b;},0)/gaps.length):0;
   var mlTot=tomas.reduce(function(a,h){return a+(h.mlEst||h.mlProvistos||0);},0);
-  var apodo=D.bebe.apodo||'Cefe';
+  var apodo=apodo();
   var narrativa='Sprint de '+horasReales+'hs completado. ';
   if(tomas.length>0){narrativa+=apodo+' tuvo '+tomas.length+' toma'+(tomas.length!==1?'s':'')+' en ese período';if(avgGap>0)narrativa+=' (intervalo promedio '+(avgGap>=60?Math.floor(avgGap/60)+'h '+(avgGap%60)+'min':avgGap+' min')+')';narrativa+='. ';}
   if(panales.length>0)narrativa+=panales.length+' pañal'+(panales.length!==1?'es':'')+' registrado'+(panales.length!==1?'s':'')+'. ';
@@ -2941,7 +2946,7 @@ function renderSprintSetup(bd){
   bd.appendChild(E.slbl('\u00bfPor qu\u00e9 activar el sprint?'));
   if(!D._sprintTipo)D._sprintTipo='voluntario';
   if(!D._sprintHoras)D._sprintHoras=24;
-  [{k:'voluntario',ic:'\uD83C\uDFAF',lbl:'Quiero ver tendencias',sub:'Generar base estad\u00edstica'},{k:'clinico',ic:'\uD83C\uDF21\uFE0F',lbl:'Seguimiento cl\u00ednico',sub:'Cefe tiene algo, quiero registrar todo'},{k:'estadistico',ic:'\uD83D\uDCCB',lbl:'Para el pediatra',sub:'Datos para la pr\u00f3xima consulta'}].forEach(function(t){
+  [{k:'voluntario',ic:'\uD83C\uDFAF',lbl:'Quiero ver tendencias',sub:'Generar base estad\u00edstica'},{k:'clinico',ic:'\uD83C\uDF21\uFE0F',lbl:'Seguimiento cl\u00ednico',sub:apodo()+' tiene algo, quiero registrar todo'},{k:'estadistico',ic:'\uD83D\uDCCB',lbl:'Para el pediatra',sub:'Datos para la pr\u00f3xima consulta'}].forEach(function(t){
     var sel=D._sprintTipo===t.k;
     var btn=document.createElement('button');
     btn.style.cssText='width:100%;padding:12px 14px;border-radius:13px;border:1px solid '+(sel?'rgba(100,200,180,.5)':'rgba(210,175,120,.15)')+';background:'+(sel?'rgba(100,200,180,.12)':'rgba(255,255,255,.03)')+';text-align:left;cursor:pointer;font-family:Georgia,serif;display:flex;align-items:center;gap:10px;margin-bottom:8px';
@@ -3004,7 +3009,7 @@ function renderSprintResumen(bd){
   sh.style.cssText='width:100%;padding:14px;border-radius:14px;border:1px solid rgba(100,200,180,.35);background:rgba(100,200,180,.1);color:#64c8b4;font-size:14px;font-weight:bold;cursor:pointer;font-family:Georgia,serif;margin-bottom:8px';
   sh.textContent='\uD83D\uDCF1 Compartir con el pediatra';
   sh.addEventListener('click',function(){
-    var r=res,apodo=D.bebe.apodo||'Cefe';
+    var r=res,apodo=apodo();
     var txt='*Sprint \u2014 '+apodo+'*\n\uD83D\uDCC5 '+r.inicio.toLocaleDateString('es-AR')+' '+r.inicio.toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'})+' \u2192 '+r.fin.toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'})+' ('+r.horasReales+'hs)\n\n\uD83C\uDF7C Tomas: '+r.tomas.length+'\n\uD83E\uDDF7 Pa\u00f1ales: '+r.panales.length+'\n';
     if(r.avgGap>0)txt+='\u23F1 Intervalo prom: '+(r.avgGap>=60?Math.floor(r.avgGap/60)+'h '+(r.avgGap%60)+'min':r.avgGap+' min')+'\n';
     if(r.mlTot>0)txt+='\uD83D\uDCA7 Total: '+r.mlTot+'ml\n';
@@ -3018,7 +3023,7 @@ function renderSprintResumen(bd){
 function generarCefiroPostToma(entrada) {
   // entrada: el objeto de historial recien guardado (type===toma)
   if (!entrada || entrada.type !== 'toma') return null;
-  var apodo = D.bebe.apodo || D.bebe.nombre || 'Cefe';
+  var apodo = apodo();
   var hora = new Date(entrada.s).getHours();
   var dur = entrada.tot || 0;
   var tomasHoy = D.hist.filter(function(h) {
@@ -3076,7 +3081,7 @@ function generarCefiroPostToma(entrada) {
 function registrarRapido(tipo) {
   // Captura instantánea con 1 tap. Sin sheets, sin confirmar.
   var ahora = new Date();
-  var apodo = D.bebe.apodo || D.bebe.nombre || 'Cefe';
+  var apodo = apodo();
   if (tipo === 'toma') {
     // Registra toma instantánea de 10 min en el seno menos usado
     var ultSeno2 = getUltimoSeno ? getUltimoSeno() : 'Izq';
@@ -3112,7 +3117,7 @@ function registrarRapido(tipo) {
 // ── PANTALLA RESUMEN SEMANAL ───────────────────────────────────────────────────────
 function renderResumenSemanal(bd) {
   var now=new Date(),desde=new Date(now.getTime()-7*86400000);
-  var apodo=D.bebe.apodo||D.bebe.nombre||'Cefe';
+  var apodo=apodo();
   var semVida=Math.floor(ageD()/7);
   var th=D.hist.filter(function(h){return h.type==='toma'&&new Date(h.s)>=desde;});
   var ph=D.hist.filter(function(h){return h.type==='panal'&&new Date(h.t)>=desde;});
@@ -3231,12 +3236,58 @@ function renderResumenSemanal(bd) {
   var shBtn2=E.btn('pb bl','Compartir','shareWeekly');shBtn2.style.flex='1';shRow.appendChild(shBtn2);
   bd.appendChild(shRow);
 }
+
+// ─── HELPERS DE NOMBRE Y CONCORDANCIA GRAMATICAL ───
+// Introducidos en A.1.2 Parte 2 (22/04/2026). Centralizan el acceso al nombre
+// del hijo y la concordancia de género según D.bebe.sexo.
+// Default masculino cuando sexo no está cargado (compat con instancia 0 y
+// uso más frecuente en español rioplatense). A.2 (gate de onboarding)
+// hace sexo obligatorio y permite eliminar el default.
+
+function apodo() {
+  return (D.bebe && (D.bebe.apodo || D.bebe.nombre)) || 'tu beb\u00e9';
+}
+
+function esF() {
+  return !!(D.bebe && D.bebe.sexo === 'F');
+}
+
+function articulo(mayusc) {
+  var a = esF() ? 'la' : 'el';
+  return mayusc ? (a.charAt(0).toUpperCase() + a.slice(1)) : a;
+}
+
+function hijoN() {
+  return esF() ? 'hija' : 'hijo';
+}
+
+function bebeN() {
+  return 'beb\u00e9';
+}
+
+function pronObj() {
+  return esF() ? 'la' : 'lo';
+}
+
+function adjConcord(baseM) {
+  if (!esF()) return baseM;
+  if (/o$/.test(baseM)) return baseM.slice(0, -1) + 'a';
+  return baseM;
+}
+
+// subsApodo: reemplaza placeholder {APODO} por el apodo real.
+// Usado para templates estrictamente estáticos (TIPS_SEMANALES, LOGROS_DEF, ACTIVIDADES).
+function subsApodo(s) {
+  if (typeof s !== 'string') return s;
+  return s.split('{APODO}').join(apodo());
+}
+
 function render(){
   applyNightMode();
   // Update device name display
   var dnEl=document.getElementById('device-name-display');
   if(dnEl)dnEl.textContent=getDeviceName()||'';
-  var MAS_STEPS=['semanalResumen','quickReg','cuentos','perfil','editBebe','editPadre','medicos','editMed','visitaForm','postVisita','consultaMedica','extras','notas','editNota','sintomas','editSintoma','hitos','cartas','editCarta','astro','actividades','vacunas','memoria','pendientes','historia','logros','config','agenda','nuevoEvento','tallaEntry','pcEntry','estudios'];
+  var MAS_STEPS=['semanalResumen','quickReg','cuentos','perfil','editBebe','editPadre','medicos','editMed','visitaForm','postVisita','consultaMedica','extras','notas','editNota','sintomas','editSintoma','hitos','cartas','editCarta','recreativo','actividades','vacunas','memoria','pendientes','historia','logros','config','agenda','nuevoEvento','tallaEntry','pcEntry','estudios'];
   var TAB_MAP={home:['home'],history:['history'],agenda:['agenda','nuevoEvento'],mas:MAS_STEPS,config:['config']};
   Object.keys(TAB_MAP).forEach(function(t){
     var el=document.getElementById('bn-'+t);if(!el)return;
@@ -3245,8 +3296,8 @@ function render(){
   var nb=document.getElementById('night-btn');if(nb)nb.style.color=D.nightMode?'#f0d9a0':'#a89070';
   var htEl=document.getElementById('hdr-title');
   if(typeof updatePendBadge==='function')updatePendBadge();
-  if(htEl){var _apodoNav=D.bebe.apodo||D.bebe.nombre||'Cefe';
-  var TITLES={home:_apodoNav,history:'Historial',peso:'Medidas',pesoEntry:'Peso',tallaEntry:'Talla',pcEntry:'Perímetro Cefálico',dash:'Dashboard',perfil:'Perfil',editBebe:'Perfil',editPadre:'Perfil',medicos:'Médicos',editMed:'Médicos',visitaForm:'Médicos',postVisita:'Seguimiento',consultaMedica:'Consulta Médica',sprintSetup:'Sprint',sprintResumen:'Resumen Sprint',logros:'Logros',config:'Configuración',agenda:'Agenda',nuevoEvento:'Nuevo evento',estudios:'Estudios y Medicación',extras:'Extras',notas:'Notas',editNota:'Nueva Nota',sintomas:'Síntomas',editSintoma:'Síntoma',hitos:'Hitos',cartas:'Cartas',editCarta:'Carta',astro:'Recreativo',actividades:'Actividades',vacunas:'Vacunas',memoria:'Memoria de '+_apodoNav,pendientes:'Pendientes',historia:'Historia de '+_apodoNav,semanalResumen:'Semana de '+(D.bebe.apodo||'Cefe'),toma:'Toma',panal:'Pañal',preview:'Confirmar',summary:'Mensaje'};
+  if(htEl){var _apodoNav=apodo();
+  var TITLES={home:_apodoNav,history:'Historial',peso:'Medidas',pesoEntry:'Peso',tallaEntry:'Talla',pcEntry:'Perímetro Cefálico',dash:'Dashboard',perfil:'Perfil',editBebe:'Perfil',editPadre:'Perfil',medicos:'Médicos',editMed:'Médicos',visitaForm:'Médicos',postVisita:'Seguimiento',consultaMedica:'Consulta Médica',sprintSetup:'Sprint',sprintResumen:'Resumen Sprint',logros:'Logros',config:'Configuración',agenda:'Agenda',nuevoEvento:'Nuevo evento',estudios:'Estudios y Medicación',extras:'Extras',notas:'Notas',editNota:'Nueva Nota',sintomas:'Síntomas',editSintoma:'Síntoma',hitos:'Hitos',cartas:'Cartas',editCarta:'Carta',recreativo:'Recreativo',actividades:'Actividades',vacunas:'Vacunas',memoria:'Memoria de '+_apodoNav,pendientes:'Pendientes',historia:'Historia de '+_apodoNav,semanalResumen:'Semana',toma:'Toma',panal:'Pañal',preview:'Confirmar',summary:'Mensaje'};
   htEl.textContent=TITLES[D.step]||_apodoNav;}
 
   var bd=document.getElementById('bd');if(!bd)return;
@@ -3266,7 +3317,7 @@ function render(){
         {ic:'⚖️',lbl:'Medidas',   sub:'curva y graficos', act:'goPeso',          clr:'rgba(180,140,220,.1)', bdr:'rgba(180,140,220,.3)'},
         {ic:'⚡',lbl:'Rápido',    sub:'1 tap = listo',   act:'goQuickReg',      clr:'rgba(224,112,112,.08)', bdr:'rgba(224,112,112,.2)'},
         {ic:'⏱️',lbl:'Timer',     sub:'actividad libre', act:'goTimerLibre',    clr:'rgba(100,200,180,.08)',bdr:'rgba(100,200,180,.2)'},
-        {ic:'📖',lbl:'Cuentos',   sub:'leer con Cefe',   act:'goCuentos',       clr:'rgba(180,140,220,.08)',bdr:'rgba(180,140,220,.2)'},
+        {ic:'📖',lbl:'Cuentos',   sub:'leer con '+apodo(),   act:'goCuentos',       clr:'rgba(180,140,220,.08)',bdr:'rgba(180,140,220,.2)'},
         {ic:'🏃',lbl:'Actividades',sub:'plan del día',act:'goActividades',  clr:'rgba(100,200,140,.08)',bdr:'rgba(100,200,140,.2)'},
         {ic:'🏥',lbl:'Consultas', sub:'próxima visita',act:'goConsultas',   clr:'rgba(224,112,112,.08)',bdr:'rgba(224,112,112,.25)'},
         {ic:'📆',lbl:'Semana',    sub:'resumen 7 días',  act:'goSemanal',      clr:'rgba(180,140,220,.08)',bdr:'rgba(180,140,220,.2)'},
@@ -3274,7 +3325,7 @@ function render(){
       ];
       // Card sueño home (si hay sleepLog o sleepStart activo)
         (function(){
-          var apodoSH=D.bebe.apodo||D.bebe.nombre||'Cefe';
+          var apodoSH=apodo();
           var ahora=new Date();
           // Tramo de descanso más largo de las últimas 24h (entre tomas)
           var desde24=new Date(ahora.getTime()-24*3600000);
@@ -3472,7 +3523,7 @@ function render(){
 
       // Construir líneas del briefing
       var lineas=[];
-      var apodo=D.bebe.apodo||D.bebe.nombre||'Cefe';
+      var apodo=apodo();
 
       // Línea 1: Resumen de la noche / últimas horas
       if(tomasNoche.length>0){
@@ -3568,7 +3619,7 @@ function render(){
       bd.appendChild(bCard);
     })();
 
-    // ── Perfil de Cefe colapsable ──────────────────────────────
+    // ── Perfil del hijo colapsable ───────────────
     (function(){
       var cfg=D.config||{};
       if(cfg.perfil_home===false)return;
@@ -3583,7 +3634,7 @@ function render(){
       var pLeft=mkDiv('display:flex;align-items:center;gap:10px');
       pLeft.appendChild(mkTxt('span',null,'👶','font-size:20px'));
       var pNames=mkDiv('');
-      pNames.appendChild(mkTxt('div',null,(b.apodo||b.nombre||'Cefe')+' · '+ageLabel(),'font-size:13px;font-weight:bold;color:#f0d9a0'));
+      pNames.appendChild(mkTxt('div',null,(apodo())+' · '+ageLabel(),'font-size:13px;font-weight:bold;color:#f0d9a0'));
       if(lp)pNames.appendChild(mkTxt('div',null,'⚖️ '+gkg(lp.g)+' kg · '+pctLbl(lp.g,ageW()),'font-size:11px;color:#a89070'));
       pLeft.appendChild(pNames);
       pHdr.appendChild(pLeft);
@@ -3689,8 +3740,8 @@ function render(){
       var hora=new Date().getHours();
       var saludoHora=hora<12?'Buenos días':hora<18?'Buenas tardes':'Buenas noches';
       var tituloCard='☀️ Resumen del día';
-      if(hora>=21||hora<6)tituloCard='🌙 Noche de Cefe';
-      else if(hora<12)tituloCard='☀️ Mañana de Cefe';
+      if(hora>=21||hora<6)tituloCard='🌙 Noche de '+apodo();
+      else if(hora<12)tituloCard='☀️ Ma\u00f1ana de '+apodo();
       card.appendChild(E.slbl(tituloCard));
 
       // ── ML totales del día ──
@@ -3753,7 +3804,7 @@ function render(){
         barF2.style.width=mlPct+'%';
         barW2.appendChild(barF2);mlCard.appendChild(barW2);
         // Contexto debajo de la barra
-        var mlCtx=mlOk?'Dentro del rango esperado para Cefe 🎯':
+        var mlCtx=mlOk?'Dentro del rango esperado 🎯':
           mlHoy>mlMin*0.7?'Va muy bien, sigue así':'Aún temprano en el día';
         mlCard.appendChild(mkTxt('div',null,mlCtx+' · Objetivo: '+mlMin+'–'+mlMax+'ml','font-size:10px;color:#a89070'));
         card.appendChild(mlCard);
@@ -3797,7 +3848,7 @@ function render(){
         var proy=mkDiv('background:rgba(180,140,220,.06);border:1px solid rgba(180,140,220,.12);border-radius:10px;padding:8px 12px;margin-top:6px');
         var proyMsg='';
         if(proyectado>=8&&proyectado<=12){
-          proyMsg='🌬️ Al ritmo de hoy, Cefe tendría ~'+proyectado+' tomas — ¡dentro del rango ideal!';
+          proyMsg='🌬️ Al ritmo de hoy, '+apodo()+' tendr\u00eda ~'+proyectado+' tomas — ¡dentro del rango ideal!';
         } else if(proyectado>12){
           proyMsg='🌬️ Ritmo intenso hoy: ~'+proyectado+' tomas proyectadas. Puede ser un día de mayor demanda, es normal.';
         } else if(proyectado>=6){
@@ -3931,7 +3982,7 @@ function render(){
       bd.appendChild(card);
     })();
 
-    // ── Plan del día de Cefe (mini-card compacta) ───────────────
+    // ── Plan del día (mini-card compacta) ───────────────
     (function(){
       var cfg=D.config||{};var notif=cfg.notif||{};
       if(notif.plan_dia===false)return;
@@ -4280,7 +4331,7 @@ function render(){
   else if(D.step==='peso'){
     // Sub-tabs: Peso / Talla / PC
     if(!D._medidasTab)D._medidasTab=ls('medidasTab')||'peso';
-    bd.appendChild(E.el('div',{cls:'st',txt:'Medidas de Cefe'}));
+    bd.appendChild(E.el('div',{cls:'st',txt:'Medidas'}));
     var mtabs=[{k:'peso',lbl:'Peso',ic:'KG'},{k:'talla',lbl:'Talla',ic:'CM'},{k:'pc',lbl:'Perim. Cef.',ic:'PC'}];
     var mtRow=mkDiv('display:flex;gap:6px;margin-bottom:14px');
     mtabs.forEach(function(t){
@@ -4322,7 +4373,7 @@ function render(){
     var predPeso=calcPesoPrediccion();
     if(predPeso){
       var cefPeso=mkDiv('background:rgba(100,200,180,.08);border:1px solid rgba(100,200,180,.2);border-radius:12px;padding:11px 14px;margin-bottom:12px');
-      var apodoPeso=D.bebe.apodo||D.bebe.nombre||'Cefe';
+      var apodoPeso=apodo();
       var msgPeso='\uD83C\uDF00 C\u00e9firo • Peso: ganando '+predPeso.slope+'g/d\u00eda.';
       if(predPeso.yaRecupero){msgPeso+=' Ya recuper\u00f3 el peso de nacimiento. En 7 d\u00edas proyecci\u00f3n: '+gkg(predPeso.pesoEn7)+'kg.';}
       else{msgPeso+=' A este ritmo recupera el peso de nacimiento en ~'+predPeso.diasParaNac+' d\u00edas (proyecci\u00f3n: '+gkg(predPeso.pesoEn7)+'kg en 7 d\u00edas).';}
@@ -4368,7 +4419,7 @@ function render(){
       // Cefiro prediccion
       if(predT){
         var cefTalla=mkDiv('background:rgba(180,140,220,.08);border:1px solid rgba(180,140,220,.2);border-radius:12px;padding:11px 14px;margin-bottom:12px');
-        var apodoCT=D.bebe.apodo||D.bebe.nombre||'Cefe';
+        var apodoCT=apodo();
         var msgT='\uD83C\uDF00 C\u00e9firo • Talla: al ritmo actual ('+predT.slopeCmSem+'cm/sem), '+apodoCT+' llegar\u00eda a '+predT.tallaEn30+'cm en 30 d\u00edas y '+predT.tallaEn90+'cm en 3 meses.';
         if(predT.diffMediana>0)msgT+=' Est\u00e1 '+predT.diffMediana+'cm por encima de la mediana OMS para su edad.';
         else if(predT.diffMediana<0)msgT+=' Est\u00e1 '+Math.abs(predT.diffMediana)+'cm por debajo de la mediana OMS. Normal en el rango P15-P85.';
@@ -4427,7 +4478,7 @@ function render(){
       // Cefiro prediccion PC
       if(predPC){
         var cefPC=mkDiv('background:rgba(212,168,67,.08);border:1px solid rgba(212,168,67,.2);border-radius:12px;padding:11px 14px;margin-bottom:12px');
-        var apodoCP=D.bebe.apodo||D.bebe.nombre||'Cefe';
+        var apodoCP=apodo();
         var msgPC='\uD83C\uDF00 C\u00e9firo • Per\u00edmetro cef\u00e1lico: creciendo '+predPC.slopeCmSem+'cm/semana — lo que refleja el desarrollo activo del cerebro en esta etapa.';
         if(predPC.diffMediana>0)msgPC+=' '+predPC.diffMediana+'cm por encima de la mediana OMS para la edad de '+apodoCP+'.';
         else if(predPC.diffMediana<0)msgPC+=' '+Math.abs(predPC.diffMediana)+'cm por debajo de la mediana, dentro del rango normal P15-P85.';
@@ -4510,12 +4561,12 @@ function render(){
   // ── RESUMEN SEMANAL ──────────────────────────────────────────────────────────────────
   else if(D.step==='semanalResumen'){
     bd.appendChild(E.btn('bk','\u2190 Volver','goHome'));
-    bd.appendChild(E.el('div',{cls:'st',txt:'\uD83D\uDCC6 Semana de '+( D.bebe.apodo||D.bebe.nombre||'Cefe')}));
+    bd.appendChild(E.el('div',{cls:'st',txt:'\uD83D\uDCC6 Semana de '+( apodo())}));
     renderResumenSemanal(bd);
   }
   // ── REGISTRO RÁPIDO (modo una mano) ─────────────────────────────────────────
   else if(D.step==='quickReg'){
-    var apodoQR=D.bebe.apodo||D.bebe.nombre||'Cefe';
+    var apodoQR=apodo();
     var ultSenoQR=getUltimoSeno?getUltimoSeno():null;
     var senoLabel=ultSenoQR?(ultSenoQR.toLowerCase().indexOf('der')>=0?'Izq':'Der'):'Izq';
     // Header mínimo
@@ -4662,7 +4713,7 @@ function render(){
         shareBtn.appendChild(stxt);
         shareBtn.appendChild(mkTxt('span',null,'→','font-size:16px;color:#25d366'));
         shareBtn.onclick=function(){
-          var apodo=D.bebe.apodo||D.bebe.nombre||'Cefe';
+          var apodo=apodo();
           var lines=['*📊 Resumen del día — '+apodo+'*','📅 '+hoy.toLocaleDateString('es-AR',{weekday:'long',day:'numeric',month:'long'}),''];
           lines.push('*\uD83C\uDF7C Tomas: '+tomHoy.length+'*');
           var totMin=tomHoy.reduce(function(a,h){return a+h.tot;},0);
@@ -4679,7 +4730,7 @@ function render(){
           if(pesoHoy.length>0){lines.push('');lines.push('*\u2696\uFE0F Peso: '+gkg(pesoHoy[0].g)+'kg*');}
           var gc2=gasC();
           lines.push('');lines.push('_Cap. gástrica est.: '+gc2.mn+'-'+gc2.mx+'ml/toma_');
-          lines.push('_Cefe App_');
+          lines.push('_Alba_');
           window.open('https://wa.me/?text='+encodeURIComponent(lines.join('\n')),'_blank');
         };
         bd.appendChild(shareBtn);
@@ -4692,11 +4743,11 @@ function render(){
   // ── PERFIL ────────────────────────────────────────────────────
   else if(D.step==='perfil'){
     var b=D.bebe||{};
-    bd.appendChild(E.el('div',{cls:'st',txt:'Perfil de Cefe'}));
+    bd.appendChild(E.el('div',{cls:'st',txt:'Perfil'}));
     var bc=E.div('card');
     var bh=mkDiv('display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px');
     var bl=E.div('');
-    bl.appendChild(mkTxt('div',null,b.apodo||'Cefe','font-size:20px;font-weight:bold;color:#f0d9a0'));
+    bl.appendChild(mkTxt('div',null,apodo(),'font-size:20px;font-weight:bold;color:#f0d9a0'));
     bl.appendChild(mkTxt('div',null,(b.nombre||'')+' '+(b.apellido||'')+' | '+(b.sexo==='F'?'Nina':'Nino')+(b.sangre?' \u00B7 '+b.sangre:'')+(b.dni?' \u00B7 DNI '+b.dni:''),'font-size:11px;color:#a89070'));
     if(b.fn)bl.appendChild(mkTxt('div',null,'Nac: '+b.fn+' \u00B7 '+ageLabel()+' de vida','font-size:11px;color:#a89070'));
     bh.appendChild(bl);bh.appendChild(E.btn('tb','Editar','editBebe'));bc.appendChild(bh);
@@ -4775,7 +4826,7 @@ function render(){
 
   // ── MEDICOS ───────────────────────────────────────────────────
   else if(D.step==='medicos'){
-    bd.appendChild(E.el('div',{cls:'st',txt:'Medicos de Cefe'}));
+    bd.appendChild(E.el('div',{cls:'st',txt:'M\u00e9dicos de '+apodo()}));
     bd.appendChild(E.aBtn('+','Agregar medico','Registrar profesional','pu','newMed'));
     if(D.meds.length>0)bd.appendChild(E.aBtn('\uD83D\uDCC5','Agendar visita','Programar consulta','rs','goVisitaForm'));
     if(D.meds.length>0){bd.appendChild(E.slbl('Profesionales'));D.meds.forEach(function(m,i){bd.appendChild(medCard(m,i));});}
@@ -4897,7 +4948,7 @@ function render(){
         var mi=medEl?parseInt(medEl.value):-1;
         var med=(mi>=0&&D.meds[mi])||{};
         var labels={consulta:'Consulta',vacuna:'Vacuna',peso:'Control de peso',actividad:'Actividad',otro:'Evento'};
-        var t=(labels[tipo]||'Evento')+(med.esp?' '+med.esp:'')+(med.nom||med.ape?' — Dr/a. '+(med.nom||'')+' '+(med.ape||''):'')+' — Cefe';
+        var t=(labels[tipo]||'Evento')+(med.esp?' '+med.esp:'')+(med.nom||med.ape?' \u2014 Dr/a. '+(med.nom||'')+' '+(med.ape||''):'')+' \u2014 '+apodo();
         var sp=document.querySelector('#visita-title-preview .vtitle-txt');if(sp)sp.textContent=t;
       }
       var t2=document.getElementById('vtipo'),m2=document.getElementById('vmed');
@@ -4943,7 +4994,7 @@ function render(){
       });
     } else {
       // Tab MEDICACION interactivo
-      var apodoMed=D.bebe.apodo||D.bebe.nombre||'Cefe';
+      var apodoMed=apodo();
       if(!D.medsPersonales)D.medsPersonales=[];
       var addMedBtn=document.createElement('button');
       addMedBtn.style.cssText='width:100%;padding:12px;border-radius:13px;border:1px solid rgba(212,168,67,.35);background:rgba(212,168,67,.1);color:#d4a843;font-size:14px;font-weight:bold;cursor:pointer;font-family:Georgia,serif;margin-bottom:14px';
@@ -5076,7 +5127,7 @@ function render(){
 
   // ── COMPARTIR INCIDENCIA AL MÉDICO ───────────────────────────────
   else if(D.step==='urgencia'){
-    var apodoUrg=D.bebe.apodo||D.bebe.nombre||'Cefe';
+    var apodoUrg=apodo();
     bd.appendChild(E.el('div',{cls:'st',txt:'\uD83D\uDED1 Informar al m\u00e9dico'}));
     bd.appendChild(mkTxt('div',null,'Completá lo que observás. Esto arma un mensaje claro para enviar al pediatra.','font-size:12px;color:#a89070;margin-bottom:16px;line-height:1.5'));
     // Síntoma principal
@@ -5148,7 +5199,7 @@ function render(){
 
   // ── TIMER LIBRE ──────────────────────────────────────────────────
   else if(D.step==='timerLibre'){
-    var apodoTL=D.bebe.apodo||D.bebe.nombre||'Cefe';
+    var apodoTL=apodo();
     if(!D.timerLibreData)D.timerLibreData={activo:false,inicio:null,secs:0,etiqueta:'',sesiones:[]};
     var tld=D.timerLibreData;
     var tipos=[
@@ -5272,7 +5323,7 @@ function render(){
 
   // ── CONSULTAS PEDIÁTRICAS PAUTADAS ──────────────────────────────
   else if(D.step==='consultas'){
-    var apodoCons=D.bebe.apodo||D.bebe.nombre||'Cefe';
+    var apodoCons=apodo();
     bd.appendChild(E.el('div',{cls:'st',txt:'\uD83D\uDCC5 Consultas de '+apodoCons}));
     bd.appendChild(mkTxt('div',null,'Calendario SAP Argentina. Tap para marcar como realizada.','font-size:11px;color:#a89070;margin-bottom:16px;line-height:1.5'));
     if(!D.consultasHechas)D.consultasHechas={};
@@ -5356,7 +5407,7 @@ function render(){
             var dt=stv.fecha;
             var dtS=dt.getFullYear()+p2(dt.getMonth()+1)+p2(dt.getDate())+'T090000';
             var dtE=dt.getFullYear()+p2(dt.getMonth()+1)+p2(dt.getDate())+'T100000';
-            var apodo=D.bebe.apodo||D.bebe.nombre||'Cefe';
+            var apodo=apodo();
             var titulo=cv.label+' — '+apodo;
             var desc=[cv.desc];
             if(D.bebe.dni)desc.push('DNI '+apodo+': '+D.bebe.dni);
@@ -5557,7 +5608,7 @@ function render(){
         var vac=VACUNAS_ARG&&VACUNAS_ARG.find(function(v){return v.id===D._newEvtVacunaId;});
         if(vac)t=vac.nombre;
       }
-      return t+' — Cefe';
+      return t+' \u2014 '+apodo();
     })();
     var titleBox=mkDiv('background:rgba(212,168,67,.08);border:1px solid rgba(212,168,67,.2);border-radius:10px;padding:10px 12px;margin-bottom:14px');
     titleBox.appendChild(mkTxt('div',null,'TíTULO DEL EVENTO','font-size:9px;color:#a89070;letter-spacing:1px;margin-bottom:4px'));
@@ -5621,7 +5672,7 @@ function render(){
       var med3=D.meds[mi3]||{};
       var dt3=entry.dt;var de3=new Date(dt3.getTime()+dur3*60000);
       var fmt3=function(d){return d.getFullYear()+p2(d.getMonth()+1)+p2(d.getDate())+'T'+p2(d.getHours())+p2(d.getMinutes())+'00';};
-      var gcDesc3='Cefe '+D.bebe.nombre+' '+D.bebe.apellido+(D.bebe.dni?'\nDNI: '+D.bebe.dni:'')+(D.bebe.os?'\nOS: '+D.bebe.os:'');
+      var gcDesc3=(D.bebe.nombre||'')+' '+(D.bebe.apellido||'')+(D.bebe.dni?'\nDNI: '+D.bebe.dni:'')+(D.bebe.os?'\nOS: '+D.bebe.os:'');
       var gcUrl3='https://calendar.google.com/calendar/render?action=TEMPLATE&text='+encodeURIComponent(titleAuto)+'&dates='+fmt3(dt3)+'/'+fmt3(de3)+(med3.dir?'&location='+encodeURIComponent(med3.dir):'')+('&details='+encodeURIComponent(gcDesc3));
       // Mostrar popup de confirmación con opción de abrir GCal
       showCpop('celebracion','\u2705','Evento guardado',titleAuto,
@@ -5641,7 +5692,7 @@ function render(){
 
   // ── AGENDA ────────────────────────────────────────────────────
   else if(D.step==='agenda'){
-    bd.appendChild(E.el('div',{cls:'st',txt:'Agenda de Cefe'}));
+    bd.appendChild(E.el('div',{cls:'st',txt:'Agenda'}));
     // Filtros
     if(!D._agendaFiltro)D._agendaFiltro='todos';
     var filtRow=mkDiv('display:flex;gap:6px;margin-bottom:12px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:2px');
@@ -5766,9 +5817,9 @@ function render(){
       return row;
     }
 
-    bd.appendChild(cfgToggle('Tips de Céfiro','Consejos semanales contextuales según la edad de Cefe','cefiro_tips',true));
+    bd.appendChild(cfgToggle('Tips de Céfiro','Consejos semanales contextuales seg\u00fan la edad de '+apodo(),'cefiro_tips',true));
     bd.appendChild(cfgToggle('Vacunas y recordatorios','Alertas de vacunas próximas y recordatorios médicos','vacunas',true));
-    bd.appendChild(cfgToggle('Chequeos de hitos','Preguntas sobre el desarrollo de Cefe','hitos',true));
+    bd.appendChild(cfgToggle('Chequeos de hitos','Preguntas sobre el desarrollo de '+apodo(),'hitos',true));
     bd.appendChild(cfgToggle('Brotes de crecimiento','Aviso cuando se acerca una semana de mayor demanda','brotes',true));
     bd.appendChild(cfgToggle('Plan de actividades','Actividades de estimulación del día en home','plan_dia',true));
     bd.appendChild(cfgToggle('Logros básicos','Notificar primer pañal, primer toma, etc. (logros de un solo registro)','logros_triviales',true));
@@ -5776,7 +5827,7 @@ function render(){
     // ── Sección: Visualización ──
     bd.appendChild(mkDiv('margin-top:8px'));
     bd.appendChild(E.slbl('Visualización'));
-    bd.appendChild(cfgToggle('Perfil de Cefe en inicio','Mostrar card del perfil en la pantalla principal','perfil_home',false));
+    bd.appendChild(cfgToggle('Perfil en inicio','Mostrar card del perfil en la pantalla principal','perfil_home',false));
     bd.appendChild(cfgToggle('Historial expandido','Mostrar todos los días por defecto en historial','historial_expandido',false));
     bd.appendChild(mkDiv('margin-top:8px'));
     bd.appendChild(E.slbl('Modo madrugada'));
@@ -5959,7 +6010,7 @@ function render(){
     bd.appendChild(E.btn('bk','← Volver','goNotas'));
     bd.appendChild(E.el('div',{cls:'st',txt:esEdicion?'Editar nota':'Nueva nota'}));
     bd.appendChild(E.field('Fecha',E.input('fi','nota-fecha','date',null,notaExistente?notaExistente.fecha:todayStr())));
-    var txa=E.textarea('ni fi','nota-texto','Observaciones del dia, como estuvo Cefe, novedades...');
+    var txa=E.textarea('ni fi','nota-texto','Observaciones del d\u00eda, c\u00f3mo estuvo '+apodo()+', novedades...');
     txa.style.minHeight='120px';
     if(notaExistente)txa.value=notaExistente.texto||'';
     bd.appendChild(E.field('Nota',txa));
@@ -6021,7 +6072,7 @@ function render(){
 
   // ── HITOS ─────────────────────────────────────────────────────
   else if(D.step==='hitos'){
-    bd.appendChild(E.el('div',{cls:'st',txt:'🌟 Hitos de Cefe'}));
+    bd.appendChild(E.el('div',{cls:'st',txt:'🌟 Hitos de '+apodo()}));
     bd.appendChild(mkTxt('div',null,'Marca cada logro cuando sucede. Los hitos de desarrollo son orientativos — consultá al pediatra.','font-size:11px;color:#a89070;margin-bottom:20px;line-height:1.5'));
 
     // Tabs: Vida / Desarrollo
@@ -6088,9 +6139,9 @@ function render(){
 
   // ── CARTAS ────────────────────────────────────────────────────
   else if(D.step==='cartas'){
-    bd.appendChild(E.el('div',{cls:'st',txt:'\uD83D\uDC8C Cartas a Cefe'}));
-    bd.appendChild(mkTxt('div',null,'Un espacio para escribirle a Cefe. Guardadas para siempre.','font-size:11px;color:#a89070;margin-bottom:16px'));
-    bd.appendChild(E.aBtn('+','Nueva carta','Escrib\u00EDle algo a Cefe','pu','newCarta'));
+    bd.appendChild(E.el('div',{cls:'st',txt:'\uD83D\uDC8C Cartas a '+apodo()}));
+    bd.appendChild(mkTxt('div',null,'Un espacio para escribirle a '+apodo()+'. Guardadas para siempre.','font-size:11px;color:#a89070;margin-bottom:16px'));
+    bd.appendChild(E.aBtn('+','Nueva carta','Escrib\u00EDle algo a '+apodo(),'pu','newCarta'));
     if(D.cartas.length===0)bd.appendChild(mkTxt('div','mu','A\u00FAn no hay cartas.'));
     D.cartas.forEach(function(c,i){
       var card=E.div('card');
@@ -6108,16 +6159,16 @@ function render(){
   else if(D.step==='editCarta'){
     var ec=D.editCartaIdx>=0?D.cartas[D.editCartaIdx]:{};
     bd.appendChild(E.btn('bk','\u2190 Volver','goCartas'));
-    bd.appendChild(E.el('div',{cls:'st',txt:(D.editCartaIdx>=0?'Editar carta':'Nueva carta para Cefe')}));
+    bd.appendChild(E.el('div',{cls:'st',txt:(D.editCartaIdx>=0?'Editar carta':'Nueva carta para '+apodo())}));
     bd.appendChild(mkTxt('div',null,'Este espacio es tuyo. Escribi lo que sientes, lo que queres que recuerde, lo que ves en el.','font-size:11px;color:#a89070;margin-bottom:16px;line-height:1.5'));
     bd.appendChild(E.field('Titulo',E.input('fi','carta-titulo','text','Ej: Tu primera semana',ec.titulo||'')));
-    var ctxa=E.textarea('ni fi','carta-texto','Querido Cefe...',ec.texto||'');ctxa.style.minHeight='200px';
+    var ctxa=E.textarea('ni fi','carta-texto','Querido/a ...',ec.texto||'');ctxa.style.minHeight='200px';
     bd.appendChild(E.field('Texto',ctxa));
     bd.appendChild(E.btn('pb pu','Guardar carta','saveCarta'));bd.appendChild(E.btn('gb rd','Cancelar','goCartas'));
   }
 
   // ── CARTA ASTRAL ──────────────────────────────────────────────
-  else if(D.step==='astro'){
+  else if(D.step==='recreativo'){
     bd.appendChild(E.el('div',{cls:'st',txt:'\u2728 M\u00f3dulo Recreativo'}));
     renderModuloRecreativo(bd);
   }
@@ -6150,7 +6201,7 @@ function render(){
       hd.appendChild(chk);
       var info=mkDiv('flex:1');
       info.appendChild(mkTxt('div',null,a.ic+' '+a.label,'font-size:14px;font-weight:bold;color:'+(hecha?'#64c88c':'#f0d9a0')+';margin-bottom:3px'));
-      info.appendChild(mkTxt('div',null,a.desc,'font-size:12px;color:#d4c090;line-height:1.6'));
+      info.appendChild(mkTxt('div',null,subsApodo(a.desc),'font-size:12px;color:#d4c090;line-height:1.6'));
       if(hecha)info.appendChild(mkTxt('div',null,'\u2713 Hecho hoy','font-size:10px;color:#64c88c;margin-top:3px;font-weight:bold'));
       hd.appendChild(info);c.appendChild(hd);
       if(!hecha&&!omitida){
@@ -6173,7 +6224,7 @@ function render(){
     renderPendientes(bd);
   }
   else if(D.step==='vacunas'){
-    bd.appendChild(E.el('div',{cls:'st',txt:'💉 Vacunas de Cefe'}));
+    bd.appendChild(E.el('div',{cls:'st',txt:'💉 Vacunas de '+apodo()}));
     bd.appendChild(mkTxt('div',null,'Calendario Nacional Argentina 2024. Tap para marcar como aplicada.','font-size:11px;color:#a89070;margin-bottom:16px;line-height:1.5'));
     var mesActual=Math.floor(ageD()/30.4);
     VACUNAS_ARG.forEach(function(v){
@@ -6272,7 +6323,7 @@ function render(){
   
   else if(D.step==='cuentos'){
     // ── Pantalla principal de Cuentos ──────────────────────────────────────
-    var apodoCto = D.bebe.apodo||D.bebe.nombre||'Cefe';
+    var apodoCto = apodo();
     var cuentosMod = (typeof AlbaCuentos !== 'undefined');
     bd.appendChild(E.el('div',{cls:'st',txt:'\uD83D\uDCDA Cuentos de '+apodoCto}));
     bd.appendChild(mkTxt('div',null,'La biblioteca crece con '+apodoCto+'.','font-size:12px;color:#a89070;margin-bottom:16px;line-height:1.5'));
@@ -6347,7 +6398,7 @@ function render(){
     var cuento=AlbaCuentos.getCuentoById(D._cuentoActual);
     if(!cuento){setStep('cuentos');return;}
     var version=D._cuentoVersion||'corto';
-    var apodoCL=D.bebe.apodo||D.bebe.nombre||'Cefe';
+    var apodoCL=apodo();
     var prot=D._cuentoProtagonista||null;
     var texto=AlbaCuentos.reemplazarProtagonista(cuento,version,prot);
     // Header
@@ -6436,7 +6487,7 @@ function render(){
     if(typeof AlbaCuentos==='undefined'){setStep('cuentos');return;}
     if(!D._generadorOpts)D._generadorOpts=AlbaCuentos.tirarDado();
     var opts=D._generadorOpts;
-    var apodoCG=D.bebe.apodo||D.bebe.nombre||'Cefe';
+    var apodoCG=apodo();
     var plantillas=ALBA_PLANTILLAS;
     // Header
     var hdrG=mkDiv('display:flex;align-items:center;gap:10px;margin-bottom:16px');
@@ -6525,12 +6576,12 @@ function render(){
     bd.appendChild(shareGenBtn);
   }
 else if(D.step==='historia'){
-    bd.appendChild(mkTxt('div',null,'La historia de Cefe, cronológica y completa.','font-size:12px;color:#a89070;margin-bottom:4px;line-height:1.5'));
+    bd.appendChild(mkTxt('div',null,'La historia de '+apodo()+', cronol\u00f3gica y completa.','font-size:12px;color:#a89070;margin-bottom:4px;line-height:1.5'));
     renderHistoria(bd);
   }
   else if(D.step==='memoria'){
-    bd.appendChild(E.el('div',{cls:'st',txt:'\uD83D\uDCD6 Memoria de Cefe'}));
-    bd.appendChild(mkTxt('div',null,'Todo lo anotado sobre Cefe, en un solo lugar.','font-size:11px;color:#a89070;margin-bottom:12px'));
+    bd.appendChild(E.el('div',{cls:'st',txt:'\uD83D\uDCD6 Memoria de '+apodo()}));
+    bd.appendChild(mkTxt('div',null,'Todo lo anotado sobre '+apodo()+', en un solo lugar.','font-size:11px;color:#a89070;margin-bottom:12px'));
     var qaRow=mkDiv('display:flex;gap:6px;margin-bottom:16px');
     var btnNota=E.btn('tb','\uD83D\uDCDD Nota','goNotas');btnNota.style.flex='1';
     var btnCarta=E.btn('tb','\uD83D\uDC8C Carta','goCartas');btnCarta.style.flex='1';
@@ -6602,7 +6653,7 @@ document.addEventListener('click', function(ev) {
         case 'goSintomas': setStep('sintomas'); return;
         case 'goHitos': setStep('hitos'); return;
         case 'goCartas': setStep('cartas'); return;
-        case 'goAstro': closeMasMenu(); setStep('astro'); return;
+        case 'goAstro': closeMasMenu(); setStep('recreativo'); return;
         case 'goEstudios': closeMasMenu(); setStep('estudios'); return;
         case 'goSemanal': setStep('semanalResumen'); return;
         case 'goQuickReg': setStep('quickReg'); return;
@@ -6734,20 +6785,20 @@ function generateUUID() {
 }
 
 function getDeviceId() {
-  var id = localStorage.getItem('cefe_device_id');
+  var id = localStorage.getItem('alba_device_id');
   if (!id) {
     id = generateUUID();
-    localStorage.setItem('cefe_device_id', id);
+    localStorage.setItem('alba_device_id', id);
   }
   return id;
 }
 
 function getDeviceName() {
-  return localStorage.getItem('cefe_device_name') || '';
+  return localStorage.getItem('alba_device_name') || '';
 }
 
 function setDeviceName(name) {
-  localStorage.setItem('cefe_device_name', name.trim());
+  localStorage.setItem('alba_device_name', name.trim());
 }
 
 var DEVICE_ID   = getDeviceId();
@@ -6922,7 +6973,7 @@ var ONBOARDING_PREGS = [
     titulo: '¿Cómo le van a decir?',
     cuerpo: 'Todos los bebés tienen un apodo especial. ¿Con qué nombre lo van a llamar en casa?',
     tipo_resp: 'texto',
-    placeholder: 'Cefe, Fefo, Feri...',
+    placeholder: 'Apodo cari\u00f1oso',
     onResp: function(val) {
       if (val && val.trim()) { D.bebe.apodo = val.trim(); saveData(); }
     }
@@ -6990,7 +7041,7 @@ var ONBOARDING_PREGS = [
     },
     icon: '👪',
     badge: 'Equipo de crianza',
-    titulo: '¿Quiénes cuidan a ' + (D.bebe.apodo||D.bebe.nombre||'Cefe') + '?',
+    titulo: '¿Quiénes cuidan a ' + (apodo()) + '?',
     cuerpo: 'Céfiro puede coordinar notificaciones entre cuidadores. ¿Hay más de una persona usando Alba?',
     tipo_resp: 'opciones',
     opciones: [
@@ -7056,7 +7107,7 @@ function posponerOnboarding(pregId, dias) {
 
 // Muestra el popup de una pregunta de onboarding
 function mostrarOnboardingPreg(preg, onDone) {
-  var apodo = D.bebe.apodo || D.bebe.nombre || 'Cefe';
+  var apodo = apodo();
   // Actualizar cuerpo dinámico si usa apodo
   var cuerpo = preg.cuerpo.replace(/Cefe/g, apodo);
 
@@ -7341,7 +7392,7 @@ function checkNocturnaCuento() {
   var key = 'nocturna_cuento_' + DEVICE_ID + '_' + hoy;
   if (localStorage.getItem(key)) return; // ya se mostró hoy
   localStorage.setItem(key, '1');
-  var apodo = D.bebe.apodo || D.bebe.nombre || 'Cefe';
+  var apodo = apodo();
   // Elegir cuento al azar de los disponibles
   var titulosCuento = [
     'La Luna y el Niño Viento', 'El Río que Cantaba', 'El Abuelo del Bosque',
@@ -7501,7 +7552,7 @@ function buildMomentosQueue() {
 
 // ─── LÍNEA DE TIEMPO / HISTORIA ───────────────────────────────
 function renderHistoria(bd) {
-  var apodo = D.bebe.apodo || D.bebe.nombre || 'Cefe';
+  var apodo = apodo();
   var fn = D.bebe.fn ? new Date(D.bebe.fn) : null;
 
   // ── Filtros ──
@@ -7900,13 +7951,13 @@ var TIPS_SEMANALES = [
     body:'El recién nacido no distingue día de noche todavía — su ciclo es de 90 minutos. La consistencia en la respuesta (no en el horario) es lo que va a ir ordenando el sueño con el tiempo.' },
   { id:'tip_s1', semMin:1, semMax:2,
     icon:'👁️', title:'La vista ya trabaja',
-    body:'Esta semana Cefe enfoca mejor a 20-30 cm — exactamente la distancia al pecho. Tu cara es su objeto favorito. Hablale de cerca, que te registra.' },
+    body:'Esta semana {APODO} enfoca mejor a 20-30 cm — exactamente la distancia al pecho. Tu cara es su objeto favorito. Hablale de cerca, que te registra.' },
   { id:'tip_s2', semMin:2, semMax:3,
     icon:'⚖️', title:'El peso, en perspectiva',
     body:'Es normal perder hasta el 10% del peso de nacimiento en los primeros días. La recuperación completa suele ocurrir entre el día 10 y el 14. Los controles del pediatra son el termómetro justo.' },
   { id:'tip_s3', semMin:4, semMax:5,
     icon:'😴', title:'El sueño no es lineal',
-    body:'Si Cefe duerme bien una noche y mal la siguiente, es normal — no es regresión ni señal de que algo está mal. Los patrones de sueño tardan meses en estabilizarse. Dormir cuando él duerme sigue siendo el mejor consejo.' },
+    body:'Si {APODO} duerme bien una noche y mal la siguiente, es normal — no es regresión ni señal de que algo está mal. Los patrones de sueño tardan meses en estabilizarse. Dormir cuando él duerme sigue siendo el mejor consejo.' },
   { id:'tip_s4', semMin:6, semMax:7,
     icon:'😭', title:'El pico del llanto',
     body:'La semana 6 suele ser el pico del llanto vespertino. Tiene fecha de vencimiento: la mayoría mejora notablemente alrededor de la semana 12. Turnarse con Sari en estos momentos es clave para no agotarse.' },
@@ -7924,7 +7975,7 @@ var TIPS_SEMANALES = [
     body:'Llevarse objetos a la boca es exploración sensorial, no un problema. Asegurate que lo que tenga en la mano sea seguro. La mano-boca es también parte del desarrollo del esquema corporal.' },
   { id:'tip_s9', semMin:24, semMax:999,
     icon:'🚀', title:'Cada semana es un mundo',
-    body:'Esta etapa trae cambios rápidos. Seguí registrando los hitos, las fotos, las notas — ese archivo que están construyendo es un regalo para Cefe y para ustedes.' },
+    body:'Esta etapa trae cambios rápidos. Seguí registrando los hitos, las fotos, las notas — ese archivo que están construyendo es un regalo para {APODO} y para ustedes.' },
 ];
 
 // ── Checks de hitos interactivos ─────────────────────────────
@@ -8037,7 +8088,7 @@ function updatePendBadge() {
 
 // ── Pantalla Pendientes ───────────────────────────────────────
 function renderPendientes(bd) {
-  var apodo = D.bebe.apodo || D.bebe.nombre || 'Cefe';
+  var apodo = apodo();
   var pendientes = getMomentosPendientes();
 
   bd.appendChild(mkTxt('div', null, 'Recordatorios y checks activos para esta etapa de ' + apodo + '.', 'font-size:12px;color:#a89070;margin-bottom:16px;line-height:1.6'));
@@ -8105,8 +8156,8 @@ function renderPendientes(bd) {
   }
   if (!tip) tip = TIPS_SEMANALES[TIPS_SEMANALES.length - 1];
   var tipCard = mkDiv('background:rgba(100,130,180,.08);border:1px solid rgba(100,130,200,.2);border-radius:14px;padding:16px;margin-top:8px');
-  tipCard.appendChild(mkTxt('div', null, tip.icon + ' ' + tip.title, 'font-size:13px;font-weight:bold;color:#c0d4f0;margin-bottom:8px'));
-  tipCard.appendChild(mkTxt('div', null, tip.body, 'font-size:12px;color:#a0b8d0;line-height:1.65'));
+  tipCard.appendChild(mkTxt('div', null, tip.icon + ' ' + subsApodo(tip.title), 'font-size:13px;font-weight:bold;color:#c0d4f0;margin-bottom:8px'));
+  tipCard.appendChild(mkTxt('div', null, subsApodo(tip.body), 'font-size:12px;color:#a0b8d0;line-height:1.65'));
   bd.appendChild(tipCard);
 }
 
@@ -8191,7 +8242,7 @@ function showNextMomento() {
   if (_momentoActual >= _momentosQueue.length) { updatePendBadge(); return; }
   var item = _momentosQueue[_momentoActual];
   _momentoActual++;
-  var apodo = D.bebe.apodo || D.bebe.nombre || 'Cefe';
+  var apodo = apodo();
   var hasNext = _momentoActual < _momentosQueue.length;
   var btnLabel = hasNext ? 'Siguiente →' : 'Entendido';
   var onNext = hasNext ? showNextMomento : function(){ updatePendBadge(); };
@@ -8262,7 +8313,7 @@ function showNextMomento() {
           btn.style.display = 'block';
           responderMomento('chk_' + chkCopy.hitoId, bCopy.v, null);
           if (bCopy.v === 'si') {
-            showCpop('celebracion','🌟','¡Hito alcanzado!','¡Lo lograron!','Registrado en los hitos de Cefe. Cada momento cuenta.', hasNext ? 'Siguiente →' : '¡Genial! 💛', onNext);
+            showCpop('celebracion','🌟','¡Hito alcanzado!','¡Lo lograron!','Registrado en los hitos de '+apodo()+'. Cada momento cuenta.', hasNext ? 'Siguiente →' : '¡Genial! 💛', onNext);
           } else {
             onNext();
           }
@@ -8337,12 +8388,12 @@ function showNextMomento() {
     localStorage.setItem(item.tipKey, '1');
     if (item.tipShownKey) localStorage.setItem(item.tipShownKey, Date.now().toString());
     showCpop('info', item.tip.icon, 'Semana ' + Math.floor(Math.floor((Date.now() - new Date(D.bebe.fn).getTime()) / 86400000) / 7),
-      item.tip.title, item.tip.body, btnLabel, onNext);
+      subsApodo(item.tip.title), subsApodo(item.tip.body), btnLabel, onNext);
 
   } else if (item.tipo === 'actividad_dia') {
     // Marcar que ya se mostró el pop-up de actividad hoy
     localStorage.setItem(item.actKey, '1');
-    var apodoAct = D.bebe.apodo || D.bebe.nombre || 'Cefe';
+    var apodoAct = apodo();
     showCpop('info', item.act.ic || '\uD83C\uDF31', 'Actividad del día',
       item.act.label,
       (item.act.desc || '') + '\n\n\u00bfLo hacemos hoy con ' + apodoAct + '?',
@@ -8417,7 +8468,7 @@ function checkContextualPopup() {
   fn.setHours(0,0,0,0);
   var diasVida = Math.floor((today - fn) / 86400000);
   var semsVida = Math.floor(diasVida / 7);
-  var apodo    = (D.bebe.apodo || D.bebe.nombre || 'Cefe');
+  var apodo    = (apodo());
 
   // ── PRIORIDAD 0: BCG pendiente (no recibida al nacer) ─────────
   if(D.bebe.vacBCG===false&&!_cpopShown){
@@ -8584,7 +8635,7 @@ function checkContextualPopup() {
 
 // ─── MODO CONSULTA MÉDICA ──────────────────────────────────────
 function renderConsultaMedica(bd) {
-  var apodo = D.bebe.apodo||D.bebe.nombre||'Cefe';
+  var apodo = apodo();
   var hoy = new Date();
   var desde2w = new Date(hoy.getTime() - 14*86400000);
   bd.appendChild(mkTxt('div',null,'Resumen para el médico — últimas 2 semanas.','font-size:12px;color:#a89070;margin-bottom:16px'));
@@ -8645,7 +8696,7 @@ function renderConsultaMedica(bd) {
 }
 
 function generarHistoriaClinicaPDF() {
-  var apodo=D.bebe.apodo||D.bebe.nombre||'Cefe';
+  var apodo=apodo();
   var b=D.bebe||{};
   var hoy=new Date();
   var css='body{font-family:Georgia,serif;color:#1a1a1a;max-width:800px;margin:0 auto;padding:30px;font-size:13px}h1{font-size:22px;border-bottom:2px solid #d4943a;padding-bottom:8px}h2{font-size:15px;color:#5a3a1a;margin-top:22px;margin-bottom:8px;border-left:3px solid #d4943a;padding-left:10px}table{width:100%;border-collapse:collapse;margin-bottom:12px;font-size:12px}th{background:#f5e6ce;text-align:left;padding:6px 10px;border-bottom:1px solid #ddd}td{padding:5px 10px;border-bottom:1px solid #f0f0f0}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}.card{background:#fdf6ed;border:1px solid #e8d5b0;border-radius:8px;padding:10px}.lbl{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#8a6a40;margin-bottom:2px}.val{font-size:14px;font-weight:bold}.footer{margin-top:28px;padding-top:10px;border-top:1px solid #ddd;font-size:10px;color:#888;text-align:center}@media print{button{display:none}}';
@@ -8808,58 +8859,6 @@ function closeMiniSheet(){
 // ═══════════════════════════════════════════════════════════════
 
 // ─── HORÓSCOPO DIARIO (offline, sin API) ──────────────────────
-// Aries con Luna en Tauro — textos rotantes según día del año
-// 4 textos por categoría, rotan semanalmente
-var HORO_ARIES = {
-  energia: [
-    'Cefe irradia una energía pionera hoy. Es un día ideal para intentar algo nuevo juntos: una postura diferente, un nuevo ritual de calma. Su espíritu Aries necesita estímulo, no solo rutina.',
-    'La energía marciana de Aries está activa. Cefe puede estar más inquieto o demandante de lo habitual — no es capricho, es su naturaleza de explorador buscando respuesta. Respondé con presencia.',
-    'Hoy Aries trae determinación. Si Cefe llora con insistencia, confía en que sabe lo que necesita. Su instinto es su guía más honesta en estas primeras semanas.',
-    'Día de impulso ariano. Cefe puede sorprenderlos con un nuevo logro pequeño — un giro de cabeza, un reflejo más marcado. Observen con atención: los pioneros siempre van un paso adelante.'
-  ],
-  luna: [
-    'La Luna en Tauro de Cefe pide hoy lo que siempre pide: contacto físico, calor y ritmo constante. Un rato de piel con piel hace más que cualquier otro estímulo.',
-    'Emocionalmente, Tauro busca seguridad sensorial. El sonido de tu voz, el olor de mamá, la temperatura correcta — hoy más que nunca esos detalles son su mundo entero.',
-    'La Luna taurina trae calma cuando el entorno es predecible. Si Cefe está irritable, revisá cambios en la rutina. La constancia es su idioma emocional.',
-    'Tauro lunar necesita tiempo para procesar. No apresures las tomas ni los cambios de pañal. El ritmo pausado hoy es un regalo para su sistema nervioso.'
-  ],
-  consejo: [
-    'El trío Aries-Tauro-Capricornio de Cefe sugiere hoy: menos estimulación visual, más contacto. Apagá una pantalla y encendé una conversación suave.',
-    'Cefe tiene la energía para liderar (Aries) pero necesita la base segura para hacerlo (Tauro). Hoy: sostené más, corregí menos.',
-    'Día para confiar en tu instinto como papá. Aries sabe sin pensar demasiado. Si algo te parece correcto, probablemente lo es.',
-    'El número 6 de Cefe habla de armonía familiar. Hoy es un buen día para que Manu y Sari se tomen un momento juntos, aunque sea de 10 minutos. La pareja que cuida bien a Cefe, primero se cuida a sí misma.'
-  ]
-};
-
-function getHoroscopo() {
-  var now = new Date();
-  var dayOfYear = Math.floor((now - new Date(now.getFullYear(), 0, 0)) / 86400000);
-  var weekOfYear = Math.floor(dayOfYear / 7);
-  var idx = weekOfYear % 4;
-
-  var meses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-  var dias = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
-
-  // Energía del día según día de la semana
-  var energiaDia = [
-    {ic:'\u2600\uFE0F', txt:'Día solar — energía alta, ideal para baños y paseos'},
-    {ic:'\uD83C\uDF19', txt:'Día lunar — privilegiá el descanso y el contacto'},
-    {ic:'\uD83D\uDD25', txt:'Día de fuego — estímulo y movimiento suave'},
-    {ic:'\uD83D\uDCA7', txt:'Día de agua — calma, hidratación, lactancia fluida'},
-    {ic:'\u26A1', txt:'Día de aire — conexión, voces, música suave'},
-    {ic:'\uD83C\uDF0D', txt:'Día de tierra — rutina y constancia como ancla'},
-    {ic:'\u2728', txt:'Día de síntesis — todo lo que funciona, repetilo'}
-  ];
-
-  return {
-    fecha: dias[now.getDay()] + ' ' + now.getDate() + ' de ' + meses[now.getMonth()],
-    energia: HORO_ARIES.energia[idx],
-    luna: HORO_ARIES.luna[idx],
-    consejo: HORO_ARIES.consejo[idx],
-    energiaDia: energiaDia[now.getDay()]
-  };
-}
-
 // ─── ACTIVIDADES POR SEMANA ────────────────────────────────────
 // Fuentes: AAP, SAP, Denver II, Brazelton
 var ACTIVIDADES = {
@@ -8892,7 +8891,7 @@ var ACTIVIDADES = {
       {ic:'\uD83D\uDE03', label:'Provocar la primera sonrisa', desc:'Todavía es refleja, pero tu cara a 20cm haciendo expresiones exageradas puede lograrlo. Es normal si no aparece hasta la semana 6.'},
       {ic:'\uD83D\uDDE3\uFE0F', label:'Narrar la rutina', desc:'"Ahora te cambiamos el pañal, ¿sentís el fresquito?" Asociar palabras a sensaciones es base del lenguaje.'},
       {ic:'\uD83C\uDF1F', label:'Estimulación visual contrastes', desc:'Tarjetas o dibujos en blanco y negro. A esta edad el sistema visual responde mejor a alto contraste.'},
-      {ic:'\uD83D\uDEBF', label:'Baño como terapia', desc:'Agua a 36-37°C. Hablale durante todo el proceso. El agua es un ambiente familiar para Cefe.'},
+      {ic:'\uD83D\uDEBF', label:'Baño como terapia', desc:'Agua a 36-37°C. Hablale durante todo el proceso. El agua es un ambiente familiar para {APODO}.'},
       {ic:'\uD83D\uDC89', label:'Tiempo al aire libre', desc:'10-15 min de luz natural (no sol directo) ayuda a regular el ritmo circadiano y sintetizar vitamina D.'}
     ]
   },
@@ -8901,7 +8900,7 @@ var ACTIVIDADES = {
     foco: 'Patrones y rutina',
     actividades: [
       {ic:'\uD83D\uDD54', label:'Instalar rutina día/noche', desc:'Luz natural durante el día, oscuridad y silencio de noche. El cerebro empieza a distinguir ciclos.'},
-      {ic:'\uD83E\uDD31', label:'Porteo funcional', desc:'Fular o mochila ergonómica. Libera las manos y mantiene a Cefe en posición ideal para su cadera.'},
+      {ic:'\uD83E\uDD31', label:'Porteo funcional', desc:'Fular o mochila ergonómica. Libera las manos y mantiene a {APODO} en posición ideal para su cadera.'},
       {ic:'\uD83C\uDFB9', label:'Tiempo de piso boca abajo', desc:'Aumentar a 3-5 min si tolera. Poneté a su nivel y hablale. Es su primera "sala de musculación".'},
       {ic:'\uD83D\uDE48', label:'Imitación facial', desc:'Sacá la lengua despacio. Algunos bebés de 3-4 semanas ya imitan. Si lo hace, es un hito precoz de conexión.'},
       {ic:'\uD83D\uDCF5', label:'Reducir estimulación si llora', desc:'A veces el llanto del final del día es por exceso de input. Luces bajas, silencio y pecho es el mejor reset.'}
@@ -9162,20 +9161,20 @@ function getVacunaStatus(v) {
 // ENTREGA B SCREENS
 // ═══════════════════════════════════════════════════════════════
 // ENTREGA B — PANTALLAS DE RENDER
-// Reemplaza el bloque "astro" existente con el módulo completo
+// Módulo recreativo: Actividades, Quiz, Trivia.
 // ═══════════════════════════════════════════════════════════════
 
-// Esta función reemplaza el bloque D.step==='astro' en render()
+// Renderiza el módulo recreativo (tab 'recreativo' del menú).
 function renderModuloRecreativo(bd) {
-  // Tabs principales
-  var mainTabs=[{k:'actividades',lbl:'Actividades'},{k:'quiz_cefe',lbl:'Quiz Cefe'},{k:'trivia',lbl:'Trivia'},{k:'astro',lbl:'Astro'}];
-  var activeMain=(['actividades','quiz_cefe','trivia'].indexOf(D.astroTab)>=0)?D.astroTab:'astro';
+  // Tabs principales (post A.1.2: eliminado tab Astro)
+  var mainTabs=[{k:'actividades',lbl:'Actividades'},{k:'quiz',lbl:'Quiz'},{k:'trivia',lbl:'Trivia'}];
+  var activeMain=(['actividades','quiz','trivia'].indexOf(D.recreativoTab)>=0)?D.recreativoTab:'actividades';
   var mainTabRow=mkDiv('display:flex;gap:6px;margin-bottom:14px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:2px');
   mainTabs.forEach(function(t){
     var on=activeMain===t.k;
     var b=document.createElement('button');
     b.style.cssText='padding:7px 14px;border-radius:20px;border:1px solid rgba(212,168,67,'+(on?'.5':'.2')+');background:rgba(212,168,67,'+(on?'.15':'.04')+');color:'+(on?'#f0d9a0':'#a89070')+';font-size:12px;cursor:pointer;font-family:Georgia,serif;white-space:nowrap;flex-shrink:0';
-    b.textContent=t.lbl;(function(k){b.onclick=function(){D.astroTab=k;render();};})(t.k);
+    b.textContent=t.lbl;(function(k){b.onclick=function(){D.recreativoTab=k;render();};})(t.k);
     mainTabRow.appendChild(b);
   });
   bd.appendChild(mainTabRow);
@@ -9184,7 +9183,7 @@ function renderModuloRecreativo(bd) {
     var act=typeof getActividades==='function'?getActividades():null;
     if(act&&act.actividades){
       var infoBox=mkDiv('background:rgba(100,200,140,.06);border:1px solid rgba(100,200,140,.15);border-radius:12px;padding:10px 13px;margin-bottom:12px');
-      infoBox.appendChild(mkTxt('div',null,'Semana '+ageW()+' — '+act.titulo,'font-size:11px;font-weight:bold;color:#64c88c;margin-bottom:3px'));
+      infoBox.appendChild(mkTxt('div',null,'Semana '+ageW()+' \u2014 '+act.titulo,'font-size:11px;font-weight:bold;color:#64c88c;margin-bottom:3px'));
       infoBox.appendChild(mkTxt('div',null,'Foco: '+act.foco,'font-size:11px;color:#a89070'));
       bd.appendChild(infoBox);
       act.actividades.forEach(function(a){
@@ -9193,7 +9192,7 @@ function renderModuloRecreativo(bd) {
         icB.appendChild(mkTxt('span',null,a.ic,'font-size:20px'));card.appendChild(icB);
         var txt2=mkDiv('flex:1');
         txt2.appendChild(mkTxt('div',null,a.label,'font-size:13px;font-weight:bold;color:#f0d9a0;margin-bottom:3px'));
-        txt2.appendChild(mkTxt('div',null,a.desc,'font-size:12px;color:#a89070;line-height:1.5'));
+        txt2.appendChild(mkTxt('div',null,subsApodo(a.desc),'font-size:12px;color:#a89070;line-height:1.5'));
         card.appendChild(txt2);bd.appendChild(card);
       });
       bd.appendChild(mkTxt('div',null,'Fuente: AAP, SAP, Denver II, WHO Motor Milestones','font-size:10px;color:#4a5060;margin-top:6px;text-align:center'));
@@ -9201,24 +9200,26 @@ function renderModuloRecreativo(bd) {
     return;
   }
 
-  if(activeMain==='quiz_cefe'){
-    var apodo=D.bebe.apodo||D.bebe.nombre||'Cefe';
-    bd.appendChild(mkTxt('div',null,'Cuanto sabes de '+apodo+'?','font-size:14px;font-weight:bold;color:#f0d9a0;margin-bottom:12px;text-align:center'));
+  if(activeMain==='quiz'){
+    var apo=(D.bebe&&(D.bebe.apodo||D.bebe.nombre))||'';
+    var titQuiz=apo?('\u00bfCu\u00e1nto sab\u00e9s de '+apo+'?'):'\u00bfCu\u00e1nto sab\u00e9s de tu beb\u00e9?';
+    bd.appendChild(mkTxt('div',null,titQuiz,'font-size:14px;font-weight:bold;color:#f0d9a0;margin-bottom:12px;text-align:center'));
     var tomasAyer2=D.hist.filter(function(h){var s=new Date(h.s);var ay=new Date();ay.setDate(ay.getDate()-1);return h.type==='toma'&&sameDay(s,ay);});
     var panAyer=D.hist.filter(function(h){var t=new Date(h.t);var ay2=new Date();ay2.setDate(ay2.getDate()-1);return h.type==='panal'&&sameDay(t,ay2);});
     var preguntas=[];
-    if(tomasAyer2.length>0){var o1=[tomasAyer2.length,tomasAyer2.length+3,Math.max(1,tomasAyer2.length-2)].sort(function(){return Math.random()-.5;});preguntas.push({p:'Cuantas tomas tuvo '+apodo+' ayer?',ops:o1.map(String),ok:o1.indexOf(tomasAyer2.length),exp:'Fueron '+tomasAyer2.length+' tomas.'});}
-    if(D.pesos&&D.pesos.length>0){var lpp=D.pesos[0];var pg=lpp.g;var o2=[gkg(pg),gkg(pg+150),gkg(Math.max(100,pg-200))].sort(function(){return Math.random()-.5;});preguntas.push({p:'Cuanto pesa '+apodo+' en el ultimo registro?',ops:o2.map(function(x){return x+' kg';}),ok:o2.indexOf(gkg(pg)),exp:'Ultimo: '+gkg(pg)+' kg ('+pctLbl(pg,ageW())+')'});}
-    if(panAyer.length>0){var o3=[panAyer.length,panAyer.length+2,Math.max(0,panAyer.length-1)].sort(function(){return Math.random()-.5;});preguntas.push({p:'Cuantos panales tuvo ayer?',ops:o3.map(String),ok:o3.indexOf(panAyer.length),exp:'Fueron '+panAyer.length+' panales.'});}
-    if(preguntas.length===0){bd.appendChild(mkTxt('div','mu','Registra tomas y panales para activar el quiz con datos reales!'));return;}
-    var qIdx=parseInt(ls('quiz_cefe_idx')||'0')%preguntas.length;
-    var q2=preguntas[qIdx];var rKey='qcefe_'+ageD()+'_'+qIdx;var yaR=ls(rKey);
+    var refBebe=apo||'el beb\u00e9';
+    if(tomasAyer2.length>0){var o1=[tomasAyer2.length,tomasAyer2.length+3,Math.max(1,tomasAyer2.length-2)].sort(function(){return Math.random()-.5;});preguntas.push({p:'\u00bfCu\u00e1ntas tomas tuvo '+refBebe+' ayer?',ops:o1.map(String),ok:o1.indexOf(tomasAyer2.length),exp:'Fueron '+tomasAyer2.length+' tomas.'});}
+    if(D.pesos&&D.pesos.length>0){var lpp=D.pesos[0];var pg=lpp.g;var o2=[gkg(pg),gkg(pg+150),gkg(Math.max(100,pg-200))].sort(function(){return Math.random()-.5;});preguntas.push({p:'\u00bfCu\u00e1nto pesa '+refBebe+' en el \u00faltimo registro?',ops:o2.map(function(x){return x+' kg';}),ok:o2.indexOf(gkg(pg)),exp:'\u00daltimo: '+gkg(pg)+' kg ('+pctLbl(pg,ageW())+')'});}
+    if(panAyer.length>0){var o3=[panAyer.length,panAyer.length+2,Math.max(0,panAyer.length-1)].sort(function(){return Math.random()-.5;});preguntas.push({p:'\u00bfCu\u00e1ntos pa\u00f1ales tuvo ayer?',ops:o3.map(String),ok:o3.indexOf(panAyer.length),exp:'Fueron '+panAyer.length+' pa\u00f1ales.'});}
+    if(preguntas.length===0){bd.appendChild(mkTxt('div','mu','\u00a1Registr\u00e1 tomas y pa\u00f1ales para activar el quiz con datos reales!'));return;}
+    var qIdx=parseInt(ls('quiz_recreativo_idx')||'0')%preguntas.length;
+    var q2=preguntas[qIdx];var rKey='qrec_'+ageD()+'_'+qIdx;var yaR=ls(rKey);
     var qCard=mkDiv('background:rgba(100,200,140,.06);border:1px solid rgba(100,200,140,.15);border-radius:14px;padding:16px;margin-bottom:12px');
     qCard.appendChild(mkTxt('div',null,q2.p,'font-size:14px;font-weight:bold;color:#f0d9a0;line-height:1.5;margin-bottom:12px'));
     if(yaR!==null){
       var corr=parseInt(yaR)===q2.ok;
-      qCard.appendChild(mkTxt('div',null,(corr?'Correcto! ':'Casi! ')+q2.exp,'font-size:12px;color:'+(corr?'#64c8b4':'#e07070')+';line-height:1.6;margin-bottom:10px'));
-      var nBtn=document.createElement('button');nBtn.style.cssText='width:100%;padding:10px;border-radius:10px;border:1px solid rgba(100,200,140,.25);background:rgba(100,200,140,.08);color:#64c88c;font-size:13px;cursor:pointer;font-family:Georgia,serif';nBtn.textContent='Siguiente pregunta';nBtn.onclick=function(){lss('quiz_cefe_idx',String((qIdx+1)%preguntas.length));render();};qCard.appendChild(nBtn);
+      qCard.appendChild(mkTxt('div',null,(corr?'\u00a1Correcto! ':'Casi. ')+q2.exp,'font-size:12px;color:'+(corr?'#64c8b4':'#e07070')+';line-height:1.6;margin-bottom:10px'));
+      var nBtn=document.createElement('button');nBtn.style.cssText='width:100%;padding:10px;border-radius:10px;border:1px solid rgba(100,200,140,.25);background:rgba(100,200,140,.08);color:#64c88c;font-size:13px;cursor:pointer;font-family:Georgia,serif';nBtn.textContent='Siguiente pregunta';nBtn.onclick=function(){lss('quiz_recreativo_idx',String((qIdx+1)%preguntas.length));render();};qCard.appendChild(nBtn);
     } else {
       var opQ=mkDiv('display:flex;flex-direction:column;gap:8px');
       q2.ops.forEach(function(op,oi){var ob=document.createElement('button');ob.style.cssText='padding:11px 14px;border-radius:11px;border:1px solid rgba(100,200,140,.2);background:rgba(100,200,140,.05);color:#d4c090;font-size:14px;cursor:pointer;font-family:Georgia,serif;text-align:left';ob.textContent=op;(function(i){ob.onclick=function(){lss(rKey,String(i));render();};})(oi);opQ.appendChild(ob);});
@@ -9237,7 +9238,7 @@ function renderModuloRecreativo(bd) {
     trCard.appendChild(mkTxt('div',null,tr.p,'font-size:14px;font-weight:bold;color:#d4c090;line-height:1.5;margin-bottom:12px'));
     if(trR!==null){
       var trC=parseInt(trR)===tr.ok;
-      trCard.appendChild(mkTxt('div',null,(trC?'Correcto! ':'Casi! ')+tr.exp,'font-size:12px;color:'+(trC?'#64c8b4':'#e07070')+';line-height:1.6;margin-bottom:10px'));
+      trCard.appendChild(mkTxt('div',null,(trC?'\u00a1Correcto! ':'Casi. ')+tr.exp,'font-size:12px;color:'+(trC?'#64c8b4':'#e07070')+';line-height:1.6;margin-bottom:10px'));
       var nBtn2=document.createElement('button');nBtn2.style.cssText='width:100%;padding:10px;border-radius:10px;border:1px solid rgba(140,100,220,.25);background:rgba(140,100,220,.08);color:#b48cdc;font-size:13px;cursor:pointer;font-family:Georgia,serif';nBtn2.textContent='Siguiente pregunta';nBtn2.onclick=function(){lss('trivia_idx',String((trIdx+1)%QUIZ_TOMA.length));render();};trCard.appendChild(nBtn2);
     } else {
       var trOp=mkDiv('display:flex;flex-direction:column;gap:8px');
@@ -9248,116 +9249,13 @@ function renderModuloRecreativo(bd) {
     bd.appendChild(mkTxt('div',null,'Fuente: OMS, AAP, NSF, ASHA, ACOG','font-size:10px;color:#4a5060;text-align:center'));
     return;
   }
-
-  // ── ASTRO (contenido existente) ───────────────────────────
-
-  // ── DISCLAIMER ──────────────────────────────────────────────
-  var disc = mkDiv('background:rgba(212,168,67,.08);border:1px solid rgba(212,168,67,.2);border-radius:12px;padding:10px 12px;margin-bottom:16px');
-  disc.appendChild(mkTxt('div',null,'\u26A0\uFE0F M\u00F3dulo recreativo \u2014 pseudociencia con disclaimer','font-size:10px;color:#d4a843;font-weight:bold;margin-bottom:3px'));
-  disc.appendChild(mkTxt('div',null,'Astrolog\u00EDa, numerolog\u00EDa y hor\u00F3scopo son contenido l\u00FAdico sin base cient\u00EDfica. No deben usarse para decisiones de salud o crianza.','font-size:11px;color:#a89070;line-height:1.5'));
-  bd.appendChild(disc);
-
-  // ── TABS internos ────────────────────────────────────────────
-  var tabRow = mkDiv('display:flex;gap:6px;margin-bottom:16px');
-  var subTabs = [
-    {k:'horoscopo', ic:'\u2728', lbl:'Hor\u00F3scopo'},
-    {k:'carta',     ic:'\uD83C\uDF20', lbl:'Carta astral'},
-    {k:'numeros',   ic:'\uD83D\uDD2E', lbl:'Numerolog\u00EDa'},
-  ];
-  var activeSub = D.astroTab || 'horoscopo';
-  subTabs.forEach(function(t) {
-    var btn = E.btn('fb' + (activeSub===t.k ? ' on' : ''), t.ic + ' ' + t.lbl, 'setAstroTab');
-    btn.dataset.k = t.k;
-    tabRow.appendChild(btn);
-  });
-  bd.appendChild(tabRow);
-
-  // ── HORÓSCOPO DIARIO ─────────────────────────────────────────
-  if (activeSub === 'horoscopo') {
-    var h = getHoroscopo();
-    var dateBox = mkDiv('text-align:center;margin-bottom:14px');
-    dateBox.appendChild(mkTxt('div',null,h.fecha,'font-size:13px;font-weight:bold;color:#f0d9a0'));
-    dateBox.appendChild(mkDiv('background:rgba(212,168,67,.15);border:1px solid rgba(212,168,67,.3);border-radius:20px;padding:4px 14px;display:inline-block;margin-top:6px').appendChild(mkTxt('span',null,h.energiaDia.ic + ' ' + h.energiaDia.txt,'font-size:11px;color:#d4c090')) || dateBox);
-    bd.appendChild(dateBox);
-
-    var energiaDayBox = mkDiv('background:rgba(212,168,67,.08);border:1px solid rgba(212,168,67,.15);border-radius:11px;padding:8px 12px;margin-bottom:10px;display:flex;align-items:center;gap:8px');
-    energiaDayBox.appendChild(mkTxt('span',null,h.energiaDia.ic,'font-size:22px;flex-shrink:0'));
-    energiaDayBox.appendChild(mkTxt('span',null,h.energiaDia.txt,'font-size:12px;color:#d4c090;line-height:1.4'));
-    bd.appendChild(energiaDayBox);
-
-    var secs = [
-      {ic:'\u2600\uFE0F', title:'Energ\u00EDa de hoy', txt:h.energia},
-      {ic:'\uD83C\uDF19', title:'Luna en Tauro \u2014 Emocional', txt:h.luna},
-      {ic:'\uD83D\uDCA1', title:'Consejo del d\u00EDa', txt:h.consejo},
-    ];
-    secs.forEach(function(s) {
-      var c = E.div('card');
-      var hd = mkDiv('display:flex;align-items:center;gap:8px;margin-bottom:8px');
-      hd.appendChild(mkTxt('span',null,s.ic,'font-size:20px'));
-      hd.appendChild(mkTxt('span',null,s.title,'font-size:13px;font-weight:bold;color:#d4a843'));
-      c.appendChild(hd);
-      c.appendChild(mkTxt('div',null,s.txt,'font-size:12px;color:#d4c090;line-height:1.7'));
-      bd.appendChild(c);
-    });
-  }
-
-  // ── CARTA ASTRAL ─────────────────────────────────────────────
-  else if (activeSub === 'carta') {
-    var astro = calcAstro();
-    var ac = E.div('card');
-    ac.appendChild(mkTxt('div',null,'Carta Astral de ' + D.bebe.apodo,'font-size:16px;font-weight:bold;color:#f0d9a0;margin-bottom:4px'));
-    ac.appendChild(mkTxt('div',null,D.bebe.fn+' \u00B7 '+D.bebe.hora+'hs \u00B7 San Isidro, Buenos Aires','font-size:10px;color:#a89070;margin-bottom:14px'));
-    var astRow = mkDiv('display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px');
-    var mkAstro = function(emoji,label,val) {
-      var d = mkDiv('background:rgba(255,255,255,.04);border:1px solid rgba(210,175,120,.1);border-radius:10px;padding:10px;text-align:center');
-      d.appendChild(mkTxt('div',null,emoji,'font-size:20px;margin-bottom:3px'));
-      d.appendChild(mkTxt('div',null,val,'font-size:13px;font-weight:bold;color:#f0d9a0'));
-      d.appendChild(mkTxt('div',null,label,'font-size:9px;color:#a89070;text-transform:uppercase;letter-spacing:1px'));
-      return d;
-    };
-    astRow.appendChild(mkAstro('\u2600\uFE0F','Sol',astro.signo));
-    astRow.appendChild(mkAstro('\uD83C\uDF19','Luna',astro.luna));
-    astRow.appendChild(mkAstro('\u2B50','Asc.',astro.ascendente));
-    ac.appendChild(astRow);
-    var mkSec = function(title,txt) {
-      var s = mkDiv('margin-bottom:14px');
-      s.appendChild(mkTxt('div',null,title,'font-size:11px;font-weight:bold;color:#d4a843;margin-bottom:6px'));
-      s.appendChild(mkTxt('div',null,txt,'font-size:12px;color:#d4c090;line-height:1.6'));
-      return s;
-    };
-    ac.appendChild(mkSec('\u2600\uFE0F Sol en Aries \u2014 El Pionero',astro.descripcionSigno));
-    ac.appendChild(mkSec('\uD83C\uDF19 Luna en Tauro \u2014 Vida emocional',astro.descripcionLuna));
-    ac.appendChild(mkSec('\u2B50 Ascendente Capricornio',astro.descripcionAsc));
-    ac.appendChild(mkSec('\uD83D\uDCA1 La combinaci\u00F3n',astro.descripcionCombinada));
-    bd.appendChild(ac);
-  }
-
-  // ── NUMEROLOGÍA ───────────────────────────────────────────────
-  else if (activeSub === 'numeros') {
-    var astro2 = calcAstro();
-    var nc = E.div('card');
-    nc.appendChild(mkTxt('div',null,'Numerolog\u00EDa de Cefe','font-size:16px;font-weight:bold;color:#f0d9a0;margin-bottom:12px'));
-    var numBox = mkDiv('background:rgba(180,140,220,.1);border:1px solid rgba(180,140,220,.3);border-radius:12px;padding:16px;text-align:center;margin-bottom:14px');
-    numBox.appendChild(mkTxt('div',null,'N\u00FAmero de Vida','font-size:9px;color:#a89070;text-transform:uppercase;letter-spacing:2px;margin-bottom:6px'));
-    numBox.appendChild(mkTxt('div',null,String(astro2.numerologia),'font-size:48px;font-weight:bold;color:#b48cdc'));
-    numBox.appendChild(mkTxt('div',null,'29/03/2026 \u2192 2+9+0+3+2+0+2+6 = 24 \u2192 2+4 = 6','font-size:10px;color:#a89070;margin-top:6px'));
-    nc.appendChild(numBox);
-    nc.appendChild(mkTxt('div',null,astro2.descripcionNum,'font-size:12px;color:#d4c090;line-height:1.6'));
-    bd.appendChild(nc);
-  }
 }
 
-// Handler para cambio de tab interno en astro
-// (se agrega al handleAction existente)
-function setAstroTab(k) {
-  D.astroTab = k;
-  render();
-}
 
 // ─── SISTEMA DE LOGROS ────────────────────────────────────────
 var LOGROS_DEF = [
   // 🍼 Lactancia
-  { id:'l_primera_toma',  cat:'lactancia', ic:'🍼', titulo:'Primera toma registrada',   desc:'El comienzo de todo. Registraste la primera toma de Cefe.',          check:function(){return D.hist.filter(function(h){return h.type==='toma';}).length>=1;} },
+  { id:'l_primera_toma',  cat:'lactancia', ic:'🍼', titulo:'Primera toma registrada',   desc:'El comienzo de todo. Registraste la primera toma de {APODO}.',          check:function(){return D.hist.filter(function(h){return h.type==='toma';}).length>=1;} },
   { id:'l_10_tomas',      cat:'lactancia', ic:'🍼', titulo:'10 tomas',                  desc:'Diez tomas registradas. Ya le agarraron el ritmo.',                  check:function(){return D.hist.filter(function(h){return h.type==='toma';}).length>=10;} },
   { id:'l_50_tomas',      cat:'lactancia', ic:'🌟', titulo:'50 tomas',                  desc:'Cincuenta tomas. Eso es mucha dedicación.',                          check:function(){return D.hist.filter(function(h){return h.type==='toma';}).length>=50;} },
   { id:'l_100_tomas',     cat:'lactancia', ic:'💫', titulo:'100 tomas',                 desc:'¡Cien tomas! Sari y Manu, son unos cracks.',                         check:function(){return D.hist.filter(function(h){return h.type==='toma';}).length>=100;} },
@@ -9367,19 +9265,19 @@ var LOGROS_DEF = [
   { id:'p_10_panales',    cat:'pañales',  ic:'🧷', titulo:'10 pañales',                desc:'Diez pañales. Ya lo hacen dormidos.',                                check:function(){return D.hist.filter(function(h){return h.type==='panal';}).length>=10;} },
   { id:'p_100_panales',   cat:'pañales',  ic:'🌊', titulo:'100 pañales',               desc:'Cien pañales. Merecen una medalla (y un buen jabón).',               check:function(){return D.hist.filter(function(h){return h.type==='panal';}).length>=100;} },
   // ⚖️ Peso
-  { id:'w_primer_peso',   cat:'peso',     ic:'⚖️', titulo:'Primer peso registrado',    desc:'Empezaron a seguir la curva de crecimiento de Cefe.',                check:function(){return D.pesos.length>=1;} },
-  { id:'w_recupero',      cat:'peso',     ic:'📈', titulo:'Recuperó peso de nacimiento',desc:'Cefe recuperó su peso de nacimiento. ¡Misión cumplida!',             check:function(){var pn=D.bebe.pn||3365;return D.pesos.some(function(p){return p.g>=pn;});} },
-  { id:'w_supero',        cat:'peso',     ic:'💪', titulo:'Superó peso de nacimiento', desc:'Cefe ya pesa más que al nacer. ¡Está creciendo!',                    check:function(){var pn=D.bebe.pn||3365;return D.pesos.some(function(p){return p.g>pn+100;});} },
+  { id:'w_primer_peso',   cat:'peso',     ic:'⚖️', titulo:'Primer peso registrado',    desc:'Empezaron a seguir la curva de crecimiento de {APODO}.',                check:function(){return D.pesos.length>=1;} },
+  { id:'w_recupero',      cat:'peso',     ic:'📈', titulo:'Recuperó peso de nacimiento',desc:'{APODO} recuperó su peso de nacimiento. ¡Misión cumplida!',             check:function(){var pn=D.bebe.pn||3365;return D.pesos.some(function(p){return p.g>=pn;});} },
+  { id:'w_supero',        cat:'peso',     ic:'💪', titulo:'Superó peso de nacimiento', desc:'{APODO} ya pesa más que al nacer. ¡Está creciendo!',                    check:function(){var pn=D.bebe.pn||3365;return D.pesos.some(function(p){return p.g>pn+100;});} },
   { id:'w_5_pesos',       cat:'peso',     ic:'📊', titulo:'5 pesajes registrados',      desc:'Curva de crecimiento tomando forma. Dato es poder.',                 check:function(){return D.pesos.length>=5;} },
   // 🏥 Salud
-  { id:'v_primera_visita',cat:'salud',    ic:'🏥', titulo:'Primera visita médica',      desc:'La primera consulta registrada. Cefe tiene su equipo de salud.',     check:function(){return D.visits.length>=1;} },
+  { id:'v_primera_visita',cat:'salud',    ic:'🏥', titulo:'Primera visita médica',      desc:'La primera consulta registrada. {APODO} tiene su equipo de salud.',     check:function(){return D.visits.length>=1;} },
   { id:'v_seguimiento',   cat:'salud',    ic:'✅', titulo:'Primera consulta completada',desc:'Registraron el seguimiento de una consulta. Así se hace.',           check:function(){return D.visits.some(function(v){return v.estado==='realizada'&&v.conclusiones;});} },
-  { id:'v_3_visitas',     cat:'salud',    ic:'🩺', titulo:'3 visitas médicas',          desc:'Tres consultas registradas. Cefe tiene un seguimiento excelente.',   check:function(){return D.visits.length>=3;} },
+  { id:'v_3_visitas',     cat:'salud',    ic:'🩺', titulo:'3 visitas médicas',          desc:'Tres consultas registradas. {APODO} tiene un seguimiento excelente.',   check:function(){return D.visits.length>=3;} },
   // 📖 Memoria
-  { id:'m_primera_nota',  cat:'memoria',  ic:'📝', titulo:'Primera nota',              desc:'Empezaron a escribir la historia de Cefe.',                          check:function(){return D.notas.length>=1;} },
-  { id:'m_primera_carta', cat:'memoria',  ic:'💌', titulo:'Primera carta para Cefe',   desc:'Una carta que Cefe va a leer algún día. Qué regalo.',                check:function(){return D.cartas.length>=1;} },
-  { id:'m_primer_hito',   cat:'memoria',  ic:'⭐', titulo:'Primer hito marcado',       desc:'Empezaron a registrar el desarrollo de Cefe.',                       check:function(){return D.hitos.length>=1;} },
-  { id:'m_5_notas',       cat:'memoria',  ic:'📖', titulo:'5 notas escritas',          desc:'Cinco observaciones del día. La memoria de Cefe crece.',             check:function(){return D.notas.length>=5;} },
+  { id:'m_primera_nota',  cat:'memoria',  ic:'📝', titulo:'Primera nota',              desc:'Empezaron a escribir la historia de {APODO}.',                          check:function(){return D.notas.length>=1;} },
+  { id:'m_primera_carta', cat:'memoria',  ic:'💌', titulo:'Primera carta para {APODO}',   desc:'Una carta que {APODO} va a leer algún día. Qué regalo.',                check:function(){return D.cartas.length>=1;} },
+  { id:'m_primer_hito',   cat:'memoria',  ic:'⭐', titulo:'Primer hito marcado',       desc:'Empezaron a registrar el desarrollo de {APODO}.',                       check:function(){return D.hitos.length>=1;} },
+  { id:'m_5_notas',       cat:'memoria',  ic:'📖', titulo:'5 notas escritas',          desc:'Cinco observaciones del día. La memoria de {APODO} crece.',             check:function(){return D.notas.length>=5;} },
   // 🔥 Constancia
   { id:'r_racha_3',       cat:'constancia',ic:'🔥',titulo:'3 días de racha',           desc:'Tres días consecutivos registrando. El hábito se forma.',            check:function(){return calcRacha()>=3;} },
   { id:'r_racha_7',       cat:'constancia',ic:'🔥',titulo:'7 días de racha',           desc:'Una semana entera. Sari y Manu, ¡son una máquina!',                  check:function(){return calcRacha()>=7;} },
@@ -9466,7 +9364,7 @@ function checkNuevosLogros() {
   var logro=nuevos[0];
   D.logrosVistos[logro.id]=true;
   saveData();
-  showCpop('celebracion',logro.ic,'🏆 Nuevo logro desbloqueado',logro.titulo,logro.desc,'¡Genial!',function(){
+  showCpop('celebracion',logro.ic,'🏆 Nuevo logro desbloqueado',subsApodo(logro.titulo),subsApodo(logro.desc),'¡Genial!',function(){
     closeCpop();
     if(nuevos.length>1){setTimeout(checkNuevosLogros,400);}
   });
@@ -9485,7 +9383,7 @@ function renderLogros(bd) {
   } else {
     hdr.appendChild(mkTxt('div',null,'🏆','font-size:36px;margin-bottom:6px'));
     hdr.appendChild(mkTxt('div',null,totalDes+' logro'+(totalDes!==1?'s':'')+' conseguido'+(totalDes!==1?'s':''),'font-size:18px;font-weight:bold;color:#f0d9a0'));
-    hdr.appendChild(mkTxt('div',null,'El camino de Sari y Manu como padres de Cefe','font-size:11px;color:#a89070;margin-top:3px'));
+    hdr.appendChild(mkTxt('div',null,'El camino como padres','font-size:11px;color:#a89070;margin-top:3px'));
   }
   bd.appendChild(hdr);
 
@@ -9524,8 +9422,8 @@ function renderLogros(bd) {
       card.appendChild(icWrap);
       // Texto
       var txt=mkDiv('flex:1');
-      txt.appendChild(mkTxt('div',null,logro.titulo,'font-size:13px;font-weight:bold;color:#f0d9a0'));
-      txt.appendChild(mkTxt('div',null,logro.desc,'font-size:11px;color:#a89070;margin-top:3px;line-height:1.4'));
+      txt.appendChild(mkTxt('div',null,subsApodo(logro.titulo),'font-size:13px;font-weight:bold;color:#f0d9a0'));
+      txt.appendChild(mkTxt('div',null,subsApodo(logro.desc),'font-size:11px;color:#a89070;margin-top:3px;line-height:1.4'));
       card.appendChild(txt);
       card.appendChild(mkTxt('span',null,'✓','font-size:18px;color:#64c88c;font-weight:bold;flex-shrink:0'));
       sec.appendChild(card);
@@ -9537,11 +9435,11 @@ function renderLogros(bd) {
   var pie=mkDiv('text-align:center;padding:16px 0 8px');
   var pieMsgs=[
     'Cada toma, cada pañal, cada nota — todo queda. Todo importa.',
-    'Cefe no podría estar mejor acompañado.',
+    '{APODO} no podría estar mejor acompañado.',
     'Lo más importante no está en ninguna pantalla — está en el vínculo.',
     'Ya ganaron el logro más importante: estar presentes.',
   ];
-  var pieMsg=pieMsgs[Math.floor(new Date().getDate()%pieMsgs.length)];
+  var pieMsg=subsApodo(pieMsgs[Math.floor(new Date().getDate()%pieMsgs.length)]);
   pie.appendChild(mkTxt('div',null,'🌬️ Céfiro dice:','font-size:10px;color:#a89070;margin-bottom:4px'));
   pie.appendChild(mkTxt('div',null,'"'+pieMsg+'"','font-size:12px;color:#b48cdc;font-style:italic;line-height:1.5'));
   bd.appendChild(pie);
@@ -9675,6 +9573,15 @@ onValue(ref(db,'cefe'),function(snap){
   // onboarding: merge (Firebase gana para datos respondidos compartidos)
   if(data.onboarding&&typeof data.onboarding==='object'){
     D.onboarding=Object.assign({},data.onboarding,D.onboarding);
+  }
+
+  // A.1.2 Parte 1: migrar astroTab legacy → recreativoTab
+  // Users con estado viejo en Firebase (horoscopo/carta/numeros/quiz_cefe) caen a
+  // tab por defecto nuevo. Runs sólo si no hay recreativoTab ya cargado.
+  if (data.astroTab && !data.recreativoTab) {
+    var _valid = ['actividades','quiz','trivia'];
+    var _mapped = data.astroTab === 'quiz_cefe' ? 'quiz' : data.astroTab;
+    D.recreativoTab = _valid.indexOf(_mapped) >= 0 ? _mapped : 'actividades';
   }
 
   // Guardar el estado actualizado en localStorage inmediatamente
