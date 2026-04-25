@@ -9665,4 +9665,164 @@ serviceWorker' in navigator) {
   });
 }
 </script>
+
+<!-- ════════════════════════════════════════════════════════════════════════ -->
+<!-- DEBUG A.1.3 — REMOVER POST-FIX                                          -->
+<!-- Activación: 5 taps sobre el header "ALBA · v3.0" en menos de 3 segundos.-->
+<!-- Captura errores JS no manejados + variables clave de runtime.           -->
+<!-- ════════════════════════════════════════════════════════════════════════ -->
+<style>
+  #albaDbgOverlay{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:99999;display:none;flex-direction:column;padding:20px;font-family:Menlo,Monaco,monospace;color:#a0e8d8;overflow-y:auto;-webkit-overflow-scrolling:touch}
+  #albaDbgOverlay.show{display:flex}
+  #albaDbgOverlay h3{color:#f0d9a0;font-size:14px;margin:8px 0 6px;font-family:Georgia,serif}
+  #albaDbgOverlay pre{font-size:11px;line-height:1.5;background:rgba(255,255,255,.05);padding:10px;border-radius:8px;white-space:pre-wrap;word-break:break-word;margin:4px 0;border:1px solid rgba(212,168,67,.15)}
+  #albaDbgOverlay .err{color:#e07070;border-color:rgba(224,112,112,.4)}
+  #albaDbgOverlay button{padding:12px;border-radius:10px;border:1px solid rgba(212,168,67,.4);background:rgba(212,168,67,.15);color:#f0d9a0;font-size:13px;font-family:Georgia,serif;cursor:pointer;margin:4px 0;-webkit-tap-highlight-color:transparent}
+  #albaDbgOverlay button.close{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.2);color:#a89070}
+</style>
+<div id="albaDbgOverlay">
+  <h3>🛠️ DEBUG ALBA</h3>
+  <div id="albaDbgContent"></div>
+  <button onclick="window.__albaDbgCopy()">📋 Copiar todo</button>
+  <button class="close" onclick="document.getElementById('albaDbgOverlay').classList.remove('show')">Cerrar</button>
+</div>
+<script>
+(function(){
+  // Buffer de errores JS capturados desde el bootstrap
+  window.__albaDbgErrors = window.__albaDbgErrors || [];
+  window.addEventListener('error', function(e){
+    window.__albaDbgErrors.push({
+      ts: new Date().toLocaleTimeString('es-AR'),
+      msg: e.message || '(sin mensaje)',
+      file: (e.filename||'').split('/').pop(),
+      line: e.lineno + ':' + e.colno,
+      stack: (e.error && e.error.stack) ? String(e.error.stack).slice(0,800) : '(sin stack)'
+    });
+  });
+  window.addEventListener('unhandledrejection', function(e){
+    window.__albaDbgErrors.push({
+      ts: new Date().toLocaleTimeString('es-AR'),
+      msg: 'PROMISE REJECT: ' + (e.reason && e.reason.message ? e.reason.message : String(e.reason)),
+      file: '(promise)',
+      line: '-',
+      stack: (e.reason && e.reason.stack) ? String(e.reason.stack).slice(0,800) : '(sin stack)'
+    });
+  });
+
+  // Capturar console.error también
+  var origErr = console.error;
+  console.error = function(){
+    var args = Array.prototype.slice.call(arguments).map(function(a){
+      try { return typeof a==='object' ? JSON.stringify(a).slice(0,300) : String(a).slice(0,300); }
+      catch(e){ return '(unstringifiable)'; }
+    }).join(' | ');
+    window.__albaDbgErrors.push({
+      ts: new Date().toLocaleTimeString('es-AR'),
+      msg: 'console.error: ' + args.slice(0,500),
+      file: '-', line: '-', stack: '-'
+    });
+    return origErr.apply(console, arguments);
+  };
+
+  // Activación: 5 taps en el header en 3s
+  var taps = 0, firstTap = 0;
+  document.addEventListener('click', function(e){
+    var t = e.target;
+    var inHeader = false;
+    while(t && t !== document.body){
+      if(t.tagName === 'HEADER' || (t.className && typeof t.className === 'string' && t.className.indexOf('logo') >= 0)){
+        inHeader = true; break;
+      }
+      t = t.parentElement;
+    }
+    // Fallback: cualquier tap en el primer 60px de altura cuenta como header
+    if(!inHeader && e.clientY < 90) inHeader = true;
+    if(!inHeader) return;
+    var now = Date.now();
+    if(now - firstTap > 3000){ taps = 1; firstTap = now; return; }
+    taps++;
+    if(taps >= 5){ taps = 0; window.__albaDbgShow(); }
+  }, true);
+
+  // Render del panel
+  window.__albaDbgShow = function(){
+    var c = document.getElementById('albaDbgContent');
+    if(!c) return;
+    var lines = [];
+    var s = function(label, val){
+      var v;
+      try { v = (typeof val === 'function') ? val() : val; }
+      catch(e){ v = '⚠️ THREW: ' + e.message; }
+      try { v = (typeof v === 'object') ? JSON.stringify(v).slice(0,400) : String(v); }
+      catch(e){ v = '(unstringifiable)'; }
+      lines.push(label + ': ' + v);
+    };
+
+    lines.push('===== TIMESTAMP =====');
+    s('now', new Date().toString());
+    s('hora local', new Date().getHours()+':'+new Date().getMinutes());
+
+    lines.push('\n===== STATE D =====');
+    s('typeof D', typeof D);
+    if(typeof D !== 'undefined' && D){
+      s('D.step', D.step);
+      s('D.hist.length', D.hist && D.hist.length);
+      s('D.hist[0]', D.hist && D.hist[0] ? {type:D.hist[0].type, s:String(D.hist[0].s||D.hist[0].t).slice(0,30)} : null);
+      s('D.pesos.length', D.pesos && D.pesos.length);
+      s('D.pesos[0]', D.pesos && D.pesos[0] ? {t:String(D.pesos[0].t).slice(0,30), g:D.pesos[0].g, n:D.pesos[0].n} : null);
+      s('D.bebe.apodo', D.bebe && D.bebe.apodo);
+      s('D.bebe.nombre', D.bebe && D.bebe.nombre);
+      s('D.bebe.fnac', D.bebe && D.bebe.fnac);
+      s('D.config.modo_madrugada', D.config && D.config.modo_madrugada);
+      s('D.nightMode', D.nightMode);
+      s('D.recreativoTab', D.recreativoTab);
+    }
+
+    lines.push('\n===== FUNCS =====');
+    s('typeof apodo', typeof apodo);
+    s('apodo()', function(){ return apodo(); });
+    s('typeof isMadrugada', typeof isMadrugada);
+    s('isMadrugada()', function(){ return isMadrugada(); });
+    s('typeof render', typeof render);
+
+    lines.push('\n===== FIREBASE =====');
+    s('window.__albaFbReady', window.__albaFbReady);
+
+    lines.push('\n===== ERRORES JS CAPTURADOS ('+window.__albaDbgErrors.length+') =====');
+
+    var html = '<pre>' + lines.join('\n').replace(/</g,'&lt;') + '</pre>';
+    if(window.__albaDbgErrors.length === 0){
+      html += '<pre>(sin errores capturados — abrí la app y volvé a tocar header 5x)</pre>';
+    } else {
+      window.__albaDbgErrors.forEach(function(err, i){
+        html += '<pre class="err">[' + (i+1) + '] ' + err.ts + '\n' +
+                'msg: ' + String(err.msg).replace(/</g,'&lt;') + '\n' +
+                'file: ' + err.file + '   line: ' + err.line + '\n' +
+                'stack: ' + String(err.stack).replace(/</g,'&lt;') + '</pre>';
+      });
+    }
+    c.innerHTML = html;
+    document.getElementById('albaDbgOverlay').classList.add('show');
+  };
+
+  window.__albaDbgCopy = function(){
+    var c = document.getElementById('albaDbgContent');
+    if(!c) return;
+    var txt = c.innerText || c.textContent;
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(txt).then(function(){
+        alert('Copiado. Pegalo en el chat con Claude.');
+      }, function(){ fallbackCopy(txt); });
+    } else { fallbackCopy(txt); }
+    function fallbackCopy(t){
+      var ta = document.createElement('textarea');
+      ta.value = t; document.body.appendChild(ta);
+      ta.select(); try{ document.execCommand('copy'); alert('Copiado.'); } catch(e){ alert('No se pudo copiar. Hacé screenshot.'); }
+      document.body.removeChild(ta);
+    }
+  };
+})();
+</script>
+<!-- FIN DEBUG A.1.3 — REMOVER POST-FIX                                      -->
+
 </body>
