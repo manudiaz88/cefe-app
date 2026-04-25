@@ -1831,7 +1831,7 @@ function genMsg(entry){
 // ─── WEEKLY SUMMARY GENERATOR ─────────────────────────────────
 function genWeeklySummary(){
   var now=new Date(), desde=new Date(now.getTime()-7*86400000);
-  var apodo=apodo();
+  var apodoVal=apodo();
   var semana=Math.floor(ageD()/7);
   var semsVida=ageW();
   var th=D.hist.filter(function(h){return h.type==='toma'&&new Date(h.s)>=desde;});
@@ -1872,7 +1872,7 @@ function genWeeklySummary(){
   var pred=typeof calcPesoPrediccion==='function'?calcPesoPrediccion():null;
   // ── Construir mensaje narrativo ──
   var lines=[];
-  lines.push('\uD83D\uDCC6 *Semana '+semana+' de '+apodo+'*');
+  lines.push('\uD83D\uDCC6 *Semana '+semana+' de '+apodoVal+'*');
   lines.push(desde.toLocaleDateString('es-AR',{day:'2-digit',month:'long'})+' — '+now.toLocaleDateString('es-AR',{day:'2-digit',month:'long'}));
   lines.push('');
   // Párrafo de tomas
@@ -1893,9 +1893,9 @@ function genWeeklySummary(){
   if(lp){
     var diffNac3=lp.g-pn;
     lines.push('\u2696\uFE0F *Peso*');
-    if(diffNac3>=0){lines.push(apodo+' pesa '+gkg(lp.g)+' kg — ya super\u00f3 el peso de nacimiento. \u2705');}
-    else if(pred&&pred.diasParaNac<=14){lines.push(apodo+' pesa '+gkg(lp.g)+' kg — recupera el peso de nac. en ~'+pred.diasParaNac+' días al ritmo actual.');}
-    else{lines.push(apodo+' pesa '+gkg(lp.g)+' kg ('+pctLbl(lp.g,ageW())+'). Faltan '+Math.abs(diffNac3)+'g para el peso de nacimiento.');}
+    if(diffNac3>=0){lines.push(apodoVal+' pesa '+gkg(lp.g)+' kg — ya super\u00f3 el peso de nacimiento. \u2705');}
+    else if(pred&&pred.diasParaNac<=14){lines.push(apodoVal+' pesa '+gkg(lp.g)+' kg — recupera el peso de nac. en ~'+pred.diasParaNac+' días al ritmo actual.');}
+    else{lines.push(apodoVal+' pesa '+gkg(lp.g)+' kg ('+pctLbl(lp.g,ageW())+'). Faltan '+Math.abs(diffNac3)+'g para el peso de nacimiento.');}
     if(pred&&pred.slope>0)lines.push('Ganando ~'+pred.slope+'g/día.');
     lines.push('');
   }
@@ -1928,8 +1928,8 @@ function genWeeklySummary(){
   var d3=ageD();
   var etapa=d3<14?'Los primeros días son los más intensos. Están haciéndolo muy bien.':
     d3<30?'Semana '+semana+': el caos se va ordenando de a poco. Todo lo que registran hoy es la memoria que van a agradecer.':
-    d3<60?'Mes 2: '+apodo+' los reconoce. La sonrisa social puede aparecer en cualquier momento.':
-    'Cada semana '+apodo+' cambia. Sigan registrando.';
+    d3<60?'Mes 2: '+apodoVal+' los reconoce. La sonrisa social puede aparecer en cualquier momento.':
+    'Cada semana '+apodoVal+' cambia. Sigan registrando.';
   lines.push('\uD83D\uDCCB _'+etapa+'_');
   lines.push('');
   lines.push('_Céfiro para Alba · v3.0_');
@@ -2919,9 +2919,9 @@ function getSprintResumen(){
   for(var i=1;i<tomas.length;i++){var g=Math.round((new Date(tomas[i].s)-new Date(tomas[i-1].e||tomas[i-1].s))/60000);if(g>0&&g<360){gaps.push(g);maxGap=Math.max(maxGap,g);}}
   var avgGap=gaps.length?Math.round(gaps.reduce(function(a,b){return a+b;},0)/gaps.length):0;
   var mlTot=tomas.reduce(function(a,h){return a+(h.mlEst||h.mlProvistos||0);},0);
-  var apodo=apodo();
+  var apodoVal=apodo();
   var narrativa='Sprint de '+horasReales+'hs completado. ';
-  if(tomas.length>0){narrativa+=apodo+' tuvo '+tomas.length+' toma'+(tomas.length!==1?'s':'')+' en ese período';if(avgGap>0)narrativa+=' (intervalo promedio '+(avgGap>=60?Math.floor(avgGap/60)+'h '+(avgGap%60)+'min':avgGap+' min')+')';narrativa+='. ';}
+  if(tomas.length>0){narrativa+=apodoVal+' tuvo '+tomas.length+' toma'+(tomas.length!==1?'s':'')+' en ese período';if(avgGap>0)narrativa+=' (intervalo promedio '+(avgGap>=60?Math.floor(avgGap/60)+'h '+(avgGap%60)+'min':avgGap+' min')+')';narrativa+='. ';}
   if(panales.length>0)narrativa+=panales.length+' pañal'+(panales.length!==1?'es':'')+' registrado'+(panales.length!==1?'s':'')+'. ';
   if(mlTot>0)narrativa+='Total estimado: '+mlTot+'ml. ';
   return {sp:sp,inicio:inicio,fin:fin,horasReales:horasReales,regs:regs,tomas:tomas,panales:panales,mlTot:mlTot,maxGap:maxGap,avgGap:avgGap,narrativa:narrativa};
@@ -3023,7 +3023,7 @@ function renderSprintResumen(bd){
 function generarCefiroPostToma(entrada) {
   // entrada: el objeto de historial recien guardado (type===toma)
   if (!entrada || entrada.type !== 'toma') return null;
-  var apodo = apodo();
+  var apodoVal = apodo();
   var hora = new Date(entrada.s).getHours();
   var dur = entrada.tot || 0;
   var tomasHoy = D.hist.filter(function(h) {
@@ -3071,7 +3071,7 @@ function generarCefiroPostToma(entrada) {
   // — Prediccion peso (si tiene datos)
   var predP = calcPesoPrediccion ? calcPesoPrediccion() : null;
   if (predP && !predP.yaRecupero && predP.diasParaNac <= 10 && predP.slope > 0) {
-    msgs.push('Al ritmo de peso actual, ' + apodo + ' recuperaría el peso de nacimiento en ≈' + predP.diasParaNac + ' días más.');
+    msgs.push('Al ritmo de peso actual, ' + apodoVal + ' recuperaría el peso de nacimiento en ≈' + predP.diasParaNac + ' días más.');
   }
   // Devolver solo el primer mensaje más relevante (no abrumar)
   return msgs.length > 0 ? msgs[0] : null;
@@ -3081,7 +3081,7 @@ function generarCefiroPostToma(entrada) {
 function registrarRapido(tipo) {
   // Captura instantánea con 1 tap. Sin sheets, sin confirmar.
   var ahora = new Date();
-  var apodo = apodo();
+  var apodoVal = apodo();
   if (tipo === 'toma') {
     // Registra toma instantánea de 10 min en el seno menos usado
     var ultSeno2 = getUltimoSeno ? getUltimoSeno() : 'Izq';
@@ -3096,7 +3096,7 @@ function registrarRapido(tipo) {
     };
     D.hist.unshift(entrada);
     saveData();
-    D._quickFeedback = {tipo:'toma', msg: apodo + ' — toma registrada. ¿Fue diferente? Editala desde el historial.', ts: Date.now()};
+    D._quickFeedback = {tipo:'toma', msg: apodoVal + ' — toma registrada. ¿Fue diferente? Editala desde el historial.', ts: Date.now()};
     setStep('home');
   } else if (tipo === 'pis' || tipo === 'caca' || tipo === 'mixto') {
     var pNom = tipo === 'pis' ? 'Pis' : tipo === 'caca' ? 'Caca' : 'Mixto';
@@ -3117,7 +3117,7 @@ function registrarRapido(tipo) {
 // ── PANTALLA RESUMEN SEMANAL ───────────────────────────────────────────────────────
 function renderResumenSemanal(bd) {
   var now=new Date(),desde=new Date(now.getTime()-7*86400000);
-  var apodo=apodo();
+  var apodoVal=apodo();
   var semVida=Math.floor(ageD()/7);
   var th=D.hist.filter(function(h){return h.type==='toma'&&new Date(h.s)>=desde;});
   var ph=D.hist.filter(function(h){return h.type==='panal'&&new Date(h.t)>=desde;});
@@ -3148,7 +3148,7 @@ function renderResumenSemanal(bd) {
   });
   // Header
   var semLabel=desde.toLocaleDateString('es-AR',{day:'2-digit',month:'short'})+' — '+now.toLocaleDateString('es-AR',{day:'2-digit',month:'short'});
-  bd.appendChild(mkTxt('div',null,'Semana '+semVida+' de '+apodo,'font-size:12px;color:#d4a843;text-align:center;margin-bottom:2px;font-weight:bold'));
+  bd.appendChild(mkTxt('div',null,'Semana '+semVida+' de '+apodoVal,'font-size:12px;color:#d4a843;text-align:center;margin-bottom:2px;font-weight:bold'));
   bd.appendChild(mkTxt('div',null,semLabel,'font-size:11px;color:#a89070;text-align:center;margin-bottom:18px'));
   // Helper: tarjeta de sección
   function mkCard(ic,titulo,items,color,extra){
@@ -3224,10 +3224,10 @@ function renderResumenSemanal(bd) {
   // Card Céfiro narrativo
   var cefNarr=mkDiv('background:rgba(100,200,180,.07);border:1px solid rgba(100,200,180,.18);border-radius:14px;padding:13px 14px;margin-bottom:14px');
   cefNarr.appendChild(mkTxt('div',null,'🌀 Céfiro — semana '+semVida,'font-size:9px;color:#64c8b4;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:7px'));
-  var cefMsg2=ageD()<14?'Los primeros días son los más intensos. Lo más importante ahora es que '+apodo+' coma, duerma y tenga pañales húmedos. Todo lo demás espera.':
+  var cefMsg2=ageD()<14?'Los primeros días son los más intensos. Lo más importante ahora es que '+apodoVal+' coma, duerma y tenga pañales húmedos. Todo lo demás espera.':
     ageD()<30?'Semana '+semVida+': el caos empieza a tener forma. Las tomas se van espaciando poco a poco. Duermen más. Ustedes también.':
-    ageD()<60?'Mes 2: '+apodo+' los reconoce. Puede aparecer la primera sonrisa social. Sigan hablando, cantando y miándolo de cerca.':
-    'Cada semana '+apodo+' cambia. Lo que registran hoy es el libro que van a leer en 20 años.';
+    ageD()<60?'Mes 2: '+apodoVal+' los reconoce. Puede aparecer la primera sonrisa social. Sigan hablando, cantando y miándolo de cerca.':
+    'Cada semana '+apodoVal+' cambia. Lo que registran hoy es el libro que van a leer en 20 años.';
   cefNarr.appendChild(mkTxt('div',null,cefMsg2,'font-size:12px;color:#a0e8d8;line-height:1.7'));
   bd.appendChild(cefNarr);
   // Botones compartir
@@ -3523,7 +3523,7 @@ function render(){
 
       // Construir líneas del briefing
       var lineas=[];
-      var apodo=apodo();
+      var apodoVal=apodo();
 
       // Línea 1: Resumen de la noche / últimas horas
       if(tomasNoche.length>0){
@@ -3538,9 +3538,9 @@ function render(){
         var pn=D.bebe.pn||3365;
         var diffNac=lp.g-pn;
         if(diffNac>=0){
-          lineas.push({ic:'⚖️',txt:apodo+' pesa '+gkg(lp.g)+' kg · recuperó el peso de nacimiento ✅'});
+          lineas.push({ic:'⚖️',txt:apodoVal+' pesa '+gkg(lp.g)+' kg · recuperó el peso de nacimiento ✅'});
         } else {
-          lineas.push({ic:'⚖️',txt:apodo+' pesa '+gkg(lp.g)+' kg · faltan '+Math.abs(diffNac)+'g para el peso de nacimiento.'});
+          lineas.push({ic:'⚖️',txt:apodoVal+' pesa '+gkg(lp.g)+' kg · faltan '+Math.abs(diffNac)+'g para el peso de nacimiento.'});
         }
       }
 
@@ -3597,7 +3597,7 @@ function render(){
       var bHL=mkDiv('display:flex;align-items:center;gap:8px');
       bHL.appendChild(mkTxt('span',null,'🌬️','font-size:16px'));
       var bHTxt=mkDiv('');
-      bHTxt.appendChild(mkTxt('div',null,'Buenos días · Día '+d+' de '+apodo,'font-size:11px;font-weight:bold;color:#b48cdc;letter-spacing:.5px'));
+      bHTxt.appendChild(mkTxt('div',null,'Buenos días · Día '+d+' de '+apodoVal,'font-size:11px;font-weight:bold;color:#b48cdc;letter-spacing:.5px'));
       bHL.appendChild(bHTxt);
       bHdr.appendChild(bHL);
       bHdr.appendChild(mkTxt('span',null,collapsed?'▼':'▲','font-size:11px;color:#a89070'));
@@ -4738,8 +4738,8 @@ function render(){
         shareBtn.appendChild(stxt);
         shareBtn.appendChild(mkTxt('span',null,'→','font-size:16px;color:#25d366'));
         shareBtn.onclick=function(){
-          var apodo=apodo();
-          var lines=['*📊 Resumen del día — '+apodo+'*','📅 '+hoy.toLocaleDateString('es-AR',{weekday:'long',day:'numeric',month:'long'}),''];
+          var apodoVal=apodo();
+          var lines=['*📊 Resumen del día — '+apodoVal+'*','📅 '+hoy.toLocaleDateString('es-AR',{weekday:'long',day:'numeric',month:'long'}),''];
           lines.push('*\uD83C\uDF7C Tomas: '+tomHoy.length+'*');
           var totMin=tomHoy.reduce(function(a,h){return a+h.tot;},0);
           lines.push('Tiempo total: '+totMin+'min');
@@ -5432,10 +5432,10 @@ function render(){
             var dt=stv.fecha;
             var dtS=dt.getFullYear()+p2(dt.getMonth()+1)+p2(dt.getDate())+'T090000';
             var dtE=dt.getFullYear()+p2(dt.getMonth()+1)+p2(dt.getDate())+'T100000';
-            var apodo=apodo();
-            var titulo=cv.label+' — '+apodo;
+            var apodoVal=apodo();
+            var titulo=cv.label+' — '+apodoVal;
             var desc=[cv.desc];
-            if(D.bebe.dni)desc.push('DNI '+apodo+': '+D.bebe.dni);
+            if(D.bebe.dni)desc.push('DNI '+apodoVal+': '+D.bebe.dni);
             if(D.bebe.os)desc.push('OS: '+D.bebe.os);
             if(med.nom)desc.push('Médico: Dr/a. '+med.nom+' '+med.ape+(med.esp?' — '+med.esp:''));
             if(med.tel)desc.push('Tel: '+med.tel);
@@ -7132,18 +7132,18 @@ function posponerOnboarding(pregId, dias) {
 
 // Muestra el popup de una pregunta de onboarding
 function mostrarOnboardingPreg(preg, onDone) {
-  var apodo = apodo();
-  // Actualizar cuerpo dinámico si usa apodo
-  var cuerpo = preg.cuerpo.replace(/Cefe/g, apodo);
+  var apodoVal = apodo();
+  // Actualizar cuerpo dinámico si usa apodoVal
+  var cuerpo = preg.cuerpo.replace(/Cefe/g, apodoVal);
 
   if (preg.tipo_resp === 'texto') {
     // Input de texto — sheet personalizada
-    _mostrarObSheet(preg, cuerpo, apodo, onDone);
+    _mostrarObSheet(preg, cuerpo, apodoVal, onDone);
   } else if (preg.tipo_resp === 'hito_retroactivo') {
-    _mostrarObHitoRetro(preg, cuerpo, apodo, onDone);
+    _mostrarObHitoRetro(preg, cuerpo, apodoVal, onDone);
   } else {
     // Opciones — usamos cpop con botones extra
-    _mostrarObOpciones(preg, cuerpo, apodo, onDone);
+    _mostrarObOpciones(preg, cuerpo, apodoVal, onDone);
   }
 }
 
@@ -7417,7 +7417,7 @@ function checkNocturnaCuento() {
   var key = 'nocturna_cuento_' + DEVICE_ID + '_' + hoy;
   if (localStorage.getItem(key)) return; // ya se mostró hoy
   localStorage.setItem(key, '1');
-  var apodo = apodo();
+  var apodoVal = apodo();
   // Elegir cuento al azar de los disponibles
   var titulosCuento = [
     'La Luna y el Niño Viento', 'El Río que Cantaba', 'El Abuelo del Bosque',
@@ -7431,7 +7431,7 @@ function checkNocturnaCuento() {
       'celebracion',
       '🌙',
       'Ritual nocturno',
-      'Hora del cuento para ' + apodo,
+      'Hora del cuento para ' + apodoVal,
       'Céfiro sugiere: “' + titulo + '”. Un cuento antes de dormir regula el sistema nervioso y fortalece el vínculo. Son solo 5 minutos que él va a recordar toda la vida.',
       '📖 Ir a cuentos',
       function() { setStep('cuentos'); },
@@ -7577,7 +7577,7 @@ function buildMomentosQueue() {
 
 // ─── LÍNEA DE TIEMPO / HISTORIA ───────────────────────────────
 function renderHistoria(bd) {
-  var apodo = apodo();
+  var apodoVal = apodo();
   var fn = D.bebe.fn ? new Date(D.bebe.fn) : null;
 
   // ── Filtros ──
@@ -7707,7 +7707,7 @@ function renderHistoria(bd) {
       var fcum = new Date(fn); fcum.setMonth(fcum.getMonth()+ms);
       if (fcum <= hoy) {
         items.push({ tipo:'hito', fecha:fcum.toISOString().slice(0,10), ic: ms===12?'🎂':'🎉',
-          titulo: ms===1?'¡Primer mes de '+apodo+'!': ms===12?'¡Primer año de '+apodo+'!':'¡'+ms+' meses de '+apodo+'!',
+          titulo: ms===1?'¡Primer mes de '+apodoVal+'!': ms===12?'¡Primer año de '+apodoVal+'!':'¡'+ms+' meses de '+apodoVal+'!',
           sub:'', color:'#d4a843', celebracion:true, auto:true });
       }
     }
@@ -7730,7 +7730,7 @@ function renderHistoria(bd) {
     var emp = mkDiv('text-align:center;padding:32px 16px');
     emp.appendChild(mkTxt('div',null,'📭','font-size:36px;margin-bottom:10px'));
     emp.appendChild(mkTxt('div',null,'Sin registros todavía','font-size:14px;color:#f0d9a0;margin-bottom:6px'));
-    emp.appendChild(mkTxt('div',null,'Empezá a registrar hitos, notas y cartas para ver la historia de '+apodo+' acá.','font-size:12px;color:#a89070;line-height:1.6'));
+    emp.appendChild(mkTxt('div',null,'Empezá a registrar hitos, notas y cartas para ver la historia de '+apodoVal+' acá.','font-size:12px;color:#a89070;line-height:1.6'));
     bd.appendChild(emp);
     return;
   }
@@ -7862,7 +7862,7 @@ function renderHistoria(bd) {
     nacDot.appendChild(mkTxt('span',null,'🌱','font-size:11px'));
     nacRow.appendChild(nacDot);
     var nacInfo = mkDiv('');
-    nacInfo.appendChild(mkTxt('div',null,'Nació '+apodo,'font-size:12px;font-weight:bold;color:#d4a843'));
+    nacInfo.appendChild(mkTxt('div',null,'Nació '+apodoVal,'font-size:12px;font-weight:bold;color:#d4a843'));
     nacInfo.appendChild(mkTxt('div',null,fn.toLocaleDateString('es-AR',{weekday:'long',day:'2-digit',month:'long',year:'numeric'}),'font-size:11px;color:#a89070'));
     nacRow.appendChild(nacInfo);
     tlWrap.appendChild(nacRow);
@@ -8113,10 +8113,10 @@ function updatePendBadge() {
 
 // ── Pantalla Pendientes ───────────────────────────────────────
 function renderPendientes(bd) {
-  var apodo = apodo();
+  var apodoVal = apodo();
   var pendientes = getMomentosPendientes();
 
-  bd.appendChild(mkTxt('div', null, 'Recordatorios y checks activos para esta etapa de ' + apodo + '.', 'font-size:12px;color:#a89070;margin-bottom:16px;line-height:1.6'));
+  bd.appendChild(mkTxt('div', null, 'Recordatorios y checks activos para esta etapa de ' + apodoVal + '.', 'font-size:12px;color:#a89070;margin-bottom:16px;line-height:1.6'));
 
   if (pendientes.length === 0) {
     var empty = mkDiv('text-align:center;padding:32px 16px');
@@ -8267,7 +8267,7 @@ function showNextMomento() {
   if (_momentoActual >= _momentosQueue.length) { updatePendBadge(); return; }
   var item = _momentosQueue[_momentoActual];
   _momentoActual++;
-  var apodo = apodo();
+  var apodoVal = apodo();
   var hasNext = _momentoActual < _momentosQueue.length;
   var btnLabel = hasNext ? 'Siguiente →' : 'Entendido';
   var onNext = hasNext ? showNextMomento : function(){ updatePendBadge(); };
@@ -8402,7 +8402,7 @@ function showNextMomento() {
   } else if (item.tipo === 'celebracion') {
     localStorage.setItem(item.cpopKey, '1');
     var esUnMes = item.mesCumple > 0;
-    var apod = apodo;
+    var apod = apodoVal;
     showCpop('celebracion', esUnMes ? '🎂' : '🎉',
       esUnMes ? '¡Cumple mes!' : '¡Cumple semanas!',
       esUnMes ? '¡' + apod + ' cumple ' + item.mesCumple + (item.mesCumple===1?' mes':' meses') + '!' : '¡' + apod + ' cumple ' + item.semsVida + ' semanas hoy!',
@@ -8493,7 +8493,7 @@ function checkContextualPopup() {
   fn.setHours(0,0,0,0);
   var diasVida = Math.floor((today - fn) / 86400000);
   var semsVida = Math.floor(diasVida / 7);
-  var apodo    = (apodo());
+  var apodoVal    = (apodo());
 
   // ── PRIORIDAD 0: BCG pendiente (no recibida al nacer) ─────────
   if(D.bebe.vacBCG===false&&!_cpopShown){
@@ -8504,7 +8504,7 @@ function checkContextualPopup() {
       showCpop(
         'urgente','\uD83D\uDC89','Vacuna pendiente',
         'BCG no recibida al nacer',
-        apodo+' a\u00FAn no recibi\u00F3 la BCG. Pod\u00E9s ir al Sanatorio Trinidad (1\u00B0 piso) lunes, mi\u00E9rcoles o viernes de 9 a 11hs. Sin turno previo.',
+        apodoVal+' a\u00FAn no recibi\u00F3 la BCG. Pod\u00E9s ir al Sanatorio Trinidad (1\u00B0 piso) lunes, mi\u00E9rcoles o viernes de 9 a 11hs. Sin turno previo.',
         'Marcar como aplicada',
         function(){
           closeCpop();
@@ -8580,8 +8580,8 @@ function checkContextualPopup() {
     localStorage.setItem(cpopKey, '1');
     var esUnMes = mesCumple > 0;
     var tituloFeliz = esUnMes
-      ? '¡' + apodo + ' cumple ' + mesCumple + (mesCumple===1?' mes':'  meses') + ' hoy! 🎂'
-      : '¡' + apodo + ' cumple ' + semsVida + ' semanas hoy!';
+      ? '¡' + apodoVal + ' cumple ' + mesCumple + (mesCumple===1?' mes':'  meses') + ' hoy! 🎂'
+      : '¡' + apodoVal + ' cumple ' + semsVida + ' semanas hoy!';
     var mensajeFeliz = esUnMes
       ? 'Un mes más de aprendizaje, amor y crecimiento juntos. Que lo disfruten mucho.'
       : 'Cada semana es un mundo nuevo para él. Están haciendo un trabajo increíble.';
@@ -8634,20 +8634,20 @@ function checkContextualPopup() {
     var msgs = [
       // 0-1
       {min:0, max:1,   icon:'🌱', badge:'Semana ' + semMsg, title:'Bienvenidos a casa',
-       body:'Los primeros días son los más intensos. No hay nada que hacer bien o mal — solo estar presentes y responder a ' + apodo + '.'},
-      {min:2, max:3,   icon:'👁️', badge:'Semana ' + semMsg, title:apodo + ' está despertando',
+       body:'Los primeros días son los más intensos. No hay nada que hacer bien o mal — solo estar presentes y responder a ' + apodoVal + '.'},
+      {min:2, max:3,   icon:'👁️', badge:'Semana ' + semMsg, title:apodoVal + ' está despertando',
        body:'Esta semana puede empezar a seguir tu cara con la vista. Hablale de cerca, que te escucha y te registra.'},
       {min:4, max:5,   icon:'📈', badge:'Semana ' + semMsg, title:'El peso va en alza',
-       body:'Si todo va bien, ' + apodo + ' ya recuperó el peso de nacimiento. Los controles con el pediatra son el mejor termómetro de esta etapa.'},
+       body:'Si todo va bien, ' + apodoVal + ' ya recuperó el peso de nacimiento. Los controles con el pediatra son el mejor termómetro de esta etapa.'},
       {min:6, max:7,   icon:'😊', badge:'Semana ' + semMsg, title:'La primera sonrisa se acerca',
        body:'Entre la semana 6 y 8 suele aparecer la primera sonrisa social. Hablale, hacele caras — ya está aprendiendo a comunicarse.'},
       {min:8, max:11,  icon:'🗣️', badge:'Semana ' + semMsg, title:'Empieza a "charlar"',
-       body:apodo + ' puede empezar a vocalizar. Respondele como si fuera una conversación — esa "charla" es aprendizaje neurológico real.'},
+       body:apodoVal + ' puede empezar a vocalizar. Respondele como si fuera una conversación — esa "charla" es aprendizaje neurológico real.'},
       {min:12, max:15, icon:'💪', badge:'Semana ' + semMsg, title:'El cuello se fortalece',
        body:'El tiempo boca abajo (tummy time) es clave en esta etapa. Empezá de a poco — 2 o 3 minutos supervisados a la vez.'},
       {min:16, max:19, icon:'😂', badge:'Semana ' + semMsg, title:'Risas en camino',
        body:'La carcajada social aparece alrededor de la semana 16. Si todavía no llegó, está muy cerca. Es uno de los mejores sonidos del mundo.'},
-      {min:20, max:999, icon:'🚀', badge:'Semana ' + semMsg, title:apodo + ' en semana ' + semMsg,
+      {min:20, max:999, icon:'🚀', badge:'Semana ' + semMsg, title:apodoVal + ' en semana ' + semMsg,
        body:'Cada semana trae algo nuevo. Seguí registrando, seguí presente — ese es el trabajo más importante.'},
     ];
     var msg = msgs[msgs.length-1];
@@ -8660,7 +8660,7 @@ function checkContextualPopup() {
 
 // ─── MODO CONSULTA MÉDICA ──────────────────────────────────────
 function renderConsultaMedica(bd) {
-  var apodo = apodo();
+  var apodoVal = apodo();
   var hoy = new Date();
   var desde2w = new Date(hoy.getTime() - 14*86400000);
   bd.appendChild(mkTxt('div',null,'Resumen para el médico — últimas 2 semanas.','font-size:12px;color:#a89070;margin-bottom:16px'));
@@ -8681,7 +8681,7 @@ function renderConsultaMedica(bd) {
   waTxt.appendChild(mkTxt('div',null,'Mensaje estructurado listo para compartir','font-size:11px;color:#a89070'));
   waBtn.appendChild(waTxt);
   waBtn.onclick=function(){
-    var lines=['*Resumen médico — '+apodo+'*','Últimas 2 semanas',''];
+    var lines=['*Resumen médico — '+apodoVal+'*','Últimas 2 semanas',''];
     lines.push('Edad: '+ageLabel()+' ('+ageD()+' días)');
     if(D.pesos.length>0)lines.push('Último peso: '+gkg(D.pesos[0].g)+'kg');
     var tomasR=D.hist.filter(function(h){return h.type==='toma'&&safeDate(h.s)>=desde2w;});
@@ -8721,11 +8721,11 @@ function renderConsultaMedica(bd) {
 }
 
 function generarHistoriaClinicaPDF() {
-  var apodo=apodo();
+  var apodoVal=apodo();
   var b=D.bebe||{};
   var hoy=new Date();
   var css='body{font-family:Georgia,serif;color:#1a1a1a;max-width:800px;margin:0 auto;padding:30px;font-size:13px}h1{font-size:22px;border-bottom:2px solid #d4943a;padding-bottom:8px}h2{font-size:15px;color:#5a3a1a;margin-top:22px;margin-bottom:8px;border-left:3px solid #d4943a;padding-left:10px}table{width:100%;border-collapse:collapse;margin-bottom:12px;font-size:12px}th{background:#f5e6ce;text-align:left;padding:6px 10px;border-bottom:1px solid #ddd}td{padding:5px 10px;border-bottom:1px solid #f0f0f0}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}.card{background:#fdf6ed;border:1px solid #e8d5b0;border-radius:8px;padding:10px}.lbl{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#8a6a40;margin-bottom:2px}.val{font-size:14px;font-weight:bold}.footer{margin-top:28px;padding-top:10px;border-top:1px solid #ddd;font-size:10px;color:#888;text-align:center}@media print{button{display:none}}';
-  var h=['<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Historia Clínica — '+apodo+'</title><style>'+css+'</style></head><body>'];
+  var h=['<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Historia Clínica — '+apodoVal+'</title><style>'+css+'</style></head><body>'];
   h.push('<h1>Historia Clínica — '+b.nombre+' '+b.apellido+'</h1>');
   h.push('<p style="color:#888;font-size:11px;margin-top:-8px">Generado por Alba · '+hoy.toLocaleDateString('es-AR',{day:'2-digit',month:'long',year:'numeric'})+'</p>');
   h.push('<h2>Datos del paciente</h2><div class="grid2">');
@@ -8756,12 +8756,12 @@ function generarHistoriaClinicaPDF() {
     D.meds.forEach(function(m){h.push('<div class="card"><div class="lbl">'+(m.esp||'Médico')+'</div><div class="val">Dr/a. '+(m.nom||'')+' '+(m.ape||'')+'</div>'+(m.tel?'<div style="font-size:11px;color:#555;margin-top:4px">📱 '+m.tel+'</div>':'')+(m.telcons?'<div style="font-size:11px;color:#555">📞 '+m.telcons+'</div>':'')+'</div>');});
     h.push('</div>');
   }
-  h.push('<div class="footer">Historia clínica generada por <b>Alba</b> · La historia de '+apodo+', en tus manos.<br>Este documento es un registro personal. No reemplaza la historia clínica oficial del profesional de salud.</div>');
+  h.push('<div class="footer">Historia clínica generada por <b>Alba</b> · La historia de '+apodoVal+', en tus manos.<br>Este documento es un registro personal. No reemplaza la historia clínica oficial del profesional de salud.</div>');
   h.push('</body></html>');
   var blob=new Blob([h.join('\n')],{type:'text/html;charset=utf-8'});
   var url=URL.createObjectURL(blob);
   var a=document.createElement('a');
-  a.href=url;a.download='Historia-Clinica-'+apodo+'-'+hoy.toISOString().slice(0,10)+'.html';
+  a.href=url;a.download='Historia-Clinica-'+apodoVal+'-'+hoy.toISOString().slice(0,10)+'.html';
   document.body.appendChild(a);a.click();
   setTimeout(function(){document.body.removeChild(a);URL.revokeObjectURL(url);},1000);
 }
@@ -9665,164 +9665,4 @@ serviceWorker' in navigator) {
   });
 }
 </script>
-
-<!-- ════════════════════════════════════════════════════════════════════════ -->
-<!-- DEBUG A.1.3 — REMOVER POST-FIX                                          -->
-<!-- Activación: 5 taps sobre el header "ALBA · v3.0" en menos de 3 segundos.-->
-<!-- Captura errores JS no manejados + variables clave de runtime.           -->
-<!-- ════════════════════════════════════════════════════════════════════════ -->
-<style>
-  #albaDbgOverlay{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:99999;display:none;flex-direction:column;padding:20px;font-family:Menlo,Monaco,monospace;color:#a0e8d8;overflow-y:auto;-webkit-overflow-scrolling:touch}
-  #albaDbgOverlay.show{display:flex}
-  #albaDbgOverlay h3{color:#f0d9a0;font-size:14px;margin:8px 0 6px;font-family:Georgia,serif}
-  #albaDbgOverlay pre{font-size:11px;line-height:1.5;background:rgba(255,255,255,.05);padding:10px;border-radius:8px;white-space:pre-wrap;word-break:break-word;margin:4px 0;border:1px solid rgba(212,168,67,.15)}
-  #albaDbgOverlay .err{color:#e07070;border-color:rgba(224,112,112,.4)}
-  #albaDbgOverlay button{padding:12px;border-radius:10px;border:1px solid rgba(212,168,67,.4);background:rgba(212,168,67,.15);color:#f0d9a0;font-size:13px;font-family:Georgia,serif;cursor:pointer;margin:4px 0;-webkit-tap-highlight-color:transparent}
-  #albaDbgOverlay button.close{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.2);color:#a89070}
-</style>
-<div id="albaDbgOverlay">
-  <h3>🛠️ DEBUG ALBA</h3>
-  <div id="albaDbgContent"></div>
-  <button onclick="window.__albaDbgCopy()">📋 Copiar todo</button>
-  <button class="close" onclick="document.getElementById('albaDbgOverlay').classList.remove('show')">Cerrar</button>
-</div>
-<script>
-(function(){
-  // Buffer de errores JS capturados desde el bootstrap
-  window.__albaDbgErrors = window.__albaDbgErrors || [];
-  window.addEventListener('error', function(e){
-    window.__albaDbgErrors.push({
-      ts: new Date().toLocaleTimeString('es-AR'),
-      msg: e.message || '(sin mensaje)',
-      file: (e.filename||'').split('/').pop(),
-      line: e.lineno + ':' + e.colno,
-      stack: (e.error && e.error.stack) ? String(e.error.stack).slice(0,800) : '(sin stack)'
-    });
-  });
-  window.addEventListener('unhandledrejection', function(e){
-    window.__albaDbgErrors.push({
-      ts: new Date().toLocaleTimeString('es-AR'),
-      msg: 'PROMISE REJECT: ' + (e.reason && e.reason.message ? e.reason.message : String(e.reason)),
-      file: '(promise)',
-      line: '-',
-      stack: (e.reason && e.reason.stack) ? String(e.reason.stack).slice(0,800) : '(sin stack)'
-    });
-  });
-
-  // Capturar console.error también
-  var origErr = console.error;
-  console.error = function(){
-    var args = Array.prototype.slice.call(arguments).map(function(a){
-      try { return typeof a==='object' ? JSON.stringify(a).slice(0,300) : String(a).slice(0,300); }
-      catch(e){ return '(unstringifiable)'; }
-    }).join(' | ');
-    window.__albaDbgErrors.push({
-      ts: new Date().toLocaleTimeString('es-AR'),
-      msg: 'console.error: ' + args.slice(0,500),
-      file: '-', line: '-', stack: '-'
-    });
-    return origErr.apply(console, arguments);
-  };
-
-  // Activación: 5 taps en el header en 3s
-  var taps = 0, firstTap = 0;
-  document.addEventListener('click', function(e){
-    var t = e.target;
-    var inHeader = false;
-    while(t && t !== document.body){
-      if(t.tagName === 'HEADER' || (t.className && typeof t.className === 'string' && t.className.indexOf('logo') >= 0)){
-        inHeader = true; break;
-      }
-      t = t.parentElement;
-    }
-    // Fallback: cualquier tap en el primer 60px de altura cuenta como header
-    if(!inHeader && e.clientY < 90) inHeader = true;
-    if(!inHeader) return;
-    var now = Date.now();
-    if(now - firstTap > 3000){ taps = 1; firstTap = now; return; }
-    taps++;
-    if(taps >= 5){ taps = 0; window.__albaDbgShow(); }
-  }, true);
-
-  // Render del panel
-  window.__albaDbgShow = function(){
-    var c = document.getElementById('albaDbgContent');
-    if(!c) return;
-    var lines = [];
-    var s = function(label, val){
-      var v;
-      try { v = (typeof val === 'function') ? val() : val; }
-      catch(e){ v = '⚠️ THREW: ' + e.message; }
-      try { v = (typeof v === 'object') ? JSON.stringify(v).slice(0,400) : String(v); }
-      catch(e){ v = '(unstringifiable)'; }
-      lines.push(label + ': ' + v);
-    };
-
-    lines.push('===== TIMESTAMP =====');
-    s('now', new Date().toString());
-    s('hora local', new Date().getHours()+':'+new Date().getMinutes());
-
-    lines.push('\n===== STATE D =====');
-    s('typeof D', typeof D);
-    if(typeof D !== 'undefined' && D){
-      s('D.step', D.step);
-      s('D.hist.length', D.hist && D.hist.length);
-      s('D.hist[0]', D.hist && D.hist[0] ? {type:D.hist[0].type, s:String(D.hist[0].s||D.hist[0].t).slice(0,30)} : null);
-      s('D.pesos.length', D.pesos && D.pesos.length);
-      s('D.pesos[0]', D.pesos && D.pesos[0] ? {t:String(D.pesos[0].t).slice(0,30), g:D.pesos[0].g, n:D.pesos[0].n} : null);
-      s('D.bebe.apodo', D.bebe && D.bebe.apodo);
-      s('D.bebe.nombre', D.bebe && D.bebe.nombre);
-      s('D.bebe.fnac', D.bebe && D.bebe.fnac);
-      s('D.config.modo_madrugada', D.config && D.config.modo_madrugada);
-      s('D.nightMode', D.nightMode);
-      s('D.recreativoTab', D.recreativoTab);
-    }
-
-    lines.push('\n===== FUNCS =====');
-    s('typeof apodo', typeof apodo);
-    s('apodo()', function(){ return apodo(); });
-    s('typeof isMadrugada', typeof isMadrugada);
-    s('isMadrugada()', function(){ return isMadrugada(); });
-    s('typeof render', typeof render);
-
-    lines.push('\n===== FIREBASE =====');
-    s('window.__albaFbReady', window.__albaFbReady);
-
-    lines.push('\n===== ERRORES JS CAPTURADOS ('+window.__albaDbgErrors.length+') =====');
-
-    var html = '<pre>' + lines.join('\n').replace(/</g,'&lt;') + '</pre>';
-    if(window.__albaDbgErrors.length === 0){
-      html += '<pre>(sin errores capturados — abrí la app y volvé a tocar header 5x)</pre>';
-    } else {
-      window.__albaDbgErrors.forEach(function(err, i){
-        html += '<pre class="err">[' + (i+1) + '] ' + err.ts + '\n' +
-                'msg: ' + String(err.msg).replace(/</g,'&lt;') + '\n' +
-                'file: ' + err.file + '   line: ' + err.line + '\n' +
-                'stack: ' + String(err.stack).replace(/</g,'&lt;') + '</pre>';
-      });
-    }
-    c.innerHTML = html;
-    document.getElementById('albaDbgOverlay').classList.add('show');
-  };
-
-  window.__albaDbgCopy = function(){
-    var c = document.getElementById('albaDbgContent');
-    if(!c) return;
-    var txt = c.innerText || c.textContent;
-    if(navigator.clipboard && navigator.clipboard.writeText){
-      navigator.clipboard.writeText(txt).then(function(){
-        alert('Copiado. Pegalo en el chat con Claude.');
-      }, function(){ fallbackCopy(txt); });
-    } else { fallbackCopy(txt); }
-    function fallbackCopy(t){
-      var ta = document.createElement('textarea');
-      ta.value = t; document.body.appendChild(ta);
-      ta.select(); try{ document.execCommand('copy'); alert('Copiado.'); } catch(e){ alert('No se pudo copiar. Hacé screenshot.'); }
-      document.body.removeChild(ta);
-    }
-  };
-})();
-</script>
-<!-- FIN DEBUG A.1.3 — REMOVER POST-FIX                                      -->
-
 </body>
