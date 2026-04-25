@@ -18,6 +18,9 @@ body.night .card{background:rgba(0,0,0,.3)}
 button{font-family:Georgia,serif;-webkit-appearance:none}
 #app{width:100%;max-width:480px;display:flex;flex-direction:column;min-height:100vh}
 #hdr{padding:16px 18px 10px;border-bottom:1px solid rgba(210,175,120,.2);display:flex;align-items:center;justify-content:space-between}
+/* A.2 — Onboarding gate: oculta header y nav inferior */
+body.alba-onboarding #hdr,body.alba-onboarding #bnav{display:none !important}
+body.alba-onboarding #bd{padding-bottom:24px}
 .hl{font-size:9px;letter-spacing:4px;color:#a89070;text-transform:uppercase;margin-bottom:3px}
 .hm{font-size:20px;font-weight:bold;color:#f0d9a0}
 .hr{display:flex;gap:5px;align-items:center}
@@ -457,13 +460,13 @@ var D = {
   hitos: [],      // {id:'sonrisa', fecha:'2026-05-10', nota:''}
   cartas: [],     // {id, fecha, titulo, texto}
   bebe: {
-    nombre:'Ceferino', apellido:'Diaz Palacios', apodo:'Cefe',
-    fn:'2026-03-29', hora:'05:20', sexo:'M',
-    pn:3365, talla:49, cc:32, sangre:'A+',
-    apgar:'9/10', eg:40, parto:'Cesarea', dni:'71.013.834',
-    vacHepB:'29/03/2026', vacBCG:false,
-    dx:'RNT PAEG', pa:2980, fa:'2026-04-01',
-    notas:'Coombs directa negativa. Pesquisa neonatal FEI 30/03. Reflejo rojo presente.'
+    nombre:'', apellido:'', apodo:'',
+    fn:'', hora:'', sexo:'M',
+    pn:0, talla:0, cc:0, sangre:'',
+    apgar:'', eg:0, parto:'', dni:'',
+    vacHepB:'', vacBCG:false,
+    dx:'', pa:0, fa:'',
+    notas:''
   },
   // toma flow
   ts: null, lados: [], cSide: null, cStart: null, ext: {l:0, r:0}, tomaNote: '',
@@ -491,6 +494,7 @@ var D = {
     perfil_home: true,         // Mostrar perfil del hijo en home colapsado
     modo_madrugada: 'auto',    // 'auto'=23-6hs | 'on'=siempre | 'off'=nunca
     tipoAlimentacion: 'pecho', // 'pecho' | 'mixta' | 'formula'
+    onboarded: false,          // A.2 — gate de onboarding obligatorio
   },
   editMedIdx: -1, editPadreIdx: -1, editPadre: null,
   editCartaIdx: -1,
@@ -656,6 +660,13 @@ function loadData() {
     }
     if (seeds.length > 0) D.pesos = seeds;
   }
+
+  // A.2 — Migración silenciosa: usuarios pre-A.2 con datos del bebé poblados
+  // se consideran ya onboardeados. Nunca ven el gate.
+  if (!D.config) D.config = {};
+  if (!D.config.onboarded && D.bebe && D.bebe.fn && D.bebe.apodo && D.bebe.pn) {
+    D.config.onboarded = true;
+  }
 }
 
 function toISO(d){
@@ -800,7 +811,7 @@ function calcMLEstimate(lados, cSide, cStart, efi, mlProv) {
 }
 
 function gasC() {
-  var d=ageD(),lp=D.pesos[0],pg=lp?lp.g:(D.bebe.pn||3365);
+  var d=ageD(),lp=D.pesos[0],pg=lp?lp.g:(D.bebe.pn);
   if(d<=1)return{mn:5,mx:7};if(d<=2)return{mn:10,mx:15};if(d<=3)return{mn:22,mx:27};
   if(d<=5)return{mn:30,mx:45};if(d<=10)return{mn:45,mx:60};if(d<=14)return{mn:60,mx:80};
   if(d<=21)return{mn:80,mx:100};var a=Math.round((pg-3)/100);return{mn:Math.max(80,a-20),mx:a+20};
@@ -900,7 +911,7 @@ function checkAutoHitos() {
       certeza: true,
       check: function(){
         if(!D.pesos||D.pesos.length===0)return null;
-        var pn=D.bebe.pn||3365;
+        var pn=D.bebe.pn;
         var lp=D.pesos[0];
         if(lp.g>=pn)return {fecha:new Date(lp.t).toISOString().slice(0,10),nota:'Peso '+gkg(lp.g)+'kg ≥ nacimiento '+gkg(pn)+'kg'};
         return null;
@@ -1007,7 +1018,7 @@ function calcPesoPrediccion() {
   if(isNaN(slope)||slope<=0)return null; // si no hay tendencia positiva, no predecir
   // Peso actual y objetivo
   var pesoActual=D.pesos[0].g;
-  var pesoNac=D.bebe.pn||3365;
+  var pesoNac=D.bebe.pn;
   var diasDesdeUltimo=(Date.now()-new Date(D.pesos[0].t).getTime())/86400000;
   // Proyectar peso actual (sin registro reciente)
   var pesoHoy=pesoActual+slope*diasDesdeUltimo;
@@ -1214,7 +1225,7 @@ function buildAgendaItems(diasAtras, diasAdelante) {
 
   // 2. Vacunas pendientes (fecha estimada)
   if(typeof VACUNAS_ARG!=='undefined') {
-    var fn = D.bebe.fn?new Date(D.bebe.fn):new Date('2026-03-29');
+    var fn = new Date(D.bebe.fn);
     VACUNAS_ARG.forEach(function(v) {
       if(D.bebe.vacunas&&D.bebe.vacunas[v.id]) return; // ya aplicada
       if(v.dia) return; // al nacer, ya pasó
@@ -1238,7 +1249,7 @@ function buildAgendaItems(diasAtras, diasAdelante) {
 
   // 3. Hitos esperados (semanas futuras)
   if(typeof HITOS_DEF!=='undefined') {
-    var fn2 = D.bebe.fn?new Date(D.bebe.fn):new Date('2026-03-29');
+    var fn2 = new Date(D.bebe.fn);
     HITOS_DEF.forEach(function(h) {
       if(!h.semanas||h.semanas===0) return;
       var yaLogrado = D.hitos&&D.hitos.some(function(hi){return hi.id===h.id&&hi.fecha;});
@@ -1631,7 +1642,7 @@ function getDailyML(){
   var now=new Date(),s=new Date(now.getFullYear(),now.getMonth(),now.getDate());
   var t=D.hist.filter(function(h){var sd=safeDate(h.s);return h.type==='toma'&&sd&&sd>=s;});
   var total=t.reduce(function(a,h){return a+estimateML(h.lados,h.efi,h.mlProvistos||0);},0);
-  var peso=D.pesos[0]?D.pesos[0].g:(D.bebe.pn||3365);
+  var peso=D.pesos[0]?D.pesos[0].g:(D.bebe.pn);
   var objMin=Math.round(peso*0.150),objMax=Math.round(peso*0.200);
   return{total:total,objMin:objMin,objMax:objMax,pct:Math.min(100,Math.round(total/objMin*100)),ntomas:t.length};
 }
@@ -1837,7 +1848,7 @@ function genWeeklySummary(){
   var th=D.hist.filter(function(h){return h.type==='toma'&&new Date(h.s)>=desde;});
   var ph=D.hist.filter(function(h){return h.type==='panal'&&new Date(h.t)>=desde;});
   var lp=D.pesos[0];
-  var pn=D.bebe.pn||3365;
+  var pn=D.bebe.pn;
   // Calcular tramo de sueño más largo de la semana
   var tomasSorted=D.hist.filter(function(h){return h.type==='toma'&&h.s&&h.e&&new Date(h.s)>=desde;})
     .map(function(h){return{s:new Date(h.s).getTime(),e:new Date(h.e).getTime()};})
@@ -2074,7 +2085,7 @@ function saveBebe(){
   D.bebe={nombre:gv('bnom'),apellido:gv('bape'),apodo:gv('bapodo')||'Bebe',
     fn:(document.getElementById('bfn')||{}).value||'',hora:prev.hora||'',
     sexo:(document.getElementById('bsexo')||{}).value||'M',
-    pn:gi('bpn')||3365,talla:gi('btalla'),cc:gi('bcc'),
+    pn:gi('bpn')||0,talla:gi('btalla'),cc:gi('bcc'),
     sangre:gv('bsangre'),dni:gv('bdni'),eg:gi('beg')||40,
     parto:gv('bparto'),apgar:gv('bapgar'),notas:gv('bnotas'),
     os:gv('bos')||prev.os||'',plan:gv('bplan')||prev.plan||'',afil:gv('bafil')||prev.afil||'',
@@ -2368,7 +2379,7 @@ function drawChart(){
   ctx.fillStyle='rgba(100,200,180,0.9)';ctx.fillText('P50',pl+cW+2,yP(tbl[ageWsafe][2])+3);
   ctx.fillStyle='rgba(212,168,67,0.8)';ctx.fillText('P15',pl+cW+2,yP(tbl[ageWsafe][1])+3);
   ctx.fillStyle='rgba(224,112,112,0.7)';ctx.fillText('P3',pl+cW+2,yP(tbl[ageWsafe][0])+3);
-  var bw=D.bebe.pn||3365;
+  var bw=D.bebe.pn;
   ctx.beginPath();ctx.strokeStyle='rgba(212,168,67,0.4)';ctx.lineWidth=1;ctx.setLineDash([3,3]);
   ctx.moveTo(pl,yP(bw));ctx.lineTo(pl+cW,yP(bw));ctx.stroke();ctx.setLineDash([]);
   if(D.pesos.length>0){
@@ -2760,6 +2771,7 @@ function handleAction(action,data){
     case 'delVisita':delVisita(parseInt(data.idx));break;
     case 'goVisitaForm':setStep('visitaForm');break;
     case 'saveBebe':saveBebe();break;
+    case 'submitOnboardingGate':submitOnboardingGate();break;
     case 'editBebe':setStep('editBebe');break;
     case 'savePadre':savePadre();break;
     case 'newPadre':D.editPadre=null;D.editPadreIdx=-1;setStep('editPadre');break;
@@ -3122,7 +3134,7 @@ function renderResumenSemanal(bd) {
   var th=D.hist.filter(function(h){return h.type==='toma'&&new Date(h.s)>=desde;});
   var ph=D.hist.filter(function(h){return h.type==='panal'&&new Date(h.t)>=desde;});
   var lp=D.pesos[0];
-  var pn=D.bebe.pn||3365;
+  var pn=D.bebe.pn;
   var pred=typeof calcPesoPrediccion==='function'?calcPesoPrediccion():null;
   // Calcular tramos de descanso (entre tomas)
   var tomasSorted=D.hist.filter(function(h){return h.type==='toma'&&h.s&&h.e&&new Date(h.s)>=desde;})
@@ -3282,6 +3294,117 @@ function subsApodo(s) {
   return s.split('{APODO}').join(apodo());
 }
 
+// ══════════════════════════════════════════════════════════════════════════
+// A.2 — ONBOARDING GATE
+// Bloquea el ingreso a la app hasta que se completen los 5 campos mínimos
+// del bebé. Mata los fallbacks literales 'Ceferino' / '2026-03-29' / 3365.
+// Se considera completado cuando D.config.onboarded === true.
+// Migración silenciosa en loadData() y onValue() para usuarios pre-A.2.
+// ══════════════════════════════════════════════════════════════════════════
+
+function renderOnboardingGate(bd) {
+  // Header y nav se ocultan vía CSS (clase body.alba-onboarding)
+  document.body.classList.add('alba-onboarding');
+
+  var wrap = document.createElement('div');
+  wrap.style.cssText = 'padding:24px 20px;max-width:480px;margin:0 auto;';
+
+  var h = document.createElement('div');
+  h.style.cssText = 'text-align:center;margin-bottom:24px;';
+  h.innerHTML = '<div style="font-size:48px;line-height:1;margin-bottom:8px">\uD83C\uDF05</div>'
+              + '<div style="font-size:22px;font-weight:600;color:#d4a843;margin-bottom:6px">Bienvenidos a Alba</div>'
+              + '<div style="font-size:13px;color:#a89070;line-height:1.5">Para empezar, contanos sobre tu hijo.<br>Solo lleva un minuto.</div>';
+  wrap.appendChild(h);
+
+  // Apodo
+  wrap.appendChild(E.field('Apodo o nombre que más usás', E.input('fi', 'ob_apodo', 'text', 'Ej: Mateo', '')));
+
+  // Fecha + Hora
+  var hoy = new Date().toISOString().slice(0,10);
+  wrap.appendChild(E.frow([
+    E.field('Fecha de nacimiento', E.input('fi', 'ob_fn', 'date', null, '')),
+    E.field('Hora aproximada', E.input('fi', 'ob_hora', 'time', null, '12:00'))
+  ]));
+
+  // Sexo
+  wrap.appendChild(E.field('Sexo', E.select('fs', 'ob_sexo', [{v:'M',l:'Niño'},{v:'F',l:'Niña'}], 'M')));
+
+  // Peso al nacer
+  wrap.appendChild(E.field('Peso al nacer (gramos)', E.input('fi', 'ob_pn', 'number', 'Ej: 3200', '')));
+
+  // Mensaje de error reservado
+  var errBox = document.createElement('div');
+  errBox.id = 'ob_err';
+  errBox.style.cssText = 'color:#e07070;font-size:12px;text-align:center;margin:12px 0;min-height:14px';
+  wrap.appendChild(errBox);
+
+  // Submit
+  var btn = E.btn('pb go', 'Empezar', 'submitOnboardingGate');
+  btn.style.cssText = 'width:100%;margin-top:8px;font-size:16px;padding:14px';
+  wrap.appendChild(btn);
+
+  // Disclaimer
+  var disc = document.createElement('div');
+  disc.style.cssText = 'font-size:11px;color:#a89070;text-align:center;margin-top:16px;line-height:1.4';
+  disc.textContent = 'Podés completar el resto del perfil después, desde Más \u2192 Perfil.';
+  wrap.appendChild(disc);
+
+  bd.appendChild(wrap);
+}
+
+function submitOnboardingGate() {
+  var apodoVal = (document.getElementById('ob_apodo')||{}).value;
+  var fnVal = (document.getElementById('ob_fn')||{}).value;
+  var horaVal = (document.getElementById('ob_hora')||{}).value || '12:00';
+  var sexoVal = (document.getElementById('ob_sexo')||{}).value || 'M';
+  var pnVal = parseInt((document.getElementById('ob_pn')||{}).value, 10);
+
+  var err = document.getElementById('ob_err');
+  function setErr(msg){ if(err) err.textContent = msg; }
+
+  if (!apodoVal || !apodoVal.trim()) { setErr('Ingresá un apodo o nombre.'); return; }
+  if (!fnVal) { setErr('Ingresá la fecha de nacimiento.'); return; }
+  // Validación mínima de fecha: que sea válida y no futura
+  var fnD = new Date(fnVal);
+  if (isNaN(fnD.getTime())) { setErr('Fecha de nacimiento inválida.'); return; }
+  if (fnD.getTime() > Date.now() + 86400000) { setErr('La fecha no puede ser futura.'); return; }
+  if (!pnVal || pnVal < 500 || pnVal > 7000) { setErr('Peso al nacer fuera de rango (500\u20137000g).'); return; }
+
+  // Persistir mínimos en D.bebe (preserva otros campos si ya existen)
+  if (!D.bebe) D.bebe = {};
+  D.bebe.apodo = apodoVal.trim();
+  D.bebe.fn = fnVal;
+  D.bebe.hora = horaVal;
+  D.bebe.sexo = sexoVal;
+  D.bebe.pn = pnVal;
+  // Nombre/apellido quedan vacíos: se completan en Perfil después
+  if (!D.bebe.nombre) D.bebe.nombre = '';
+  if (!D.bebe.apellido) D.bebe.apellido = '';
+  if (!D.bebe.vacunas) D.bebe.vacunas = {};
+
+  // Seed peso nacimiento si no existe (replica lógica de loadData)
+  if (!D.pesos) D.pesos = [];
+  if (D.pesos.length === 0) {
+    try {
+      D.pesos = [{ t: new Date(fnVal + 'T' + horaVal), g: pnVal, n: 'Peso nacimiento' }];
+    } catch(ex) {}
+  }
+
+  // Marcar gate completado
+  if (!D.config) D.config = {};
+  D.config.onboarded = true;
+
+  // Quitar clase de body
+  document.body.classList.remove('alba-onboarding');
+
+  // Persistir y renderizar
+  // saveData() ya invoca fbSave internamente con el payload completo;
+  // NO llamar fbSave aquí o sobrescribiríamos Firebase con un objeto vacío.
+  saveData();
+  D.step = 'home';
+  render();
+}
+
 function render(){
   applyNightMode();
   // Update device name display
@@ -3302,6 +3425,18 @@ function render(){
 
   var bd=document.getElementById('bd');if(!bd)return;
   while(bd.firstChild)bd.removeChild(bd.firstChild);
+
+  // ── ONBOARDING GATE (A.2) ─────────────────────────────────────
+  // Bloquea TODA la app hasta completar los datos mínimos del bebé.
+  // Migración silenciosa en loadData() / onValue() para usuarios pre-A.2.
+  if(!D.config || !D.config.onboarded){
+    renderOnboardingGate(bd);
+    return;
+  }
+  // Limpieza defensiva por si quedó la clase en alguna recarga
+  if(document.body.classList.contains('alba-onboarding')){
+    document.body.classList.remove('alba-onboarding');
+  }
 
   var tomas=D.hist.filter(function(h){return h.type==='toma';});
   var panales=D.hist.filter(function(h){return h.type==='panal';});
@@ -3511,7 +3646,7 @@ function render(){
         VACUNAS_ARG.forEach(function(v){
           if(v.dia)return;
           if(D.bebe.vacunas&&D.bebe.vacunas[v.id])return;
-          var fn=D.bebe.fn?new Date(D.bebe.fn):new Date('2026-03-29');
+          var fn=new Date(D.bebe.fn);
           var fv=new Date(fn);fv.setMonth(fv.getMonth()+v.mes);
           var dias=Math.round((fv.getTime()-Date.now())/86400000);
           if(dias>0&&dias<proxVacDias){proxVacDias=dias;proxVacNombre=v.nombre;}
@@ -3535,7 +3670,7 @@ function render(){
 
       // Línea 2: Peso / percentil
       if(lp){
-        var pn=D.bebe.pn||3365;
+        var pn=D.bebe.pn;
         var diffNac=lp.g-pn;
         if(diffNac>=0){
           lineas.push({ic:'⚖️',txt:apodoVal+' pesa '+gkg(lp.g)+' kg · recuperó el peso de nacimiento ✅'});
@@ -3837,7 +3972,7 @@ function render(){
 
       // ── Peso ──
       if(lastP){
-        var pn2=D.bebe.pn||3365;
+        var pn2=D.bebe.pn;
         var diffNac2=lastP.g-pn2;
         var pred=typeof calcPesoPrediccion==='function'?calcPesoPrediccion():null;
         var pesoCtx2='';
@@ -4371,7 +4506,7 @@ function render(){
 
     // ── TAB PESO ──────────────────────────────────────────────
     if(D._medidasTab==='peso'){
-    var pNac=D.bebe.pn||3365,lp4=D.pesos[0];
+    var pNac=D.bebe.pn,lp4=D.pesos[0];
     var pctL=lp4?pctLbl(lp4.g,ageW()):'\u2014';
     var gcv3=gasC();
     var miniRow=mkDiv('display:flex;gap:8px;margin-bottom:12px');
@@ -4823,7 +4958,7 @@ function render(){
     bd.appendChild(E.frow([E.field('Nombre',E.input('fi','bnom','text',null,b3.nombre||'')),E.field('Apellido',E.input('fi','bape','text',null,b3.apellido||''))]));
     bd.appendChild(E.field('Apodo',E.input('fi','bapodo','text',null,b3.apodo||'')));
     bd.appendChild(E.frow([E.field('Fecha nacimiento',E.input('fi','bfn','date',null,b3.fn||'')),E.field('Sexo',E.select('fs','bsexo',[{v:'M',l:'Nino'},{v:'F',l:'Nina'}],b3.sexo||'M'))]));
-    bd.appendChild(E.frow([E.field('Peso nac (g)',E.input('fi','bpn','number',null,b3.pn||3365)),E.field('Talla (cm)',E.input('fi','btalla','number',null,b3.talla||''))]));
+    bd.appendChild(E.frow([E.field('Peso nac (g)',E.input('fi','bpn','number',null,b3.pn||'')),E.field('Talla (cm)',E.input('fi','btalla','number',null,b3.talla||''))]));
     bd.appendChild(E.frow([E.field('CC (cm)',E.input('fi','bcc','number',null,b3.cc||'')),E.field('Grupo sanguineo',E.input('fi','bsangre','text','A+',b3.sangre||''))]));
     bd.appendChild(E.frow([E.field('DNI',E.input('fi','bdni','text',null,b3.dni||'')),E.field('Edad gestacional',E.input('fi','beg','number',null,b3.eg||40))]));
     bd.appendChild(E.frow([E.field('Tipo parto',E.input('fi','bparto','text',null,b3.parto||'')),E.field('Apgar',E.input('fi','bapgar','text','9/10',b3.apgar||''))]));
@@ -5931,7 +6066,7 @@ function render(){
     for(var ii=1;ii<stT.length;ii++)ivs.push(Math.round((new Date(stT[ii].s)-new Date(stT[ii-1].s))/60000));
     var avgI=ivs.length?Math.round(ivs.reduce(function(a,b){return a+b;},0)/ivs.length):0;
     var nc=ph.filter(function(p){return p.p==='Caca';}).length,nm2=ph.filter(function(p){return p.p==='Mixto';}).length;
-    var lp5=D.pesos[0],pAct=lp5?lp5.g:0,pNac2=D.bebe.pn||3365,pAlt2=D.bebe.pa||2980;
+    var lp5=D.pesos[0],pAct=lp5?lp5.g:0,pNac2=D.bebe.pn,pAlt2=D.bebe.pa||2980;
     var dNac=pAct-pNac2,dAlt=pAct-pAlt2,tpd=D.dashDays>0?Math.round(nt2/D.dashDays):nt2;
     var sigs=[],pos=[];
     if(tpd<6)sigs.push({i:'\uD83D\uDD34',m:'Pocas tomas: '+tpd+'/dia (ideal 8-12).'});else if(tpd>=8)pos.push({i:'\u2705',m:'Frecuencia OK: '+tpd+' tomas/dia.'});else pos.push({i:'\uD83D\uDFE1',m:'Tomas: '+tpd+'/dia (ideal 8-12).'});
@@ -7007,7 +7142,7 @@ var ONBOARDING_PREGS = [
   {
     id: 'ob_alimentacion',
     trigger: function() {
-      var diasVida = Math.floor((Date.now() - new Date(D.bebe.fn||'2026-03-29').getTime()) / 86400000);
+      var diasVida = Math.floor((Date.now() - new Date(D.bebe.fn).getTime()) / 86400000);
       return diasVida >= 1 && D.hist.length >= 1;
     },
     icon: '🍼',
@@ -7028,7 +7163,7 @@ var ONBOARDING_PREGS = [
   {
     id: 'ob_cordon',
     trigger: function() {
-      var dias = Math.floor((Date.now() - new Date(D.bebe.fn||'2026-03-29').getTime()) / 86400000);
+      var dias = Math.floor((Date.now() - new Date(D.bebe.fn).getTime()) / 86400000);
       var yaMarcado = D.hitos && D.hitos.some(function(h){ return h && h.id === 'v05'; });
       return dias >= 5 && !yaMarcado;
     },
@@ -7044,7 +7179,7 @@ var ONBOARDING_PREGS = [
   {
     id: 'ob_primer_bano',
     trigger: function() {
-      var dias = Math.floor((Date.now() - new Date(D.bebe.fn||'2026-03-29').getTime()) / 86400000);
+      var dias = Math.floor((Date.now() - new Date(D.bebe.fn).getTime()) / 86400000);
       var cordonCaido = D.hitos && D.hitos.some(function(h){ return h && h.id === 'v05'; });
       var yaMarcado = D.hitos && D.hitos.some(function(h){ return h && h.id === 'v04'; });
       return (dias >= 3 || cordonCaido) && !yaMarcado;
@@ -7061,7 +7196,7 @@ var ONBOARDING_PREGS = [
   {
     id: 'ob_cuidadores',
     trigger: function() {
-      var dias = Math.floor((Date.now() - new Date(D.bebe.fn||'2026-03-29').getTime()) / 86400000);
+      var dias = Math.floor((Date.now() - new Date(D.bebe.fn).getTime()) / 86400000);
       return dias >= 3;
     },
     icon: '👪',
@@ -7083,7 +7218,7 @@ var ONBOARDING_PREGS = [
   {
     id: 'ob_primera_salida',
     trigger: function() {
-      var dias = Math.floor((Date.now() - new Date(D.bebe.fn||'2026-03-29').getTime()) / 86400000);
+      var dias = Math.floor((Date.now() - new Date(D.bebe.fn).getTime()) / 86400000);
       var yaMarcado = D.hitos && D.hitos.some(function(h){ return h && h.id === 'v03'; });
       return dias >= 25 && !yaMarcado;
     },
@@ -7293,7 +7428,7 @@ function _mostrarObHitoRetro(preg, cuerpo, apodo, onDone) {
   fechaInp.type = 'date';
   fechaInp.style.cssText = 'width:100%;padding:10px 14px;border-radius:11px;border:1px solid rgba(212,168,67,.3);background:rgba(255,255,255,.07);color:#f0d9a0;font-size:16px;font-family:Georgia,serif;margin-bottom:10px;box-sizing:border-box;outline:none';
   // Default: fecha de nacimiento
-  var fnDef = D.bebe.fn || '2026-03-29';
+  var fnDef = D.bebe.fn;
   fechaInp.value = fnDef;
   fechaInp.max = new Date().toISOString().slice(0,10);
   fechaInp.min = fnDef;
@@ -9150,7 +9285,7 @@ var CONSULTAS_PAUTADAS = [
 ];
 
 function getConsultaStatus(c) {
-  var fn = D.bebe.fn ? new Date(D.bebe.fn) : new Date('2026-03-29');
+  var fn = new Date(D.bebe.fn);
   var fechaIdeal = new Date(fn.getTime() + c.dias * 86400000);
   var now = new Date();
   var diff = Math.round((fechaIdeal - now) / 86400000);
@@ -9161,7 +9296,7 @@ function getConsultaStatus(c) {
   };
 }
 function getVacunaStatus(v) {
-  var fn = D.bebe.fn ? new Date(D.bebe.fn) : new Date('2026-03-29');
+  var fn = new Date(D.bebe.fn);
   var fechaVac = new Date(fn);
   if (v.dia) {
     // Vacuna de RN — ya se aplicó al nacer
@@ -9291,8 +9426,8 @@ var LOGROS_DEF = [
   { id:'p_100_panales',   cat:'pañales',  ic:'🌊', titulo:'100 pañales',               desc:'Cien pañales. Merecen una medalla (y un buen jabón).',               check:function(){return D.hist.filter(function(h){return h.type==='panal';}).length>=100;} },
   // ⚖️ Peso
   { id:'w_primer_peso',   cat:'peso',     ic:'⚖️', titulo:'Primer peso registrado',    desc:'Empezaron a seguir la curva de crecimiento de {APODO}.',                check:function(){return D.pesos.length>=1;} },
-  { id:'w_recupero',      cat:'peso',     ic:'📈', titulo:'Recuperó peso de nacimiento',desc:'{APODO} recuperó su peso de nacimiento. ¡Misión cumplida!',             check:function(){var pn=D.bebe.pn||3365;return D.pesos.some(function(p){return p.g>=pn;});} },
-  { id:'w_supero',        cat:'peso',     ic:'💪', titulo:'Superó peso de nacimiento', desc:'{APODO} ya pesa más que al nacer. ¡Está creciendo!',                    check:function(){var pn=D.bebe.pn||3365;return D.pesos.some(function(p){return p.g>pn+100;});} },
+  { id:'w_recupero',      cat:'peso',     ic:'📈', titulo:'Recuperó peso de nacimiento',desc:'{APODO} recuperó su peso de nacimiento. ¡Misión cumplida!',             check:function(){var pn=D.bebe.pn;return D.pesos.some(function(p){return p.g>=pn;});} },
+  { id:'w_supero',        cat:'peso',     ic:'💪', titulo:'Superó peso de nacimiento', desc:'{APODO} ya pesa más que al nacer. ¡Está creciendo!',                    check:function(){var pn=D.bebe.pn;return D.pesos.some(function(p){return p.g>pn+100;});} },
   { id:'w_5_pesos',       cat:'peso',     ic:'📊', titulo:'5 pesajes registrados',      desc:'Curva de crecimiento tomando forma. Dato es poder.',                 check:function(){return D.pesos.length>=5;} },
   // 🏥 Salud
   { id:'v_primera_visita',cat:'salud',    ic:'🏥', titulo:'Primera visita médica',      desc:'La primera consulta registrada. {APODO} tiene su equipo de salud.',     check:function(){return D.visits.length>=1;} },
@@ -9594,6 +9729,14 @@ onValue(ref(db,'cefe'),function(snap){
   if(data.config&&typeof data.config==='object'){
     var defNotif={cefiro_tips:true,logros_triviales:false,dato_dia:true,brotes:true,vacunas:true,hitos:true,plan_dia:true};
     D.config=Object.assign({notif:defNotif,historial_expandido:true,perfil_home:true},data.config,{notif:Object.assign(defNotif,(data.config.notif||{}))});
+  }
+
+  // A.2 — Migración silenciosa: si Firebase trae bebe poblado pero no flag,
+  // marcar como onboardeado. Cierra el caso de devices nuevos que reciben datos
+  // de un usuario pre-A.2 sincronizado.
+  if (!D.config) D.config = {};
+  if (!D.config.onboarded && D.bebe && D.bebe.fn && D.bebe.apodo && D.bebe.pn) {
+    D.config.onboarded = true;
   }
   // onboarding: merge (Firebase gana para datos respondidos compartidos)
   if(data.onboarding&&typeof data.onboarding==='object'){
