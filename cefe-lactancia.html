@@ -1444,7 +1444,7 @@ function startTomaRapidaMamadera(){
     var entry={type:'toma',s:sT2,e:eT2,lados:[{s:ladoLabel,m:durEst}],tot:durEst,
       ext:{l:0,r:0},mlProvistos:ml2,tipoToma:tipoM,nt:addM(sT2,180),
       note:'Mamadera '+ml2+'ml'+(tipoM==='formula'?' (formula)':tipoM==='mixta'?' (mixta)':''),efi:3};
-    D.hist.unshift(entry);D.alarmFired=false;schedAlarm(entry.nt);saveData();overlay.remove();render();
+    entry.addedBy=getCurrentUid();D.hist.unshift(entry);D.alarmFired=false;schedAlarm(entry.nt);saveData();overlay.remove();render();
   };
   box.appendChild(saveBtn2);
   var cancelBtn2=document.createElement('button');cancelBtn2.style.cssText='width:100%;padding:10px;border-radius:11px;border:1px solid rgba(255,255,255,.08);background:transparent;color:#a89070;font-size:13px;cursor:pointer;font-family:Georgia,serif';cancelBtn2.textContent='Cancelar';cancelBtn2.onclick=function(){overlay.remove();};box.appendChild(cancelBtn2);
@@ -1680,7 +1680,7 @@ function toggleSleep(){
   if(D.sleepStart){
     var ss=safeDate(D.sleepStart)||new Date();
     var dur=Math.round((Date.now()-ss.getTime())/60000);
-    if(dur>5)D.sleepLog.unshift({start:D.sleepStart,end:new Date().toISOString(),dur:dur});
+    if(dur>5)D.sleepLog.unshift({start:D.sleepStart,end:new Date().toISOString(),dur:dur,addedBy:getCurrentUid()});
     D.sleepStart=null;
   } else {D.sleepStart=new Date().toISOString();}
   lss('sleepStart2',D.sleepStart||null);
@@ -2018,7 +2018,7 @@ function confirmEntry(){
     D.pend.mlEst=estimateML(D.pend.lados,D.efi,D.mlProvistos||0);
   }
   D.msg=genMsg(D.pend);D.msgType=D.pend.type;
-  D.hist.unshift(D.pend);saveData();
+  D.pend.addedBy=getCurrentUid();D.hist.unshift(D.pend);saveData();
   if(D.pend.type==='toma'){D.alarmFired=false;schedAlarm(D.pend.nt);D.mlProvistos=0;}
   D.pend=null;setStep('summary');
   // Auto-detectar hitos después de registrar
@@ -2043,7 +2043,7 @@ function savePeso(){
   var fv=gv('pesofecha'),hv=gv('pesohora');
   var t=new Date();
   if(fv){try{t=new Date(fv+'T'+(hv||'12:00'));}catch(e){}}
-  D.pesos.unshift({t:t,g:D.pg,n:nEl?nEl.value:''});
+  D.pesos.unshift({t:t,g:D.pg,n:nEl?nEl.value:'',addedBy:getCurrentUid()});
   // Sort by date descending
   D.pesos.sort(function(a,b){var da=safeDate(a.t)||new Date(0),db=safeDate(b.t)||new Date(0);return db-da;});
   saveData();setStep('peso');
@@ -2070,7 +2070,7 @@ function saveMed(){
   if(!validatePhone(m.telcons)){alert('Teléfono de consultorio inválido.');return;}
   if(!validateEmail(m.email)){alert('Email inválido. Verificá el formato.');return;}
   if(!m.nom||!m.ape){alert('Nombre y apellido obligatorios.');return;}
-  if(D.editMedIdx>=0)D.meds[D.editMedIdx]=m;else D.meds.push(m);
+  if(D.editMedIdx>=0){D.meds[D.editMedIdx]=m;}else{m.addedBy=getCurrentUid();D.meds.push(m);}
   D.editMedIdx=-1;saveData();setStep('medicos');
 }
 function savePadre(){
@@ -2107,7 +2107,7 @@ function saveVisita(){
     desc:gv('vdesc'),estado:'pendiente',conclusiones:'',receta:'',proxVisita:'',pesoEnVisita:0,
     tipo:tipo,durMin:durMin,notif1d:notif1d,notif2h:notif2h,
     tituloManual:gv('vdesc')||tipo};
-  D.visits.unshift(entry);saveData();D.msg=genMsg(entry);D.msgType='visita';setStep('summary');
+  entry.addedBy=getCurrentUid();D.visits.unshift(entry);saveData();D.msg=genMsg(entry);D.msgType='visita';setStep('summary');
 }
 function savePostVisita(idx){
   var v=D.visits[idx];if(!v)return;
@@ -2123,7 +2123,7 @@ function savePostVisita(idx){
   if(v.pesoEnVisita>0){
     var existePeso=D.pesos.some(function(p){return sameDay(p.t,v.dt)&&p.g===v.pesoEnVisita;});
     var notaPeso='Consulta '+((D.meds&&D.meds[v.mi])?D.meds[v.mi].esp:'medica');
-    if(!existePeso){D.pesos.unshift({t:v.dt,g:v.pesoEnVisita,n:notaPeso});
+    if(!existePeso){D.pesos.unshift({t:v.dt,g:v.pesoEnVisita,n:notaPeso,addedBy:getCurrentUid()});
     D.pesos.sort(function(a,b){return new Date(b.t)-new Date(a.t);});}
   }
   // Talla → curva de talla
@@ -2131,7 +2131,7 @@ function savePostVisita(idx){
     var notaTalla='Consulta '+((D.meds&&D.meds[v.mi])?D.meds[v.mi].esp:'medica');
     if(!D.tallas)D.tallas=[];
     var existeTalla=D.tallas.some(function(t){return sameDay(t.t,v.dt)&&t.cm===v.tallaEnVisita;});
-    if(!existeTalla){D.tallas.unshift({t:v.dt,cm:v.tallaEnVisita,n:notaTalla});
+    if(!existeTalla){D.tallas.unshift({t:v.dt,cm:v.tallaEnVisita,n:notaTalla,addedBy:getCurrentUid()});
     D.tallas.sort(function(a,b){return new Date(b.t)-new Date(a.t);}); }
   }
   // PC → curva de PC
@@ -2139,7 +2139,7 @@ function savePostVisita(idx){
     var notaPC='Consulta '+((D.meds&&D.meds[v.mi])?D.meds[v.mi].esp:'medica');
     if(!D.pcs)D.pcs=[];
     var existePC=D.pcs.some(function(p){return sameDay(p.t,v.dt)&&p.cm===v.pcEnVisita;});
-    if(!existePC){D.pcs.unshift({t:v.dt,cm:v.pcEnVisita,n:notaPC});
+    if(!existePC){D.pcs.unshift({t:v.dt,cm:v.pcEnVisita,n:notaPC,addedBy:getCurrentUid()});
     D.pcs.sort(function(a,b){return new Date(b.t)-new Date(a.t);}); }
   }
   // Si hay próxima visita, agendar automáticamente
@@ -2147,7 +2147,7 @@ function savePostVisita(idx){
     var parts=v.proxVisita.split('-');
     var prxEntry={type:'visita',mi:v.mi,dt:new Date(v.proxVisita+'T09:00'),
       mod:v.mod,desc:'Seguimiento — '+v.desc,estado:'pendiente',conclusiones:'',receta:'',proxVisita:'',pesoEnVisita:0};
-    D.visits.unshift(prxEntry);
+    prxEntry.addedBy=getCurrentUid();D.visits.unshift(prxEntry);
   }
   // Interconexión: si hay receta con vacuna → actualizar vacunas
   if(v.conclusiones&&v.conclusiones.toLowerCase().indexOf('vacuna')>=0){
@@ -2173,7 +2173,7 @@ function saveNota(){
     D.notas=D.notas.filter(function(n){return n.fecha!==D.editNotaFecha;});
   }
   var existing=D.notas.find(function(n){return n.fecha===fecha;});
-  if(existing)existing.texto=texto;else D.notas.unshift({fecha:fecha,texto:texto});
+  if(existing){existing.texto=texto;}else{D.notas.unshift({fecha:fecha,texto:texto,addedBy:getCurrentUid()});}
   D.notas.sort(function(a,b){return new Date(b.fecha)-new Date(a.fecha);});
   D.editNotaFecha=null;
   saveData();setStep('notas');
@@ -2186,7 +2186,7 @@ function saveSintoma(){
   if(fv){try{t=new Date(fv+'T'+(hv||p2(new Date().getHours())+':'+p2(new Date().getMinutes())));}catch(e){}}
   var entry={t:t,tipo:tipo,valor:valor,nota:nota};
   if(D.editSintomaIdx>=0){D.sintomas[D.editSintomaIdx]=entry;}
-  else{D.sintomas.unshift(entry);}
+  else{entry.addedBy=getCurrentUid();D.sintomas.unshift(entry);}
   D.editSintomaIdx=-1;
   saveData();setStep('sintomas');
 }
@@ -2220,7 +2220,7 @@ function showHitoDialog(id){
   guardarBtn.onclick=function(){
     var fecha=document.getElementById('hito-fecha-inp').value||todayStr();
     var nota=document.getElementById('hito-nota-inp').value||'';
-    D.hitos.push({id:id,fecha:fecha,nota:nota});
+    D.hitos.push({id:id,fecha:fecha,nota:nota,addedBy:getCurrentUid()});
     saveData();overlay.remove();render();
   };
   btnRow.appendChild(cancelBtn);btnRow.appendChild(guardarBtn);box.appendChild(btnRow);
@@ -2232,7 +2232,7 @@ function saveCarta(){
   var texto=gv('carta-texto');
   if(!texto.trim()){alert('Escrib\u00ed algo para '+apodo()+'.');return;}
   var carta={id:Date.now(),fecha:todayStr(),titulo:titulo,texto:texto};
-  if(D.editCartaIdx>=0)D.cartas[D.editCartaIdx]=carta;else D.cartas.unshift(carta);
+  if(D.editCartaIdx>=0){D.cartas[D.editCartaIdx]=carta;}else{carta.addedBy=getCurrentUid();D.cartas.unshift(carta);}
   D.editCartaIdx=-1;saveData();setStep('cartas');
 }
 
@@ -2819,7 +2819,7 @@ function handleAction(action,data){
           opcNegLabel:'Cancelar'
         }, hd.label, apodo(), function(){ render(); });
       } else {
-        D.hitos.push({id:data.id,fecha:new Date().toISOString(),nota:''});
+        D.hitos.push({id:data.id,fecha:new Date().toISOString(),nota:'',addedBy:getCurrentUid()});
         saveData();render();
       }
     })();break;
@@ -2918,7 +2918,7 @@ function stopSprint(){
   var sp=D.sprintActivo,inicio=new Date(sp.inicio),ahora=new Date();
   var regs=(D.hist||[]).filter(function(h){var t=h.type==='toma'?new Date(h.s):new Date(h.t);return t>=inicio&&t<=ahora;});
   sp.finReal=ahora.toISOString();sp.tomas=regs.filter(function(h){return h.type==='toma';}).length;sp.panales=regs.filter(function(h){return h.type==='panal';}).length;
-  if(!D.sprints)D.sprints=[];D.sprints.unshift(sp);D.sprintActivo=null;saveData();setStep('sprintResumen');
+  if(!D.sprints)D.sprints=[];sp.addedBy=getCurrentUid();D.sprints.unshift(sp);D.sprintActivo=null;saveData();setStep('sprintResumen');
 }
 function getSprintResumen(){
   var sp=D.sprints&&D.sprints[0];if(!sp)return null;
@@ -3106,21 +3106,21 @@ function registrarRapido(tipo) {
       nt: new Date(ahora.getTime() + 150 * 60000),
       note: 'Registro rápido', _rapido: true
     };
-    D.hist.unshift(entrada);
+    entrada.addedBy=getCurrentUid();D.hist.unshift(entrada);
     saveData();
     D._quickFeedback = {tipo:'toma', msg: apodoVal + ' — toma registrada. ¿Fue diferente? Editala desde el historial.', ts: Date.now()};
     setStep('home');
   } else if (tipo === 'pis' || tipo === 'caca' || tipo === 'mixto') {
     var pNom = tipo === 'pis' ? 'Pis' : tipo === 'caca' ? 'Caca' : 'Mixto';
     var entrada2 = {type: 'panal', p: pNom, t: ahora, note: 'Registro rápido'};
-    D.hist.unshift(entrada2);
+    entrada2.addedBy=getCurrentUid();D.hist.unshift(entrada2);
     saveData();
     D._quickFeedback = {tipo:'panal', msg: 'Pañal ' + pNom.toLowerCase() + ' registrado.', ts: Date.now()};
     setStep('home');
   } else if (tipo === 'llanto') {
     // Registra un momento de llanto como nota rápida
     if (!D.notas) D.notas = [];
-    D.notas.unshift({t: ahora, txt: 'Llanto registrado (registro rápido) — ' + ahora.toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'})});
+    D.notas.unshift({addedBy:getCurrentUid(), t: ahora, txt: 'Llanto registrado (registro rápido) — ' + ahora.toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'})});
     saveData();
     D._quickFeedback = {tipo:'llanto', msg: 'Llanto anotado. Causas posibles: hambre, pañal, agarre, contacto o temperatura.', ts: Date.now()};
     setStep('home');
@@ -3403,6 +3403,30 @@ function submitOnboardingGate() {
   saveData();
   D.step = 'home';
   render();
+}
+
+
+// ──────────────────────────────────────────────────────────────
+// A.3.1 — HELPERS DE IDENTIDAD MULTI-TENANT (stubs)
+// ──────────────────────────────────────────────────────────────
+// En A.3.1.a: stubs que mantienen la app funcionando contra cefe/.
+// En A.3.1.b: implementación real con Firebase Auth + paths nuevos.
+// ──────────────────────────────────────────────────────────────
+function getCurrentUid() {
+  // Stub. En A.3.1.b: return auth.currentUser ? auth.currentUser.uid : null;
+  return '_legacy_';
+}
+function getActiveFamiliaId() {
+  // Stub. En A.3.1.b: return D.familiaActivaId || null;
+  return null;
+}
+function getActiveHijoId() {
+  // Stub. En A.3.1.b: return D.hijoActivoId || null;
+  return null;
+}
+function getRef(subpath) {
+  // Stub. En A.3.1.b: return ref(db, 'familias/' + getActiveFamiliaId() + '/hijos/' + getActiveHijoId() + '/' + subpath);
+  return ref(db, 'cefe/' + subpath);
 }
 
 function render(){
@@ -4689,7 +4713,7 @@ function render(){
       if(!fecha||!cm||cm<30||cm>130){alert('Talla invalida (30-130 cm).');return;}
       var nota=gv('te-nota')||'';
       if(!D.tallas)D.tallas=[];
-      D.tallas.unshift({t:new Date(fecha+'T12:00'),cm:cm,n:nota});
+      D.tallas.unshift({t:new Date(fecha+'T12:00'),cm:cm,n:nota,addedBy:getCurrentUid()});
       D.tallas.sort(function(a,b){return new Date(b.t)-new Date(a.t);});
       saveData();D._medidasTab='talla';setStep('peso');
     };
@@ -4709,7 +4733,7 @@ function render(){
       if(!fecha||!cm||cm<25||cm>60){alert('PC invalido (25-60 cm).');return;}
       var nota=gv('pe-nota')||'';
       if(!D.pcs)D.pcs=[];
-      D.pcs.unshift({t:new Date(fecha+'T12:00'),cm:cm,n:nota});
+      D.pcs.unshift({t:new Date(fecha+'T12:00'),cm:cm,n:nota,addedBy:getCurrentUid()});
       D.pcs.sort(function(a,b){return new Date(b.t)-new Date(a.t);});
       saveData();D._medidasTab='pc';setStep('peso');
     };
@@ -5429,7 +5453,7 @@ function render(){
           var slEnd=new Date();
           var slStart=new Date(slEnd.getTime()-secsGuardados*1000);
           if(!D.sleepLog)D.sleepLog=[];
-          D.sleepLog.unshift({start:slStart.toISOString(),end:slEnd.toISOString(),dur:Math.round(secsGuardados/60)});
+          D.sleepLog.unshift({addedBy:getCurrentUid(),start:slStart.toISOString(),end:slEnd.toISOString(),dur:Math.round(secsGuardados/60)});
         }
         tld3.secs=0;tld3.inicio=null;tld3.activo=false;
         saveData();
@@ -5824,7 +5848,7 @@ function render(){
         estado:'pendiente',conclusiones:'',receta:'',proxVisita:'',pesoEnVisita:0,
         tipo:selectedTipo,durMin:dur3,notif1d:notif1d3,notif2h:notif2h3,
         tituloManual:titleAuto};
-      D.visits.unshift(entry);
+      entry.addedBy=getCurrentUid();D.visits.unshift(entry);
       // Limpiar estado temporal
       D._newEvtTipo=null;D._newEvtMedIdx=null;D._newEvtVacunaId=null;
       saveData();
@@ -6872,7 +6896,7 @@ document.addEventListener('click', function(ev) {
             updated_at: Date.now(),
             fecha: existing ? (existing.fecha||todayStr()) : todayStr()
           };
-          if(idx>=0 && idx<D.medsPersonales.length){ D.medsPersonales[idx] = med; } else { D.medsPersonales.push(med); }
+          if(idx>=0 && idx<D.medsPersonales.length){ D.medsPersonales[idx] = med; } else { med.addedBy=getCurrentUid(); D.medsPersonales.push(med); }
           // Limpiar flags de UI
           D._mpDrogaSel = undefined;
           D._mpMarcaSel = undefined;
@@ -7056,7 +7080,7 @@ function responderMomento(id, valor, accion) {
         return (typeof h === 'string' ? h : h.id) === hitoId;
       });
       if (!yaExiste) {
-        D.hitos.push({ id: hitoId, fecha: new Date().toISOString().slice(0,10), nota: 'Registrado vía app por ' + (DEVICE_NAME||'') });
+        D.hitos.push({ addedBy: getCurrentUid(), id: hitoId, fecha: new Date().toISOString().slice(0,10), nota: 'Registrado vía app por ' + (DEVICE_NAME||'') });
       }
     }
   } else if (valor === 'no_aun') {
@@ -8205,7 +8229,17 @@ function responderMomento(id, valor, accion) {
   if (id.startsWith('chk_') && valor === 'si') {
     var hitoId = id.replace('chk_', '');
     if (!D.hitos) D.hitos = [];
-    if (D.hitos.indexOf(hitoId) === -1) D.hitos.push(hitoId);
+    var existe = D.hitos.find(function(h) {
+      return (typeof h === 'string' ? h : h.id) === hitoId;
+    });
+    if (!existe) {
+      D.hitos.push({
+        id: hitoId,
+        fecha: new Date().toISOString().slice(0,10),
+        nota: '',
+        addedBy: getCurrentUid()
+      });
+    }
   }
   saveData();
   if (accion) { closeCpop(); setStep(accion.replace('go','')); return; }
