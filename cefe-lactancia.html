@@ -190,6 +190,22 @@ body.alba-onboarding #bd{padding-bottom:24px}
 </head>
 <body>
 <div id="alba-splash"><div class="alba-splash-logo">Alba</div><div class="alba-splash-spinner"></div></div>
+<script>
+// A.3.1.b.1.fix1 — hideSplash global, robusto a fallas del módulo Firebase.
+window.__albaSplashHidden = false;
+window.hideSplash = function() {
+  if (window.__albaSplashHidden) return;
+  window.__albaSplashHidden = true;
+  var el = document.getElementById('alba-splash');
+  if (el) {
+    el.style.opacity = '0';
+    setTimeout(function(){ if (el.parentNode) el.parentNode.removeChild(el); }, 200);
+  }
+};
+// Timeout de seguridad alto (2s) para mobile lento o módulo Firebase tardando.
+// onAuthStateChanged llama hideSplash apenas resuelve, típicamente <500ms.
+setTimeout(window.hideSplash, 2000);
+</script>
 <!-- ONBOARDING -->
 <div id="onboard-overlay" class="hidden" style="position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:600;align-items:center;justify-content:center;padding:20px">
   <div style="width:100%;max-width:380px;background:linear-gradient(160deg,#0f1923,#1a2d3d);border:1px solid rgba(212,168,67,.3);border-radius:20px;padding:28px 22px;text-align:center">
@@ -9862,19 +9878,6 @@ window.__albaUnsubFb = onValue(getRef(''),function(snap){
 // Cuando onAuthStateChanged dispara con user real Y D.familiaActivaId/hijoActivoId
 // poblados (post-login), desuscribimos cefe/ y resuscribimos a familias/...
 // ─────────────────────────────────────────────────────────────
-var __albaSplashHidden = false;
-function hideSplash() {
-  if (__albaSplashHidden) return;
-  __albaSplashHidden = true;
-  var el = document.getElementById('alba-splash');
-  if (el) {
-    el.style.opacity = '0';
-    setTimeout(function(){ if (el.parentNode) el.parentNode.removeChild(el); }, 200);
-  }
-}
-// Timeout de seguridad: si Auth no responde en 300ms, ocultar splash igual.
-setTimeout(hideSplash, 300);
-
 // Resuscribir cuando cambia el contexto de identidad
 function resubscribeActivePath() {
   if (typeof window.__albaUnsubFb === 'function') {
@@ -9890,7 +9893,7 @@ onAuthStateChanged(auth, function(user) {
   // user = null si no hay sesión. Sin sesión → fallback α (cefe/) ya activo.
   // Con sesión → en A.3.1.b.2 cargaremos D.familiaActivaId/hijoActivoId
   // desde usuarios/{uid}/familias y resuscribiremos.
-  hideSplash();
+  if (window.hideSplash) window.hideSplash();
   if (user) {
     console.log('[Auth] Sesión activa: ' + user.uid + ' (' + (user.email || 'sin email') + ')');
   } else {
