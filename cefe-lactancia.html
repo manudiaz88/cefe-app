@@ -165,8 +165,31 @@ body.alba-onboarding #bd{padding-bottom:24px}
 *::-webkit-scrollbar{display:none}
 </style>
 <script src="alba-cuentos.js" onerror="console.warn('alba-cuentos.js no disponible — módulo de cuentos desactivado')"></script>
+<style>
+/* A.3.1.b.1 — splash overlay */
+#alba-splash {
+  position: fixed; inset: 0; z-index: 9999;
+  background: #fff5e6;
+  display: flex; align-items: center; justify-content: center;
+  flex-direction: column; gap: 16px;
+  transition: opacity 200ms ease-out;
+}
+#alba-splash .alba-splash-logo {
+  font-size: 40px; font-weight: 600; color: #d4a843;
+  letter-spacing: 2px; font-family: -apple-system, sans-serif;
+}
+#alba-splash .alba-splash-spinner {
+  width: 28px; height: 28px;
+  border: 3px solid #f0e0c0;
+  border-top-color: #d4a843;
+  border-radius: 50%;
+  animation: alba-spin 700ms linear infinite;
+}
+@keyframes alba-spin { to { transform: rotate(360deg); } }
+</style>
 </head>
 <body>
+<div id="alba-splash"><div class="alba-splash-logo">Alba</div><div class="alba-splash-spinner"></div></div>
 <!-- ONBOARDING -->
 <div id="onboard-overlay" class="hidden" style="position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:600;align-items:center;justify-content:center;padding:20px">
   <div style="width:100%;max-width:380px;background:linear-gradient(160deg,#0f1923,#1a2d3d);border:1px solid rgba(212,168,67,.3);border-radius:20px;padding:28px 22px;text-align:center">
@@ -3407,26 +3430,34 @@ function submitOnboardingGate() {
 
 
 // ──────────────────────────────────────────────────────────────
-// A.3.1 — HELPERS DE IDENTIDAD MULTI-TENANT (stubs)
+// A.3.1 — HELPERS DE IDENTIDAD MULTI-TENANT (reales, fallback α)
 // ──────────────────────────────────────────────────────────────
-// En A.3.1.a: stubs que mantienen la app funcionando contra cefe/.
-// En A.3.1.b: implementación real con Firebase Auth + paths nuevos.
+// A.3.1.b.1: implementación real con Firebase Auth.
+// Fallback α: si NO hay usuario logueado o NO hay familia/hijo activos,
+// las operaciones siguen contra cefe/ (preserva instancia 0 hasta A.3.2).
 // ──────────────────────────────────────────────────────────────
 function getCurrentUid() {
-  // Stub. En A.3.1.b: return auth.currentUser ? auth.currentUser.uid : null;
-  return '_legacy_';
+  // Si hay sesión: uid real. Sin sesión: '_legacy_' (compat con A.3.1.a).
+  return (typeof auth !== 'undefined' && auth.currentUser && auth.currentUser.uid) || '_legacy_';
 }
 function getActiveFamiliaId() {
-  // Stub. En A.3.1.b: return D.familiaActivaId || null;
-  return null;
+  return D.familiaActivaId || null;
 }
 function getActiveHijoId() {
-  // Stub. En A.3.1.b: return D.hijoActivoId || null;
-  return null;
+  return D.hijoActivoId || null;
 }
 function getRef(subpath) {
-  // Stub. En A.3.1.b: return ref(db, 'familias/' + getActiveFamiliaId() + '/hijos/' + getActiveHijoId() + '/' + subpath);
-  return ref(db, 'cefe/' + subpath);
+  // Fallback α: sin sesión O sin familia/hijo activos → cefe/ (legacy).
+  // Con sesión + familia + hijo → familias/{fid}/hijos/{hid}/{subpath}.
+  var uid = (typeof auth !== 'undefined' && auth.currentUser) ? auth.currentUser.uid : null;
+  var fid = D.familiaActivaId;
+  var hid = D.hijoActivoId;
+  if (!uid || !fid || !hid) {
+    return subpath ? ref(db, 'cefe/' + subpath) : ref(db, 'cefe');
+  }
+  return subpath
+    ? ref(db, 'familias/' + fid + '/hijos/' + hid + '/' + subpath)
+    : ref(db, 'familias/' + fid + '/hijos/' + hid);
 }
 
 function render(){
@@ -9658,8 +9689,10 @@ setTimeout(checkOnboarding, 800);
 // ══════════════════════════════════════════════════════════════════════════
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, sendEmailVerification, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 var cfg={apiKey:"AIzaSyC5iVBZbLlD0a7yVRx4eDg6pOjRKNO28kA",authDomain:"cefe-app.firebaseapp.com",databaseURL:"https://cefe-app-default-rtdb.firebaseio.com",projectId:"cefe-app",storageBucket:"cefe-app.firebasestorage.app",messagingSenderId:"40391677831",appId:"1:40391677831:web:3640958b4450f2cd5ae522"};
 var app=initializeApp(cfg);var db=getDatabase(app);
+var auth=getAuth(app);auth.languageCode='es';
 var dot=document.getElementById('sync-dot');var fbReady=false;
 function setDot(c,t){if(dot){dot.style.color=c;dot.title=t||'';}}
 function restoreDate(v){if(!v)return null;var d=new Date(v);return isNaN(d.getTime())?null:d;}
@@ -9674,9 +9707,9 @@ function restoreEntry(e){
 window.fbSave=function(data){
   if(!fbReady)return;
   setDot('#d4a843','Guardando...');
-  set(ref(db,'cefe'),data).then(function(){setDot('#64c8b4','Sincronizado');}).catch(function(){setDot('#e07070','Error');});
+  set(getRef(''),data).then(function(){setDot('#64c8b4','Sincronizado');}).catch(function(){setDot('#e07070','Error');});
 };
-onValue(ref(db,'cefe'),function(snap){
+window.__albaUnsubFb = onValue(getRef(''),function(snap){
   var data=snap.val();fbReady=true;window.__albaFbReady=true;
   if(!data){setDot('#64c8b4','Conectado');if(typeof render==='function')render();return;}
 
@@ -9819,6 +9852,51 @@ onValue(ref(db,'cefe'),function(snap){
     if(typeof checkNocturnaCuento==='function') checkNocturnaCuento();
   }, 6500);
 },function(err){fbReady=true;window.__albaFbReady=true;setDot('#e07070','Error Firebase');console.error(err);});
+
+// ──────────────────────────────────────────────────────────────
+// A.3.1.b.1 — AUTH BOOTSTRAP + RESUSCRIPCIÓN DINÁMICA
+// ──────────────────────────────────────────────────────────────
+// La suscripción inicial arriba ya apunta al path correcto vía getRef('').
+// Al arranque, sin sesión aún resuelta, getRef('') = ref(db,'cefe'). Eso
+// preserva instancia 0 desde el primer paint.
+// Cuando onAuthStateChanged dispara con user real Y D.familiaActivaId/hijoActivoId
+// poblados (post-login), desuscribimos cefe/ y resuscribimos a familias/...
+// ─────────────────────────────────────────────────────────────
+var __albaSplashHidden = false;
+function hideSplash() {
+  if (__albaSplashHidden) return;
+  __albaSplashHidden = true;
+  var el = document.getElementById('alba-splash');
+  if (el) {
+    el.style.opacity = '0';
+    setTimeout(function(){ if (el.parentNode) el.parentNode.removeChild(el); }, 200);
+  }
+}
+// Timeout de seguridad: si Auth no responde en 300ms, ocultar splash igual.
+setTimeout(hideSplash, 300);
+
+// Resuscribir cuando cambia el contexto de identidad
+function resubscribeActivePath() {
+  if (typeof window.__albaUnsubFb === 'function') {
+    try { window.__albaUnsubFb(); } catch(e){}
+  }
+  // Re-correr el mismo callback (definido inline arriba) requeriría extraerlo.
+  // Para A.3.1.b.1: postergamos resuscripción hasta A.3.1.b.2 (cuando exista
+  // login real). En b.1 no hay flujo posible que cambie auth.currentUser.
+  // Documentado para implementación en b.2.
+}
+
+onAuthStateChanged(auth, function(user) {
+  // user = null si no hay sesión. Sin sesión → fallback α (cefe/) ya activo.
+  // Con sesión → en A.3.1.b.2 cargaremos D.familiaActivaId/hijoActivoId
+  // desde usuarios/{uid}/familias y resuscribiremos.
+  hideSplash();
+  if (user) {
+    console.log('[Auth] Sesión activa: ' + user.uid + ' (' + (user.email || 'sin email') + ')');
+  } else {
+    console.log('[Auth] Sin sesión — fallback legacy α contra cefe/');
+  }
+});
 </script>
 
 <script>
